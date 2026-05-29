@@ -1,0 +1,94 @@
+{
+    "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+    "name": "frontend-design-masterclass",
+    "version": "2.1.0",
+    "description": "Build distinctive, production-grade frontend interfaces with SvelteKit/Bun/Hono. Opinionated modern stack with deep reference documentation on typography, color, layout, animation, imagery, data visualization, and Mermaid theming.",
+    "author": "Ice-ninja",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ice-ninja/skills"
+    },
+    "keywords": [
+        "frontend",
+        "ui-design",
+        "sveltekit",
+        "tailwind",
+        "landing-pages",
+        "dashboards",
+        "typography",
+        "color-theory",
+        "animation",
+        "data-visualization"
+    ],
+    "skills": [
+        {
+            "name": "frontend-design-masterclass",
+            "source": "./SKILL.md",
+            "description": "Build distinctive frontend UI with SvelteKit/Bun/Hono"
+        }
+    ],
+    "dependencies": {
+        "optional": [
+            {
+                "name": "auditing-ui-ux",
+                "description": "Audit and improve existing interfaces after initial build"
+            },
+            {
+                "name": "humanize-writing",
+                "description": "Polish UI copy for human voice"
+            },
+            {
+                "name": "deliberative-refinement",
+                "description": "Iterative design improvement with expert councils"
+            }
+        ]
+    },
+    "resources": [
+        {
+            "name": "landing-pages",
+            "source": "./references/landing-pages.md",
+            "description": "8 timeless styles, hero anatomy, flow patterns"
+        },
+        {
+            "name": "typography",
+            "source": "./references/typography.md",
+            "description": "Font catalogs, pairing strategies, type scales"
+        },
+        {
+            "name": "color-system",
+            "source": "./references/color-system.md",
+            "description": "3-group palette, harmony models, theme construction"
+        },
+        {
+            "name": "imagery",
+            "source": "./references/imagery.md",
+            "description": "Dithering, overlays, Nano Banana, AI prompting"
+        },
+        {
+            "name": "microanimations",
+            "source": "./references/microanimations.md",
+            "description": "5-state buttons, scroll animations, haptic patterns"
+        },
+        {
+            "name": "visual-kinetics",
+            "source": "./references/visual-kinetics.md",
+            "description": "Parallax, glassmorphism, kinetic typography"
+        },
+        {
+            "name": "data-graphics",
+            "source": "./references/data-graphics.md",
+            "description": "Tables, charts, infographics, Mermaid integration"
+        },
+        {
+            "name": "data-visualization",
+            "source": "./references/data-visualization.md",
+            "description": "LayerChart, shadcn-svelte charts, bento grids"
+        },
+        {
+            "name": "mermaid-theming",
+            "source": "./references/mermaid-theming.md",
+            "description": "beautiful-mermaid setup, Shiki integration"
+        }
+    ]
+}

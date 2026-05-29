@@ -1,0 +1,21 @@
+{
+    "name": "deep-research",
+    "version": "2.0.0",
+    "description": "Exhaustive research agent with SEO-piercing operators, mandatory source evaluation, and dialectical synthesis.",
+    "author": "Ice-Ninja",
+    "license": "MIT",
+    "triggers": [
+        "deep research",
+        "investigate deeply",
+        "comprehensive analysis",
+        "research agent"
+    ],
+    "resources": [
+        "SKILL.md",
+        "resources/search-operators.md",
+        "resources/source-evaluation.md",
+        "resources/synthesis-protocols.md",
+        "resources/research-anti-patterns.md",
+        "resources/templates/scratchpad_template.md"
+    ]
+}

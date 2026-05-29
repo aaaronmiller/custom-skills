@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "prompt-mine-sql": {
+      "command": "python3",
+      "args": ["-m", "prompt_mine.mcp_server"],
+      "description": "MCP server providing SQL query access to the prompt-mine database for natural language to SQL translation",
+      "env": {
+        "PROMPT_MINE_DB": "~/.prompt-mine/prompt_mine.db"
+      }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "satirical-media-generator",
+  "version": "1.0.0",
+  "description": "Generates high-quality, authentic satire in visual, written, and spoken formats. Emulates styles of Jon Stewart, The Onion, National Lampoon, Mad Magazine, and Gary Larson.",
+  "author": "Antigravity Agent",
+  "tags": [
+    "humor",
+    "satire",
+    "comedy",
+    "creative writing",
+    "image-generation-prompts",
+    "tts"
+  ],
+  "triggers": [
+    "generate funny media",
+    "write a satirical script",
+    "write a daily show monologue",
+    "create an onion article",
+    "create a far side comic prompt",
+    "write national lampoon satire",
+    "create a mad magazine fold in",
+    "generate a funny TTS prompt"
+  ],
+  "permissions": []
+}

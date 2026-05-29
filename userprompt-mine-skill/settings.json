@@ -1,0 +1,8 @@
+{
+  "prompt-mine": {
+    "auto_ingest": true,
+    "capture_realtime": false,
+    "default_search_method": "hybrid",
+    "web_server_port": 8420
+  }
+}

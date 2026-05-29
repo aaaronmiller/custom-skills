@@ -1,0 +1,83 @@
+{
+    "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+    "name": "auditing-ui-ux",
+    "version": "1.0.0",
+    "description": "Diagnose, audit, and improve existing UI/UX. 10 operating modes: full audits, anti-pattern scanning, style discovery, accessibility compliance, design token extraction, and pre-ship QA.",
+    "author": "Ice-ninja",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ice-ninja/skills"
+    },
+    "keywords": [
+        "ui-audit",
+        "ux-review",
+        "accessibility",
+        "design-tokens",
+        "style-migration",
+        "wcag",
+        "anti-patterns",
+        "quality-assurance",
+        "frontend-review",
+        "design-system"
+    ],
+    "skills": [
+        {
+            "name": "auditing-ui-ux",
+            "source": "./SKILL.md",
+            "description": "Audit and improve existing user interfaces"
+        }
+    ],
+    "dependencies": {
+        "optional": [
+            {
+                "name": "frontend-design-masterclass",
+                "description": "Build new interfaces when audit recommends ground-up rebuild"
+            },
+            {
+                "name": "humanize-writing",
+                "description": "Polish UI copy for human voice"
+            },
+            {
+                "name": "deliberative-refinement",
+                "description": "Iterative improvement with expert councils"
+            },
+            {
+                "name": "create-viral-content",
+                "description": "Optimize CTA and marketing content for engagement"
+            }
+        ]
+    },
+    "resources": [
+        {
+            "name": "ux-guidelines",
+            "source": "./references/ux-guidelines.md",
+            "description": "99 UX anti-patterns across 18 categories"
+        },
+        {
+            "name": "styles",
+            "source": "./references/styles.md",
+            "description": "Visual style database with migration paths"
+        },
+        {
+            "name": "products",
+            "source": "./references/products.md",
+            "description": "Product type to style mapping"
+        },
+        {
+            "name": "colors",
+            "source": "./references/colors.md",
+            "description": "Color palettes by mood and industry"
+        },
+        {
+            "name": "typography",
+            "source": "./references/typography-ref.md",
+            "description": "Font pairings with use-case mapping"
+        },
+        {
+            "name": "charts",
+            "source": "./references/charts.md",
+            "description": "Chart type selection guide"
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "prompt-mine",
+  "description": "Unified conversation mining system: extract, store, search, and analyze all your AI model interactions across Claude Code, Roo/Kilo Code, OpenAI, Gemini, and Anthropic exports. Provides RAG-based semantic search, metadata tagging, project clustering, and a browsable interface for your complete prompt history.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Data Kiln"
+  },
+  "repository": "https://github.com/datakiln/prompt-mine",
+  "license": "MIT"
+}

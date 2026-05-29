@@ -1,0 +1,95 @@
+# Semantic Color Scheme Template
+
+This file provides a recommended color mapping for CLI/TUI applications. Items of like function should have similar colors.
+
+## Color Assignments
+
+```yaml
+# Primary Colors - Main UI Elements
+colors:
+  # Text
+  text:
+    primary: "#F8F8F2"      # Main text - warm white
+    secondary: "#6272A8"    # Muted/descriptions
+    dim: "#44475A"          # Very muted
+    
+  # Semantic (ALWAYS use these consistently)
+  semantic:
+    error: "#FF5555"        # Errors - red
+    error_bold: "#FF6E67"
+    warning: "#FFB86C"      # Warnings - orange/yellow
+    warning_bold: "#FFCA28"
+    success: "#50FA7B"      # Success - green
+    success_bold: "#69FF94"
+    info: "#8BE9FD"         # Info/links - cyan
+    info_bold: "#A9EFFE"
+    question: "#FF79C6"     # Prompts - pink/magenta
+    
+  # File Types
+  file:
+    regular: "#F8F8F2"
+    directory: "#F1FA8C"    # Yellow for dirs
+    symlink: "#FF79C6"      # Pink for links
+    executable: "#50FA7B"   # Green for exe
+    readonly: "#BD93F9"    # Purple for ro
+    
+  # Git Status
+  git:
+    clean: "#50FA7B"        # Green
+    modified: "#F1FA8C"     # Yellow
+    added: "#50FA7B"        # Green
+    deleted: "#FF5555"     # Red
+    untracked: "#6272A8"    # Gray
+    
+  # Language/File Extensions (for ls alternatives)
+  code:
+    javascript: "#F1FA8C"   # Yellow
+    typescript: "#8BE9FD"  # Cyan
+    python: "#50FA7B"      # Green
+    rust: "#FFB86C"        # Orange
+    go: "#8BE9FD"          # Cyan
+    html: "#FF79C6"        # Pink
+    css: "#BD93F9"         # Purple
+    json: "#F1FA8C"        # Yellow
+    yaml: "#F1FA8C"        # Yellow
+    markdown: "#F1FA8C"    # Yellow
+    
+  # Background (for borders/panels)
+  background:
+    dark: "#282A36"
+    darker: "#21222C"
+    panel: "#383A59"
+```
+
+## Usage in Code
+
+```go
+// Go with lipgloss
+var (
+    ErrorStyle = lipgloss.NewStyle().
+        Foreground(lipgloss.Color("#FF5555"))
+    
+    SuccessStyle = lipgloss.NewStyle().
+        Foreground(lipgloss.Color("#50FA7B"))
+        
+    WarningStyle = lipgloss.NewStyle().
+        Foreground(lipgloss.Color("#FFB86C"))
+)
+```
+
+```javascript
+// Node.js with chalk
+const colors = {
+    error: chalk.hex('#FF5555'),
+    success: chalk.hex('#50FA7B'),
+    warning: chalk.hex('#FFB86C'),
+    info: chalk.hex('#8BE9FD'),
+    question: chalk.hex('#FF79C6'),
+};
+```
+
+## Notes
+
+- These colors based on Dracula theme (works well in dark terminals)
+- For light mode, invert: use darker backgrounds, lighter foregrounds
+- Always test with your specific terminal emulator

@@ -1,0 +1,881 @@
+# =============================================================================
+# Karpathy Wiki — Comprehensive Configuration Schema
+# =============================================================================
+#
+# This is the single source of truth for all Karpathy Wiki configuration.
+# Every configurable parameter across ClawMem, MemVid, dream agent,
+# intent router, RAG encoding, classification, and agent integration
+# is defined here with defaults, types, and documentation.
+#
+# File location: skills-USER/karpathy-wiki/config.schema.yaml
+# Active config: ~/.local/share/ai-wiki/config.yaml (auto-generated)
+#
+# Usage:
+#   setup.sh --preset balanced   # Apply a named preset
+#   setup.sh --config my.yaml    # Apply custom overrides
+#
+# Schema version: 1.0.0
+
+# ──────────────────────────────────────────────────────────────────
+# WIKI — Core data paths and version control
+# ──────────────────────────────────────────────────────────────────
+wiki:
+  data_dir: "~/.local/share/ai-wiki"       # All wiki data (raw, pages, .meta)
+  code_dir: "skills-USER/karpathy-wiki"     # Canonical code location
+  git_enabled: true                         # Auto-commit all changes
+  git_push_remote: ""                       # Remote URL (empty = local only)
+  git_push_on_threshold: 10                 # Push after N un-pushed commits
+
+  # Sub-directory layout (relative to data_dir)
+  directories:
+    raw: "raw"                              # Immutable source documents
+    pages: "pages"                          # Compiled wiki articles
+    pages_concepts: "pages/concepts"        # Atomic concept articles
+    pages_entities: "pages/entities"        # People, orgs, projects, tools
+    pages_sources: "pages/sources"          # Source summaries
+    pages_queries: "pages/queries"          # Filed query answers
+    meta: ".meta"                           # Runtime state and references
+    meta_skills: ".meta/skills"             # Auto-generated skill refs
+    meta_references: ".meta/references"     # S-tier reference exemplars
+
+# ──────────────────────────────────────────────────────────────────
+# CLAWMEM — Hot/warm memory tier (REST API + SQLite)
+# ──────────────────────────────────────────────────────────────────
+clawmem:
+  enabled: true
+  binary: "~/git/ClawMem/bin/clawmem"           # Path to clawmem binary
+  install_method: "source"                         # "npm" or "source"
+  install_path: "~/git/ClawMem"                    # Where ClawMem is cloned
+
+  # REST API
+  url: "http://localhost:7438"
+  api_token: ""                                    # Bearer token for auth
+  collection: "wiki"                               # Collection name for wiki data
+
+  # Embedding server (llama.cpp or cloud API)
+  embed:
+    url: "http://localhost:8088"                   # CLAWMEM_EMBED_URL
+    api_key: ""                                    # CLAWMEM_EMBED_API_KEY (cloud)
+    model: "embedding"                             # CLAWMEM_EMBED_MODEL
+    max_chars: 6000                                # CLAWMEM_EMBED_MAX_CHARS
+    tpm_limit: 100000                              # CLAWMEM_EMBED_TPM_LIMIT
+    dimensions: 768                                # CLAWMEM_EMBED_DIMENSIONS (empty = model default)
+
+  # LLM server (for enrichment, classification)
+  llm:
+    url: "http://localhost:8089"                   # CLAWMEM_LLM_URL
+    backend: "llama.cpp"                           # vllm | llama.cpp | mlx | openai
+    model: ""                                      # Model ID (empty = default for backend)
+    api_key: ""                                    # For cloud LLM providers
+
+  # Reranker
+  rerank:
+    url: "http://localhost:8090"                   # CLAWMEM_RERANK_URL
+    model: ""                                      # Cross-encoder model
+    interval_minutes: 60                           # How often to re-rerank
+
+  # Profile (performance presets)
+  profile: "balanced"                              # speed | balanced | deep
+
+  # Memory lifecycle
+  enable_amem: true                                # A-MEM note construction during indexing
+  enable_consolidation: false                      # Background consolidation worker
+  consolidation_interval_ms: 300000                # Worker poll interval
+
+  # Alternative vault paths (for multi-agent isolation)
+  vaults: {}                                       # {"vault-name": "/path/to/sqlite"}
+
+# ──────────────────────────────────────────────────────────────────
+# MEMVID — Cold storage tier (QR-coded video archives)
+# ──────────────────────────────────────────────────────────────────
+memvid:
+  enabled: false                                    # Install and configure MemVid
+  install_method: "pip"                             # pip | cargo | none
+  sdk_version: "memvid-sdk>=2.0.157"                # Python SDK version constraint
+
+  # Archive schedule and paths
+  archive_dir: "~/.cache/memvid"                    # Where .mv2 files live
+  encode_schedule: "monthly"                        # monthly | weekly | manual | disabled
+  encode_day: 1                                     # Day of month for full re-encode
+
+  # RAG encoding types (multiple strategies)
+  # Each encoding type can be enabled/disabled independently.
+  # Multiple encodings run in parallel during encode and are
+  # fused at query time via score fusion.
+  encoding:
+    # Linear: standard sequential chunk → vector encoding (default)
+    linear:
+      enabled: true
+      chunk_size: 1024                               # Characters per chunk
+      overlap: 32                                    # Overlap between chunks
+      model: "bge-base"                              # bge-small | bge-base | nomic | gte-large | openai
+      dimensions: 768                                # Embedding dimension
+
+    # Sequential: position-aware encoding with sliding window
+    sequential:
+      enabled: false
+      chunk_size: 512
+      overlap: 128
+      window_size: 3                                 # Number of chunks in sliding window
+      stride: 1                                      # Window stride
+      model: "bge-small"
+
+    # Contextual: entity/claim-level named encoding
+    contextual:
+      enabled: false
+      chunk_size: 256                                # Smaller = more granular
+      overlap: 64
+      entity_bonus_weight: 0.3                       # Boost entities in embedding
+      model: "nomic"
+
+    # Bitsize: multi-resolution (compression-oriented)
+    bitsize:
+      enabled: false
+      resolution_tiers: [256, 768, 1568, 2064, 4096]  # N dimensions per tier
+      base_model: "gte-large"
+      storage_optimization: 0.90                      # 90% target compression
+
+  # MemVid-rs (Rust fork) specific config
+  rust_fork:
+    enabled: false
+    install_method: "cargo"
+    config_path: "~/.config/memvid/config.toml"
+    device: "auto"                                   # auto | cpu | cuda | metal
+    qr_error_correction: "high"                      # low | medium | quartile | high
+    qr_version: 40                                   # 1-40 (auto = None)
+    video_codec: "prores_ks"                         # ProRes for lossless QR
+    prores_profile: "proxy"                          # proxy|lt|standard|hq|4444|xq
+    fps: 30.0
+
+  # Search configuration
+  search:
+    mode: "auto"                                     # lex | sem | auto
+    top_k: 10                                        # Default result count
+    adaptive: true                                   # Adaptive retrieval on/off
+    min_score_threshold: 0.0
+    engine: "auto"                                   # auto | hnsw | flat
+
+  # Sketch index (for very large memories)
+  sketch:
+    enabled: false
+    variant: "medium"                                # small | medium | large
+
+# ──────────────────────────────────────────────────────────────────
+# DREAM AGENT — Sleep-time compute (background knowledge processor)
+# ──────────────────────────────────────────────────────────────────
+dream_agent:
+  enabled: true
+
+  # Schedule
+  scheduler: "systemd"                               # systemd | cron | daemon | manual
+  idle_check_interval_minutes: 30                    # How often to check idle status
+  idle_threshold_seconds: 300                        # 5 min idle before cycle starts
+  budget_percentage: 0.25                            # 25% of idle time
+  max_budget_seconds: 7200                           # 2 hour absolute cap
+  wall_clock_fallback: true                          # Run regardless if idle for 4+ hours
+
+  # Phase timing (relative budget allocation)
+  # Values are ratios of the total budget (must sum to 1.0)
+  phase_budget:
+    extract: 0.25
+    refine: 0.15
+    compile: 0.20
+    pattern_detect: 0.05
+    reindex: 0.02
+    improve: 0.30
+    lint: 0.03
+
+  # Intake ratio (dynamic, based on wiki refinement state)
+  # At raw wiki (state=0.0): intake_ratio = intake_ratio_max
+  # At mature wiki (state=1.0): intake_ratio = intake_ratio_min
+  intake:
+    ratio_min: 0.33                                  # Minimum intake share
+    ratio_max: 0.80                                  # Maximum intake share
+    state_decay: 0.50                                # How fast intake drops with refinement
+
+  # Confidence scoring gates
+  confidence:
+    auto_add: 0.80                                   # Auto-add to wiki
+    flag_review: 0.50                                # Flag for user review
+    reject_below: 0.50                               # Reject below this
+    council_low: 0.50                                # Council escalation floor
+    council_high: 0.60                               # Council escalation ceiling
+
+  # Council escalation (adversarial deliberation)
+  council:
+    enabled: true
+    judges: 2                                        # Number of adversarial judges
+    judge_model: ""                                  # Separate model for judges (empty = same as LLM backend)
+    consensus_mode: "majority"                       # majority | unanimous | weighted
+
+  # Pattern detection (auto-SKILL.md creation)
+  patterns:
+    enabled: true
+    threshold: 3                                     # 3+ occurrences = create skill
+    types:                                           # Pattern types tracked
+      - "code-review"
+      - "deployment"
+      - "testing"
+      - "debugging"
+      - "database"
+      - "api-development"
+      - "research"
+
+  # ClawMem REST API
+  clawmem_url: "http://localhost:7438"
+  clawmem_collection: "wiki"
+
+  # Improvement engine (Phase 6)
+  improvement:
+    enabled: true
+    max_iterations_per_doc: 10
+    convergence_threshold: 0.01                      # < 0.01 loss reduction = converged
+    meaning_preservation_threshold: 0.80             # Cosine similarity gate
+    optimal_score_threshold: 90                      # Flag for execution ready
+    max_docs_per_cycle: 5                            # Cap improvements per cycle
+
+# ──────────────────────────────────────────────────────────────────
+# INTENT ROUTER — Query classification and tier routing
+# ──────────────────────────────────────────────────────────────────
+intent_router:
+  default_strategy: "intent_routed"                  # score_fusion | cascade | intent_routed
+  fallback_strategy: "score_fusion"
+  token_budget: 2000                                  # Max context tokens from memory
+  heuristic_confidence_threshold: 0.8                # Below → LLM refinement
+
+  # Intent classification weights
+  weights:
+    semantic: 0.6
+    recency: 0.25
+    importance: 0.15
+
+  # Heuristic patterns (fast path, covers ~70%)
+  # These are loaded at startup; custom patterns can be added
+  heuristic_patterns:
+    - intent: "archival"
+      patterns:
+        - "\\b(202[0-5]|last year|old project|archive|months ago|way back|original design|historically)\\b"
+    - intent: "recent"
+      patterns:
+        - "\\b(just now|this session|the error|latest|current|fresh|right now|just got)\\b"
+    - intent: "relational"
+      patterns:
+        - "\\b(why did|how does .+ relate|pattern|architecture|decision|trade-?off|relationship)\\b"
+    - intent: "entity"
+      patterns:
+        - "\\b(what is|show me|tell me about|what does .+ relate to)\\b"
+    - intent: "factual"
+      patterns:
+        - "\\b(API for|config for|command to|syntax|parameter)\\b"
+
+  # Intent-to-tier mapping
+  intent_tier_map:
+    recent: ["hot"]                                  # ClawMem only
+    entity: ["hot", "graph"]                         # ClawMem + graph
+    relational: ["hot", "graph"]
+    archival: ["hot", "cold"]                        # ClawMem + MemVid
+    factual: ["hot", "warm"]                         # ClawMem + future Graphiti
+    __fallback__: ["hot", "warm", "cold"]            # All tiers
+
+# ──────────────────────────────────────────────────────────────────
+# CLASSIFIER — Ingestion and retrieval classification
+# ──────────────────────────────────────────────────────────────────
+classifier:
+  # Ingestion pipeline classifier
+  ingestion:
+    # Regex-based fast classifier (covers ~70%)
+    regex:
+      enabled: true
+      patterns:
+        decision:
+          - "\\b(decided|chose|selected|elected|went with|settled on)\\b"
+        preference:
+          - "\\b(prefer|rather|like|dislike|favorite|hate)\\b"
+        problem:
+          - "\\b(fail|broken|crash|error|bug|regression|issue\\b(?!.*tracker))"
+        milestone:
+          - "\\b(launch|shipped|released|finished|completed|done)\\b"
+        note:
+          - ".*"                                     # Catch-all default
+
+    # Ratio-based classification (complex vs simple)
+    complexity:
+      enabled: true
+      simple_threshold: 100                          # <100 chars → simple
+      complex_ratio: 0.3                             # >30% unique entities → complex
+      min_chars_for_llm: 500                         # >500 chars → escalate to LLM
+
+    # LLM refinement (for ambiguous/ complex docs)
+    llm_refinement:
+      enabled: true
+      backend: ""                                    # Empty = use dream_agent's LLM backend
+      model: ""                                      # Empty = use dream_agent's LLM model
+      min_confidence: 0.5
+      timeout_seconds: 10
+
+  # Retrieval source selection classifier
+  retrieval:
+    # Which memory tier(s) to query based on query type
+    source_selection:
+      enabled: true
+      min_vector_score: 0.7                          # Only return vectors above this
+      hybrid_weight_bm25: 0.4                        # BM25 weight in hybrid search
+      hybrid_weight_vector: 0.6                      # Vector weight in hybrid search
+
+    # Reranking configuration
+    rerank:
+      enabled: true
+      top_k: 20                                      # Rerank top N results
+      final_k: 5                                     # Return top N after rerank
+      model: ""                                      # Rerank model (empty = backend default)
+
+# ──────────────────────────────────────────────────────────────────
+# LLM BACKEND — Configurable LLM provider
+# ──────────────────────────────────────────────────────────────────
+llm_backend:
+  # Primary backend
+  provider: "llama.cpp"                              # vllm | llama.cpp | mlx | openai | anthropic
+  url: ""                                            # Server URL (auto-detect by provider if empty)
+  api_key: ""                                        # Required for cloud providers
+  model: ""                                          # Model ID
+
+  # Provider-specific defaults (auto-selected when url/model is empty)
+  providers:
+    vllm:
+      default_url: "http://localhost:8000"
+      default_model: "Qwen/Qwen2.5-7B-Instruct"
+      health_endpoint: "/health"
+    llama_cpp:
+      default_url: "http://localhost:8080"
+      default_model: "llama-3.2-3b-instruct"
+      health_endpoint: "/health"
+      extra_args: "--n-gpu-layers -1"
+    mlx:
+      default_url: "http://localhost:8080"
+      default_model: "mlx-community/Llama-3.2-3B-Instruct-4bit"
+      health_endpoint: "/health"
+    openai:
+      default_url: "https://api.openai.com/v1"
+      default_model: "gpt-4o-mini"
+    anthropic:
+      default_url: "https://api.anthropic.com/v1"
+      default_model: "claude-sonnet-4-20250514"
+
+  # Classification-specific model override
+  classification:
+    model: ""                                        # Empty = use primary model
+    backend: ""                                      # Empty = use primary backend
+    gpu_fallback: "clawmem-qmd-1.7b"                 # GPU-specific classifier model
+    cpu_fallback: "littlelamb-0.3b"                  # CPU-specific classifier model
+
+  # Embedding model (for ClawMem + dream agent improvement)
+  embedding:
+    provider: "llama.cpp"
+    url: "http://localhost:8088"
+    model: "embedding"
+    dimensions: 768
+
+# ──────────────────────────────────────────────────────────────────
+# RERANK — Cross-encoder reranking configuration
+# ──────────────────────────────────────────────────────────────────
+rerank:
+  enabled: true
+  model: ""                                          # Cross-encoder model
+  url: "http://localhost:8090"                       # Reranker server URL
+  provider: "llama.cpp"                              # Server backend
+
+  # Interval-based operation
+  interval_minutes: 60                               # Batch rerank interval
+  batch_size: 50                                     # Docs per batch
+
+  # Thresholds
+  min_score: 0.1                                     # Minimum rerank score to include
+  boost_recent_minutes: 30                           # Recency boost window
+  boost_recent_factor: 1.2                           # Recency multiplier
+
+  # Caching
+  cache_ttl_minutes: 1440                            # 24-hour rerank cache
+
+# ──────────────────────────────────────────────────────────────────
+# MCP — Model Context Protocol server configuration
+# ──────────────────────────────────────────────────────────────────
+mcp:
+  # ClawMem MCP server (built-in)
+  clawmem:
+    enabled: true
+    command: "~/git/ClawMem/bin/clawmem mcp"
+    transport: "stdio"                                # stdio | http
+    port: 0                                           # 0 = auto from ClawMem
+
+  # Register MCP with each agent
+  register_with:
+    - "claude-code"                                   # ~/.claude/mcp.json
+    - "pi"                                            # ~/.pi/agent/mcp-cache.json
+    - "hermes"                                        # hermes mcp add
+    - "kilocode"                                      # ~/.kilocode/mcp_servers/
+    - "ante"                                          # ~/.ante/settings.json
+    - "opencode"                                      # opencode.json plugins
+
+  # Karpathy Wiki MCP server (future: expose wiki search as MCP tool)
+  wiki_mcp:
+    enabled: false
+    port: 7439
+    tools:
+      - "wiki_search"                                 # Search compiled wiki pages
+      - "wiki_query"                                  # Query + synthesize answer
+      - "wiki_ingest"                                 # Add source to raw/
+
+# ──────────────────────────────────────────────────────────────────
+# AGENTS — Integration configuration for supported agents/tools
+# ──────────────────────────────────────────────────────────────────
+agents:
+  # Pi Agent (home: ~/.pi/)
+  pi:
+    enabled: true
+    skill_symlink: true                               # Link skill/SKILL.md → skill directory
+    skill_path: "~/.pi/agent/skills/karpathy-wiki"
+    plugin_path: "~/.pi/agent/plugins/goal"
+    mcp_registration: true                            # Register MCP server
+
+  # Claude Code (home: ~/.claude/)
+  claude_code:
+    enabled: true
+    skill_symlink: true
+    skill_path: "~/.claude/skills/karpathy-wiki"
+    mcp_registration: true
+    mcp_config: "~/.claude/mcp.json"
+    hooks: true                                       # Install ClawMem session hooks
+
+  # Ante Agent (home: ~/.ante/)
+  ante:
+    enabled: true
+    skill_symlink: true
+    skill_path: "~/.ante/skills/karpathy-wiki"
+    mcp_registration: true
+    mcp_config: "~/.ante/settings.json"
+
+  # Hermes Agent (home: ~/.config/hermes/)
+  hermes:
+    enabled: true
+    skill_symlink: true
+    skill_install_cmd: "hermes skills install"        # CLI command to install skill
+    mcp_registration: true
+    mcp_add_cmd: "hermes mcp add"
+    hook_install_cmd: "hermes hooks install"
+    config_path: "~/.config/hermes/config.json"
+
+  # KiloCode (home: ~/.kilocode/)
+  kilocode:
+    enabled: true
+    skill_symlink: true
+    skill_path: "~/.kilocode/skills/karpathy-wiki"
+    mcp_registration: true
+    mcp_config: "~/.kilocode/mcp_servers/"
+    hooks_path: "~/.kilocode/hooks/"
+
+  # OpenCode (home: ~/.config/opencode/)
+  opencode:
+    enabled: true
+    skill_symlink: true
+    skill_path: "~/.config/opencode/skills/karpathy-wiki"
+    mcp_registration: true
+    mcp_config: "~/.config/opencode/opencode.json"
+    # Also creates symlink in ~/.claude/skills/ and ~/.agents/skills/
+    # since OpenCode discovers skills from all three locations
+    cross_discovery: true
+
+  # Antigravity CLI (home: varies by platform)
+  antigravity:
+    enabled: true
+    # Antigravity is an editor, not an agent — no skill/hook/MCP system.
+    # Integration is via the global wiki data directory at ~/.local/share/ai-wiki/
+    # which any editor can read/write.
+    data_access: "direct"                             # Direct filesystem access to wiki
+
+# ──────────────────────────────────────────────────────────────────
+# SYMLINKS — All symlinks managed by the system
+# ──────────────────────────────────────────────────────────────────
+symlinks:
+  # User-friendly wiki pointers
+  user:
+    - target: "~/.local/share/ai-wiki"
+      link: "~/ai-wiki"
+    - target: "~/.local/share/ai-wiki"
+      link: "~/.pi/wiki"
+
+  # Agent skill directories
+  skills:
+    - target: "skills-USER/karpathy-wiki/skill"
+      link: "~/.pi/agent/skills/karpathy-wiki"
+    - target: "skills-USER/karpathy-wiki/skill"
+      link: "~/.claude/skills/karpathy-wiki"
+    - target: "skills-USER/karpathy-wiki/skill"
+      link: "~/.ante/skills/karpathy-wiki"
+    - target: "skills-USER/karpathy-wiki/skill"
+      link: "~/.kilocode/skills/karpathy-wiki"
+    - target: "skills-USER/karpathy-wiki/skill"
+      link: "~/.config/opencode/skills/karpathy-wiki"
+    - target: "skills-USER/karpathy-wiki/skill"
+      link: "~/.claude/skills/karpathy-wiki-cross"    # OpenCode cross-discovery
+
+  # Plugins
+  plugins:
+    - target: "skills-USER/karpathy-wiki/plugin/goal"
+      link: "~/.pi/agent/plugins/goal"
+
+# ──────────────────────────────────────────────────────────────────
+# HOOKS — Session lifecycle hooks
+# ──────────────────────────────────────────────────────────────────
+hooks:
+  enabled: true
+
+  # ClawMem hooks (installed via clawmem setup hooks)
+  clawmem:
+    enabled: true
+    hooks:
+      - "context-surfacing"                           # IO6: pre-prompt context
+      - "decision-extractor"                          # Capture decisions from sessions
+      - "handoff-generator"                           # Generate handoff docs
+      - "feedback-loop"                               # User feedback capture
+      - "precompact-extract"                          # Extract before compact
+      - "session-bootstrap"                           # Per-session bootstrap
+      - "staleness-check"                             # Flag stale content
+      - "curator-nudge"                               # Nudge improvement
+
+  # Custom Karpathy Wiki hooks
+  custom:
+    enabled: true
+    pre_compact: "skills-USER/karpathy-wiki/hooks/pre_compact.py"
+    session_end: "skills-USER/karpathy-wiki/hooks/session_end.py"
+
+  # KiloCode hooks directory
+  kilocode:
+    enabled: true
+    path: "~/.kilocode/hooks/"
+    hooks_dir: "skills-USER/karpathy-wiki/hooks/"
+
+  # Hermes shell hooks
+  hermes:
+    enabled: true
+    install_cmd: "hermes hooks install"
+
+# ──────────────────────────────────────────────────────────────────
+# ENVIRONMENT — Environment variables exported by setup
+# ──────────────────────────────────────────────────────────────────
+environment:
+  # Wiki paths
+  AI_WIKI: "~/.local/share/ai-wiki"
+  WIKI_DATA_DIR: "~/.local/share/ai-wiki"
+
+  # ClawMem
+  CLAWMEM_URL: "http://localhost:7438"
+  CLAWMEM_COLLECTION: "wiki"
+  CLAWMEM_EMBED_URL: "http://localhost:8088"
+  CLAWMEM_EMBED_API_KEY: ""
+  CLAWMEM_EMBED_MODEL: "embedding"
+  CLAWMEM_EMBED_MAX_CHARS: "6000"
+  CLAWMEM_EMBED_TPM_LIMIT: "100000"
+  CLAWMEM_EMBED_DIMENSIONS: "768"
+  CLAWMEM_LLM_URL: "http://localhost:8089"
+  CLAWMEM_RERANK_URL: "http://localhost:8090"
+  CLAWMEM_NO_LOCAL_MODELS: "false"
+  CLAWMEM_PROFILE: "balanced"
+  CLAWMEM_ENABLE_AMEM: "true"
+  CLAWMEM_ENABLE_CONSOLIDATION: "false"
+  CLAWMEM_API_TOKEN: ""
+
+  # Dream agent
+  PI_SKILLS_DIR: "~/.pi/agent/skills"
+  ANTE_SKILLS_DIR: "~/.ante/skills"
+  SKILL_CREATION_THRESHOLD: "3"
+  CONFIDENCE_AUTO: "0.8"
+  CONFIDENCE_FLAG: "0.5"
+  CONFIDENCE_REJECT: "0.5"
+  COUNCIL_LOW: "0.5"
+  COUNCIL_HIGH: "0.6"
+  IMPROVEMENT_BUDGET_RATIO: "0.33"
+  MAX_ITERATIONS_PER_DOC: "10"
+  MEANING_PRESERVATION_THRESHOLD: "0.80"
+  CONVERGENCE_THRESHOLD: "0.01"
+
+  # Intent router
+  AAA_MEMORY_STRATEGY: "intent_routed"
+  AAA_MEMORY_TOKEN_BUDGET: "2000"
+
+  # MemVid
+  MEMVID_MODEL_NAME: "sentence-transformers/all-MiniLM-L6-v2"
+  EMBEDDING_API_URL: "http://localhost:8088"
+
+  # Ante
+  ANTE_DISABLE_MCP_AUTO: "false"
+
+# ──────────────────────────────────────────────────────────────────
+# PRESETS — Named configuration profiles
+# ──────────────────────────────────────────────────────────────────
+#
+# Each preset overrides specific config values from defaults above.
+# Presets are applied in order: defaults → preset → user overrides.
+#
+# To create a custom preset, add it here or use a separate YAML file
+# and pass via setup.sh --preset-file custom.yaml
+
+presets:
+
+  # ── LIGHTWEIGHT ───────────────────────────────────────────────
+  # Minimal resource usage, CPU-only, single-agent (Pi/Claude Code)
+  # Ideal for: Laptops, low-RAM systems, first-time setup
+  lightweight:
+    description: "Minimal resource usage, CPU-only, single-agent"
+    overrides:
+      clawmem:
+        profile: "speed"                              # BM25 only, no vector
+        embed:
+          model: "embedding"
+          dimensions: 384
+        enable_amem: false
+        enable_consolidation: false
+      memvid:
+        enabled: false
+      dream_agent:
+        budget_percentage: 0.10                       # 10% of idle time
+        max_budget_seconds: 1800                      # 30 min cap
+        improvement:
+          enabled: false
+          max_docs_per_cycle: 0
+      intent_router:
+        heuristic_confidence_threshold: 0.6           # More heuristic, less LLM
+      llm_backend:
+        provider: "llama.cpp"
+        providers:
+          llama_cpp:
+            default_model: "llama-3.2-1b-instruct"    # Tiny model
+      classifier:
+        ingestion:
+          llm_refinement:
+            enabled: false                            # No LLM refinement
+        retrieval:
+          rerank:
+            enabled: false                            # No reranking
+      agents:
+        ante:
+          enabled: false
+        hermes:
+          enabled: false
+        kilocode:
+          enabled: false
+        opencode:
+          enabled: false
+      hooks:
+        clawmem:
+          enabled: false
+        custom:
+          enabled: false
+
+  # ── BALANCED ─────────────────────────────────────────────────
+  # Default configuration, works on most hardware with GPU
+  # Ideal for: Everyday use, desktop, 8GB+ VRAM
+  balanced:
+    description: "Default configuration, GPU-assisted, multi-agent"
+    overrides:
+      clawmem:
+        profile: "balanced"                           # BM25 + vector
+        embed:
+          dimensions: 768
+        enable_amem: true
+      memvid:
+        enabled: false                                # MemVid optional, not default
+      dream_agent:
+        budget_percentage: 0.25
+        max_budget_seconds: 7200
+        improvement:
+          enabled: true
+          max_docs_per_cycle: 5
+      intent_router:
+        heuristic_confidence_threshold: 0.8
+      llm_backend:
+        provider: "llama.cpp"
+        providers:
+          llama_cpp:
+            default_model: "llama-3.2-3b-instruct"
+      classifier:
+        ingestion:
+          llm_refinement:
+            enabled: true
+        retrieval:
+          rerank:
+            enabled: true
+      agents:
+        ante:
+          enabled: true
+        hermes:
+          enabled: true
+        kilocode:
+          enabled: true
+        opencode:
+          enabled: true
+      hooks:
+        clawmem:
+          enabled: true
+        custom:
+          enabled: true
+
+  # ── HIGH-QUALITY ─────────────────────────────────────────────
+  # Maximum retrieval quality, full RAG pipeline, GPU-intensive
+  # Ideal for: Research, knowledge work, dedicated GPU server
+  high_quality:
+    description: "Maximum retrieval quality, full RAG pipeline"
+    overrides:
+      clawmem:
+        profile: "deep"                               # BM25 + vector + expansion + rerank
+        embed:
+          dimensions: 1536
+          model: "gte-large"                          # Best quality open model
+        enable_amem: true
+        enable_consolidation: true
+      memvid:
+        enabled: true
+        encoding:
+          linear:
+            enabled: true
+            model: "gte-large"
+            dimensions: 1536
+          sequential:
+            enabled: true
+            chunk_size: 512
+            overlap: 128
+          contextual:
+            enabled: true
+          bitsize:
+            enabled: false                            # Skip compression
+        search:
+          mode: "auto"
+          top_k: 20
+          adaptive: true
+        sketch:
+          enabled: true
+          variant: "large"
+      dream_agent:
+        budget_percentage: 0.50                       # 50% of idle time
+        max_budget_seconds: 14400                     # 4 hour cap
+        improvement:
+          max_docs_per_cycle: 10
+      intent_router:
+        heuristic_confidence_threshold: 0.9
+        token_budget: 4000
+      llm_backend:
+        provider: "vllm"
+        providers:
+          vllm:
+            default_model: "Qwen/Qwen2.5-7B-Instruct"
+      classifier:
+        ingestion:
+          llm_refinement:
+            enabled: true
+        retrieval:
+          rerank:
+            enabled: true
+            top_k: 50
+            final_k: 10
+      rerank:
+        enabled: true
+        batch_size: 100
+      agents:
+        ante:
+          enabled: true
+        hermes:
+          enabled: true
+        kilocode:
+          enabled: true
+        opencode:
+          enabled: true
+      hooks:
+        clawmem:
+          enabled: true
+        custom:
+          enabled: true
+
+  # ── MAX-CONTEXT ──────────────────────────────────────────────
+  # Maximum context preservation — all encodings, all tiers,
+  # long archives. Requires significant storage and compute.
+  # Ideal for: Knowledge archives, documentation repos, research
+  max_context:
+    description: "Maximum preservation — all encodings, all tiers, long archives"
+    overrides:
+      clawmem:
+        profile: "deep"
+        embed:
+          dimensions: 1536
+          model: "gte-large"
+          max_chars: 12000                            # Larger embedding inputs
+        enable_amem: true
+        enable_consolidation: true
+        consolidation_interval_ms: 60000
+      memvid:
+        enabled: true
+        encoding:
+          linear:
+            enabled: true
+            model: "gte-large"
+            dimensions: 4096
+            chunk_size: 2048                          # Larger chunks for max context
+          sequential:
+            enabled: true
+            chunk_size: 1024
+            overlap: 256
+            window_size: 5
+          contextual:
+            enabled: true
+            chunk_size: 512
+            entity_bonus_weight: 0.5
+          bitsize:
+            enabled: true
+            resolution_tiers: [256, 768, 1568, 2064, 4096]
+        search:
+          mode: "auto"
+          top_k: 50
+          adaptive: true
+        sketch:
+          enabled: true
+          variant: "large"
+      dream_agent:
+        budget_percentage: 0.75                       # 75% of idle time
+        max_budget_seconds: 28800                     # 8 hour cap
+        improvement:
+          max_docs_per_cycle: 20
+      intent_router:
+        heuristic_confidence_threshold: 0.95
+        token_budget: 8000
+      llm_backend:
+        provider: "vllm"
+        providers:
+          vllm:
+            default_model: "Qwen/Qwen2.5-14B-Instruct"
+      classifier:
+        ingestion:
+          llm_refinement:
+            enabled: true
+            min_confidence: 0.3                       # More LLM classification
+        retrieval:
+          rerank:
+            enabled: true
+            top_k: 100
+            final_k: 20
+      rerank:
+        enabled: true
+        interval_minutes: 30
+        batch_size: 200
+        cache_ttl_minutes: 4320                       # 3-day cache
+      agents:
+        ante:
+          enabled: true
+        hermes:
+          enabled: true
+        kilocode:
+          enabled: true
+        opencode:
+          enabled: true
+      hooks:
+        clawmem:
+          enabled: true
+        custom:
+          enabled: true
