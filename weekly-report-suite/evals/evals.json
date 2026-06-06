@@ -1,0 +1,20 @@
+{
+  "skill_name": "weekly-report-suite",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Generate the dad-facing weekly report for week ending May 31 and a personal report with dashboard bundle. Use prior examples and do not overclaim Daily Radar as running.",
+      "expected_output": "Dad report in established format, personal report with evidence/caveats, metrics JSON and dashboard HTML paths."
+    },
+    {
+      "id": 2,
+      "prompt": "I need this week's report for my dad. I submitted 8 applications, gateway testing is still underway, no mentor meeting. Ask only if you need missing facts.",
+      "expected_output": "Concise one-page report that uses history first, asks minimal clarifying questions only if necessary, and preserves job-search cadence."
+    },
+    {
+      "id": 3,
+      "prompt": "Make the weekly HTML project dashboard from the personal report and expose Prometheus metrics for Grafana.",
+      "expected_output": "Dashboard bundle instructions, generated static HTML/JSON, and Prometheus exporter command."
+    }
+  ]
+}

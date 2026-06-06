@@ -1,18 +1,21 @@
 ---
 name: prompt-mine
 description: >
-  Mine, store, search, and analyze all your AI model interactions. Use when you need to:
-  extract conversation history from Claude Code / Roo / Kilo / OpenAI / Gemini / Anthropic exports;
-  initialize or update the prompt-mine database; run semantic or SQL searches across conversations;
-  tag conversations with project/topic metadata; find related conversations across providers;
-  launch the browse interface; set up automated ingestion pipelines or browser capture scripts.
-  Trigger phrases: "mine my prompts", "search my conversations", "find when I asked about X",
-  "ingest new conversations", "what did I tell the model about Y", "show my project history".
+  Mine, store, search, report, and continuously improve across all your coding agent
+  sessions (Claude Code, Codex, Cursor, ChatGPT, Aider, Gemini, Cline, and 15+ more).
+  Backed by CASS (coding-agent-search). Use when you need to find a past session,
+  generate project activity reports, get weekly/daily digests, discover incomplete work,
+  or analyze tool usage patterns across all your projects.
+  Self-improves: each run logs performance, adapts search strategies, and refines
+  reporting templates. Trigger phrases: "search sessions", "project activity report",
+  "weekly digest", "what happened this week", "find when I fixed", "agent usage report",
+  "incomplete projects", "todays brief", "sprint retro", "error patterns", "tech radar".
 when_to_use: >
-  Activate whenever the user wants to extract, search, browse, tag, or analyze their past
-  AI conversations from any provider. Also activate for setup tasks like database initialization,
-  scheduled ingestion, or Tampermonkey script deployment.
-argument-hint: "[action] [query-or-source]"
+  Activate for ANY request involving past coding agent sessions, project activity
+  analysis, cross-project reporting, agent utilization metrics, or finding information
+  buried in session history. Also activate for indexing, setup, and system health tasks.
+  In case of ambiguity, default to `cass triage --json` as the opening move.
+argument-hint: "[search-query] | report:<type> | index | status | browse | reflect"
 arguments: action query
 disable-model-invocation: false
 user-invocable: true
@@ -20,168 +23,183 @@ allowed-tools: Read Write Edit Bash Grep Glob
 model: inherit
 effort: high
 context: inline
-paths: "**/.claude/**,**/prompt-mine/**,**/conversations/**,**/claude-code/**"
+paths: "**/.claude/**,**/.codex/**,**/.cursor/**,**/.gemini/**,**/.cass/**,**/.local/share/coding-agent-search/**"
 ---
 
-# Prompt Mine — Unified Conversation Mining System
+# Prompt Mine — CASS-Powered Session Mining & Reporting
 
-You are operating the **prompt-mine** plugin, a system that extracts, stores, searches, and
-analyzes every AI conversation the user has across all providers and tools. Your job is to
-guide the user through mining their data and to execute the appropriate scripts and workflows.
+Backed by **CASS** (coding-agent-search), which indexes sessions from 21+ coding
+agents into a unified SQLite database with Tantivy FTS, ANN vector search, and
+a cross-encoder reranker.
 
-## Core Architecture
-
-The system has five layers:
-
-1. **Extraction Layer** — Scripts that pull conversations from each source
-2. **Storage Layer** — SQLite + SQLite-vec for relational and vector data
-3. **Processing Layer** — Metadata tagging, project clustering, summarization
-4. **Search Layer** — Hybrid SQL + RAG semantic search
-5. **Interface Layer** — Web UI for browsing, expanding, and interacting with conversations
-
-## Quick Reference: Actions
-
-| Action | What It Does | Script / Command |
-|--------|-------------|-----------------|
-| `init` | Create the database and schema | `scripts/init_database.py` |
-| `extract-claude` | Mine Claude Code history & checkpoints | `scripts/extract_claude_code.py` |
-| `extract-roo` | Mine Roo/Kilo Code sessions | `scripts/extract_roo_kilo.py` |
-| `parse-openai` | Parse OpenAI data export | `scripts/parse_openai_export.py` |
-| `parse-gemini` | Parse Google Gemini data export | `scripts/parse_gemini_export.py` |
-| `parse-anthropic` | Parse Anthropic data export | `scripts/parse_anthropic_export.py` |
-| `ingest-all` | Run all extractors + update DB | `scripts/daily_ingest.py` |
-| `search` | Hybrid SQL + semantic search | `scripts/rag_pipeline.py --search` |
-| `tag` | Auto-tag conversations with metadata | `scripts/rag_pipeline.py --tag` |
-| `cluster` | Cluster conversations by topic/project | `scripts/rag_pipeline.py --cluster` |
-| `browse` | Launch the web browse interface | `scripts/web_server.py` |
-| `status` | Show DB stats and last ingest times | `scripts/daily_ingest.py --status` |
-| `export-browser-capture` | Install Tampermonkey capture scripts | See `resources/browser-capture.md` |
-
-## Step-by-Step Workflow
-
-### 1. First-Time Setup
-
-```
-1. Run: python scripts/init_database.py
-   This creates the SQLite database at ~/.prompt-mine/prompt_mine.db
-   with all tables, indexes, and the vector index.
-
-2. Verify: python scripts/daily_ingest.py --status
-   Should show 0 conversations, ready for first ingest.
-```
-
-### 2. Extract Conversations
-
-For each source, point the script at the appropriate directory or file:
+## 0. Pre-Flight Check
 
 ```bash
-# Claude Code — scans ~/.claude/ projects/
-python scripts/extract_claude_code.py --projects-dir ~/projects
-
-# Claude Code — also extract checkpoint diffs
-python scripts/extract_claude_code.py --projects-dir ~/projects --include-checkpoints
-
-# Roo/Kilo Code — scans workspace storage
-python scripts/extract_roo_kilo.py --storage-path ~/.roo/storage
-
-# OpenAI export — point at the unzipped export folder
-python scripts/parse_openai_export.py --export-dir ~/Downloads/chatgpt-export
-
-# Gemini export — point at the Takeout folder
-python scripts/parse_gemini_export.py --export-dir ~/Downloads/takeout
-
-# Anthropic export — point at the export JSON/ZIP
-python scripts/parse_anthropic_export.py --export-file ~/Downloads/anthropic-export.json
+if ! command -v cass &>/dev/null; then
+  echo "MISSING: CASS not installed — tell user to install"
+  # See resources/cass-install-guide.md for full instructions
+fi
+cass --version
+cass health --json     # must return {"healthy": true} before proceeding
 ```
 
-### 3. Run Full Ingest
+If health fails, run `cass index --full`. Do not proceed until healthy.
+
+## 1. Core Workflows
+
+### 1.1 Search (Primary)
 
 ```bash
-python scripts/daily_ingest.py --all
+# Always use --robot for JSON output
+cass search "<query>" --robot --limit 10
+
+# Key fields per hit: title, snippet, agent, workspace, score, match_type,
+# source_path, created_at, line_number
+
+# Common patterns:
+cass search "<q>" --robot --agent claude                      # by agent
+cass search "<q>" --robot --workspace /path                   # by project
+cass search "<q>" --robot --days 7                            # recent
+cass search "<q>" --robot --since 2026-01-01 --until 2026-03-01  # date range
+cass search "<q>" --robot --mode semantic                     # conceptual
+cass search "<q>" --robot --mode hybrid                       # best of both
+cass search "<q>" --robot --fields minimal                    # token-efficient
+cass search "<q>" --robot --aggregate agent,workspace,date    # server-side counts
 ```
 
-This runs all extractors that have configured source paths, then runs the
-processing pipeline: embedding generation, metadata tagging, and project clustering.
-
-### 4. Search
+### 1.2 Deep Dive
 
 ```bash
-# Semantic search (natural language)
-python scripts/rag_pipeline.py --search "how did I configure the RAG pipeline"
-
-# SQL search (structured)
-python scripts/rag_pipeline.py --sql "SELECT * FROM conversations WHERE provider='openai' AND created_at > '2025-01-01'"
-
-# Filtered semantic search
-python scripts/rag_pipeline.py --search "Python debugging" --provider anthropic --project data-kiln --limit 20
+cass view /path/to/session.jsonl -n 42 --json        # peek at match
+cass expand /path/to/session.jsonl -n 42 -C 5 --json # widen context
+cass export /path/to/session.jsonl --format markdown  # export session
 ```
 
-### 5. Browse
+### 1.3 Diagnostics & Setup
 
 ```bash
-python scripts/web_server.py --port 8420
+cass triage --json       # best first command — tells you what to do
+cass status --json       # full snapshot
+cass capabilities --json # feature discovery
+cass index               # incremental (fast)
+cass index --full        # first-time or full rebuild
+cass index --watch       # real-time background watcher
 ```
 
-Opens a web UI at http://localhost:8420 where you can:
-- Scroll through all conversations with collapsed previews (2-3 lines)
-- Expand individual user prompts or model responses
-- For responses over the size threshold: see summary + last N lines, with option to view full text
-- Filter by provider, project, topic, date range
-- Run semantic search directly from the UI
+### 1.4 Model Installation (for --mode semantic)
 
-## Response Size Handling
+```bash
+cass models install minilm  # default (~90 MB)
+cass models list --json     # verify
+```
 
-The system applies configurable truncation to model responses:
+---
 
-| Response Size | Storage | Browse Display |
-|--------------|---------|----------------|
-| < 2,000 chars | Full verbatim | Full text |
-| 2,000–20,000 chars | Full text + auto-summary | Summary + last 50 lines (expandable) |
-| > 20,000 chars | Full text + auto-summary + chunk embeddings | Summary + last 50 lines (expandable, searchable) |
+## 2. Quick Reference: Actions
 
-User prompts are always stored in full.
+| Action | What | CASS Command |
+|--------|------|-------------|
+| `init` | First-time setup | `cass index --full` |
+| `index` | Incremental | `cass index` |
+| `search <q>` | Find anything | `cass search "<q>" --robot --limit 10` |
+| `view <path> -n N` | Session context | `cass view <path> -n N --json` |
+| `sessions` | List sessions | `cass sessions --current --json` |
+| `timeline` | Recent activity | `cass timeline --days 7 --json` |
+| `stats` | System stats | `cass stats --json` |
+| `health` | Readiness | `cass health --json` |
+| `report:<type>` | Generate a report | See `resources/cass-report-patterns.md` |
+| `reflect` | Post-run improvement | See `resources/cass-self-improvement.md` |
+| `watch` | Start watcher | `cass index --watch` |
+| `browse` | Web UI | `cass serve --port 8420` or `python scripts/web_server.py` |
+| `models` | Embedders | `cass models install <model>` |
 
-Configuration is in `~/.prompt-mine/config.yaml` (created on `init`).
+---
 
-## Automated Ingestion
+## 3. Report Types (15 Patterns)
 
-To set up daily automated ingestion, see `resources/daily-ingest-setup.md` for cron
-and systemd timer configurations. The Tampermonkey scripts for real-time browser
-capture are detailed in `resources/browser-capture.md`.
+> Full detail in `resources/cass-report-patterns.md` — read that file when
+> any `report:<type>` action is triggered.
 
-## Progressive Disclosure References
+| # | Report | Purpose | Key Commands |
+|---|--------|---------|-------------|
+| 1 | Daily Brief | Today's activity | `cass timeline --today --json` |
+| 2 | Weekly Digest | 7-day summary | `cass timeline --days 7 --json` |
+| 3 | Monthly Review | 30-day trends | `cass timeline --days 30 --json` + aggregation |
+| 4 | Sprint Retro | Activity since date | `cass search "error|TODO" --since YYYY-MM-DD` |
+| 5 | Project Deep Dive | All sessions for a project | `cass search "" --workspace PATH` |
+| 6 | Cross-Project Dashboard | All projects at once | `cass search "" --aggregate workspace` |
+| 7 | Stale Projects | Untouched in N days | Cross-reference workspaces with `--days N` |
+| 8 | Agent Utilization | Per-agent usage stats | `cass stats --json` + aggregation |
+| 9 | Agent Cross-Reference | Multi-agent projects | Query workspaces with >1 distinct agent |
+| 10 | Work-in-Progress | Open/unresolved sessions | `cass sessions --current` + search for "in progress" |
+| 11 | Outstanding TODOs | Technical debt markers | `cass search "TODO|FIXME|HACK|XXX"` |
+| 12 | Error Patterns | Common failures | `cass search "error|crash|panic|timeout"` |
+| 13 | Technology Radar | Languages/frameworks used | Extract tech names from session snippets |
+| 14 | Activity Heatmap | Day-by-day density | `cass search "" --days 90 --aggregate date` |
+| 15 | Learning Summary | What was learned in period | `cass search "learned|discovered"` + error patterns |
 
-For deep-dive instructions on specific subsystems, read these resource files
-on demand (do NOT load them all into context at once):
+**Composition rule:** If the user's request doesn't match exactly, run the closest
+report + supplementary searches and combine the results.
 
-- `resources/claude-code-extraction.md` — Claude Code session format, checkpoint parsing, conversation replay
-- `resources/roo-kilo-extraction.md` — Roo/Kilo workspace storage layout, state files, task history
-- `resources/provider-export-parsing.md` — OpenAI, Gemini, Anthropic export formats and field mappings
-- `resources/database-schema.md` — Full schema DDL, indexes, relationships, vector table design
-- `resources/rag-pipeline.md` — Embedding model selection, chunking strategy, hybrid search algorithm
-- `resources/metadata-tagging.md` — Auto-tagging rules, project detection, topic clustering, NLP pipeline
-- `resources/browser-capture.md` — Tampermonkey userscripts for OpenAI, Gemini, Anthropic web UIs
-- `resources/interface-design.md` — Web UI architecture, API endpoints, component layout
-- `resources/sizing-estimates.md` — Storage projections based on token usage patterns
-- `resources/daily-ingest-setup.md` — Cron/systemd configuration, incremental extraction, deduplication
+---
 
-## Subagent Dispatch
+## 4. Self-Improvement Loop
 
-For complex multi-step operations, dispatch to specialized subagents:
+> Full protocol in `resources/cass-self-improvement.md` — read that file when
+> the `reflect` action is triggered or at end of any prompt-mine invocation.
 
-- **@conversation-miner** — Full extraction pipeline across all sources (runs as background agent)
-- **@semantic-analyzer** — Embedding generation, clustering, topic modeling (forked context)
-- **@relationship-mapper** — Find related conversations, aggregate by project/topic, inject metadata
+After every invocation, silently:
+1. **Log** the session to `~/.prompt-mine/refinement-log/$(date +%Y-%m).md`
+2. **Assess** tool use (--robot consistent? Limits right? Mode chosen correctly?)
+3. **Check** for pattern emergence (same suggestion 3+ times → propose refinement)
+4. **Apply** refinements with user approval when thresholds are met
 
-These agents are defined in the plugin's `agents/` directory and can be invoked with
-`@agent-name` or deployed for async background execution.
+---
 
-## Hooks
+## 5. Subagent Dispatch
 
-This plugin registers hooks for:
+| Agent | Trigger | Task |
+|-------|---------|------|
+| `@conversation-miner` | `init`, `index`, `watch` | Runs `cass index`, verifies health, reports stats |
+| `@semantic-analyzer` | Semantic/fuzzy/hybrid search | Installs models, runs `--mode semantic`, interprets scores |
+| `@relationship-mapper` | Cross-referencing, handoff detection | Multi-agent searches, pipeline mode, aggregation |
+| `@report-architect` | Any `report:<type>` | Executes report commands, formats output |
+| `@skill-refiner` | Post-run or explicit `reflect` | Analyzes reflection log, manages refinement lifecycle |
 
-- **PostToolUse** (on Write/Edit to `.claude/` paths): Auto-captures Claude Code conversation
-  turns if the user has enabled real-time capture in their config
-- **SessionEnd**: Runs a lightweight diff to check for new conversations since last ingest
+---
 
-Hook configuration is in `hooks/hooks.json`.
+## 6. Error Handling
+
+| Situation | Action |
+|-----------|--------|
+| `cass` not found | **Block.** Show install instructions. Do not proceed until `cass health --json` passes. |
+| `healthy: false` | Run `cass index --full`. If still fails: `cass index --full --force-rebuild` |
+| No index exists | Run `cass index --full`. Warn user this may take a few minutes. |
+| Stale index | Run `cass index` (incremental) |
+| Semantic = 0 results | Fall back to `--mode lexical` or `--mode hybrid` |
+| Malformed --robot output | Re-run without `--robot` to see stderr diagnostics |
+| Context limit risk | Use `--fields minimal`, `--max-tokens N`, `--limit 5` |
+
+---
+
+## 7. Fallback: Legacy Python Scripts
+
+The original Python scripts in `scripts/` work independently on their own
+`~/.prompt-mine/prompt_mine.db`. Use them only if CASS is unavailable.
+
+---
+
+## 8. File Map
+
+```
+userprompt-mine-skill/
+└── skills/mine/
+    ├── SKILL.md                   ← THIS FILE
+    ├── agents/                    ← Subagent definitions
+    ├── scripts/                   ← Legacy Python fallback scripts
+    ├── resources/                 ← Progressive-disclosure docs
+    │   ├── cass-report-patterns.md   ← 15 report types (referenced from §3)
+    │   ├── cass-self-improvement.md  ← Reflection protocol (referenced from §4)
+    │   └── <legacy docs>             ← Original Python-era docs (fallback reference)
+    └── refinement-log/            ← Auto-created post-run reflections
+```

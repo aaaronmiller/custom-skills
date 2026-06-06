@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#08090a" />
+  <title>Weekly Report Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #08090a;
+      --bg-2: #0c0d10;
+      --panel: rgba(255,255,255,0.035);
+      --panel-strong: rgba(255,255,255,0.055);
+      --panel-soft: rgba(255,255,255,0.022);
+      --border: rgba(255,255,255,0.08);
+      --border-soft: rgba(255,255,255,0.05);
+      --text: #f7f8f8;
+      --text-2: #d0d6e0;
+      --muted: #8a8f98;
+      --faint: #62666d;
+      --accent: #7170ff;
+      --accent-2: #828fff;
+      --brand: #5e6ad2;
+      --green: #10b981;
+      --yellow: #d8a657;
+      --red: #f87171;
+      --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { background: var(--bg); }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 15% -10%, rgba(113,112,255,0.18), transparent 34rem),
+        radial-gradient(circle at 82% 8%, rgba(16,185,129,0.09), transparent 28rem),
+        linear-gradient(180deg, #08090a 0%, #0a0b0e 48%, #08090a 100%);
+      color: var(--text);
+      font-family: var(--sans);
+      font-feature-settings: "cv01", "ss03";
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    a { color: var(--accent-2); }
+    button { font: inherit; }
+    button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .shell { width: min(1440px, calc(100% - 40px)); margin: 0 auto; padding: 32px 0 28px; }
+    header {
+      border: 1px solid var(--border-soft);
+      background: linear-gradient(135deg, rgba(255,255,255,0.052), rgba(255,255,255,0.018));
+      border-radius: 28px;
+      padding: clamp(28px, 4vw, 52px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 28px 80px rgba(0,0,0,0.35);
+      position: relative;
+      overflow: hidden;
+    }
+    header:after {
+      content: "";
+      position: absolute;
+      inset: auto -10% -45% 34%;
+      height: 220px;
+      background: radial-gradient(circle, rgba(113,112,255,0.16), transparent 62%);
+      pointer-events: none;
+    }
+    .topline { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 34px; position: relative; z-index: 1; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text-2); font-size: 13px; font-weight: 510; letter-spacing: -0.13px; }
+    .mark { width: 24px; height: 24px; border-radius: 8px; background: linear-gradient(135deg, var(--brand), var(--accent-2)); box-shadow: 0 0 24px rgba(113,112,255,0.38); }
+    .status-pill { border: 1px solid var(--border); border-radius: 999px; color: var(--text-2); background: rgba(255,255,255,0.025); padding: 7px 12px; font-size: 12px; font-weight: 510; }
+    h1 { margin: 0; max-width: 850px; font-size: clamp(42px, 7vw, 76px); line-height: 0.96; letter-spacing: -1.55px; font-weight: 510; position: relative; z-index: 1; text-wrap: balance; }
+    .subtitle { max-width: 780px; margin: 22px 0 0; color: var(--muted); font-size: clamp(16px, 2vw, 19px); line-height: 1.65; letter-spacing: -0.165px; position: relative; z-index: 1; }
+    .metric-grid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.045), 0 1px 0 rgba(0,0,0,0.35);
+    }
+    .metric { padding: 16px; min-height: 112px; display: flex; flex-direction: column; justify-content: space-between; }
+    .metric-label { color: var(--faint); font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.02em; }
+    .metric-value { font-size: 34px; line-height: 1; letter-spacing: -0.7px; font-weight: 510; color: var(--text); font-variant-numeric: tabular-nums; }
+    .metric-note { color: var(--muted); font-size: 12px; margin-top: 6px; }
+    .content-grid { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(380px, 0.92fr); gap: 16px; margin-top: 16px; }
+    .section { padding: 20px; }
+    .section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    h2 { margin: 0; font-size: 18px; line-height: 1.25; letter-spacing: -0.24px; font-weight: 590; color: var(--text); }
+    h3 { margin: 0 0 10px; font-size: 13px; color: var(--text-2); font-weight: 590; letter-spacing: -0.13px; }
+    .tabs { display: inline-flex; gap: 6px; padding: 4px; border: 1px solid var(--border-soft); border-radius: 12px; background: rgba(0,0,0,0.16); }
+    .tab { border: 0; background: transparent; color: var(--muted); border-radius: 8px; padding: 7px 10px; cursor: pointer; font-size: 12px; font-weight: 510; }
+    .tab.active { background: rgba(113,112,255,0.16); color: var(--text); box-shadow: inset 0 0 0 1px rgba(113,112,255,0.26); }
+    .report {
+      white-space: pre-wrap;
+      max-height: 760px;
+      overflow: auto;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid var(--border-soft);
+      border-radius: 14px;
+      padding: 18px;
+      color: var(--text-2);
+      font-size: 14px;
+      line-height: 1.68;
+      scrollbar-color: var(--border) transparent;
+    }
+    .board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .lane { min-width: 0; }
+    .item { background: rgba(0,0,0,0.2); border: 1px solid var(--border-soft); border-radius: 12px; padding: 10px 11px; margin: 8px 0; color: var(--text-2); font-size: 13px; overflow-wrap: anywhere; }
+    .item.done { border-left: 3px solid var(--green); }
+    .item.wip { border-left: 3px solid var(--yellow); }
+    .item.planned { border-left: 3px solid var(--accent); }
+    .item.caveat { border-left: 3px solid var(--red); }
+    .momentum-card { margin-top: 16px; padding: 20px; background: linear-gradient(135deg, rgba(113,112,255,0.12), rgba(255,255,255,0.025)); }
+    .bar { height: 10px; background: rgba(0,0,0,0.36); border: 1px solid var(--border-soft); border-radius: 999px; overflow: hidden; margin-top: 16px; }
+    .bar span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--brand), var(--accent-2)); border-radius: inherit; transition: width 420ms ease; }
+    .muted { color: var(--muted); }
+    .tiny { color: var(--faint); font-size: 12px; font-family: var(--mono); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border-bottom: 1px solid var(--border-soft); padding: 11px 10px; text-align: left; vertical-align: top; }
+    th { color: var(--faint); font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.02em; font-weight: 500; }
+    td { color: var(--text-2); }
+    tbody tr:hover td { background: rgba(255,255,255,0.025); }
+    .state { display: inline-flex; border: 1px solid var(--border); border-radius: 999px; padding: 3px 8px; background: rgba(255,255,255,0.025); color: var(--text-2); font-size: 12px; white-space: nowrap; }
+    .project-name { color: var(--text); font-weight: 510; }
+    .activity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    footer { color: var(--faint); font-size: 12px; margin-top: 18px; padding: 0 4px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    @media (max-width: 1180px) { .metric-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .content-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 760px) { .shell { width: min(100% - 24px, 1440px); padding-top: 14px; } header { border-radius: 20px; } .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .board, .activity-grid { grid-template-columns: 1fr; } .section-head { align-items: flex-start; flex-direction: column; } }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="topline">
+        <div class="brand"><span class="mark" aria-hidden="true"></span><span>Weekly Report Suite</span></div>
+        <div class="status-pill">Live evidence + Kanban + Prometheus</div>
+      </div>
+      <h1 id="title">Weekly Report Dashboard</h1>
+      <p class="subtitle" id="subtitle">Loading metrics…</p>
+    </header>
+
+    <main id="main-content">
+      <section class="metric-grid" id="metrics" aria-label="Weekly metrics"></section>
+
+      <section class="content-grid" aria-label="Report and work state">
+        <article class="card section">
+          <div class="section-head">
+            <h2>Written Report</h2>
+            <div class="tabs" role="tablist" aria-label="Report tabs">
+              <button id="tab-dad" class="tab active" type="button" role="tab" aria-selected="true" onclick="showReport('dad')">Dad-facing</button>
+              <button id="tab-personal" class="tab" type="button" role="tab" aria-selected="false" onclick="showReport('personal')">Personal</button>
+            </div>
+          </div>
+          <div class="report" id="report" tabindex="0" aria-live="polite"></div>
+        </article>
+
+        <aside>
+          <section class="card section">
+            <div class="section-head"><h2>Work State Board</h2><span class="tiny" id="board-count"></span></div>
+            <div class="board" id="board"></div>
+          </section>
+          <section class="card momentum-card">
+            <div class="section-head"><h2>Momentum</h2><span class="tiny" id="momentum-score"></span></div>
+            <div class="bar" aria-hidden="true"><span id="momentumBar"></span></div>
+            <p class="muted" id="momentumText"></p>
+          </section>
+        </aside>
+      </section>
+
+      <section class="card section" style="margin-top:16px">
+        <div class="section-head"><h2>Project Activity</h2><span class="tiny" id="project-count"></span></div>
+        <div style="overflow:auto"><table id="projects"></table></div>
+      </section>
+
+      <section class="activity-grid">
+        <article class="card section"><h2>Daily and Agent Activity</h2><div id="activity"></div></article>
+        <article class="card section"><h2>Caveats and Self-Improvement</h2><div id="caveats"></div></article>
+      </section>
+    </main>
+
+    <footer>
+      <span>Generated by weekly-report-suite from git, session fallback, and Hermes Kanban data.</span>
+      <span>Prometheus: http://127.0.0.1:9109/metrics · Grafana files: ./grafana/</span>
+    </footer>
+  </div>
+
+<script>
+let DATA = {};
+let REPORTS = { dad: '', personal: '' };
+const numberFmt = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 });
+function esc(s) { return String(s ?? '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function num(v) { const n = Number(v ?? 0); return Number.isFinite(n) ? numberFmt.format(n) : esc(v ?? 'n/a'); }
+function metric(label, val, note='') {
+  return `<div class="card metric"><div><div class="metric-label">${esc(label)}</div><div class="metric-note">${esc(note)}</div></div><div class="metric-value">${num(val)}</div></div>`;
+}
+function stateClass(s) {
+  const v = String(s || '').toLowerCase();
+  if (v.includes('ship') || v.includes('fix') || v.includes('run')) return 'done';
+  if (v.includes('design') || v.includes('scaffold')) return 'planned';
+  return 'wip';
+}
+function render() {
+  const p = DATA.period || {};
+  const m = DATA.metrics || {};
+  document.getElementById('title').textContent = `Week Ending ${p.end || ''}`;
+  document.getElementById('subtitle').textContent = DATA.summary || DATA.theme || 'Weekly project history';
+  document.getElementById('metrics').innerHTML = [
+    ['Projects', m.projects_total, 'tracked this week'],
+    ['Sessions', m.sessions_total, 'agent work logs'],
+    ['Commits', m.commits_total, 'git evidence'],
+    ['Files', m.files_changed_total, 'changed across repos'],
+    ['Done', m.work_done, 'closed items'],
+    ['WIP', m.work_in_progress, 'active carry-over'],
+    ['Planned', m.work_planned, 'next moves'],
+    ['Momentum', m.momentum_score ?? 'n/a', 'composite score']
+  ].map(x => metric(x[0], x[1], x[2])).join('');
+
+  const score = Number(m.momentum_score || 0);
+  document.getElementById('momentumBar').style.width = Math.max(0, Math.min(100, score)) + '%';
+  document.getElementById('momentum-score').textContent = score ? `${score}/100` : 'not computed';
+  document.getElementById('momentumText').textContent = score ? 'Weighted from project spread, sessions, commits, file changes, and task closure.' : 'Momentum score was not computed for this bundle.';
+
+  const lanes = [['Done','done','done'], ['In Progress','wip','wip'], ['Planned','planned','planned']];
+  const totalItems = lanes.reduce((n, [,key]) => n + (DATA[key] || []).length, 0);
+  document.getElementById('board-count').textContent = `${totalItems} items`;
+  document.getElementById('board').innerHTML = lanes.map(([title,key,cls]) => `<div class="lane"><h3>${title}</h3>${(DATA[key] || []).map(i => `<div class="item ${cls}">${esc(i)}</div>`).join('') || '<p class="muted">No items captured.</p>'}</div>`).join('');
+
+  const projects = DATA.projects || [];
+  document.getElementById('project-count').textContent = `${projects.length} projects`;
+  const rows = projects.map(pr => `<tr><td><div class="project-name">${esc(pr.name)}</div><div class="tiny">${esc(pr.path || '')}</div></td><td><span class="state ${stateClass(pr.state)}">${esc(pr.state || 'unknown')}</span></td><td>${num(pr.sessions)}</td><td>${num(pr.commits)}</td><td>${num(pr.files_changed)}</td><td>${esc(pr.last_activity || '')}</td><td>${esc(pr.evidence || '')}</td></tr>`).join('');
+  document.getElementById('projects').innerHTML = `<thead><tr><th>Project</th><th>State</th><th>Sessions</th><th>Commits</th><th>Files</th><th>Last Activity</th><th>Evidence</th></tr></thead><tbody>${rows || '<tr><td colspan="7" class="muted">No projects captured.</td></tr>'}</tbody>`;
+
+  const daily = (DATA.daily_activity || []).map(d => `<div class="item">${esc(d.date || d.day)}: ${num(d.sessions)} sessions</div>`).join('') || '<p class="muted">No CASS timeline loaded.</p>';
+  const agents = (DATA.agent_activity || []).map(a => `<div class="item">${esc(a.agent)}: ${num(a.sessions)} sessions</div>`).join('') || '<p class="muted">No agent activity loaded.</p>';
+  document.getElementById('activity').innerHTML = `<h3>Daily Activity</h3>${daily}<h3 style="margin-top:16px">Agent Activity</h3>${agents}`;
+  document.getElementById('caveats').innerHTML = [...(DATA.caveats || []), ...(DATA.self_improvement || [])].map(c => `<div class="item caveat">${esc(c)}</div>`).join('') || '<p class="muted">No caveats captured.</p>';
+  showReport('dad');
+}
+function showReport(which) {
+  for (const id of ['dad','personal']) {
+    const tab = document.getElementById(`tab-${id}`);
+    tab.classList.toggle('active', id === which);
+    tab.setAttribute('aria-selected', id === which ? 'true' : 'false');
+  }
+  document.getElementById('report').textContent = REPORTS[which] || 'Report text unavailable.';
+}
+const bust = '?v=' + Date.now();
+Promise.all([
+  fetch('weekly-metrics.json' + bust, { cache: 'no-store' }).then(r => r.json()),
+  fetch('dad-report.md' + bust, { cache: 'no-store' }).then(r => r.text()).catch(() => ''),
+  fetch('personal-report.md' + bust, { cache: 'no-store' }).then(r => r.text()).catch(() => '')
+]).then(([data, dad, personal]) => { DATA = data; REPORTS = { dad, personal }; render(); })
+  .catch(e => { document.getElementById('subtitle').textContent = 'Failed to load weekly-metrics.json: ' + e; });
+</script>
+</body>
+</html>
