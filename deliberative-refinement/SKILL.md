@@ -13,7 +13,7 @@ tags:
 grade: A
 source: custom
 ---
-> ⚠️ **BEFORE USING THIS SKILL:** Review all files in the `references/` directory. These contain council specifications, profile guidance, and execution parameters required for proper skill execution.
+> ⚠️ **BEFORE USING THIS SKILL:** Review all files in the `resources/` directory. These contain council specifications, profile guidance, and execution parameters required for proper skill execution.
 
 # Deliberative Refinement
 
@@ -133,7 +133,7 @@ Six months ago you'd chain a dozen models together—one for generation, one for
 - [references/councils.md](references/councils.md) — Council type specifications
 - [references/profiles.md](references/profiles.md) — Intensity parameter guidance
 
-> ⚠️ **BEFORE USING THIS SKILL:** Review all files in the `references/` directory. These contain council specifications, profile guidance, and execution parameters required for proper skill execution.
+> ⚠️ **BEFORE USING THIS SKILL:** Review all files in the `resources/` directory. These contain council specifications, profile guidance, and execution parameters required for proper skill execution.
 
 # Deliberative Refinement
 
@@ -253,7 +253,7 @@ Six months ago you'd chain a dozen models together—one for generation, one for
 - [references/councils.md](references/councils.md) — Council type specifications
 - [references/profiles.md](references/profiles.md) — Intensity parameter guidance
 
-> ⚠️ **BEFORE USING THIS SKILL:** Review all files in the `references/` directory. These contain council specifications, profile guidance, and execution parameters required for proper skill execution.
+> ⚠️ **BEFORE USING THIS SKILL:** Review all files in the `resources/` directory. These contain council specifications, profile guidance, and execution parameters required for proper skill execution.
 
 # Deliberative Refinement
 
@@ -373,7 +373,7 @@ Six months ago you'd chain a dozen models together—one for generation, one for
 - [references/councils.md](references/councils.md) — Council type specifications
 - [references/profiles.md](references/profiles.md) — Intensity parameter guidance
 
-> ⚠️ **BEFORE USING THIS SKILL:** Review all files in the `references/` directory. These contain council specifications, profile guidance, and execution parameters required for proper skill execution.
+> ⚠️ **BEFORE USING THIS SKILL:** Review all files in the `resources/` directory. These contain council specifications, profile guidance, and execution parameters required for proper skill execution.
 
 # Deliberative Refinement
 

@@ -1,5 +1,5 @@
 ---
-name: spec-audit-skill-v3.1
+name: spec-audit-skill-v3
 version: 3.1
 description: 'True backtranslation-driven spec audit, aligned with the LLM SFT training
   data

@@ -10,8 +10,8 @@ prerequisites:
   - gemini
   - jq
   files:
-  - /home/cheta/.gemini/oauth_creds.json
-  - /home/cheta/.gemini/settings.json
+  - ~/.gemini/oauth_creds.json
+  - ~/.gemini/settings.json
 metadata:
   tags:
   - image-generation
@@ -47,8 +47,8 @@ Automated headless generation, editing, and refinement of images using the Nano 
 ## Authentication Config
 
 The CLI automatically authenticates using the user's cached OAuth tokens. The active configuration is located at:
-- **Settings:** `/home/cheta/.gemini/settings.json` (configured with `"selectedType": "oauth-personal"`)
-- **Credentials:** `/home/cheta/.gemini/oauth_creds.json`
+- **Settings:** `~/.gemini/settings.json` (configured with `"selectedType": "oauth-personal"`)
+- **Credentials:** `~/.gemini/oauth_creds.json`
 
 ### Security Warning
 Do not hardcode or commit access tokens into source code or settings templates. The `oauth_creds.json` file has local permissions (`0600`) and should remain excluded from version control via `.gitignore`.
@@ -115,7 +115,7 @@ A bash wrapper script (`bin/nanobanana.sh`) is provided in this skill's folder t
 ```
 
 ## Troubleshooting
-- **Permission Denied:** Ensure your terminal has read access to `/home/cheta/.gemini/oauth_creds.json`.
+- **Permission Denied:** Ensure your terminal has read access to `~/.gemini/oauth_creds.json`.
 - **Command Hangs:** Nano Banana calls external APIs. Image generation typically takes 5 to 15 seconds. If executing programmatically, verify subprocess timeouts are set to at least 30 seconds.
 
 
@@ -126,8 +126,8 @@ Automated headless generation, editing, and refinement of images using the Nano 
 ## Authentication Config
 
 The CLI automatically authenticates using the user's cached OAuth tokens. The active configuration is located at:
-- **Settings:** `/home/cheta/.gemini/settings.json` (configured with `"selectedType": "oauth-personal"`)
-- **Credentials:** `/home/cheta/.gemini/oauth_creds.json`
+- **Settings:** `~/.gemini/settings.json` (configured with `"selectedType": "oauth-personal"`)
+- **Credentials:** `~/.gemini/oauth_creds.json`
 
 ### Security Warning
 Do not hardcode or commit access tokens into source code or settings templates. The `oauth_creds.json` file has local permissions (`0600`) and should remain excluded from version control via `.gitignore`.
@@ -194,7 +194,7 @@ A bash wrapper script (`bin/nanobanana.sh`) is provided in this skill's folder t
 ```
 
 ## Troubleshooting
-- **Permission Denied:** Ensure your terminal has read access to `/home/cheta/.gemini/oauth_creds.json`.
+- **Permission Denied:** Ensure your terminal has read access to `~/.gemini/oauth_creds.json`.
 - **Command Hangs:** Nano Banana calls external APIs. Image generation typically takes 5 to 15 seconds. If executing programmatically, verify subprocess timeouts are set to at least 30 seconds.
 
 
@@ -205,8 +205,8 @@ Automated headless generation, editing, and refinement of images using the Nano 
 ## Authentication Config
 
 The CLI automatically authenticates using the user's cached OAuth tokens. The active configuration is located at:
-- **Settings:** `/home/cheta/.gemini/settings.json` (configured with `"selectedType": "oauth-personal"`)
-- **Credentials:** `/home/cheta/.gemini/oauth_creds.json`
+- **Settings:** `~/.gemini/settings.json` (configured with `"selectedType": "oauth-personal"`)
+- **Credentials:** `~/.gemini/oauth_creds.json`
 
 ### Security Warning
 Do not hardcode or commit access tokens into source code or settings templates. The `oauth_creds.json` file has local permissions (`0600`) and should remain excluded from version control via `.gitignore`.
@@ -273,7 +273,7 @@ A bash wrapper script (`bin/nanobanana.sh`) is provided in this skill's folder t
 ```
 
 ## Troubleshooting
-- **Permission Denied:** Ensure your terminal has read access to `/home/cheta/.gemini/oauth_creds.json`.
+- **Permission Denied:** Ensure your terminal has read access to `~/.gemini/oauth_creds.json`.
 - **Command Hangs:** Nano Banana calls external APIs. Image generation typically takes 5 to 15 seconds. If executing programmatically, verify subprocess timeouts are set to at least 30 seconds.
 
 
@@ -284,8 +284,8 @@ Automated headless generation, editing, and refinement of images using the Nano 
 ## Authentication Config
 
 The CLI automatically authenticates using the user's cached OAuth tokens. The active configuration is located at:
-- **Settings:** `/home/cheta/.gemini/settings.json` (configured with `"selectedType": "oauth-personal"`)
-- **Credentials:** `/home/cheta/.gemini/oauth_creds.json`
+- **Settings:** `~/.gemini/settings.json` (configured with `"selectedType": "oauth-personal"`)
+- **Credentials:** `~/.gemini/oauth_creds.json`
 
 ### Security Warning
 Do not hardcode or commit access tokens into source code or settings templates. The `oauth_creds.json` file has local permissions (`0600`) and should remain excluded from version control via `.gitignore`.
@@ -352,5 +352,5 @@ A bash wrapper script (`bin/nanobanana.sh`) is provided in this skill's folder t
 ```
 
 ## Troubleshooting
-- **Permission Denied:** Ensure your terminal has read access to `/home/cheta/.gemini/oauth_creds.json`.
+- **Permission Denied:** Ensure your terminal has read access to `~/.gemini/oauth_creds.json`.
 - **Command Hangs:** Nano Banana calls external APIs. Image generation typically takes 5 to 15 seconds. If executing programmatically, verify subprocess timeouts are set to at least 30 seconds.

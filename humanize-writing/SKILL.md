@@ -12,7 +12,7 @@ tags:
 grade: A
 source: derived
 ---
-**MANDATORY: Before applying this skill, you MUST read and fully load every file in the `references/` directory.** These files contain vocabulary blacklists, pattern guides, and validation checklists that are required for correct execution. Do not proceed until all reference files have been opened and their contents are in your context.
+**MANDATORY: Before applying this skill, you MUST read and fully load every file in the `resources/` directory.** These files contain vocabulary blacklists, pattern guides, and validation checklists that are required for correct execution. Do not proceed until all reference files have been opened and their contents are in your context.
 
 # Humanize Writing System
 
@@ -297,11 +297,11 @@ For these, just cut the obvious clichés and excess hedging. Keep the formality.
 - **Keep meaning** — Humanization preserves all original information and intent
 
 ## Reference Files
-- `references/ai-vocabulary-list.md`: Comprehensive blacklist of AI words
-- `references/content-type-guides.md`: Detailed guides for Blogs, Emails, etc.
-- `references/sentence-patterns.md`: Sentence pattern analysis
-- `references/rhythm-techniques.md`: Advanced rhythm techniques
-- `references/validation-checklist.md`: Full validation rubric
+- `resources/ai-vocabulary-list.md`: Comprehensive blacklist of AI words
+- `resources/content-type-guides.md`: Detailed guides for Blogs, Emails, etc.
+- `resources/sentence-patterns.md`: Sentence pattern analysis
+- `resources/rhythm-techniques.md`: Advanced rhythm techniques
+- `resources/validation-checklist.md`: Full validation rubric
 
 ## Ethical Framework
 - **Do:** Use this to improve clarity, engagement, and personal voice.
@@ -313,7 +313,7 @@ For these, just cut the obvious clichés and excess hedging. Keep the formality.
 **For use**: Claude.ai Web Interface  
 **Format**: Project Knowledge compatible
 
-**MANDATORY: Before applying this skill, you MUST read and fully load every file in the `references/` directory.** These files contain vocabulary blacklists, pattern guides, and validation checklists that are required for correct execution. Do not proceed until all reference files have been opened and their contents are in your context.
+**MANDATORY: Before applying this skill, you MUST read and fully load every file in the `resources/` directory.** These files contain vocabulary blacklists, pattern guides, and validation checklists that are required for correct execution. Do not proceed until all reference files have been opened and their contents are in your context.
 
 # Humanize Writing System
 
@@ -598,11 +598,11 @@ For these, just cut the obvious clichés and excess hedging. Keep the formality.
 - **Keep meaning** — Humanization preserves all original information and intent
 
 ## Reference Files
-- `references/ai-vocabulary-list.md`: Comprehensive blacklist of AI words
-- `references/content-type-guides.md`: Detailed guides for Blogs, Emails, etc.
-- `references/sentence-patterns.md`: Sentence pattern analysis
-- `references/rhythm-techniques.md`: Advanced rhythm techniques
-- `references/validation-checklist.md`: Full validation rubric
+- `resources/ai-vocabulary-list.md`: Comprehensive blacklist of AI words
+- `resources/content-type-guides.md`: Detailed guides for Blogs, Emails, etc.
+- `resources/sentence-patterns.md`: Sentence pattern analysis
+- `resources/rhythm-techniques.md`: Advanced rhythm techniques
+- `resources/validation-checklist.md`: Full validation rubric
 
 ## Ethical Framework
 - **Do:** Use this to improve clarity, engagement, and personal voice.
@@ -614,7 +614,7 @@ For these, just cut the obvious clichés and excess hedging. Keep the formality.
 **For use**: Claude.ai Web Interface  
 **Format**: Project Knowledge compatible
 
-**MANDATORY: Before applying this skill, you MUST read and fully load every file in the `references/` directory.** These files contain vocabulary blacklists, pattern guides, and validation checklists that are required for correct execution. Do not proceed until all reference files have been opened and their contents are in your context.
+**MANDATORY: Before applying this skill, you MUST read and fully load every file in the `resources/` directory.** These files contain vocabulary blacklists, pattern guides, and validation checklists that are required for correct execution. Do not proceed until all reference files have been opened and their contents are in your context.
 
 # Humanize Writing System
 
@@ -899,11 +899,11 @@ For these, just cut the obvious clichés and excess hedging. Keep the formality.
 - **Keep meaning** — Humanization preserves all original information and intent
 
 ## Reference Files
-- `references/ai-vocabulary-list.md`: Comprehensive blacklist of AI words
-- `references/content-type-guides.md`: Detailed guides for Blogs, Emails, etc.
-- `references/sentence-patterns.md`: Sentence pattern analysis
-- `references/rhythm-techniques.md`: Advanced rhythm techniques
-- `references/validation-checklist.md`: Full validation rubric
+- `resources/ai-vocabulary-list.md`: Comprehensive blacklist of AI words
+- `resources/content-type-guides.md`: Detailed guides for Blogs, Emails, etc.
+- `resources/sentence-patterns.md`: Sentence pattern analysis
+- `resources/rhythm-techniques.md`: Advanced rhythm techniques
+- `resources/validation-checklist.md`: Full validation rubric
 
 ## Ethical Framework
 - **Do:** Use this to improve clarity, engagement, and personal voice.
@@ -915,7 +915,7 @@ For these, just cut the obvious clichés and excess hedging. Keep the formality.
 **For use**: Claude.ai Web Interface  
 **Format**: Project Knowledge compatible
 
-**MANDATORY: Before applying this skill, you MUST read and fully load every file in the `references/` directory.** These files contain vocabulary blacklists, pattern guides, and validation checklists that are required for correct execution. Do not proceed until all reference files have been opened and their contents are in your context.
+**MANDATORY: Before applying this skill, you MUST read and fully load every file in the `resources/` directory.** These files contain vocabulary blacklists, pattern guides, and validation checklists that are required for correct execution. Do not proceed until all reference files have been opened and their contents are in your context.
 
 # Humanize Writing System
 
@@ -1200,11 +1200,11 @@ For these, just cut the obvious clichés and excess hedging. Keep the formality.
 - **Keep meaning** — Humanization preserves all original information and intent
 
 ## Reference Files
-- `references/ai-vocabulary-list.md`: Comprehensive blacklist of AI words
-- `references/content-type-guides.md`: Detailed guides for Blogs, Emails, etc.
-- `references/sentence-patterns.md`: Sentence pattern analysis
-- `references/rhythm-techniques.md`: Advanced rhythm techniques
-- `references/validation-checklist.md`: Full validation rubric
+- `resources/ai-vocabulary-list.md`: Comprehensive blacklist of AI words
+- `resources/content-type-guides.md`: Detailed guides for Blogs, Emails, etc.
+- `resources/sentence-patterns.md`: Sentence pattern analysis
+- `resources/rhythm-techniques.md`: Advanced rhythm techniques
+- `resources/validation-checklist.md`: Full validation rubric
 
 ## Ethical Framework
 - **Do:** Use this to improve clarity, engagement, and personal voice.

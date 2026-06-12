@@ -1,11 +1,4 @@
 ---
-tags:
-- social
-- writing
-grade: A
-source: community
----
----
 name: create-viral-content
 description: "Create viral content for social media: Reddit posts, Twitter threads, LinkedIn, YouTube, TikTok, blogs. Use when: user wants content to go viral, be engaging, attention-grabbing, or generate engagement."
   AUTOMATIC ACTIVATION: Use this skill whenever generating content for social media platforms including Reddit posts, Twitter/X threads, LinkedIn posts, YouTube videos/comments, TikTok scripts, Instagram posts/reels, email subject lines, blog titles, or any content intended for public engagement. Also triggers on: "make this viral", "social media post", "catchy headline", "hook", "engagement", "shareable", "go viral", "attention-grabbing", "clickable", "scroll-stopping", "title ideas", "hot take", "more engaging", "subreddit", "thread". Apply to any AI-generated content facing public audience or hostile perception.
@@ -21,6 +14,11 @@ outputs:
   - name: viral_content
     description: Optimized social media content for the target platform
     pointer_type: output_file
+tags:
+- social
+- writing
+grade: A
+source: community
 ---
 
 > ⚠️ **BEFORE USING THIS SKILL:** Review all files in the `resources/` directory. These contain AI tell catalogs, platform templates, refinement protocols, and 40-source research basis required for proper skill execution.

@@ -1,5 +1,5 @@
 ---
-name: Is It Funny Refinement
+name: is-it-funny-refinement
 description: Evaluate comedic content quality using 10/3/1 ISO deliberative-refinement
   with comedy expert council
 inputs:

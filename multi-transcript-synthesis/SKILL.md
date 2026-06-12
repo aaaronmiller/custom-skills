@@ -1,13 +1,4 @@
 ---
-tags:
-- writing
-- planning
-- ai/llm
-- automation
-grade: A
-source: custom
----
----
 name: multi-transcript-synthesis
 description: "Collate and synthesize multiple AI conversation transcripts, specs, and notes into clean requirements and design documents. Use when: auditing files, cleaning up transcripts, figuring out what to build, collating ideas from multiple conversations."
   Collate and synthesize multiple AI conversation transcripts, specs, and notes into clean requirements and design documents. Use when: the user has multiple files from different AI sessions about the same project idea, needs to "audit these files", "clean up these transcripts", "figure out what I actually need", "collate ideas from multiple conversations", "find the best version", "merge these specs", "create requirements from conversations", "synthesize these docs", "extract the good ideas", "make sense of this mess", "consolidate these transcripts", "build a requirements doc from these notes", "compare these approaches", "which model was right", "merge these ideas", "what's the consensus across these", "I got different answers from different models", "prioritize these features from my notes", "make a spec from these conversations", "I talked to GPT/Claude/Gemini about this". AUTOMATIC ACTIVATION: Any request involving 3+ markdown files that appear to be AI conversation logs, project specs, or ideation documents about the same topic. NOT for: summarizing a single meeting transcript, editing one document, simple Q&A, or single-file analysis tasks. Minimum 2 source files required.
@@ -20,6 +11,13 @@ outputs:
   - name: requirements_doc
     description: Consolidated requirements and design document
     pointer_type: output_file
+tags:
+- writing
+- planning
+- ai/llm
+- automation
+grade: A
+source: custom
 ---
 
 > ⚠️ **BEFORE STARTING:** Read all files in `references/` — they contain the scratchpad template, synthesis matrix, retrospective checklist, and starter code guide required for proper execution.
