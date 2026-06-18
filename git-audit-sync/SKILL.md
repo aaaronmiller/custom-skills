@@ -118,6 +118,8 @@ git switch -c recovery-<reponame> git-audit-sync/backup-YYYYMMDD-HHMMSS-<reponam
 
 The core logic is in [scripts/audit_sync.py](scripts/audit_sync.py). It handles all repo states deterministically.
 
+**Repo discovery**: Recursively walks the target directory tree (skipping `node_modules`, `.cache`, `venv`, build artifacts). Finds repos at any nesting depth — not just direct children.
+
 ```bash
 # Full sync (commit, push, pull)
 python3 scripts/audit_sync.py ~/code

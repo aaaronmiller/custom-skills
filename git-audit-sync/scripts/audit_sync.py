@@ -192,9 +192,9 @@ class GitRepo:
         if not self.has_origin:
             return  # No remote to compare with
 
-        # Fetch
+        # Fetch (short timeout — some nested repos have no network)
         try:
-            run_git(self.path, "fetch", "origin", "--quiet", timeout=30)
+            run_git(self.path, "fetch", "origin", "--quiet", timeout=10)
         except RuntimeError as e:
             self.error = f"fetch failed: {e}"
             return
@@ -387,13 +387,40 @@ def _warn_secrets(repo: GitRepo, report: Report):
 
 # ── Main loop ───────────────────────────────────────────────────────────────
 
-def find_git_repos(root: Path) -> list[Path]:
-    """Find all git repos under root (directories with .git)."""
-    repos = []
-    for entry in sorted(root.iterdir()):
-        if entry.is_dir() and (entry / ".git").exists():
-            repos.append(entry)
-    return repos
+def find_git_repos(root: Path, maxdepth: int = 3) -> list[Path]:
+    """Recursively find all git repos under root using find(1).
+    Fast because it prunes node_modules, .cache, and .git objects.
+    maxdepth controls how deep to search (default 3 = mostly top-level)."""
+    try:
+        r = subprocess.run([
+            "find", str(root),
+            "-name", ".git", "-type", "d",
+            "-not", "-path", "*/node_modules/*",
+            "-not", "-path", "*/.cache/*",
+            "-not", "-path", "*/venv/*",
+            "-not", "-path", "*/.venv/*",
+            "-not", "-path", "*/__pycache__/*",
+            "-not", "-path", "*/target/*",
+            "-maxdepth", str(maxdepth),
+        ], capture_output=True, text=True, timeout=30)
+        if r.returncode != 0:
+            raise RuntimeError(r.stderr)
+        repos = []
+        for line in r.stdout.strip().split("\n"):
+            line = line.strip()
+            if not line:
+                continue
+            repo_dir = Path(line).parent
+            if repo_dir != root:
+                repos.append(repo_dir)
+        return sorted(set(repos))
+    except Exception:
+        # Fallback: shallow scan of direct children only
+        repos = []
+        for entry in sorted(root.iterdir()):
+            if entry.is_dir() and (entry / ".git").exists():
+                repos.append(entry)
+        return repos
 
 
 def process_repo(repo_path: Path, report: Report, excludes: set[str]) -> bool:
@@ -491,6 +518,8 @@ def main():
                         help="Read-only audit, no changes")
     parser.add_argument("--exclude", type=str, default="",
                         help="Comma-separated list of repo names to skip")
+    parser.add_argument("--maxdepth", type=int, default=3,
+                        help="Max directory depth for repo discovery (default: 3)")
     args = parser.parse_args()
 
     root = args.directory.resolve()
@@ -502,7 +531,7 @@ def main():
     excludes = set(x.strip() for x in args.exclude.split(",") if x.strip())
     report = Report(root, dry_run)
 
-    repos = find_git_repos(root)
+    repos = find_git_repos(root, args.maxdepth)
     if not repos:
         print(f"❌ No git repos found in {root}")
         sys.exit(1)
