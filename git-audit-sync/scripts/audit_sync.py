@@ -3,24 +3,71 @@
 Git Audit & Sync — Scan every git repo in a directory, assess state,
 and bring all repos to a clean, synced state.
 
+Each repo is processed by an independent worker — safe for parallel
+execution since every repo has its own .git directory.
+
 Usage:
     python3 audit_sync.py <directory>
     python3 audit_sync.py <directory> --dry-run
     python3 audit_sync.py <directory> --audit-only
+    python3 audit_sync.py <directory> --workers 8
+    python3 audit_sync.py <directory> --since 7
     python3 audit_sync.py <directory> --exclude repo1,repo2
+    python3 audit_sync.py <directory> --commit-message "feat: sync"
+    python3 audit_sync.py <directory> --update-submodules
 """
 
 import argparse
+import concurrent.futures
+import fnmatch
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
+
+
+# ── Lockfile (prevents concurrent runs) ─────────────────────────────────────
+LOCKFILE = Path(tempfile.gettempdir()) / "git-audit-sync.lock"
+_LOCK_FD: Optional[int] = None
+
+
+def acquire_lock() -> bool:
+    """Acquire a system-wide lock so only one instance runs at a time."""
+    global _LOCK_FD
+    try:
+        _LOCK_FD = os.open(str(LOCKFILE), os.O_CREAT | os.O_RDWR, 0o644)
+        import fcntl
+        fcntl.flock(_LOCK_FD, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        return True
+    except (BlockingIOError, OSError, ImportError):
+        if _LOCK_FD is not None:
+            os.close(_LOCK_FD)
+            _LOCK_FD = None
+        return False
+
+
+def release_lock():
+    global _LOCK_FD
+    if _LOCK_FD is not None:
+        try:
+            import fcntl
+            fcntl.flock(_LOCK_FD, fcntl.LOCK_UN)
+        except Exception:
+            pass
+        os.close(_LOCK_FD)
+        _LOCK_FD = None
+        try:
+            LOCKFILE.unlink(missing_ok=True)
+        except Exception:
+            pass
 
 
 # ── Colours / icons ─────────────────────────────────────────────────────────
@@ -42,51 +89,67 @@ LOG_DIR = Path.home() / "git-audit-logs"
 
 
 class Report:
-    """Collect per-repo results and write a final report."""
+    """Collect per-repo results and write a final report (thread-safe)."""
 
     def __init__(self, root: Path, dry_run: bool):
         LOG_DIR.mkdir(parents=True, exist_ok=True)
         ts = datetime.now().strftime("%Y-%m-%d_%H%M%S")
         self.path = LOG_DIR / f"git-audit-{ts}.md"
+        self.json_path = LOG_DIR / f"git-audit-{ts}.json"
         self.root = root
         self.dry_run = dry_run
         self.lines: list[str] = []
         self.summary: list[str] = []
-        self.stats = {"clean": 0, "pulled": 0, "pushed": 0, "committed": 0,
-                      "synced": 0, "conflict": 0, "error": 0, "skipped": 0}
+        self.stats: dict[str, int] = {
+            "clean": 0, "pulled": 0, "pushed": 0, "committed": 0,
+            "synced": 0, "conflict": 0, "error": 0, "skipped": 0,
+        }
+        self.details: list[dict[str, Any]] = []
 
-    def add(self, repo: str, icon: str, msg: str):
+    def add(self, repo: str, icon: str, msg: str, detail: Optional[dict] = None):
+        """Add a result (called from workers). Thread-safe via GIL."""
         label = f"{icon} {msg}"
         self.summary.append(f"| {label} |")
-        line = f"- {label}"
-        self.lines.append(line)
-        for key in self.stats:
-            if icon in [OK, SKIP, DRY] and key == "clean":
-                self.stats[key] += 1; break
-            if icon == PULLED and key == "pulled":
-                self.stats[key] += 1; break
-            if icon == PUSHED and key == "pushed":
-                self.stats[key] += 1; break
-            if icon == COMMITTED and key == "committed":
-                self.stats[key] += 1; break
-            if icon == SYNCED and key == "synced":
-                self.stats[key] += 1; break
-            if icon == CONFLICT and key == "conflict":
-                self.stats[key] += 1; break
-            if icon == ERROR and key == "error":
-                self.stats[key] += 1; break
-            if icon == SKIP and key == "skipped":
-                self.stats[key] += 1; break
+        self.lines.append(f"- {label}")
+        if detail:
+            self.details.append(detail)
+        # Stat counting (first match wins)
+        icon_groups = {
+            "clean": [OK, SKIP, DRY],
+            "pulled": [PULLED],
+            "pushed": [PUSHED],
+            "committed": [COMMITTED],
+            "synced": [SYNCED],
+            "conflict": [CONFLICT],
+            "error": [ERROR],
+            "skipped": [SKIP],
+        }
+        for key, icons in icon_groups.items():
+            if icon in icons:
+                self.stats[key] += 1
+                break
+
+    def sort_by_state(self):
+        """Sort results: errors/conflicts first, then by name."""
+        def sort_key(line: str) -> tuple:
+            for i, ch in enumerate([ERROR, CONFLICT, SYNCED, COMMITTED, PUSHED, PULLED, SKIP, OK]):
+                if line.startswith(f"- {ch}"):
+                    return (i, line.lower())
+            return (99, line.lower())
+        self.lines.sort(key=sort_key)
 
     def write(self):
+        self.sort_by_state()
         total = sum(self.stats.values()) or 1
         ok = self.stats["clean"] + self.stats["pulled"] + self.stats["pushed"] \
              + self.stats["committed"] + self.stats["synced"]
         pct = round(ok / total * 100)
+
         content = [
             f"# Git Audit — {self.root}",
             f"**Run**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
             f"**Mode**: {'DRY RUN' if self.dry_run else 'LIVE'}",
+            f"**Workers**: parallel (multi-repo)",
             "",
             "## Summary",
             f"| Stat | Count |",
@@ -103,14 +166,28 @@ class Report:
             "",
             "## Per-repo results",
         ] + self.lines
+
         self.path.write_text("\n".join(content) + "\n")
+
+        # JSON output for machine consumption
+        json_data = {
+            "root": str(self.root),
+            "timestamp": datetime.now().isoformat(),
+            "mode": "dry-run" if self.dry_run else "live",
+            "stats": self.stats,
+            "health_pct": pct,
+            "repos": self.details,
+        }
+        self.json_path.write_text(json.dumps(json_data, indent=2, default=str))
+
         print(f"\n📊 Report: {self.path}")
+        print(f"📊 JSON:    {self.json_path}")
 
 
 # ── Helpers ─────────────────────────────────────────────────────────────────
 
 def run(cmd: list[str], cwd: Path, timeout: int = 60) -> subprocess.CompletedProcess:
-    """Run a command and return result. Works on all OS paths."""
+    """Run a command and return result."""
     return subprocess.run(cmd, capture_output=True, text=True,
                           timeout=timeout, cwd=str(cwd))
 
@@ -131,18 +208,40 @@ def maybe_run_git(repo: Path, *args: str, timeout: int = 60) -> Optional[str]:
     return r.stdout.strip() if r.returncode == 0 else None
 
 
-def create_backup_tag(repo: Path, report: Report):
-    """Create a lightweight backup tag before any write operation."""
+def run_with_retry(cmd: list[str], cwd: Path, timeout: int = 60,
+                   max_retries: int = 3, backoff: float = 2.0) -> subprocess.CompletedProcess:
+    """Run a command with exponential backoff retry for network flakiness."""
+    last_exc = None
+    for attempt in range(max_retries):
+        try:
+            r = subprocess.run(cmd, capture_output=True, text=True,
+                               timeout=timeout, cwd=str(cwd))
+            if r.returncode == 0:
+                return r
+            last_exc = RuntimeError(r.stderr.strip() or f"exit code {r.returncode}")
+            if attempt < max_retries - 1:
+                wait = backoff ** attempt
+                print(f"  ⏳ retry {attempt + 1}/{max_retries} after {wait:.0f}s...")
+                time.sleep(wait)
+        except (subprocess.TimeoutExpired, OSError) as e:
+            last_exc = e
+            if attempt < max_retries - 1:
+                time.sleep(backoff ** attempt)
+    raise RuntimeError(str(last_exc))
+
+
+def create_backup_tag(repo: Path, dry_run: bool) -> str:
+    """Create a lightweight git branch (safer than tag — no detached HEAD)."""
     ts = datetime.now().strftime("%Y%m%d-%H%M%S")
     repo_name = repo.name
-    tag = f"git-audit-sync/backup-{ts}-{repo_name}"
-    if not report.dry_run:
-        r = run(["git", "tag", tag], repo)
+    branch = f"git-audit-sync/backup-{ts}-{repo_name}"
+    if not dry_run:
+        r = run(["git", "branch", branch], repo)
         if r.returncode == 0:
-            print(f"  📦 Backup tag: {tag}")
+            print(f"  📦 Backup branch: {branch}")
     else:
-        print(f"  📦 Would create backup tag: {tag}")
-    return tag
+        print(f"  📦 Would create backup branch: {branch}")
+    return branch
 
 
 # ── Repo state inspection ───────────────────────────────────────────────────
@@ -160,22 +259,51 @@ class GitRepo:
         self.ahead: int = 0
         self.behind: int = 0
         self.has_stashed: bool = False
+        self.active_git_op: Optional[str] = None
+        self.is_detached: bool = False
         self.conflict_files: list[str] = []
         self.error: Optional[str] = None
+        self.last_modified: Optional[datetime] = None
+        self.has_skip_marker: bool = False
+        self.untracked_files: list[str] = []
+        self.commit_msg: str = "git-audit-sync: auto-commit"
 
-    def inspect(self):
+    def inspect(self, since: Optional[int] = None, commit_msg: str = "git-audit-sync: auto-commit"):
         """Gather all state info about this repo."""
-        # Check for active merge/rebase/cherry-pick/revert first
-        # These would cause git operations to fail, so flag early
+        self.commit_msg = commit_msg
+
+        # Check for .gitaudit-skip marker
+        self.has_skip_marker = (self.path / ".gitaudit-skip").exists()
+
+        # Last modified time
+        try:
+            mtime = os.path.getmtime(self.path / ".git")
+            self.last_modified = datetime.fromtimestamp(mtime)
+        except OSError:
+            pass
+
+        # Detect detached HEAD
+        try:
+            head = run_git(self.path, "rev-parse", "--symbolic-full-name", "HEAD", timeout=5)
+            self.is_detached = not head.startswith("refs/heads/")
+        except RuntimeError:
+            pass
+
+        # Check for active merge/rebase/cherry-pick/revert
         GIT_LOCK_FILES = ["MERGE_HEAD", "REBASE_HEAD", "CHERRY_PICK_HEAD",
                           "REVERT_HEAD", "MERGE_MSG", "MERGE_MODE", "sequencer/todo"]
         git_dir = self.path / ".git"
         active_ops = []
         for lf in GIT_LOCK_FILES:
-            if (git_dir / lf).exists():
-                active_ops.append(lf.replace("_HEAD", "").replace("_MSG", " (merge)")
-                                   .replace("_MODE", " (merge)").replace("sequencer/todo", "rebase (interactive)"))
+            fp = git_dir / lf
+            if fp.exists():
+                name = lf.replace("_HEAD", "").replace("_MSG", " (merge)") \
+                          .replace("_MODE", " (merge)") \
+                          .replace("sequencer/todo", "rebase (interactive)")
+                active_ops.append(name)
         self.active_git_op = active_ops[0] if active_ops else None
+        if self.active_git_op:
+            return
 
         try:
             self.branch = run_git(self.path, "rev-parse", "--abbrev-ref", "HEAD",
@@ -188,13 +316,13 @@ class GitRepo:
         origin_url = maybe_run_git(self.path, "remote", "get-url", "origin",
                                    timeout=10)
         self.has_origin = origin_url is not None
-
         if not self.has_origin:
-            return  # No remote to compare with
+            return
 
-        # Fetch (short timeout — some nested repos have no network)
+        # Fetch with retry
         try:
-            run_git(self.path, "fetch", "origin", "--quiet", timeout=10)
+            run_with_retry(["git", "fetch", "origin", "--quiet"],
+                           self.path, timeout=15, max_retries=2)
         except RuntimeError as e:
             self.error = f"fetch failed: {e}"
             return
@@ -203,7 +331,6 @@ class GitRepo:
         upstream = maybe_run_git(self.path, "rev-parse", "--abbrev-ref",
                                  "--symbolic-full-name", "@{u}", timeout=10)
         self.has_upstream = upstream is not None
-
         if not self.has_upstream:
             return
 
@@ -217,10 +344,12 @@ class GitRepo:
         except (RuntimeError, ValueError, IndexError):
             pass
 
-        # Uncommitted
+        # Uncommitted + untracked
         r = maybe_run_git(self.path, "status", "--porcelain", timeout=15)
         if r:
-            self.uncommitted = len([l for l in r.split("\n") if l.strip()])
+            lines = [l.strip() for l in r.split("\n") if l.strip()]
+            self.uncommitted = len(lines)
+            self.untracked_files = [l[3:] for l in lines if l.startswith("??")]
 
         # Stashed
         r = maybe_run_git(self.path, "stash", "list", timeout=10)
@@ -228,6 +357,8 @@ class GitRepo:
 
     def classify(self) -> str:
         """Return the state classification."""
+        if self.has_skip_marker:
+            return "skipped"
         if self.active_git_op:
             return "in-progress"
         if self.error:
@@ -253,77 +384,112 @@ class GitRepo:
 
 # ── Actions ─────────────────────────────────────────────────────────────────
 
-def pull_ff(repo: GitRepo, report: Report) -> str:
+def pull_ff(repo: GitRepo, dry_run: bool) -> str:
     """Fast-forward pull. Fails safely if not possible."""
-    create_backup_tag(repo.path, report)
-    if report.dry_run:
+    create_backup_tag(repo.path, dry_run)
+    if dry_run:
         return f"would pull --ff-only ({repo.behind} commits)"
-    r = run(["git", "pull", "--ff-only"], repo.path)
-    if r.returncode == 0:
+    try:
+        r = run_with_retry(["git", "pull", "--ff-only"], repo.path, timeout=30)
         return f"pulled ({repo.behind} commits, ff-only)"
-    # --ff-only failed — likely would create merge commit
-    run(["git", "merge", "--abort"], repo.path, timeout=10)
-    return f"pull failed (ff-only not possible): {r.stderr.strip()}"
+    except RuntimeError as e:
+        run(["git", "merge", "--abort"], repo.path, timeout=10)
+        return f"pull failed: {str(e)}"
 
 
-def push(repo: GitRepo, report: Report) -> str:
+def push(repo: GitRepo, dry_run: bool) -> str:
     """Push local commits to origin."""
-    create_backup_tag(repo.path, report)
-    if report.dry_run:
+    create_backup_tag(repo.path, dry_run)
+    if dry_run:
         return f"would push ({repo.ahead} commits)"
-    r = run(["git", "push"], repo.path)
-    return f"pushed ({repo.ahead} commits)" if r.returncode == 0 \
-        else f"push failed: {r.stderr.strip()}"
+    try:
+        r = run_with_retry(["git", "push"], repo.path, timeout=30)
+        return f"pushed ({repo.ahead} commits)"
+    except RuntimeError as e:
+        return f"push failed: {str(e)}"
 
 
-def commit_and_push(repo: GitRepo, report: Report) -> str:
+def get_dryrun_diff(repo: GitRepo) -> str:
+    """Get a summary of files that would be committed (for dry-run display)."""
+    r = maybe_run_git(repo.path, "diff", "--stat", timeout=10)
+    untracked = maybe_run_git(repo.path, "ls-files", "--others", "--exclude-standard", timeout=10)
+    parts = []
+    if r:
+        parts.append(r.strip())
+    if untracked:
+        ucount = len([l for l in untracked.split("\n") if l.strip()])
+        if ucount > 0:
+            parts.append(f"{ucount} untracked file(s)")
+    return " | ".join(parts) if parts else ""
+
+
+def commit_and_push(repo: GitRepo, dry_run: bool) -> str:
     """Stage all, commit, push."""
-    create_backup_tag(repo.path, report)
-    if report.dry_run:
-        return f"would commit {repo.uncommitted} files and push"
+    dry_diff = get_dryrun_diff(repo) if dry_run else ""
+    create_backup_tag(repo.path, dry_run)
+    if dry_run:
+        detail = f"would commit {repo.uncommitted} files"
+        if dry_diff:
+            detail += f" ({dry_diff})"
+        detail += " and push"
+        return detail
+
     r = run(["git", "add", "-A"], repo.path, timeout=30)
     if r.returncode != 0:
         return f"git add failed: {r.stderr.strip()}"
-    r = run(["git", "commit", "-m", "git-audit-sync: auto-commit",
+    r = run(["git", "commit", "-m", repo.commit_msg,
              "-m", f"Uncommitted changes from audit ({repo.uncommitted} files)"],
             repo.path, timeout=30)
     if r.returncode != 0 and "nothing to commit" not in r.stderr:
         return f"commit failed: {r.stderr.strip()}"
+    commit_hash = maybe_run_git(repo.path, "rev-parse", "--short", "HEAD", timeout=5) or "?"
     if repo.has_upstream:
-        r = run(["git", "push"], repo.path, timeout=30)
-        if r.returncode != 0:
-            return f"committed but push failed: {r.stderr.strip()}"
-        return f"committed + pushed ({repo.uncommitted} files)"
-    return f"committed ({repo.uncommitted} files)"
+        try:
+            run_with_retry(["git", "push"], repo.path, timeout=30)
+            return f"committed + pushed ({repo.uncommitted} files) [{commit_hash}]"
+        except RuntimeError as e:
+            return f"committed [{commit_hash}] but push failed: {str(e)}"
+    return f"committed ({repo.uncommitted} files) [{commit_hash}]"
 
 
-def commit_push_pull(repo: GitRepo, report: Report) -> str:
+def commit_push_pull(repo: GitRepo, dry_run: bool) -> str:
     """Commit, push, then pull (safer than pull first)."""
-    result = commit_and_push(repo, report)
-    # If commit+push failed, don't attempt pull
-    if result.startswith("commit failed") or result.startswith("committed but push failed"):
+    result = commit_and_push(repo, dry_run)
+    if any(result.startswith(p) for p in ["commit failed", "committed but", "git add failed"]):
         return result
-    # Pull after commit+push ensures we're synced both ways
-    r = run(["git", "pull", "--ff-only"], repo.path, timeout=30)
-    if r.returncode != 0:
-        return f"{result}; pull failed: {r.stderr.strip()}"
-    return f"{result}; pulled ({repo.behind} commits)"
+    try:
+        r = run_with_retry(["git", "pull", "--ff-only"], repo.path, timeout=30)
+        return f"{result}; pulled ({repo.behind} commits)"
+    except RuntimeError as e:
+        return f"{result}; pull failed: {str(e)}"
 
 
-def push_upstream(repo: GitRepo, report: Report) -> str:
+def push_upstream(repo: GitRepo, dry_run: bool) -> str:
     """Push branch with upstream tracking (for feature branches)."""
-    create_backup_tag(repo.path, report)
-    if report.dry_run:
+    create_backup_tag(repo.path, dry_run)
+    if dry_run:
         return f"would push --set-upstream origin {repo.branch}"
-    r = run(["git", "push", "--set-upstream", "origin", repo.branch],
-            repo.path, timeout=30)
-    return f"pushed branch '{repo.branch}' to origin" if r.returncode == 0 \
-        else f"push failed: {r.stderr.strip()}"
+    try:
+        run_with_retry(["git", "push", "--set-upstream", "origin", repo.branch],
+                       repo.path, timeout=30)
+        return f"pushed branch '{repo.branch}' to origin"
+    except RuntimeError as e:
+        return f"push failed: {str(e)}"
 
 
-def assess_conflict(repo: GitRepo, report: Report) -> str:
-    """Check if diverged changes are in same files. If not, merge."""
-    # Find what changed locally vs what changed upstream
+def update_submodules(repo: GitRepo, dry_run: bool) -> Optional[str]:
+    """Update submodules if they exist."""
+    if dry_run:
+        return None
+    r = maybe_run_git(repo.path, "submodule", "status", timeout=10)
+    if not r or not r.strip():
+        return None
+    r2 = run(["git", "submodule", "update", "--recursive"], repo.path, timeout=60)
+    return "submodules updated" if r2.returncode == 0 else "submodule update failed"
+
+
+def assess_conflict(repo: GitRepo, dry_run: bool) -> Any:
+    """Check if diverged changes are in same source files."""
     local_files = set()
     r = maybe_run_git(repo.path, "diff", "HEAD", "--name-only", timeout=15)
     if r:
@@ -339,8 +505,6 @@ def assess_conflict(repo: GitRepo, report: Report) -> str:
             upstream_files = set(r.strip().split("\n"))
 
     overlap = local_files & upstream_files
-
-    # Safe types: generated/data files that merge fine
     SAFE_EXTENSIONS = {".json", ".csv", ".db", ".lock", ".pyc", ".log",
                        ".svg", ".png", ".jpg", ".ico"}
     safe_overlap = {f for f in overlap
@@ -348,10 +512,8 @@ def assess_conflict(repo: GitRepo, report: Report) -> str:
     real_overlap = overlap - safe_overlap
 
     if not real_overlap:
-        # Only safe overlaps or no overlap — proceed
-        result = commit_push_pull(repo, report)
+        result = commit_push_pull(repo, dry_run)
         return f"auto-merged: {result}"
-
     return real_overlap
 
 
@@ -362,35 +524,147 @@ SECRET_PATTERNS = [".env", ".env.*", "*key*", "*secret*", "*token*",
                    "*auth*", "*access*", "*api-key*"]
 
 
-def _warn_secrets(repo: GitRepo, report: Report):
-    """Check untracked files for potential secrets before staging all."""
-    import fnmatch
-    r = maybe_run_git(repo.path, "status", "--porcelain", timeout=10)
-    if not r:
-        return
-    untracked = []
-    for line in r.split("\n"):
-        line = line.strip()
-        if line.startswith("??"):
-            fname = line[3:]
-            for pat in SECRET_PATTERNS:
-                if fnmatch.fnmatch(fname, pat) or fnmatch.fnmatch(fname.split("/")[-1], pat):
-                    untracked.append(fname)
-                    break
-    if untracked:
-        files_str = ", ".join(untracked[:5])
-        more = f" (+{len(untracked)-5} more)" if len(untracked) > 5 else ""
-        print(f"  ⚠️  SECRET RISK: untracked files matching secret patterns")
-        print(f"     {files_str}{more}")
-        print(f"     Continuing anyway — verify .gitignore is correct")
+def check_secrets(repo: GitRepo) -> list[str]:
+    """Check untracked files for potential secrets."""
+    found = []
+    for fname in repo.untracked_files:
+        basename = os.path.basename(fname)
+        for pat in SECRET_PATTERNS:
+            if fnmatch.fnmatch(fname, pat) or fnmatch.fnmatch(basename, pat):
+                found.append(fname)
+                break
+    return found
 
 
-# ── Main loop ───────────────────────────────────────────────────────────────
+# ── Repo processing (runs in parallel worker) ──────────────────────────────
+
+def process_repo(repo_path: Path, excludes: set[str], dry_run: bool,
+                 since: Optional[int], commit_msg: str,
+                 do_submodules: bool) -> tuple[str, str, str, Optional[dict]]:
+    """Process a single repo. Returns (name, icon, message, detail_dict).
+    Designed to be called from parallel workers — no shared state needed."""
+    name = repo_path.name
+
+    if name in excludes:
+        return (name, SKIP, f"{name} — excluded", None)
+
+    # --since filter: skip repos not modified recently
+    if since is not None:
+        try:
+            mtime = os.path.getmtime(repo_path / ".git")
+            age_days = (time.time() - mtime) / 86400
+            if age_days > since:
+                return (name, SKIP, f"{name} — not modified in {since}+ days (skipped)",
+                        {"state": "stale", "age_days": round(age_days, 1)})
+        except OSError:
+            pass
+
+    r = GitRepo(repo_path)
+    r.inspect(since=since, commit_msg=commit_msg)
+
+    if r.has_skip_marker:
+        return (name, SKIP, f"{name} — .gitaudit-skip marker found (skipped)", None)
+
+    if r.error:
+        return (name, ERROR, f"{name} — {r.error}",
+                {"state": "error", "error": r.error})
+
+    if r.is_detached:
+        return (name, SKIP, f"{name} — detached HEAD (skip) — git switch <branch>",
+                {"state": "detached", "branch": r.branch})
+
+    state = r.classify()
+    print(f"📁 {name} [{state}] br={r.branch} u={r.uncommitted} "
+          f"a={r.ahead} b={r.behind}", flush=True)
+
+    detail: dict[str, Any] = {
+        "name": name, "state": state, "branch": r.branch,
+        "uncommitted": r.uncommitted, "ahead": r.ahead, "behind": r.behind,
+    }
+
+    try:
+        if state == "in-progress":
+            return (name, SKIP, f"{name} — active {r.active_git_op} in progress (skipped)", detail)
+
+        if state == "clean":
+            return (name, OK, f"{name} — clean, up-to-date", detail)
+
+        elif state == "pullable":
+            msg = pull_ff(r, dry_run)
+            detail["action"] = "pull"
+            return (name, PULLED, f"{name} — {msg}", detail)
+
+        elif state == "pushable":
+            msg = push(r, dry_run)
+            detail["action"] = "push"
+            return (name, PUSHED, f"{name} — {msg}", detail)
+
+        elif state == "dirty-even":
+            if r.branch not in ("main", "master"):
+                return (name, SKIP, f"{name} — {r.uncommitted} uncommitted on "
+                        f"'{r.branch}' branch (skipped)", detail)
+            secrets = check_secrets(r)
+            if secrets:
+                print(f"  ⚠️  SECRET RISK: {', '.join(secrets[:3])}")
+            msg = commit_and_push(r, dry_run)
+            detail["action"] = "commit+push"
+            detail["secrets"] = secrets[:3] if secrets else []
+            return (name, COMMITTED, f"{name} — {msg}", detail)
+
+        elif state == "diverged":
+            if r.branch not in ("main", "master"):
+                return (name, SKIP, f"{name} — {r.uncommitted} uncommitted + "
+                        f"{r.behind} behind on '{r.branch}' (skipped)", detail)
+            secrets = check_secrets(r)
+            if secrets:
+                print(f"  ⚠️  SECRET RISK: {', '.join(secrets[:3])}")
+            msg = commit_push_pull(r, dry_run)
+            detail["action"] = "commit+push+pull"
+            detail["secrets"] = secrets[:3] if secrets else []
+            if do_submodules:
+                sm = update_submodules(r, dry_run)
+                if sm:
+                    msg += f"; {sm}"
+                    detail["submodules"] = sm
+            return (name, SYNCED, f"{name} — {msg}", detail)
+
+        elif state == "conflict-risk":
+            overlap = assess_conflict(r, dry_run)
+            if isinstance(overlap, set) and overlap:
+                files_str = ", ".join(sorted(overlap)[:5])
+                detail["conflict_files"] = sorted(overlap)[:5]
+                return (name, CONFLICT, f"{name} — DIVERGED in same files: "
+                        f"{files_str}. Needs review.", detail)
+            secrets = check_secrets(r)
+            if secrets:
+                print(f"  ⚠️  SECRET RISK: {', '.join(secrets[:3])}")
+            msg = commit_push_pull(r, dry_run)
+            detail["action"] = "auto-resolved"
+            detail["secrets"] = secrets[:3] if secrets else []
+            return (name, SYNCED, f"{name} — auto-resolved: {msg}", detail)
+
+        elif state in ("no-upstream", "no-remote"):
+            if r.uncommitted > 0:
+                if r.branch not in ("main", "master"):
+                    return (name, SKIP, f"{name} — {r.uncommitted} uncommitted "
+                            f"on '{r.branch}' (no upstream, skipped)", detail)
+                msg = commit_and_push(r, dry_run)
+                detail["action"] = "commit (no upstream)"
+                return (name, COMMITTED, f"{name} — {msg}", detail)
+            return (name, OK, f"{name} — clean, no upstream", detail)
+
+        else:
+            return (name, SKIP, f"{name} — unknown state '{state}'", detail)
+
+    except Exception as e:
+        return (name, ERROR, f"{name} — exception: {e}",
+                {"state": "error", "error": str(e)})
+
+
+# ── Main ─────────────────────────────────────────────────────────────────────
 
 def find_git_repos(root: Path, maxdepth: int = 3) -> list[Path]:
-    """Recursively find all git repos under root using find(1).
-    Fast because it prunes node_modules, .cache, and .git objects.
-    maxdepth controls how deep to search (default 3 = mostly top-level)."""
+    """Recursively find all git repos under root using find(1)."""
     try:
         r = subprocess.run([
             "find", str(root),
@@ -415,7 +689,6 @@ def find_git_repos(root: Path, maxdepth: int = 3) -> list[Path]:
                 repos.append(repo_dir)
         return sorted(set(repos))
     except Exception:
-        # Fallback: shallow scan of direct children only
         repos = []
         for entry in sorted(root.iterdir()):
             if entry.is_dir() and (entry / ".git").exists():
@@ -423,93 +696,9 @@ def find_git_repos(root: Path, maxdepth: int = 3) -> list[Path]:
         return repos
 
 
-def process_repo(repo_path: Path, report: Report, excludes: set[str]) -> bool:
-    """Process a single repo. Returns True if handled."""
-    name = repo_path.name
-    if name in excludes:
-        report.add(name, SKIP, f"{name} — excluded")
-        return True
-
-    r = GitRepo(repo_path)
-    r.inspect()
-
-    if r.error:
-        report.add(name, ERROR, f"{name} — {r.error}")
-        return True
-
-    state = r.classify()
-    print(f"\n📁 {name} [{state}] branch={r.branch} origin={r.has_origin} "
-          f"upstream={r.has_upstream} uncommitted={r.uncommitted} "
-          f"ahead={r.ahead} behind={r.behind}")
-
-    try:
-        if state == "in-progress":
-            report.add(name, SKIP, f"{name} — active {r.active_git_op} in progress (skipped)")
-            return True
-
-        if state == "clean":
-            report.add(name, OK, f"{name} — clean, up-to-date")
-
-        elif state == "pullable":
-            msg = pull_ff(r, report)
-            report.add(name, PULLED, f"{name} — {msg}")
-
-        elif state == "pushable":
-            msg = push(r, report)
-            report.add(name, PUSHED, f"{name} — {msg}")
-
-        elif state == "dirty-even":
-            if r.branch != "main" and r.branch != "master":
-                report.add(name, SKIP, f"{name} — {r.uncommitted} uncommitted on "
-                          f"'{r.branch}' branch (skipped)")
-            else:
-                _warn_secrets(r, report)
-                msg = commit_and_push(r, report)
-                report.add(name, COMMITTED, f"{name} — {msg}")
-
-        elif state == "diverged":
-            if r.branch != "main" and r.branch != "master":
-                report.add(name, SKIP, f"{name} — {r.uncommitted} uncommitted + "
-                          f"{r.behind} behind on '{r.branch}' (skipped)")
-            else:
-                _warn_secrets(r, report)
-                msg = commit_push_pull(r, report)
-                report.add(name, SYNCED, f"{name} — {msg}")
-
-        elif state == "conflict-risk":
-            overlap = assess_conflict(r, report)
-            if isinstance(overlap, set) and overlap:
-                files_str = ", ".join(sorted(overlap)[:5])
-                report.add(name, CONFLICT, f"{name} — DIVERGED in same files: "
-                          f"{files_str}. Backup tag created. Needs review.")
-            else:
-                _warn_secrets(r, report)
-                msg = commit_push_pull(r, report)
-                report.add(name, SYNCED, f"{name} — auto-resolved: {msg}")
-
-        elif state == "no-upstream" or state == "no-remote":
-            if r.uncommitted > 0:
-                if r.branch != "main" and r.branch != "master":
-                    report.add(name, SKIP, f"{name} — {r.uncommitted} uncommitted "
-                              f"on '{r.branch}' (no upstream, skipped)")
-                else:
-                    msg = commit_and_push(r, report)
-                    report.add(name, COMMITTED, f"{name} — {msg}")
-            else:
-                report.add(name, OK, f"{name} — clean, no upstream")
-
-        else:
-            report.add(name, SKIP, f"{name} — unknown state '{state}'")
-
-    except Exception as e:
-        report.add(name, ERROR, f"{name} — exception: {e}")
-
-    return True
-
-
 def main():
     parser = argparse.ArgumentParser(
-        description="Git Audit & Sync — sync all repos in a directory")
+        description="Git Audit & Sync — sync all repos in a directory in parallel")
     parser.add_argument("directory", type=Path,
                         help="Root directory to scan for git repos")
     parser.add_argument("--dry-run", action="store_true",
@@ -520,46 +709,92 @@ def main():
                         help="Comma-separated list of repo names to skip")
     parser.add_argument("--maxdepth", type=int, default=3,
                         help="Max directory depth for repo discovery (default: 3)")
+    parser.add_argument("--since", type=int, default=None,
+                        help="Only process repos modified in the last N days")
+    parser.add_argument("--workers", type=int, default=0,
+                        help="Number of parallel workers (default: min(8, cpu_count))")
+    parser.add_argument("--commit-message", type=str, default="git-audit-sync: auto-commit",
+                        help="Custom commit message")
+    parser.add_argument("--update-submodules", action="store_true",
+                        help="Update git submodules after pull")
     args = parser.parse_args()
+
+    # Parse excludes with shlex to handle spaces properly
+    excludes = set()
+    if args.exclude:
+        try:
+            for part in shlex.split(args.exclude):
+                excludes.add(part.strip())
+        except ValueError:
+            # Fallback: simple comma split
+            excludes = set(x.strip() for x in args.exclude.split(",") if x.strip())
 
     root = args.directory.resolve()
     if not root.is_dir():
         print(f"❌ Not a directory: {root}")
         sys.exit(1)
 
-    dry_run = args.dry_run or args.audit_only
-    excludes = set(x.strip() for x in args.exclude.split(",") if x.strip())
-    report = Report(root, dry_run)
-
-    repos = find_git_repos(root, args.maxdepth)
-    if not repos:
-        print(f"❌ No git repos found in {root}")
+    # PID lockfile
+    if not acquire_lock():
+        print(f"❌ Another instance is already running (lock: {LOCKFILE})")
         sys.exit(1)
 
-    print(f"{'🔍' if dry_run else '🚀'} Git Audit & Sync")
-    print(f"{'   DRY RUN — no changes will be made' if dry_run else ''}")
-    print(f"   Directory: {root}")
-    print(f"   Repos found: {len(repos)}")
-    if excludes:
-        print(f"   Excluding: {', '.join(excludes)}")
-    print()
+    try:
+        dry_run = args.dry_run or args.audit_only
+        report = Report(root, dry_run)
 
-    for repo_path in repos:
-        process_repo(repo_path, report, excludes)
+        repos = find_git_repos(root, args.maxdepth)
+        if not repos:
+            print(f"❌ No git repos found in {root}")
+            return
 
-    report.write()
+        workers = args.workers if args.workers > 0 else min(8, os.cpu_count() or 4)
+        since = args.since
 
-    if report.stats["conflict"] > 0:
-        print(f"\n{CONFLICT} {report.stats['conflict']} repos need your attention!")
-        print(f"   Check {report.path} for details")
-    if report.stats["error"] > 0:
-        print(f"\n{ERROR} {report.stats['error']} repos had errors")
-        print(f"   Check {report.path} for details")
+        print(f"{'🔍' if dry_run else '🚀'} Git Audit & Sync")
+        print(f"{'   DRY RUN — no changes will be made' if dry_run else ''}")
+        print(f"   Directory: {root}")
+        print(f"   Repos found: {len(repos)}")
+        print(f"   Workers: {workers}")
+        if excludes:
+            print(f"   Excluding: {', '.join(excludes)}")
+        if since:
+            print(f"   Since: {since} days")
+        print()
 
-    total = sum(report.stats.values())
-    ok = report.stats["clean"] + report.stats["pulled"] + report.stats["pushed"] \
-         + report.stats["committed"] + report.stats["synced"]
-    print(f"\n📊 {ok}/{total} repos clean ({round(ok/total*100)}%)")
+        # Parallel processing — each repo is independent
+        results: list[tuple[str, str, str, Optional[dict]]] = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = {
+                pool.submit(process_repo, rp, excludes, dry_run, since,
+                            args.commit_message, args.update_submodules): rp
+                for rp in repos
+            }
+            for future in concurrent.futures.as_completed(futures):
+                try:
+                    results.append(future.result())
+                except Exception as e:
+                    rp = futures[future]
+                    results.append((rp.name, ERROR, f"{rp.name} — worker crashed: {e}", None))
+
+        # Merge results into report (single-threaded)
+        for name, icon, msg, detail in results:
+            report.add(name, icon, msg, detail)
+
+        report.write()
+
+        if report.stats["conflict"] > 0:
+            print(f"\n{CONFLICT} {report.stats['conflict']} repos need your attention!")
+        if report.stats["error"] > 0:
+            print(f"\n{ERROR} {report.stats['error']} repos had errors")
+
+        total = sum(report.stats.values())
+        ok = report.stats["clean"] + report.stats["pulled"] + report.stats["pushed"] \
+             + report.stats["committed"] + report.stats["synced"]
+        print(f"\n📊 {ok}/{total} repos clean ({round(ok/total*100)}%)")
+
+    finally:
+        release_lock()
 
 
 if __name__ == "__main__":

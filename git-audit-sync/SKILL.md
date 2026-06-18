@@ -108,35 +108,62 @@ git switch -c recovery-<reponame> git-audit-sync/backup-YYYYMMDD-HHMMSS-<reponam
 ## Known Limitations
 
 - **Binary files**: The script cannot detect or merge binary file conflicts. If a `.png`, `.ico`, or other binary file diverges, git's native merge will report the conflict.
-- **Submodules**: The script does not update submodules after pull. Use `git submodule update --recursive` manually if needed.
-- **Detached HEAD**: If a repo is in detached HEAD state, the script reports it as "no upstream" and skips it. Run `git switch <branch>` first.
+- **Detached HEAD**: If a repo is in detached HEAD state, the script reports it and skips it. Run `git switch <branch>` first.
 - **Active operations**: If a merge, rebase, cherry-pick, or revert is in progress, the script skips the repo and reports it.
 - **Large binary files in history**: The script is not designed for repos with large binary files or LFS-managed assets.
 - **Pre-commit hooks**: The script does not trigger pre-commit hooks during auto-commit. If hooks are configured, run `git commit` manually.
 
 ## Automation Script
 
-The core logic is in [scripts/audit_sync.py](scripts/audit_sync.py). It handles all repo states deterministically.
+The core logic is in [scripts/audit_sync.py](scripts/audit_sync.py). It handles all repo states deterministically and processes repos in **parallel** using independent worker threads — each repo has its own `.git` so no shared state or conflict is possible.
 
 **Repo discovery**: Recursively walks the target directory tree (skipping `node_modules`, `.cache`, `venv`, build artifacts). Finds repos at any nesting depth — not just direct children.
 
+### Flags
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--workers N` | `min(8, cpu_count)` | Number of parallel workers. Each gets its own repos — zero shared state. |
+| `--since N` | all | Only process repos modified in the last N days (checks `.git` mtime). |
+| `--exclude repo1,repo2` | none | Comma or space-separated repo names to skip. |
+| `--maxdepth N` | 3 | Max directory depth for recursive repo discovery. |
+| `--commit-message "msg"` | `git-audit-sync: auto-commit` | Custom commit message for auto-commits. |
+| `--update-submodules` | off | Run `git submodule update --recursive` after pull. |
+| `--audit-only` | off | Read-only audit — no changes made. |
+| `--dry-run` | off | Simulate all operations without making changes. |
+
 ```bash
-# Full sync (commit, push, pull)
+# Full sync (8 workers in parallel)
 python3 scripts/audit_sync.py ~/code
 
-# Read-only audit (no changes)
+# Read-only audit
 python3 scripts/audit_sync.py ~/code --audit-only
 
 # Dry run (show what would happen)
 python3 scripts/audit_sync.py ~/code --dry-run
 
+# Fast parallel scan with 12 workers, skip old repos
+python3 scripts/audit_sync.py ~/code --workers 12 --since 30
+
 # Skip specific repos
 python3 scripts/audit_sync.py ~/code --exclude whisper.cpp,agents
+
+# Custom commit message + update submodules
+python3 scripts/audit_sync.py ~/code --commit-message "chore: sync" --update-submodules
 ```
+
+### Parallel workers (sub-agent pattern)
+
+Each repo is dispatched to an independent worker thread. Workers don't share state — each has its own `GitRepo` object and writes results back through a thread-safe collector. This design:
+
+- **Scales linearly** with CPU count — 20 repos on 8 workers finishes in ~3 batches
+- **Eliminates conflict risk** — no two workers touch the same `.git`
+- **Preserves ordering** — results are merged in completion order, then sorted by severity
+- **Survives crashes** — one repo failing doesn't block the rest
 
 ## Output
 
-Creates a timestamped report at `~/git-audit-logs/`:
+Creates a timestamped report at `~/git-audit-logs/` — both markdown (human) and JSON (machine):
 ```
 📊 Report: ~/git-audit-logs/git-audit-2026-06-17-192525.md
 
