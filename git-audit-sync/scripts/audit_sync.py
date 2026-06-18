@@ -165,6 +165,18 @@ class GitRepo:
 
     def inspect(self):
         """Gather all state info about this repo."""
+        # Check for active merge/rebase/cherry-pick/revert first
+        # These would cause git operations to fail, so flag early
+        GIT_LOCK_FILES = ["MERGE_HEAD", "REBASE_HEAD", "CHERRY_PICK_HEAD",
+                          "REVERT_HEAD", "MERGE_MSG", "MERGE_MODE", "sequencer/todo"]
+        git_dir = self.path / ".git"
+        active_ops = []
+        for lf in GIT_LOCK_FILES:
+            if (git_dir / lf).exists():
+                active_ops.append(lf.replace("_HEAD", "").replace("_MSG", " (merge)")
+                                   .replace("_MODE", " (merge)").replace("sequencer/todo", "rebase (interactive)"))
+        self.active_git_op = active_ops[0] if active_ops else None
+
         try:
             self.branch = run_git(self.path, "rev-parse", "--abbrev-ref", "HEAD",
                                   timeout=10)
@@ -216,6 +228,8 @@ class GitRepo:
 
     def classify(self) -> str:
         """Return the state classification."""
+        if self.active_git_op:
+            return "in-progress"
         if self.error:
             return "error"
         if not self.has_origin:
@@ -286,8 +300,9 @@ def commit_and_push(repo: GitRepo, report: Report) -> str:
 def commit_push_pull(repo: GitRepo, report: Report) -> str:
     """Commit, push, then pull (safer than pull first)."""
     result = commit_and_push(repo, report)
-    if r.status.returncode != 0:
-        pass
+    # If commit+push failed, don't attempt pull
+    if result.startswith("commit failed") or result.startswith("committed but push failed"):
+        return result
     # Pull after commit+push ensures we're synced both ways
     r = run(["git", "pull", "--ff-only"], repo.path, timeout=30)
     if r.returncode != 0:
@@ -340,6 +355,36 @@ def assess_conflict(repo: GitRepo, report: Report) -> str:
     return real_overlap
 
 
+# ── Secret detection ──────────────────────────────────────────────────────────
+
+SECRET_PATTERNS = [".env", ".env.*", "*key*", "*secret*", "*token*",
+                   "*credential*", "*password*", "*.pem", "*.key",
+                   "*auth*", "*access*", "*api-key*"]
+
+
+def _warn_secrets(repo: GitRepo, report: Report):
+    """Check untracked files for potential secrets before staging all."""
+    import fnmatch
+    r = maybe_run_git(repo.path, "status", "--porcelain", timeout=10)
+    if not r:
+        return
+    untracked = []
+    for line in r.split("\n"):
+        line = line.strip()
+        if line.startswith("??"):
+            fname = line[3:]
+            for pat in SECRET_PATTERNS:
+                if fnmatch.fnmatch(fname, pat) or fnmatch.fnmatch(fname.split("/")[-1], pat):
+                    untracked.append(fname)
+                    break
+    if untracked:
+        files_str = ", ".join(untracked[:5])
+        more = f" (+{len(untracked)-5} more)" if len(untracked) > 5 else ""
+        print(f"  ⚠️  SECRET RISK: untracked files matching secret patterns")
+        print(f"     {files_str}{more}")
+        print(f"     Continuing anyway — verify .gitignore is correct")
+
+
 # ── Main loop ───────────────────────────────────────────────────────────────
 
 def find_git_repos(root: Path) -> list[Path]:
@@ -371,6 +416,10 @@ def process_repo(repo_path: Path, report: Report, excludes: set[str]) -> bool:
           f"ahead={r.ahead} behind={r.behind}")
 
     try:
+        if state == "in-progress":
+            report.add(name, SKIP, f"{name} — active {r.active_git_op} in progress (skipped)")
+            return True
+
         if state == "clean":
             report.add(name, OK, f"{name} — clean, up-to-date")
 
@@ -387,6 +436,7 @@ def process_repo(repo_path: Path, report: Report, excludes: set[str]) -> bool:
                 report.add(name, SKIP, f"{name} — {r.uncommitted} uncommitted on "
                           f"'{r.branch}' branch (skipped)")
             else:
+                _warn_secrets(r, report)
                 msg = commit_and_push(r, report)
                 report.add(name, COMMITTED, f"{name} — {msg}")
 
@@ -395,6 +445,7 @@ def process_repo(repo_path: Path, report: Report, excludes: set[str]) -> bool:
                 report.add(name, SKIP, f"{name} — {r.uncommitted} uncommitted + "
                           f"{r.behind} behind on '{r.branch}' (skipped)")
             else:
+                _warn_secrets(r, report)
                 msg = commit_push_pull(r, report)
                 report.add(name, SYNCED, f"{name} — {msg}")
 
@@ -405,6 +456,7 @@ def process_repo(repo_path: Path, report: Report, excludes: set[str]) -> bool:
                 report.add(name, CONFLICT, f"{name} — DIVERGED in same files: "
                           f"{files_str}. Backup tag created. Needs review.")
             else:
+                _warn_secrets(r, report)
                 msg = commit_push_pull(r, report)
                 report.add(name, SYNCED, f"{name} — auto-resolved: {msg}")
 

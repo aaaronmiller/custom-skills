@@ -1,6 +1,6 @@
 ---
 name: git-audit-sync
-description: Automatically audit, commit, push, and pull every git repo in a directory tree. Detects uncommitted work, ahead/behind status, merge conflicts, and non-main branches. Handles trivial merges automatically and flags conflicts for user review. Use when asked to sync git repos, audit code folders, push/pull all projects, check for uncommitted work, or prepare a machine's git state.
+description: Automatically audit, commit, push, and pull every git repo in a directory tree. Detects uncommitted work, ahead/behind status, merge conflicts, active rebase/merge states, detached HEAD, and non-main branches. Handles trivial merges automatically and flags conflicts for user review. Use when asked to sync git repos, audit code folders, push/pull all projects, check for uncommitted work, or prepare a machine's git state.
 ---
 
 # Git Audit & Sync
@@ -10,60 +10,109 @@ Audits every git repo in a folder and brings them to a clean, synced state.
 ## Workflow
 
 1. Run the automation script (see [scripts/audit_sync.py](scripts/audit_sync.py))
-2. Review the report it generates
-3. Address any flagged conflicts manually
+2. Read the report it generates to the user
+3. For any flagged repos, show the details and ask for instructions
+
+## After Running
+
+After the script finishes, do the following for the user:
+
+1. **Read** `~/git-audit-logs/git-audit-<timestamp>.md` and present the Summary table
+2. **For ✅ Clean repos**: Just note the count — no action needed
+3. **For ⏩ Pulled / 📤 Pushed / 💾 Committed / 🔄 Synced repos**: Mention what happened and any notable commit counts
+4. **For ⚠️ Conflict repos**: Show the conflicting files and diffs, then ask the user how to proceed on each
+5. **For ⏭️ Skipped repos**: Explain why (in-progress merge, non-main branch, detached HEAD)
+
+If there are no conflicts, summarize the result as "X repos processed, all clean."
 
 ## Decision Tree
 
 ```
-                    ┌──────────────┐
-                    │  Fetch each  │
-                    │    repo      │
-                    └──────┬───────┘
+                    ┌──────────────────┐
+                    │  Check for merge │
+                    │  /rebase/cherry- │
+                    │  pick in progress│
+                    └──────┬───────────┘
                            │
-                    ┌──────▼───────┐
-                    │  Check state │
-                    └──────┬───────┘
+                    ┌──────▼───────────┐
+                    │  1. Fetch each   │
+                    │     repo         │
+                    └──────┬───────────┘
                            │
-              ┌────────────┼────────────┐
-              │            │            │
-         Clean +      Dirty +      Dirty +
-         behind       ahead        diverged
-              │            │            │
-         pull --ff-only  commit &    flag for
-                          push       review
+                    ┌──────▼───────────┐
+                    │  2. Classify     │
+                    │     state        │
+                    └──────┬───────────┘
+                           │
+        ┌──────────────────┼──────────────────┐
+        │                  │                  │
+   Active op          Has origin          No origin
+   (merge, etc.)      + upstream          or upstream
+        │                  │                  │
+   ⏭️ Skip, warn     ┌──────▼──────┐    Dirty?→ commit&push
+        │           │  Compare    │    Clean? → ✅ skip
+        │           │  local vs   │
+        │           │  upstream   │
+        │           └──────┬──────┘
+        │                  │
+        │      ┌───────────┼───────────┐
+        │      │           │           │
+        │  Clean       Dirty       Dirty +
+        │  behind      ahead       diverged
+        │  (pullable)  (pushable)  (behind
+        │      │           │       +ahead)
+        │  pull --ff-  push      ┌──────┘
+        │  only                  │
+        │              ┌─────────┴────────┐
+        │              │                  │
+        │         Same files        Different files
+        │         changed?          changed?
+        │              │                  │
+        │         ⚠️ Flag for        commit → push
+        │         user review        → pull (auto)
+        │
+        └──────────────── Non-main branch?
+                           Yes → ⏭️ Skip (WIP)
+                           No  → process normally
 ```
 
 ## Repo States & Actions
 
-| State | Uncommitted | vs Upstream | Action | Script method |
+| State | Uncommitted | vs Upstream | Branch | Action |
 |---|---|---|---|---|
-| **Clean** | 0 | even | ✅ skip | `.report()` |
-| **Pullable** | 0 | behind | `git pull --ff-only` | `.pull_ff()` |
-| **Pushable** | 0 | ahead | `git push` | `.push()` |
-| **Local work** | >0 | even | commit → push | `.commit_push()` |
-| **Diverged** | >0 | behind | commit → push → pull | `.commit_push_pull()` |
-| **Conflict** | >0 | ahead+behind | assess → auto-resolve or flag | `.assess_conflict()` |
-| **Feature branch** | any | no upstream | push with `--set-upstream` | `.push_upstream()` |
+| **Clean** | 0 | even | any | ✅ Skip — nothing to do |
+| **Pullable** | 0 | behind | any | `git pull --ff-only` |
+| **Pushable** | 0 | ahead | any | `git push` |
+| **Local work** | >0 | even | main/master | Stage all → commit → push |
+| **Local work** | >0 | even | other | ⏭️ Skip — WIP on feature branch |
+| **Diverged** | >0 | behind | main/master | Commit → push → pull |
+| **Diverged** | >0 | behind | other | ⏭️ Skip — WIP on feature branch |
+| **Conflict risk** | >0 | ahead+behind | main/master | Check file overlap → auto-merge or flag |
+| **No upstream** | any | n/a | any | Push with `--set-upstream` or skip if detached |
+| **In progress** | any | any | any | ⏭️ Skip — active merge/rebase/cherry-pick |
+| **Error** | any | any | any | Report error and continue |
 
-### Rollback Safety
+## Rollback Safety
 
-Before any write operation, the script creates a lightweight tag:
+Before any write operation, the script creates a backup tag:
 ```
 git-audit-sync/backup-YYYYMMDD-HHMMSS-<reponame>
 ```
 
 Restore with:
 ```bash
-git checkout git-audit-sync/backup-YYYYMMDD-HHMMSS-<reponame>
+# Creates a branch from the tag so you're not in detached HEAD
+git switch -c recovery-<reponame> git-audit-sync/backup-YYYYMMDD-HHMMSS-<reponame>
 ```
 
-### Conflict Assessment
+## Known Limitations
 
-The script classifies conflicts into two tiers:
-
-- **Auto-resolve**: Changes touch different files, or only data/generated files (`.json`, `.csv`, `.db`, `lockfiles`) — the script chooses upstream or local based on file modification time
-- **Needs user**: Same source files changed in both — creates backup tag and reports the conflicting files with diffs
+- **Binary files**: The script cannot detect or merge binary file conflicts. If a `.png`, `.ico`, or other binary file diverges, git's native merge will report the conflict.
+- **Submodules**: The script does not update submodules after pull. Use `git submodule update --recursive` manually if needed.
+- **Detached HEAD**: If a repo is in detached HEAD state, the script reports it as "no upstream" and skips it. Run `git switch <branch>` first.
+- **Active operations**: If a merge, rebase, cherry-pick, or revert is in progress, the script skips the repo and reports it.
+- **Large binary files in history**: The script is not designed for repos with large binary files or LFS-managed assets.
+- **Pre-commit hooks**: The script does not trigger pre-commit hooks during auto-commit. If hooks are configured, run `git commit` manually.
 
 ## Automation Script
 
@@ -87,16 +136,31 @@ python3 scripts/audit_sync.py ~/code --exclude whisper.cpp,agents
 
 Creates a timestamped report at `~/git-audit-logs/`:
 ```
-git-audit-2026-06-17-190000.md
-├── ✅ surface-quell — clean, up-to-date
-├── ⏩ wiki-memory — pulled (3 commits ff-only)
-├── 💾 voice-agent — committed + pushed (6 files)
-├── ⚠️  claude-code-proxy-old — CONFLICT: src/config.py
-├── 📊 12 repos: 8 clean, 2 updated, 1 pushed, 1 conflict
+📊 Report: ~/git-audit-logs/git-audit-2026-06-17-192525.md
+
+# Git Audit — /home/user/code
+## Summary
+| Stat | Count |
+|------|-------|
+| ✅ Clean / up-to-date | 8 |
+| ⏩ Pulled | 2 |
+| 💾 Committed + pushed | 1 |
+| ⚠️ Conflicts | 1 |
+| ⏭️ Skipped | 1 |
+| **Health** | **89%** |
+
+## Per-repo results
+- ✅ surface-fixed-event-quell — clean, up-to-date
+- ⏩ wiki-memory — pulled (3 commits ff-only)
+- 💾 voice-agent — committed + pushed (6 files)
+- ⚠️ aaa-memory — DIVERGED in same files: src/config.py. Needs review.
+- ⏭️ AutoResearchClaw — active merge in progress (skipped)
 ```
 
 ## Cases that always need user input
 
 - **Uncommitted work on a non-main branch** — may be work-in-progress, won't auto-commit
+- **Same-file divergence between local and upstream** — flagged for review with file list
 - **Binary file conflicts** — can't auto-merge
-- **Merge conflicts after pull** — `--ff-only` fails safely, leaves repo untouched
+- **Active merge/rebase/cherry-pick** — skipped, user must resolve first
+- **Detached HEAD** — skipped, user must `git switch <branch>` first
