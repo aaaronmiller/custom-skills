@@ -39,6 +39,6 @@ if __name__ == "__main__":
 
 ## Config Schema Details
 
-The settings JSON (`resources/settings.json`) mirrors the main Antigravity configuration settings found at `/home/cheta/.gemini/settings.json`.
+The settings JSON (`references/settings.json`) mirrors the main Antigravity configuration settings found at `/home/cheta/.gemini/settings.json`.
 
 During headless execution, the CLI automatically authenticates via `/home/cheta/.gemini/oauth_creds.json` as it is globally cached. Do not copy the raw access tokens into code repositories, as they expire and present security risks. The CLI reads them natively.

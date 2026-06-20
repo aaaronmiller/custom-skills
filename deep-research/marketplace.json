@@ -12,10 +12,10 @@
     ],
     "resources": [
         "SKILL.md",
-        "resources/search-operators.md",
-        "resources/source-evaluation.md",
-        "resources/synthesis-protocols.md",
-        "resources/research-anti-patterns.md",
-        "resources/templates/scratchpad_template.md"
+        "references/inference-guide.md",
+        "references/verification-strategies.md",
+        "references/refinement-patterns.md",
+        "references/report-template.md",
+        "references/templates/scratchpad_template.md"
     ]
 }

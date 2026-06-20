@@ -11,7 +11,7 @@ A sophisticated, multi-level research agent designed to perform exhaustive inves
 4.  **Infinite Context**: Uses "File Rotation" to handle massive research sessions.
 
 ## The Brain (Resources)
-This skill is backed by a knowledge library in `resources/`:
+This skill is backed by a knowledge library in `references/`:
 - `search-operators.md`: The toolkit for finding hidden data.
 - `source-evaluation.md`: The rubric for killing low-quality sources.
 - `synthesis-protocols.md`: The logic for connecting dots.

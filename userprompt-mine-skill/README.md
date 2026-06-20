@@ -76,16 +76,16 @@ Open http://localhost:8420 in your browser.
 
 ### Resource Documents (Progressive Disclosure)
 
-- `resources/claude-code-extraction.md` — Claude Code session format details
-- `resources/roo-kilo-extraction.md` — Roo/Kilo storage layout
-- `resources/provider-export-parsing.md` — Export format specifications
-- `resources/database-schema.md` — Full DDL and schema design
-- `resources/rag-pipeline.md` — Embedding, chunking, search algorithms
-- `resources/metadata-tagging.md` — Auto-tagging and clustering rules
-- `resources/browser-capture.md` — Tampermonkey userscripts
-- `resources/interface-design.md` — Web UI architecture
-- `resources/sizing-estimates.md` — Storage projections
-- `resources/daily-ingest-setup.md` — Cron/systemd configuration
+- `references/claude-code-extraction.md` — Claude Code session format details
+- `references/roo-kilo-extraction.md` — Roo/Kilo storage layout
+- `references/provider-export-parsing.md` — Export format specifications
+- `references/database-schema.md` — Full DDL and schema design
+- `references/rag-pipeline.md` — Embedding, chunking, search algorithms
+- `references/metadata-tagging.md` — Auto-tagging and clustering rules
+- `references/browser-capture.md` — Tampermonkey userscripts
+- `references/interface-design.md` — Web UI architecture
+- `references/sizing-estimates.md` — Storage projections
+- `references/daily-ingest-setup.md` — Cron/systemd configuration
 
 ## Search Examples
 
@@ -102,7 +102,7 @@ python3 scripts/rag_pipeline.py --search "Python debugging" --provider anthropic
 
 ## Browser Capture (Real-Time)
 
-Install the Tampermonkey userscripts from `resources/browser-capture.md` to capture
+Install the Tampermonkey userscripts from `references/browser-capture.md` to capture
 conversations in real-time from chatgpt.com, gemini.google.com, and claude.ai.
 
 ## Storage Estimates

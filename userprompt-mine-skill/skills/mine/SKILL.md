@@ -37,7 +37,7 @@ a cross-encoder reranker.
 ```bash
 if ! command -v cass &>/dev/null; then
   echo "MISSING: CASS not installed — tell user to install"
-  # See resources/cass-install-guide.md for full instructions
+  # See references/cass-install-guide.md for full instructions
 fi
 cass --version
 cass health --json     # must return {"healthy": true} before proceeding
@@ -107,8 +107,8 @@ cass models list --json     # verify
 | `timeline` | Recent activity | `cass timeline --days 7 --json` |
 | `stats` | System stats | `cass stats --json` |
 | `health` | Readiness | `cass health --json` |
-| `report:<type>` | Generate a report | See `resources/cass-report-patterns.md` |
-| `reflect` | Post-run improvement | See `resources/cass-self-improvement.md` |
+| `report:<type>` | Generate a report | See `references/cass-report-patterns.md` |
+| `reflect` | Post-run improvement | See `references/cass-self-improvement.md` |
 | `watch` | Start watcher | `cass index --watch` |
 | `browse` | Web UI | `cass serve --port 8420` or `python scripts/web_server.py` |
 | `models` | Embedders | `cass models install <model>` |
@@ -117,7 +117,7 @@ cass models list --json     # verify
 
 ## 3. Report Types (15 Patterns)
 
-> Full detail in `resources/cass-report-patterns.md` — read that file when
+> Full detail in `references/cass-report-patterns.md` — read that file when
 > any `report:<type>` action is triggered.
 
 | # | Report | Purpose | Key Commands |
@@ -145,7 +145,7 @@ report + supplementary searches and combine the results.
 
 ## 4. Self-Improvement Loop
 
-> Full protocol in `resources/cass-self-improvement.md` — read that file when
+> Full protocol in `references/cass-self-improvement.md` — read that file when
 > the `reflect` action is triggered or at end of any prompt-mine invocation.
 
 After every invocation, silently:
@@ -197,7 +197,7 @@ userprompt-mine-skill/
     ├── SKILL.md                   ← THIS FILE
     ├── agents/                    ← Subagent definitions
     ├── scripts/                   ← Legacy Python fallback scripts
-    ├── resources/                 ← Progressive-disclosure docs
+    ├── references/                 ← Progressive-disclosure docs
     │   ├── cass-report-patterns.md   ← 15 report types (referenced from §3)
     │   ├── cass-self-improvement.md  ← Reflection protocol (referenced from §4)
     │   └── <legacy docs>             ← Original Python-era docs (fallback reference)

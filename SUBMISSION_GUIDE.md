@@ -21,7 +21,7 @@ This guide provides comprehensive instructions for packaging and submitting skil
 ```
 skill-name/
 ├── SKILL.md              # Required: Main skill file
-├── resources/           # Optional: Reference materials
+├── references/           # Optional: Reference materials
 │   ├── templates/
 │   └── examples/
 ├── scripts/             # Optional: Executable helpers
@@ -161,8 +161,8 @@ Keep the base SKILL.md under 500 lines:
 
 ## Detailed Instructions
 [Link to external resources for deep dives]
-- See `resources/guide.md` for comprehensive examples
-- See `resources/api.md` for API reference
+- See `references/guide.md` for comprehensive examples
+- See `references/api.md` for API reference
 ```
 
 ### 2. Tool Permissions
@@ -254,7 +254,7 @@ When users provide corrections or improvements:
 your-skill/
 ├── .git/
 ├── SKILL.md              # Main skill file
-├── resources/           # Documentation
+├── references/           # Documentation
 ├── examples/            # Usage examples
 ├── LICENSE              # License file
 ├── .gitignore

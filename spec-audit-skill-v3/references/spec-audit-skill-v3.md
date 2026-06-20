@@ -95,7 +95,7 @@ PHASE 4: COMPARE
 
 PHASE 5: COUNCIL
 └── Deliberative refinement on AMBIGUOUS and DIVERGENT-BETTER items
-      └── See resource: resources/council-formations.md for formation selection
+      └── See resource: references/council-formations.md for formation selection
             ↓
 
 PHASE 6: OUTPUT
@@ -324,7 +324,7 @@ Produce `divergence-report.md`.
 
 For **AMBIGUOUS** and **DIVERGENT-BETTER** items:
 
-> See `resources/council-formations.md` for available council formations and selection criteria.
+> See `references/council-formations.md` for available council formations and selection criteria.
 > The council formation choice is context-dependent. Use the resource to determine which
 > formation (or sequence of formations) is appropriate for the current divergence set.
 
@@ -387,30 +387,30 @@ If a question-answer pair is being revised iteratively (e.g., via a clarificatio
 
 These sub-documents are loaded only when needed. They are NOT read automatically — reference them at the specific phase where they apply.
 
-### `resources/council-formations.md`
+### `references/council-formations.md`
 **When to load:** Phase 5 (Council Deliberation), when selecting a council formation for deliberative refinement.
 **What it covers:** Available council formation types (parallel groups, adversarial, Socratic, etc.), selection criteria by use case, multi-formation sequences for complex divergence sets.
-**Location:** `[skill-root]/resources/council-formations.md`
+**Location:** `[skill-root]/references/council-formations.md`
 
-### `resources/question-quality-rubric.md`
+### `references/question-quality-rubric.md`
 **When to load:** Phase 2 (Backtranslation), if you're uncertain whether a question is contaminated or well-formed.
 **What it covers:** Graded rubric for question quality (contamination test, specificity test, answerability test, reconstruction test), worked examples for each test, repair patterns for common contamination types.
-**Location:** `[skill-root]/resources/question-quality-rubric.md`
+**Location:** `[skill-root]/references/question-quality-rubric.md`
 
-### `resources/divergence-classification-guide.md`
+### `references/divergence-classification-guide.md`
 **When to load:** Phase 4 (Compare), when a divergence is unclear and needs a structured classification decision.
 **What it covers:** Decision tree for AMBIGUOUS vs BETTER vs EQUIVALENT, how to apply constraint tags to filter INFEASIBLE, confidence weighting rules, examples of each classification type.
-**Location:** `[skill-root]/resources/divergence-classification-guide.md`
+**Location:** `[skill-root]/references/divergence-classification-guide.md`
 
-### `resources/spec-writing-patterns.md`
+### `references/spec-writing-patterns.md`
 **When to load:** Phase 1 (Document), when the project being audited is complex or unfamiliar, or when the first draft of spec-as-designed.md needs quality review.
 **What it covers:** Patterns for writing Problem fields that feed clean backtranslation, common spec-writing mistakes (too vague, too implementation-specific, missing constraints), worked examples from different project types (agentic systems, APIs, data pipelines, UI frameworks).
-**Location:** `[skill-root]/resources/spec-writing-patterns.md`
+**Location:** `[skill-root]/references/spec-writing-patterns.md`
 
-### `resources/dual-path-merge-guide.md`
+### `references/dual-path-merge-guide.md`
 **When to load:** After both Path 1 and Path 2 results are returned, before Phase 5 council.
 **What it covers:** How to merge Path 1 and Path 2 findings into a unified divergence picture, weighting Path 2 (cold reconstruction) heavier for architectural decisions vs Path 1 (full context) for implementation coherence checks, format for combined divergence report.
-**Location:** `[skill-root]/resources/dual-path-merge-guide.md`
+**Location:** `[skill-root]/references/dual-path-merge-guide.md`
 
 ---
 
@@ -444,8 +444,8 @@ PHASE 4: compare
 [ ] divergence-report.md produced
 
 PHASE 5: council
-[ ] council-formations.md consulted (resources/council-formations.md)
-[ ] Dual-path merge completed if both paths ran (resources/dual-path-merge-guide.md)
+[ ] council-formations.md consulted (references/council-formations.md)
+[ ] Dual-path merge completed if both paths ran (references/dual-path-merge-guide.md)
 [ ] Each AMBIGUOUS and DIVERGENT-BETTER item has a council recommendation
 
 PHASE 6: output

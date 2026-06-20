@@ -5,7 +5,7 @@
 ```bash
 skill-name/
 ├── SKILL.md              # Required: Main instructions
-├── resources/           # Optional: Reference docs
+├── references/           # Optional: Reference docs
 └── scripts/             # Optional: Helper tools
 ```
 

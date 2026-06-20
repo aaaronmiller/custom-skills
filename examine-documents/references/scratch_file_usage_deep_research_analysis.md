@@ -43,8 +43,8 @@
 
 ### File Structure
 - `SKILL.md`: The core prompt/instruction set.
-- `resources/scratchpad_template.md`: Template for the intermediate findings.
-- `resources/report_template.md`: Template for the final unified report.
+- `references/scratchpad_template.md`: Template for the intermediate findings.
+- `references/report_template.md`: Template for the final unified report.
 
 ### Logic Flow (Pseudo-Code for Prompt)
 1. **Analyze Request**: Determine complexity level (Default to Standard).

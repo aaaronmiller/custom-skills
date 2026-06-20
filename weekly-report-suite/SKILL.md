@@ -73,7 +73,7 @@ This distinction matters more than making the week sound impressive. Honest stat
 
 ### 3. Generate the dad-facing report
 
-Use the dad/mentor template in `resources/templates/dad-report.md` and detailed guidance in `resources/dad-report-template.md`.
+Use the dad/mentor template in `references/templates/dad-report.md` and detailed guidance in `references/dad-report-template.md`.
 
 Characteristics:
 
@@ -88,7 +88,7 @@ Characteristics:
 
 ### 4. Generate the personal report
 
-Use `resources/templates/personal-report.md` and `resources/personal-report-template.md`.
+Use `references/templates/personal-report.md` and `references/personal-report-template.md`.
 
 Characteristics:
 
@@ -121,7 +121,7 @@ For live metrics, `scripts/prometheus_exporter.py` serves a Prometheus-compatibl
 
 ### 6. Run the self-improvement loop
 
-At the end of each weekly report task, run a brief audit using `resources/self-improvement-loop.md`:
+At the end of each weekly report task, run a brief audit using `references/self-improvement-loop.md`:
 
 - What evidence was easy/hard to gather?
 - Which metrics were missing or noisy?
@@ -210,13 +210,13 @@ The dashboard should include sections for:
 - Evidence/caveat panel to show which metrics are verified vs estimated.
 - Self-improvement backlog.
 
-Use the dashboard spec in `resources/dashboard-and-metrics-spec.md`.
+Use the dashboard spec in `references/dashboard-and-metrics-spec.md`.
 
 ## Prior-work context
 
-This skill inherits ideas from Daily Radar and project_dashboard, but it is more specific: Daily Radar is broad multi-cadence activity synthesis; this skill is the weekly reporting product for Aaron's dad/mentor plus Aaron's personal dashboard. See `resources/prior-work-audit.md` before modifying dashboard assumptions.
+This skill inherits ideas from Daily Radar and project_dashboard, but it is more specific: Daily Radar is broad multi-cadence activity synthesis; this skill is the weekly reporting product for Aaron's dad/mentor plus Aaron's personal dashboard. See `references/prior-work-audit.md` before modifying dashboard assumptions.
 
-The Claude-online source instructions and durable report memory are distilled in `resources/claude-online-source-spec.md`. Read that reference when changing the report-generation protocol, checkbox behavior, or dad-facing style rules.
+The Claude-online source instructions and durable report memory are distilled in `references/claude-online-source-spec.md`. Read that reference when changing the report-generation protocol, checkbox behavior, or dad-facing style rules.
 
 ## Quality checklist before final response
 

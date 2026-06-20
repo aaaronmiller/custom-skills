@@ -13,6 +13,9 @@
     "resources": [
         "SKILL.md",
         "references/ai-vocabulary-list.md",
-        "references/style-guide.md"
+        "references/content-type-guides.md",
+        "references/sentence-patterns.md",
+        "references/rhythm-techniques.md",
+        "references/validation-checklist.md"
     ]
 }

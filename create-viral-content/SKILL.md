@@ -21,7 +21,7 @@ grade: A
 source: community
 ---
 
-> ⚠️ **BEFORE USING THIS SKILL:** Review all files in the `resources/` directory. These contain AI tell catalogs, platform templates, refinement protocols, and 40-source research basis required for proper skill execution.
+> ⚠️ **BEFORE USING THIS SKILL:** Review all files in the `references/` directory. These contain AI tell catalogs, platform templates, refinement protocols, and 40-source research basis required for proper skill execution.
 
 ## Research Basis
 
@@ -32,7 +32,7 @@ This skill synthesizes findings from 40 documented research sources:
 - **Face Psychology:** +35-50% CTR with faces in thumbnails
 - **A/B Testing Research:** 30-40% CTR improvement over time
 
-Full statistics in `resources/research-statistics.md`.
+Full statistics in `references/research-statistics.md`.
 
 # Create Viral Content
 
@@ -291,7 +291,7 @@ No humanize-writing? Run this instead:
 Check these numbers after humanizing:
 
 - **Hook strength**: First sentence must create curiosity or stakes
-- **AI tells**: Zero tolerance for blacklisted phrases (see `resources/ai-tells.md`)
+- **AI tells**: Zero tolerance for blacklisted phrases (see `references/ai-tells.md`)
 - **Word count**: Platform-specific (Reddit: 200-400, Twitter: <280 per tweet)
 - **Specificity ratio**: ≥1 concrete example per abstract claim
 - **Closer strength**: Must end on authority, not request
@@ -330,7 +330,7 @@ Check these numbers after humanizing:
 
 ## Title Generation
 
-> ⚠️ **CRITICAL:** Titles determine 70% of content performance. Consult `resources/viral-titles.md` and `resources/title-formulas.md` for 50+ formulas.
+> ⚠️ **CRITICAL:** Titles determine 70% of content performance. Consult `references/viral-titles.md` and `references/title-formulas.md` for 50+ formulas.
 
 ### Research-Backed Title Rules
 - **Optimal length:** 11 words / 65 characters (BuzzSumo 100M study)
@@ -356,7 +356,7 @@ Check these numbers after humanizing:
 
 ## Thumbnail Design
 
-> ⚠️ **CRITICAL:** Thumbnails drive 70%+ of video performance. Consult `resources/viral-thumbnails.md` and `resources/thumbnail-checklist.md` for design protocols.
+> ⚠️ **CRITICAL:** Thumbnails drive 70%+ of video performance. Consult `references/viral-thumbnails.md` and `references/thumbnail-checklist.md` for design protocols.
 
 ### Research-Backed Thumbnail Rules
 - **Face CTR boost:** +35-50% (neuroscience: amygdala activation)
@@ -433,15 +433,15 @@ Flip the order and you're always playing defense. Two inbox windows:
 
 📎 `~/code/agents/skills/create-viral-content/README.md`
 📎 `~/code/agents/skills/create-viral-content/marketplace.json`
-📎 `~/code/agents/skills/create-viral-content/resources/ai-tells.md`
-📎 `~/code/agents/skills/create-viral-content/resources/humanize-integration.md`
-📎 `~/code/agents/skills/create-viral-content/resources/platform-templates.md`
-📎 `~/code/agents/skills/create-viral-content/resources/refinement-protocol.md`
-📎 `~/code/agents/skills/create-viral-content/resources/research-statistics.md`
-📎 `~/code/agents/skills/create-viral-content/resources/thumbnail-checklist.md`
-📎 `~/code/agents/skills/create-viral-content/resources/title-formulas.md`
-📎 `~/code/agents/skills/create-viral-content/resources/viral-thumbnails.md`
-📎 `~/code/agents/skills/create-viral-content/resources/viral-titles.md`
+📎 `~/code/agents/skills/create-viral-content/references/ai-tells.md`
+📎 `~/code/agents/skills/create-viral-content/references/humanize-integration.md`
+📎 `~/code/agents/skills/create-viral-content/references/platform-templates.md`
+📎 `~/code/agents/skills/create-viral-content/references/refinement-protocol.md`
+📎 `~/code/agents/skills/create-viral-content/references/research-statistics.md`
+📎 `~/code/agents/skills/create-viral-content/references/thumbnail-checklist.md`
+📎 `~/code/agents/skills/create-viral-content/references/title-formulas.md`
+📎 `~/code/agents/skills/create-viral-content/references/viral-thumbnails.md`
+📎 `~/code/agents/skills/create-viral-content/references/viral-titles.md`
 
 ### Progressive-Disclosure Resources (load only when needed)
 
@@ -449,9 +449,9 @@ Flip the order and you're always playing defense. Two inbox windows:
 
 | Resource | When to Load |
 |---|---|
-| `resources/trend-intelligence.md` | User has NO topic and needs trend discovery |
-| `resources/feedback-loop.md` | User wants to track engagement or improve over time |
-| `resources/cross-platform-adaptation.md` | User wants ONE piece adapted to multiple platforms |
+| `references/trend-intelligence.md` | User has NO topic and needs trend discovery |
+| `references/feedback-loop.md` | User wants to track engagement or improve over time |
+| `references/cross-platform-adaptation.md` | User wants ONE piece adapted to multiple platforms |
 
 
 ## 🔗 Part of the Custom Skills Ecosystem
@@ -476,4 +476,3 @@ cp -r custom-skills/* ~/.claude/skills/
 ```
 
 📦 **Repository**: https://github.com/aaaronmiller/custom-skills
-⭐ **34 stars** (create-viral-content is the most-starred skill in the collection)
