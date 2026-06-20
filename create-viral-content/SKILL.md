@@ -443,6 +443,16 @@ Flip the order and you're always playing defense. Two inbox windows:
 📎 `~/code/agents/skills/create-viral-content/resources/viral-thumbnails.md`
 📎 `~/code/agents/skills/create-viral-content/resources/viral-titles.md`
 
+### Progressive-Disclosure Resources (load only when needed)
+
+> These resources are NOT loaded automatically. Only pull them in when the user's request requires the specific capability.
+
+| Resource | When to Load |
+|---|---|
+| `resources/trend-intelligence.md` | User has NO topic and needs trend discovery |
+| `resources/feedback-loop.md` | User wants to track engagement or improve over time |
+| `resources/cross-platform-adaptation.md` | User wants ONE piece adapted to multiple platforms |
+
 
 ## 🔗 Part of the Custom Skills Ecosystem
 
