@@ -789,6 +789,32 @@ def process_repo(repo_path: Path, excludes: set[str], dry_run: bool,
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 
+def check_pi_model():
+    """Check if Pi is configured with a good model via model-scan."""
+    try:
+        result = subprocess.run(
+            ["python3", str(Path.home() / "code" / "model-scan" / "cli_overall.py"), "overall", "-a", "--free"],
+            capture_output=True, text=True, timeout=10
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            recommended = result.stdout.strip().split("\n")[0]
+            # Read current Pi settings
+            settings_path = Path.home() / ".config" / "pi" / "settings.json"
+            if settings_path.exists():
+                settings = json.loads(settings_path.read_text())
+                current = settings.get("defaultModel", "unknown")
+                if recommended.lower() not in current.lower() and current.lower() not in recommended.lower():
+                    return {
+                        "current": current,
+                        "recommended": recommended,
+                        "match": False,
+                    }
+            return {"recommended": recommended, "match": True}
+    except Exception:
+        pass
+    return None
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Git Audit & Sync — sync all repos in a directory in parallel")
@@ -841,6 +867,15 @@ def main():
     if not root.is_dir():
         print(f"Not a directory: {root}")
         sys.exit(1)
+
+    # Check Pi model configuration
+    pi_check = check_pi_model()
+    if pi_check and not pi_check.get("match", True):
+        print(f"\n⚠️  Pi model mismatch:")
+        print(f"   Current:    {pi_check['current']}")
+        print(f"   Recommended: {pi_check['recommended']}")
+        print(f"   Run: pi settings defaultModel {pi_check['recommended']}")
+        print()
 
     # PID lockfile
     if not acquire_lock():
