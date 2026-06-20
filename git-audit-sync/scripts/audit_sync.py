@@ -794,6 +794,8 @@ def main():
         description="Git Audit & Sync — sync all repos in a directory in parallel")
     parser.add_argument("directory", type=Path,
                         help="Root directory to scan for git repos")
+    parser.add_argument("--fix", action="store_true",
+                        help="Auto-fix all issues (commit, push, pull)")
     parser.add_argument("--dry-run", action="store_true",
                         help="Show what would be done without making changes")
     parser.add_argument("--audit-only", action="store_true",
@@ -814,6 +816,8 @@ def main():
                         help="Custom commit message")
     parser.add_argument("--update-submodules", action="store_true",
                         help="Update git submodules after pull")
+    parser.add_argument("--table", action="store_true",
+                        help="Compact table output (good for terminal)")
     parser.add_argument("--quiet", "-q", action="store_true",
                         help="Suppress per-repo output")
     parser.add_argument("--output-dir", type=Path, default=None,
@@ -849,7 +853,7 @@ def main():
             print(f"No git repos found in {root}")
             return
 
-        dry_run = args.dry_run or args.audit_only
+        dry_run = not args.fix if args.fix else (args.dry_run or args.audit_only)
 
         # --since-date conversion
         since = args.since
@@ -916,6 +920,56 @@ def main():
         # Merge results (single-threaded)
         for name, icon, msg, detail in results:
             report.add(name, icon, msg, detail)
+
+        # --table: compact terminal table
+        if args.table:
+            print(f"\n{'Repo':30s} {'State':15s} {'Branch':20s} {'Files':>6s} {'Action':30s}")
+            print("-" * 101)
+            for name, icon, msg, detail in sorted(results):
+                d = detail or {}
+                state = d.get("state", "?")[:15]
+                branch = d.get("branch", "?")[:20]
+                files = str(d.get("uncommitted", 0))
+                # Strip repo name prefix from msg
+                action = msg.replace(f"{name} — ", "")[:30]
+                print(f"{name:30s} {state:15s} {branch:20s} {files:>6s} {action:30s}")
+            print()
+
+        # Create REMEDIATION_PLAN.md in repos that need attention
+        for name, icon, msg, detail in results:
+            if icon in (CONFLICT, ERROR):
+                plan_path = Path(str(args.directory)) / name / "REMEDIATION_PLAN.md"
+                d = detail or {}
+                plan = [
+                    f"# REMEDIATION PLAN — {name}",
+                    f"**Generated**: {datetime.now().isoformat()}",
+                    f"**Status**: {icon} Needs attention",
+                    "",
+                    "## Issue",
+                    f"State: {d.get('state', 'unknown')}",
+                    f"Branch: {d.get('branch', '?')}",
+                    f"Uncommitted: {d.get('uncommitted', 0)} files",
+                    f"Ahead: {d.get('ahead', 0)} | Behind: {d.get('behind', 0)}",
+                    "",
+                    "## Investigation",
+                    d.get("error", "Same files changed in both local and upstream.") if isinstance(d.get("error"), str) else "",
+                    "",
+                    "## Recommended Actions",
+                    "- [ ] Review changes: `git diff HEAD..@{u}`" if d.get("behind", 0) > 0 else "",
+                    "- [ ] Commit or stash local changes" if d.get("uncommitted", 0) > 0 else "",
+                    "- [ ] Pull upstream: `git pull --rebase`" if d.get("behind", 0) > 0 else "",
+                    "- [ ] Push local: `git push`" if d.get("ahead", 0) > 0 else "",
+                    "- [ ] Resolve merge conflicts if any",
+                    "",
+                    "## Auto-sync will skip this repo until resolved.",
+                ]
+                try:
+                    plan_path.parent.mkdir(parents=True, exist_ok=True)
+                    plan_path.write_text("\n".join(filter(None, plan)))
+                    if not args.quiet:
+                        print(f"  📋 Remediation plan: {plan_path}")
+                except (OSError, PermissionError):
+                    pass
 
         # --check-only: exit 1 if any repo is dirty or conflicted
         if args.check_only:
