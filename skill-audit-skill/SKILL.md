@@ -243,7 +243,7 @@ Resource files (`references/`) do NOT need YAML frontmatter descriptions.
 They are loaded when the model reads the SKILL.md body and encounters a reference:
 
 ```markdown
-For detailed patterns, see `references/patterns.md`.
+For the scoring rubric, see `references/scoring-rubric.md`.
 ```
 
 The model decides to load the file because the SKILL.md body INSTRUCTED it to.

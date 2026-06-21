@@ -106,8 +106,6 @@ fires. Use a tiered approach based on the skill's name distinctiveness:
 - **Rule**: Skills under-trigger by default. Write descriptions slightly aggressively.
   Use `"Triggers:"` with quoted phrases for explicit pattern-matching surface.
 
-See also `references/description-research-findings.md` (in skill-audit-skill) for
-the full research analysis across 15+ sources.
 
 #### Progressive Disclosure
 

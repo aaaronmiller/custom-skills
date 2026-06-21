@@ -64,3 +64,28 @@ For complex audit results with multiple divergence types:
 ---
 
 *Expand this file with project-specific formation configurations as needed.*
+
+---
+
+## Documenting Your Formation: `council-plan.md` template
+
+Once a formation is selected, record the decision so the deliberation is reproducible:
+
+```markdown
+# Council Plan — <Project Name>
+
+## Formation
+<e.g. Parallel Groups: Group A (Internal/As-Built) vs Group B (External/Ideal) → Merge Council>
+
+## Profile
+V(agents, rounds, probes) — e.g. V(8, 3, 1) = 8 agents, 3 rounds, 1 web probe per gap
+
+## Mode
+<REFINE when comparing two inputs (as-built spec + external answers), else GENERATE>
+
+## Strategy
+<BRANCHING to explore the gap between perspectives; CONVERGING to drive to one answer>
+
+## Materials Given to Each Group
+<which documents each group/agent receives>
+```
