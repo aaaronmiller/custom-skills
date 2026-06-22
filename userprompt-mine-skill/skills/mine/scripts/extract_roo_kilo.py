@@ -107,80 +107,81 @@ def process_task_file(
         return len(conversations), 0, 0
 
     try:
-        if existing:
-            conv_id = existing[0]
+        with conn:
+            if existing:
+                conv_id = existing[0]
+                conn.execute(
+                    """UPDATE conversations SET
+                        session_title = ?, source_hash = ?, updated_at = ?,
+                        ingested_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+                    WHERE id = ?""",
+                    (session_title, source_hash, updated_at, conv_id),
+                )
+                conn.execute("DELETE FROM conversation_turns WHERE conversation_id = ?", (conv_id,))
+            else:
+                cursor = conn.execute(
+                    """INSERT INTO conversations
+                        (provider, session_id, session_title, project_name, model_id,
+                         source_path, source_hash, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (provider, session_id, session_title, project_name, model_id,
+                     filepath, source_hash, created_at, updated_at),
+                )
+                conv_id = cursor.lastrowid
+
+            turn_count = 0
+            user_turn_count = 0
+            total_chars = 0
+
+            for idx, conv in enumerate(conversations):
+                role = conv.get("role", "tool")
+                if role not in ("user", "assistant", "system", "tool"):
+                    role = "tool"
+
+                content = conv.get("content", "")
+                if isinstance(content, list):
+                    content = " ".join(
+                        block.get("text", "") for block in content
+                        if isinstance(block, dict) and block.get("type") == "text"
+                    )
+                content_text = str(content) if content else ""
+                char_count = len(content_text)
+                total_chars += char_count
+
+                if role == "user":
+                    user_turn_count += 1
+
+                content_summary = None
+                content_truncated = None
+                if role == "assistant" and char_count > 2000:
+                    content_summary = generate_summary(content_text)
+                    content_truncated = generate_truncated(content_text)
+
+                tool_calls_json = None
+                if conv.get("toolCalls"):
+                    tool_calls_json = json.dumps(conv["toolCalls"])
+
+                turn_ts = conv.get("ts", task_ts)
+                turn_created = unix_ms_to_iso(turn_ts)
+
+                conn.execute(
+                    """INSERT INTO conversation_turns
+                        (conversation_id, turn_index, role, content_text, content_summary,
+                         content_truncated, model_id, tool_calls, char_count,
+                         token_estimate, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (conv_id, idx, role, content_text, content_summary, content_truncated,
+                     model_id, tool_calls_json, char_count, char_count // 4, turn_created),
+                )
+                turn_count += 1
+
             conn.execute(
                 """UPDATE conversations SET
-                    session_title = ?, source_hash = ?, updated_at = ?,
-                    ingested_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+                    turn_count = ?, user_turn_count = ?, total_chars = ?,
+                    updated_at = ?, ingested_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
                 WHERE id = ?""",
-                (session_title, source_hash, updated_at, conv_id),
+                (turn_count, user_turn_count, total_chars, updated_at, conv_id),
             )
-            conn.execute("DELETE FROM conversation_turns WHERE conversation_id = ?", (conv_id,))
-        else:
-            cursor = conn.execute(
-                """INSERT INTO conversations
-                    (provider, session_id, session_title, project_name, model_id,
-                     source_path, source_hash, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (provider, session_id, session_title, project_name, model_id,
-                 filepath, source_hash, created_at, updated_at),
-            )
-            conv_id = cursor.lastrowid
-
-        turn_count = 0
-        user_turn_count = 0
-        total_chars = 0
-
-        for idx, conv in enumerate(conversations):
-            role = conv.get("role", "tool")
-            if role not in ("user", "assistant", "system", "tool"):
-                role = "tool"
-
-            content = conv.get("content", "")
-            if isinstance(content, list):
-                content = " ".join(
-                    block.get("text", "") for block in content
-                    if isinstance(block, dict) and block.get("type") == "text"
-                )
-            content_text = str(content) if content else ""
-            char_count = len(content_text)
-            total_chars += char_count
-
-            if role == "user":
-                user_turn_count += 1
-
-            content_summary = None
-            content_truncated = None
-            if role == "assistant" and char_count > 2000:
-                content_summary = generate_summary(content_text)
-                content_truncated = generate_truncated(content_text)
-
-            tool_calls_json = None
-            if conv.get("toolCalls"):
-                tool_calls_json = json.dumps(conv["toolCalls"])
-
-            turn_ts = conv.get("ts", task_ts)
-            turn_created = unix_ms_to_iso(turn_ts)
-
-            conn.execute(
-                """INSERT INTO conversation_turns
-                    (conversation_id, turn_index, role, content_text, content_summary,
-                     content_truncated, model_id, tool_calls, char_count,
-                     token_estimate, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (conv_id, idx, role, content_text, content_summary, content_truncated,
-                 model_id, tool_calls_json, char_count, char_count // 4, turn_created),
-            )
-            turn_count += 1
-
-        conn.execute(
-            """UPDATE conversations SET
-                turn_count = ?, user_turn_count = ?, total_chars = ?,
-                updated_at = ?, ingested_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
-            WHERE id = ?""",
-            (turn_count, user_turn_count, total_chars, updated_at, conv_id),
-        )
 
         return turn_count, 0, 0
 

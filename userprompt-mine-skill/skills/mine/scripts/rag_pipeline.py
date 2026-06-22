@@ -499,21 +499,38 @@ def cluster_conversations(conn: sqlite3.Connection, force: bool = False) -> int:
 # Re-embedding
 # ============================================================
 
-def reembed_all(conn: sqlite3.Connection):
+def reembed_all(conn: sqlite3.Connection, dry_run: bool = False, force: bool = False):
     """Re-embed all conversation turns."""
+    # Get all turns
+    turns = conn.execute(
+        "SELECT id, content_text FROM conversation_turns ORDER BY id"
+    ).fetchall()
+
+    if dry_run:
+        print(f"[DRY RUN] Would delete all existing embeddings and re-embed {len(turns)} turns.")
+        return
+
+    if not force:
+        if not sys.stdout.isatty():
+            print("Non-interactive terminal detected. Must specify --force to re-embed all turns.")
+            sys.exit(1)
+        try:
+            confirm = input("Are you sure you want to delete all existing embeddings and re-embed? (y/N): ")
+            if confirm.lower() not in ['y', 'yes']:
+                print("Operation cancelled.")
+                return
+        except KeyboardInterrupt:
+            print("\nOperation cancelled.")
+            return
+
     print("Re-embedding all turns... This may take a while.")
     embedder = Embedder()
 
     # Clear existing embeddings
     try:
         conn.execute("DELETE FROM turn_embeddings")
-    except Exception:
-        pass
-
-    # Get all turns
-    turns = conn.execute(
-        "SELECT id, content_text FROM conversation_turns ORDER BY id"
-    ).fetchall()
+    except Exception as e:
+        print(f"Failed to clear existing embeddings: {e}")
 
     batch_size = 64
     for i in range(0, len(turns), batch_size):
@@ -559,7 +576,8 @@ def main():
     parser.add_argument("--tag", action="store_true", help="Auto-tag conversations")
     parser.add_argument("--cluster", action="store_true", help="Cluster conversations")
     parser.add_argument("--reembed-all", action="store_true", help="Re-embed all turns")
-    parser.add_argument("--force", action="store_true", help="Force re-tag/re-cluster")
+    parser.add_argument("--force", action="store_true", help="Force re-tag/re-cluster or force re-embedding")
+    parser.add_argument("--dry-run", action="store_true", help="Perform a dry run without making actual database changes")
     parser.add_argument("--db-path", default=DB_PATH)
     args = parser.parse_args()
 
@@ -605,7 +623,7 @@ def main():
             print(f"Clustered {count} conversations")
 
         elif args.reembed_all:
-            reembed_all(conn)
+            reembed_all(conn, dry_run=args.dry_run, force=args.force)
 
         else:
             parser.print_help()

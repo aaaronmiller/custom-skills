@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Added
+- `third-party-skills.json` manifest at `~/code/agents/third-party-skills.json` — manifest-driven integration for external skill repos (taste-skill, ponytail, drawio-skill, SkillSpector, skill-audit).
+- `scripts/sync-third-party.py` at `~/code/agents/scripts/` — sync engine that clones/pulls third-party repos and selectively symlinks skills, commands, hooks, and agents.
+- Integrated `--third-party` flag into `sync.sh` — runs automatically during `--fix` and previews during `--dry-run`.
+
+### Fixed
+- Mermaid diagram syntax in `external_skills_integration_plan.md` — replaced problematic `subgraph` labels with colons/slashes.
+
 ### Removed
 - `spec-audit-skill-v2` and `spec-audit-skill` (v1) — superseded by the v3 backtranslation methodology; unique council-plan template migrated forward.
 - `spec-audit-skill-v3/references/spec-audit-skill-v3.md` — dead embedded copy of an older SKILL body (never loaded).

@@ -502,10 +502,78 @@ RIGHT: [Developer confident] → [Game breaks] → [Metrics show success anyway]
 
 ---
 
+### Mad Magazine Fold-In (Al Jaffee)
+
+**Core Structure:**
+- Full-page scene that appears normal initially
+- Visual/textual "fold" reveals hidden, cynical truth
+- The fold IS the punchline — the hidden reality is more damning than the surface
+
+**What Works:**
+- Surface scene is convincing and realistic
+- The fold reveals structural hypocrisy (what institution claims vs. what it does)
+- Labels, arrows, and text guide the reader to the hidden meaning
+- Multiple readings reveal deeper layers
+
+**What Fails:**
+- Fold is obvious from the start
+- Surface scene is too obviously satirical
+- The reveal is vague rather than specific
+
+### National Lampoon Style
+
+**Core Structure:**
+- Aggressive, irreverent satire
+- Assumes actions stem from greed, malice, or stupidity
+- Heavy use of irony and superior narrative voice
+- Perfect mimicry of the target's format
+
+**What Works:**
+- Spot-on parody of the target's voice/style
+- Escalation from reasonable to absurd
+- Specific, documented targets (not vague complaints)
+
+**What Fails:**
+- Over-the-top without landing any real critique
+- Punching down instead of up
+- Losing the target's authentic voice
+
+### TTS Audio (Text-to-Speech) Satire
+
+**Core Structure:**
+- Write prompts for robotic/neutral TTS delivery
+- Use em-dashes (—) for abrupt comedic cut-offs
+- Use ellipses (...) for pregnant pauses
+- Deadpan delivery contrasts with absurd content
+
+**Format:**
+```
+[Alt description of visual (if applicable)]
+
+NARRATOR (TTS, deadpan):
+[Script with — and ... for comedic timing]
+
+[End — no explanation]
+```
+
+### The Satirical Orthogonal Mapper
+
+Before generating ANY output, use this deliberative-refinement process:
+
+1. **Identify the Truth** — State the dry, uncomfortable factual contradiction ("The Elephant")
+2. **Orthogonal Map** — Map that truth to an entirely unrelated, mundane scenario (HR memo, appliance manual, real estate listing, investor presentation)
+3. **Draft the Ski-Jump** — Write content with the punchline/most absurd element pushed to the very last words
+
+Use internal deliberation (not user-facing) to execute this process before drafting.
+
+---
+
 ## Related Skills
 - `is-it-funny-refinement` — Evaluate comedy quality using deliberative-refinement
 - `deliberative-refinement` — 10/3/1 ISO council validation
 - `refine-satire-iteratively` — Workflow for continuous skill improvement
+- `humanize-writing` — Post-process to remove AI tells from polished output
+- `create-viral-content` — Platform optimization hooks/titles (apply after generation)
 
 ---
 

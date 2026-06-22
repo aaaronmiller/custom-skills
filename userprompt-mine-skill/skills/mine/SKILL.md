@@ -1,15 +1,6 @@
 ---
 name: prompt-mine
-description: >
-  Mine, store, search, report, and continuously improve across all your coding agent
-  sessions (Claude Code, Codex, Cursor, ChatGPT, Aider, Gemini, Cline, and 15+ more).
-  Backed by CASS (coding-agent-search). Use when you need to find a past session,
-  generate project activity reports, get weekly/daily digests, discover incomplete work,
-  or analyze tool usage patterns across all your projects.
-  Self-improves: each run logs performance, adapts search strategies, and refines
-  reporting templates. Trigger phrases: "search sessions", "project activity report",
-  "weekly digest", "what happened this week", "find when I fixed", "agent usage report",
-  "incomplete projects", "todays brief", "sprint retro", "error patterns", "tech radar".
+description: "Use when: mining sessions, extracting prompts, searching past transcripts. Action: Search and extract developer prompt histories from logs..."
 when_to_use: >
   Activate for ANY request involving past coding agent sessions, project activity
   analysis, cross-project reporting, agent utilization metrics, or finding information

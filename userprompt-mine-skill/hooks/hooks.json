@@ -1,26 +1,3 @@
 {
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"$HOME/.prompt-mine/scripts/hook_capture_turn.py\" post-tool-use"
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"$HOME/.prompt-mine/scripts/hook_capture_turn.py\" session-end"
-          }
-        ]
-      }
-    ]
-  }
+  "hooks": {}
 }
