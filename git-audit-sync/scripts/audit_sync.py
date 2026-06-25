@@ -283,20 +283,6 @@ def run_with_retry(cmd: list[str], cwd: Path, timeout: int = 60,
     raise RuntimeError(str(last_exc))
 
 
-def create_backup_branch(repo: Path, dry_run: bool) -> str:
-    """Create a lightweight git branch (safer than tag — no detached HEAD)."""
-    ts = datetime.now().strftime("%Y%m%d-%H%M%S")
-    repo_name = repo.name
-    branch = f"git-audit-sync/backup-{ts}-{repo_name}"
-    if not dry_run:
-        r = run(["git", "branch", branch], repo)
-        if r.returncode == 0:
-            print(f"  Backup branch: {branch}")
-    else:
-        print(f"  Would create backup branch: {branch}")
-    return branch
-
-
 # ── Git error classification & safe recovery ────────────────────────────────
 
 def classify_git_error(text: str) -> str:
@@ -317,78 +303,58 @@ def classify_git_error(text: str) -> str:
     return ""
 
 
-def abort_in_progress(repo: Path) -> None:
-    """Return a repo to a clean state after a failed merge/rebase so it is
-    never left mid-operation — the #1 cause of 'broken' repos after a sync."""
-    git_dir = repo / ".git"
-    if (git_dir / "rebase-merge").exists() or (git_dir / "rebase-apply").exists():
-        run(["git", "rebase", "--abort"], repo, timeout=15)
-    elif (git_dir / "MERGE_HEAD").exists():
-        run(["git", "merge", "--abort"], repo, timeout=15)
+def is_owned_remote(url: Optional[str], user: str) -> bool:
+    """True if `url` belongs to `user` — i.e. a repo we are allowed to push to.
+    When the user is unknown we can't verify, so we don't hard-block (a push to
+    a repo that isn't ours simply 403s and transfers nothing)."""
+    if not url:
+        return False
+    if not user:
+        return True
+    return f"/{user}/" in url or f":{user}/" in url
 
 
-def staged_deletions(repo: Path) -> list[str]:
-    """List tracked files that the current index would DELETE. A non-empty
-    result during an auto-commit is a strong signal of an accidental `rm`
-    that must not be silently captured (it later collides with upstream)."""
-    r = maybe_run_git(repo, "diff", "--cached", "--diff-filter=D",
-                      "--name-only", timeout=15)
-    return [l for l in (r.split("\n") if r else []) if l.strip()]
-
-
-def find_fork_remote(repo: Path, user: str) -> Optional[str]:
-    """Return the name of a push remote whose URL belongs to `user` (a fork we
-    can push to), preferring a non-origin remote. Used when origin isn't ours."""
+def owned_remote_name(repo: Path, user: str) -> Optional[str]:
+    """Name of a non-origin push remote owned by `user`, if any. Used only to
+    inform the user — we never auto-redirect a push to it."""
     if not user:
         return None
     raw = maybe_run_git(repo, "remote", "-v", timeout=10)
     if not raw:
         return None
-    candidates = []
     for line in raw.split("\n"):
         parts = line.split()
-        if len(parts) >= 3 and parts[2] == "(push)":
-            name, url = parts[0], parts[1]
-            if f"/{user}/" in url or f":{user}/" in url:
-                candidates.append(name)
-    for c in candidates:
-        if c != "origin":
-            return c
-    return candidates[0] if candidates else None
+        if len(parts) >= 3 and parts[2] == "(push)" and parts[0] != "origin":
+            if is_owned_remote(parts[1], user):
+                return parts[0]
+    return None
 
 
-def _push_fallback(repo: "GitRepo", err: str) -> str:
-    """Turn a failed `git push` into an actionable message, and when origin
-    push is denied, transparently push to the user's fork remote instead."""
+def push_block_reason(repo: "GitRepo") -> Optional[str]:
+    """If we must NOT auto-push (and should ask the user instead), return why.
+    None means origin is a destination we own and may push to. We never push to
+    a repo that isn't ours, and never invent a destination."""
+    url = maybe_run_git(repo.path, "remote", "get-url", "origin", timeout=10)
+    if not url:
+        return "no 'origin' remote — nowhere to push; add a remote you own"
+    if _GITHUB_USER and not is_owned_remote(url, _GITHUB_USER):
+        owned = owned_remote_name(repo.path, _GITHUB_USER)
+        hint = (f"; you own remote '{owned}' — set it as origin or push manually"
+                if owned else "")
+        return f"origin not owned by you ({url}){hint}"
+    return None
+
+
+def push_error_msg(repo: "GitRepo", err: str) -> str:
+    """Classify a failed push into an actionable message. Never redirects."""
     kind = classify_git_error(err)
-    if kind == "permission-denied":
-        fork = find_fork_remote(repo.path, _GITHUB_USER)
-        if fork:
-            try:
-                run_with_retry(["git", "push", fork, f"HEAD:{repo.branch}"],
-                               repo.path, timeout=30)
-                return f"pushed to fork '{fork}' (no push access to origin)"
-            except RuntimeError as e2:
-                return f"push denied on origin; fork '{fork}' push failed: {e2}"
-        return ("push denied — origin not owned by you; create a fork "
-                "(gh repo fork) and add it as a remote (or pass --github-user)")
     if kind == "not-found":
-        return "push failed — remote repository not found (update or remove origin)"
+        return "NEEDS INPUT: push destination not found (origin deleted/renamed)"
+    if kind == "permission-denied":
+        return "NEEDS INPUT: push denied — origin not owned by you"
     if kind == "non-fast-forward":
-        return "push rejected (behind remote)"
-    return f"push failed: {err}"
-
-
-def _result_icon(msg: str, default: str) -> str:
-    """Choose the report icon for an action result string."""
-    low = msg.lower()
-    if "git add failed" in low or "commit failed" in low:
-        return ERROR
-    if ("needs review" in low or "needs manual merge" in low or "denied" in low
-            or "not found" in low or "conflicted" in low
-            or "create a fork" in low):
-        return CONFLICT
-    return default
+        return "NEEDS AGENT: push rejected (remote moved ahead) — agent to reconcile"
+    return f"NEEDS AGENT: push failed — {err}"
 
 
 # ── Repo state inspection ───────────────────────────────────────────────────
@@ -413,13 +379,10 @@ class GitRepo:
         self.last_modified: Optional[datetime] = None
         self.has_skip_marker: bool = False
         self.untracked_files: list[str] = []
-        self.commit_msg: str = "git-audit-sync: auto-commit"
         self.remote_missing: bool = False
 
-    def inspect(self, commit_msg: str = "git-audit-sync: auto-commit"):
+    def inspect(self):
         """Gather all state info about this repo."""
-        self.commit_msg = commit_msg
-
         # Check for .gitaudit-skip marker
         self.has_skip_marker = (self.path / ".gitaudit-skip").exists()
 
@@ -544,138 +507,40 @@ class GitRepo:
 
 # ── Actions ─────────────────────────────────────────────────────────────────
 
+# The script performs ONLY operations that cannot break a repo or lose work:
+#   • git pull --ff-only   (refuses anything that isn't a clean fast-forward)
+#   • git push             (to an origin we own; a rejected push changes nothing)
+# Anything needing judgment — commits, merges, rebases, conflict resolution,
+# missing/foreign push destinations — is NOT attempted. It is flagged for the
+# deployed agent to clear up. The script never commits, merges, rebases, forces,
+# or pushes to a repo that isn't ours.
+
 def pull_ff(repo: GitRepo, dry_run: bool) -> str:
-    """Fast-forward pull. Fails safely if not possible."""
-    create_backup_branch(repo.path, dry_run)
+    """Fast-forward-only pull. Cannot create a conflict or rewrite history —
+    git refuses if the update isn't a clean fast-forward."""
     if dry_run:
         return f"would pull --ff-only ({repo.behind} commits)"
     try:
-        r = run_with_retry(["git", "pull", "--ff-only"], repo.path, timeout=30)
+        run_with_retry(["git", "pull", "--ff-only"], repo.path, timeout=30)
         return f"pulled ({repo.behind} commits, ff-only)"
     except RuntimeError as e:
-        run(["git", "merge", "--abort"], repo.path, timeout=10)
-        return f"pull failed: {str(e)}"
+        # Not a clean fast-forward (diverged). Leave untouched for the agent.
+        return f"NEEDS AGENT: not a fast-forward ({repo.behind} behind) — {e}"
 
 
 def push(repo: GitRepo, dry_run: bool) -> str:
-    """Push local commits to origin."""
-    create_backup_branch(repo.path, dry_run)
+    """Push already-made commits to an origin we own. Never forces; a rejected
+    push transfers nothing. Blocks (asks) when origin isn't ours/missing."""
+    blocked = push_block_reason(repo)
+    if blocked:
+        return f"NEEDS INPUT: {blocked}"
     if dry_run:
         return f"would push ({repo.ahead} commits)"
     try:
-        r = run_with_retry(["git", "push"], repo.path, timeout=30)
+        run_with_retry(["git", "push"], repo.path, timeout=30)
         return f"pushed ({repo.ahead} commits)"
     except RuntimeError as e:
-        return _push_fallback(repo, str(e))
-
-
-def get_dryrun_diff(repo: GitRepo) -> str:
-    """Get a summary of files that would be committed (for dry-run display)."""
-    r = maybe_run_git(repo.path, "diff", "--stat", timeout=10)
-    untracked = maybe_run_git(repo.path, "ls-files", "--others",
-                              "--exclude-standard", timeout=10)
-    parts = []
-    if r:
-        parts.append(r.strip())
-    if untracked:
-        ucount = len([l for l in untracked.split("\n") if l.strip()])
-        if ucount > 0:
-            parts.append(f"{ucount} untracked file(s)")
-    return " | ".join(parts) if parts else ""
-
-
-def commit_and_push(repo: GitRepo, dry_run: bool) -> str:
-    """Stage all, commit, push."""
-    dry_diff = get_dryrun_diff(repo) if dry_run else ""
-    create_backup_branch(repo.path, dry_run)
-    if dry_run:
-        detail = f"would commit {repo.uncommitted} files"
-        if dry_diff:
-            detail += f" ({dry_diff})"
-        detail += " and push"
-        return detail
-
-    r = run(["git", "add", "-A"], repo.path, timeout=30)
-    if r.returncode != 0:
-        return f"git add failed: {r.stderr.strip()}"
-    # Safety: never auto-commit deletions of tracked files. An accidental `rm`
-    # would otherwise be captured and later collide with upstream (a deletion
-    # vs. an upstream edit is an unresolvable auto-merge). Flag for review.
-    if not _ALLOW_DELETE:
-        dels = staged_deletions(repo.path)
-        if dels:
-            run(["git", "reset", "-q"], repo.path, timeout=15)
-            preview = ", ".join(dels[:3]) + ("…" if len(dels) > 3 else "")
-            return (f"NEEDS REVIEW: auto-commit would delete {len(dels)} tracked "
-                    f"file(s) ({preview}) — skipped (pass --allow-delete to permit)")
-    r = run(["git", "commit", "-m", repo.commit_msg,
-             "-m", f"Uncommitted changes from audit ({repo.uncommitted} files)"],
-            repo.path, timeout=30)
-    if r.returncode != 0 and "nothing to commit" not in r.stderr:
-        return f"commit failed: {r.stderr.strip()}"
-    commit_hash = maybe_run_git(repo.path, "rev-parse", "--short", "HEAD",
-                                timeout=5) or "?"
-    if repo.has_upstream:
-        try:
-            run_with_retry(["git", "push"], repo.path, timeout=30)
-            return f"committed + pushed ({repo.uncommitted} files) [{commit_hash}]"
-        except RuntimeError as e:
-            return f"committed [{commit_hash}]; {_push_fallback(repo, str(e))}"
-    return f"committed ({repo.uncommitted} files) [{commit_hash}]"
-
-
-def commit_push_pull(repo: GitRepo, dry_run: bool) -> str:
-    """Commit local work, then (if the first push was rejected for being behind)
-    integrate upstream via rebase and re-push, completing the sync. Any rebase
-    conflict is aborted so the repo is never left mid-operation."""
-    result = commit_and_push(repo, dry_run)
-    if dry_run:
-        return result
-    # Hard stops — nothing safely reconcilable downstream.
-    if any(s in result for s in ("commit failed", "git add failed",
-                                 "NEEDS REVIEW")):
-        return result
-    # First push already succeeded — done.
-    if "+ pushed" in result or result.startswith("committed (") \
-            or "pushed (" in result:
-        return result
-    # Push was rejected (typically behind): rebase onto upstream, then re-push.
-    try:
-        run_with_retry(["git", "pull", "--rebase"], repo.path, timeout=30)
-    except RuntimeError as e:
-        abort_in_progress(repo.path)
-        return (f"{result.split(';')[0]}; pull --rebase conflicted "
-                f"(aborted, repo left clean) — needs manual merge")
-    try:
-        run_with_retry(["git", "push"], repo.path, timeout=30)
-        return f"{result.split(';')[0]}; rebased on upstream + pushed"
-    except RuntimeError as e:
-        return f"{result.split(';')[0]}; rebased but re-push failed: " \
-               f"{_push_fallback(repo, str(e))}"
-
-
-def push_upstream(repo: GitRepo, dry_run: bool) -> str:
-    """Push branch with upstream tracking (for feature branches)."""
-    create_backup_branch(repo.path, dry_run)
-    if dry_run:
-        return f"would push --set-upstream origin {repo.branch}"
-    try:
-        run_with_retry(["git", "push", "--set-upstream", "origin", repo.branch],
-                       repo.path, timeout=30)
-        return f"pushed branch '{repo.branch}' to origin"
-    except RuntimeError as e:
-        return f"push failed: {str(e)}"
-
-
-def update_submodules(repo: GitRepo, dry_run: bool) -> Optional[str]:
-    """Update submodules if they exist."""
-    if dry_run:
-        return None
-    r = maybe_run_git(repo.path, "submodule", "status", timeout=10)
-    if not r or not r.strip():
-        return None
-    r2 = run(["git", "submodule", "update", "--recursive"], repo.path, timeout=60)
-    return "submodules updated" if r2.returncode == 0 else "submodule update failed"
+        return push_error_msg(repo, str(e))
 
 
 def assess_conflict_files(repo: GitRepo) -> set:
@@ -701,15 +566,6 @@ def assess_conflict_files(repo: GitRepo) -> set:
     safe_overlap = {f for f in overlap
                     if any(f.endswith(ext) for ext in SAFE_EXTENSIONS)}
     return overlap - safe_overlap
-
-
-def assess_conflict(repo: GitRepo, dry_run: bool) -> Any:
-    """Check if diverged changes are in same source files; if not, auto-merge."""
-    real_overlap = assess_conflict_files(repo)
-    if not real_overlap:
-        result = commit_push_pull(repo, dry_run)
-        return f"auto-merged: {result}"
-    return real_overlap
 
 
 # ── Secret detection ──────────────────────────────────────────────────────────
@@ -794,8 +650,7 @@ def find_git_repos(root: Path, maxdepth: int = 3) -> list[Path]:
 
 # ── Globals shared with worker threads ──────────────────────────────────────
 _PROCESS_QUIET = False
-_GITHUB_USER = ""        # used to find a fork remote when origin push is denied
-_ALLOW_DELETE = False    # permit auto-commit of tracked-file deletions
+_GITHUB_USER = ""        # used to verify we OWN an origin before pushing to it
 
 
 def detect_github_user() -> str:
@@ -819,8 +674,7 @@ def detect_github_user() -> str:
 # ── Repo processing (runs in parallel worker) ──────────────────────────────
 
 def process_repo(repo_path: Path, excludes: set[str], dry_run: bool,
-                 since: Optional[int], commit_msg: str,
-                 do_submodules: bool) -> tuple[str, str, str, Optional[dict]]:
+                 since: Optional[int]) -> tuple[str, str, str, Optional[dict]]:
     """Process a single repo. Returns (name, icon, message, detail_dict).
     Designed to be called from parallel workers — no shared state needed."""
     name = repo_path.name
@@ -841,7 +695,7 @@ def process_repo(repo_path: Path, excludes: set[str], dry_run: bool,
             pass
 
     r = GitRepo(repo_path)
-    r.inspect(commit_msg=commit_msg)
+    r.inspect()
 
     if r.has_skip_marker:
         return (name, SKIP, f"{name} — .gitaudit-skip marker found (skipped)", None)
@@ -867,132 +721,60 @@ def process_repo(repo_path: Path, excludes: set[str], dry_run: bool,
         "uncommitted": r.uncommitted, "ahead": r.ahead, "behind": r.behind,
     }
 
-    try:
-        if state == "in-progress":
-            return (name, SKIP, f"{name} — active {r.active_git_op} (skipped)", detail)
+    # Annotate every result with anything the agent will need to act safely.
+    secrets = check_secrets(r)
+    if secrets:
+        detail["secrets"] = secrets[:3]
+    if r.untracked_files:
+        detail["untracked"] = r.untracked_files[:10]
 
+    try:
+        # ── States the script handles itself (provably safe) ──────────────
         if state == "clean":
             return (name, OK, f"{name} — clean, up-to-date", detail)
 
         elif state == "pullable":
+            # Clean + behind → fast-forward only (cannot conflict).
             msg = pull_ff(r, dry_run)
-            detail["action"] = "pull"
-            return (name, PULLED, f"{name} — {msg}", detail)
+            detail["action"] = "pull-ff"
+            icon = CONFLICT if msg.startswith("NEEDS") else PULLED
+            return (name, icon, f"{name} — {msg}", detail)
 
         elif state == "pushable":
+            # Clean + ahead → push to an origin we own (no force).
             msg = push(r, dry_run)
             detail["action"] = "push"
-            return (name, PUSHED, f"{name} — {msg}", detail)
+            icon = CONFLICT if msg.startswith("NEEDS") else PUSHED
+            return (name, icon, f"{name} — {msg}", detail)
 
-        elif state == "dirty-even":
-            if r.branch not in ("main", "master"):
-                return (name, SKIP, f"{name} — {r.uncommitted} uncommitted on "
-                        f"'{r.branch}' branch (skipped)", detail)
-            secrets = check_secrets(r)
-            if secrets:
-                print(f"  SECRET RISK: {', '.join(secrets[:3])}")
-            msg = commit_and_push(r, dry_run)
-            detail["action"] = "commit+push"
-            detail["secrets"] = secrets[:3] if secrets else []
-            return (name, _result_icon(msg, COMMITTED), f"{name} — {msg}", detail)
+        elif state in ("no-upstream", "no-remote") and r.uncommitted == 0 \
+                and r.ahead == 0:
+            # Local-only or untracked-branch repo with nothing pending.
+            return (name, OK, f"{name} — clean (no upstream)", detail)
 
-        elif state == "local-ahead":
-            # Uncommitted changes + ahead of upstream
-            # Commit the changes then push both new and existing ahead commits
-            if r.branch not in ("main", "master"):
-                return (name, SKIP, f"{name} — {r.uncommitted} uncommitted + "
-                        f"{r.ahead} ahead on '{r.branch}' branch (skipped)", detail)
-            secrets = check_secrets(r)
-            if secrets:
-                print(f"  SECRET RISK: {', '.join(secrets[:3])}")
-            # First commit uncommitted changes
-            if r.uncommitted > 0:
-                if dry_run:
-                    return (name, COMMITTED, f"{name} — would commit {r.uncommitted} files and push ({r.ahead} ahead)", detail)
-                try:
-                    run(["git", "add", "-A"], r.path, timeout=30)
-                    run(["git", "commit", "-m", commit_msg], r.path, timeout=30)
-                except RuntimeError as e:
-                    return (name, ERROR, f"{name} — commit failed: {e}", {"state": "error", "error": str(e)})
-            # Then push all ahead commits
-            msg = push(r, dry_run)
-            detail["action"] = "commit+push (local-ahead)"
-            detail["secrets"] = secrets[:3] if secrets else []
-            return (name, _result_icon(msg, COMMITTED), f"{name} — {msg}", detail)
+        # ── Everything else needs judgment → leave for the deployed agent ──
+        # The script makes NO changes here. It records exactly what the agent
+        # must resolve so nothing is committed/merged/rebased automatically.
+        reasons = {
+            "in-progress": f"active {r.active_git_op} in progress — agent to finish or abort",
+            "dirty-even":  f"{r.uncommitted} uncommitted file(s) on '{r.branch}' — agent to review, commit, push",
+            "local-ahead": f"{r.uncommitted} uncommitted + {r.ahead} unpushed on '{r.branch}' — agent to commit & push",
+            "diverged":    f"diverged: {r.ahead} ahead, {r.behind} behind, {r.uncommitted} uncommitted — agent to reconcile",
+            "conflict-risk": f"diverged with overlap: {r.ahead} ahead, {r.behind} behind — agent to resolve",
+            "no-upstream": f"no upstream for '{r.branch}' with {r.uncommitted} uncommitted / {r.ahead} ahead — agent to set up & push",
+            "no-remote":   f"no remote — nowhere to push; agent to add one you own or confirm local-only",
+        }
+        reason = reasons.get(state, f"unhandled state '{state}'")
+        detail["needs"] = reason
 
-        elif state == "diverged":
-            if r.branch not in ("main", "master"):
-                return (name, SKIP, f"{name} — diverged "
-                        f"({r.ahead} ahead, {r.behind} behind, {r.uncommitted} uncommitted) "
-                        f"on '{r.branch}' (skipped)", detail)
-            secrets = check_secrets(r)
-            if secrets:
-                print(f"  SECRET RISK: {', '.join(secrets[:3])}")
-            if r.uncommitted > 0:
-                # Has uncommitted changes: commit, push, then pull
-                msg = commit_push_pull(r, dry_run)
-                detail["action"] = "commit+push+pull"
-            else:
-                # No uncommitted changes: just pull then push
-                # First pull with rebase, then push
-                if dry_run:
-                    msg = f"would pull --rebase ({r.behind} commits) and push ({r.ahead} commits)"
-                else:
-                    try:
-                        run_with_retry(["git", "pull", "--rebase"], r.path, timeout=30)
-                        pull_msg = f"pulled --rebase ({r.behind} commits)"
-                    except RuntimeError as e:
-                        abort_in_progress(r.path)
-                        detail["conflict_files"] = sorted(
-                            assess_conflict_files(r))[:5]
-                        return (name, CONFLICT,
-                                f"{name} — pull --rebase conflicted "
-                                f"(aborted, left clean) — needs manual merge",
-                                {**detail, "state": "diverged"})
-                    try:
-                        run_with_retry(["git", "push"], r.path, timeout=30)
-                        push_msg = f"pushed ({r.ahead} commits)"
-                    except RuntimeError as e:
-                        push_msg = _push_fallback(r, str(e))
-                    msg = f"{pull_msg}; {push_msg}"
-                detail["action"] = "pull+push"
-            detail["secrets"] = secrets[:3] if secrets else []
-            if do_submodules:
-                sm = update_submodules(r, dry_run)
-                if sm:
-                    msg += f"; {sm}"
-                    detail["submodules"] = sm
-            return (name, _result_icon(msg, SYNCED), f"{name} — {msg}", detail)
+        # For overlapping divergence, surface the contested files for the agent.
+        if state in ("diverged", "conflict-risk") and r.behind > 0 and r.ahead > 0:
+            overlap = sorted(assess_conflict_files(r))[:8]
+            if overlap:
+                detail["conflict_files"] = overlap
 
-        elif state == "conflict-risk":
-            overlap = assess_conflict(r, dry_run)
-            if isinstance(overlap, set) and overlap:
-                files_str = ", ".join(sorted(overlap)[:5])
-                detail["conflict_files"] = sorted(overlap)[:5]
-                return (name, CONFLICT, f"{name} — DIVERGED in same files: "
-                        f"{files_str}. Needs review.", detail)
-            secrets = check_secrets(r)
-            if secrets:
-                print(f"  SECRET RISK: {', '.join(secrets[:3])}")
-            msg = commit_push_pull(r, dry_run)
-            detail["action"] = "auto-resolved"
-            detail["secrets"] = secrets[:3] if secrets else []
-            return (name, _result_icon(msg, SYNCED),
-                    f"{name} — auto-resolved: {msg}", detail)
-
-        elif state in ("no-upstream", "no-remote"):
-            if r.uncommitted > 0:
-                if r.branch not in ("main", "master"):
-                    return (name, SKIP, f"{name} — {r.uncommitted} uncommitted "
-                            f"on '{r.branch}' (no upstream, skipped)", detail)
-                msg = commit_and_push(r, dry_run)
-                detail["action"] = "commit (no upstream)"
-                return (name, _result_icon(msg, COMMITTED),
-                        f"{name} — {msg}", detail)
-            return (name, OK, f"{name} — clean, no upstream", detail)
-
-        else:
-            return (name, SKIP, f"{name} — unknown state '{state}'", detail)
+        tag = "NEEDS INPUT" if state == "no-remote" else "NEEDS AGENT"
+        return (name, CONFLICT, f"{name} — {tag}: {reason}", detail)
 
     except Exception as e:
         print(f"  {str(e)[:200]}", file=sys.stderr, flush=True)
@@ -1050,11 +832,6 @@ def main():
     parser.add_argument("--since", type=int, default=None, help=argparse.SUPPRESS)
     parser.add_argument("--workers", type=int, default=0,
                         help="Number of parallel workers (default: min(16, cpu_count*2))")
-    parser.add_argument("--commit-message", type=str,
-                        default="git-audit-sync: auto-commit",
-                        help="Custom commit message")
-    parser.add_argument("--update-submodules", action="store_true",
-                        help="Update git submodules after pull")
     parser.add_argument("--table", action="store_true",
                         help="Compact table output (good for terminal)")
     parser.add_argument("--quiet", "-q", action="store_true",
@@ -1066,11 +843,8 @@ def main():
     parser.add_argument("--prune-backups", type=int, default=None,
                         help="Remove backup branches older than N days")
     parser.add_argument("--github-user", type=str, default="",
-                        help="GitHub username for fork-remote fallback when "
-                             "origin push is denied (auto-detected via gh/git if unset)")
-    parser.add_argument("--allow-delete", action="store_true",
-                        help="Permit auto-commit of tracked-file deletions "
-                             "(default: deletions are flagged for review, not committed)")
+                        help="Your GitHub username; the script only pushes to an "
+                             "origin you own (auto-detected via gh/git if unset)")
     args = parser.parse_args()
 
     # Parse excludes with shlex to handle spaces properly
@@ -1144,12 +918,11 @@ def main():
                 print(f"  Pruned {pruned} old backup branches")
 
         # Set worker-visible globals
-        global _PROCESS_QUIET, _GITHUB_USER, _ALLOW_DELETE
+        global _PROCESS_QUIET, _GITHUB_USER
         _PROCESS_QUIET = args.quiet
-        _ALLOW_DELETE = args.allow_delete
         _GITHUB_USER = args.github_user.strip() or detect_github_user()
         if _GITHUB_USER and not args.quiet:
-            print(f"  Fork fallback user: {_GITHUB_USER}")
+            print(f"  Ownership check user: {_GITHUB_USER} (push only to repos you own)")
 
         report = Report(root, dry_run, output_dir=args.output_dir)
 
@@ -1164,8 +937,7 @@ def main():
         results: list[tuple[str, str, str, Optional[dict]]] = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
             futures = {
-                pool.submit(process_repo, rp, excludes, dry_run, since,
-                            args.commit_message, args.update_submodules): rp
+                pool.submit(process_repo, rp, excludes, dry_run, since): rp
                 for rp in repos
             }
             for future in concurrent.futures.as_completed(futures):
@@ -1193,52 +965,11 @@ def main():
                 print(f"{name:30s} {state:15s} {branch:20s} {files:>6s} {action:30s}")
             print()
 
-        # Create REMEDIATION_PLAN.md in repos that need attention during live runs only.
-        # Audit-only/dry-run must remain read-only aside from git fetch/report output.
-        if not dry_run:
-            for name, icon, msg, detail in results:
-                if icon in (CONFLICT, ERROR):
-                    plan_path = Path(str(args.directory)) / name / "REMEDIATION_PLAN.md"
-                    d = detail or {}
-                    plan = [
-                        f"# REMEDIATION PLAN — {name}",
-                        f"**Generated**: {datetime.now().isoformat()}",
-                        f"**Status**: {icon} Needs attention",
-                        "",
-                        "## Issue",
-                        f"State: {d.get('state', 'unknown')}",
-                        f"Branch: {d.get('branch', '?')}",
-                        f"Uncommitted: {d.get('uncommitted', 0)} files",
-                        f"Ahead: {d.get('ahead', 0)} | Behind: {d.get('behind', 0)}",
-                        "",
-                        "## Investigation",
-                        d.get("error", "Same files changed in both local and upstream.") if isinstance(d.get("error"), str) else "",
-                        "",
-                        "## Recommended Actions",
-                        "- [ ] Review changes: `git diff HEAD..@{u}`" if d.get("behind", 0) > 0 else "",
-                        "- [ ] Commit or stash local changes" if d.get("uncommitted", 0) > 0 else "",
-                        "- [ ] Pull upstream: `git pull --rebase`" if d.get("behind", 0) > 0 else "",
-                        "- [ ] Push local: `git push`" if d.get("ahead", 0) > 0 else "",
-                        "- [ ] Resolve merge conflicts if any",
-                        "",
-                        "## Auto-sync will skip this repo until resolved.",
-                    ]
-                    try:
-                        plan_path.parent.mkdir(parents=True, exist_ok=True)
-                        marker = f"\n---\n*Generated by reposcan at {datetime.now().isoformat()}*\n"
-                        # Append if exists, create if not
-                        existing = plan_path.read_text() if plan_path.exists() else ""
-                        if existing:
-                            plan_text = existing + marker + "\n".join(filter(None, plan))
-                        else:
-                            plan_text = "\n".join(filter(None, plan)) + marker
-                        plan_path.write_text(plan_text)
-                        if not args.quiet:
-                            action = "updated" if existing else "created"
-                            print(f"  📋 Remediation plan: {action} {plan_path}")
-                    except (OSError, PermissionError) as e:
-                        if not args.quiet:
-                            print(f"  ⚠️  Could not write remediation plan: {e}")
+        # NOTE: the script intentionally writes NOTHING into the repos themselves
+        # (not even a plan file — that would dirty the working tree). Everything
+        # the deployed agent needs to act on is in the report under
+        # ~/git-audit-logs (markdown + JSON, including a "needs" reason and any
+        # conflict_files per flagged repo).
 
         # --check-only: exit 1 if any repo is dirty or conflicted
         if args.check_only:

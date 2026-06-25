@@ -1,130 +1,61 @@
 ---
 name: git-audit-sync
-description: Automatically audit, commit, push, and pull every git repo in a directory tree. Detects uncommitted work, ahead/behind status, merge conflicts, active rebase/merge states, detached HEAD, and non-main branches. Handles trivial merges automatically and flags conflicts for user review. Use when asked to sync git repos, audit code folders, push/pull all projects, check for uncommitted work, or prepare a machine's git state.
+description: Audit every git repo in a directory tree and make each one current with its cloud remote. The script performs only operations that cannot break a repo or lose work (fast-forward pull, push to a remote you own); everything needing judgment — commits, merges, rebases, conflicts, missing or foreign push destinations — is flagged for the agent to resolve. Use when asked to sync git repos, audit code folders, push all projects to the cloud, check for uncommitted work, or prepare a machine's git state.
 ---
 
 # Git Audit & Sync
 
-Audits every git repo in a folder and brings them to a clean, synced state.
+Goal: make every repo **current with the cloud** — your local commits pushed up,
+clean fast-forwards pulled down, end state nothing pending. The work is split:
+
+- **The script** does only what is provably safe: `git pull --ff-only` and
+  `git push` to a remote you own. It never commits, merges, rebases, forces, or
+  pushes to a repo that isn't yours. A safe op that can't apply cleanly is left
+  untouched and flagged.
+- **The agent (you)** clears up everything the script flags — reviewing and
+  committing uncommitted work, reconciling divergence, resolving simple
+  conflicts, and asking the user when there is no valid destination.
+
+This division is deliberate: the script is never given the power to break a repo
+or do the wrong thing. All judgment lives with the agent.
 
 ## Workflow
 
-1. Run the automation script (see [scripts/audit_sync.py](scripts/audit_sync.py))
-2. Read the report it generates to the user
-3. For any flagged repos, show the details and ask for instructions
+1. Run the script: `repo <dir>` (or `python3 scripts/audit_sync.py <dir>`).
+2. Read the report at `~/git-audit-logs/git-audit-<timestamp>.md` (+ `.json`).
+3. Present the summary, then **handle each flagged repo yourself** (see below).
 
-## After Running
+## Handling flagged repos (the agent's job)
 
-After the script finishes, do the following for the user:
+The script tags each repo it won't touch. For each:
 
-1. **Read** `~/git-audit-logs/git-audit-<timestamp>.md` and present the Summary table
-2. **For ✅ Clean repos**: Just note the count — no action needed
-3. **For ⏩ Pulled / 📤 Pushed / 💾 Committed / 🔄 Synced repos**: Mention what happened and any notable commit counts
-4. **For ⚠️ Conflict repos**: Show the conflicting files and diffs, then ask the user how to proceed on each
-5. **For ⏭️ Skipped repos**: Explain why (in-progress merge, non-main branch, detached HEAD)
+| Flag | Meaning | What you do |
+|---|---|---|
+| `⚠️ NEEDS AGENT: uncommitted…` | Local uncommitted work | Inspect the diff. Check for secrets, accidental deletions, and junk/build artifacts. Commit only what belongs, with a real message, then push. Never blind `git add -A`. |
+| `⚠️ NEEDS AGENT: <N> unpushed…` | Committed but not pushed | Push if origin is yours; otherwise treat as the foreign-origin case below. |
+| `⚠️ NEEDS AGENT: diverged…` | Behind **and** ahead | Read `git diff HEAD..@{u}`. If the changes don't overlap, integrate (ff/rebase) and push. If they overlap, resolve the conflict **keeping all functionality** — find the reason for the conflict before editing; never delete to clear it. Ask if non-trivial. |
+| `⚠️ NEEDS AGENT: not a fast-forward…` | Clean but diverged from remote | Same as diverged — reconcile, don't force. |
+| `⚠️ NEEDS INPUT: origin not owned by you` | Push target is someone else's repo | **Ask the user.** Never push to a repo that isn't theirs. Offer: fork to their account and push there, or leave local-only. |
+| `⚠️ NEEDS INPUT: no remote / nowhere to push` | No destination | Ask the user where it should go (add a remote they own), or confirm it stays local. |
+| `❌ remote not found` | Origin deleted/renamed (404) | Ask whether to repoint or remove the remote. Never auto-remove a remote. |
+| `⏭️ active merge/rebase in progress` | Repo mid-operation | Finish or abort the operation with the user, then re-run. |
+| `secrets`/`untracked` in detail | Hints attached to the result | Use them: don't commit secrets; decide per-file whether untracked artifacts belong. |
 
-If there are no conflicts, summarize the result as "X repos processed, all clean."
+If the script reports no flags: "X repos processed, all current — nothing to do."
 
-## Decision Tree
+## What the script does on its own (safe states only)
 
-```
-                    ┌──────────────────┐
-                    │  Check for merge │
-                    │  /rebase/cherry- │
-                    │  pick in progress│
-                    └──────┬───────────┘
-                           │
-                    ┌──────▼───────────┐
-                    │  1. Fetch each   │
-                    │     repo         │
-                    └──────┬───────────┘
-                           │
-                    ┌──────▼───────────┐
-                    │  2. Classify     │
-                    │     state        │
-                    └──────┬───────────┘
-                           │
-        ┌──────────────────┼──────────────────┐
-        │                  │                  │
-   Active op          Has origin          No origin
-   (merge, etc.)      + upstream          or upstream
-        │                  │                  │
-   ⏭️ Skip, warn     ┌──────▼──────┐    Dirty?→ commit&push
-        │           │  Compare    │    Clean? → ✅ skip
-        │           │  local vs   │
-        │           │  upstream   │
-        │           └──────┬──────┘
-        │                  │
-        │      ┌───────────┼───────────┐
-        │      │           │           │
-        │  Clean       Dirty       Dirty +
-        │  behind      ahead       diverged
-        │  (pullable)  (pushable)  (behind
-        │      │           │       +ahead)
-        │  pull --ff-  push      ┌──────┘
-        │  only                  │
-        │              ┌─────────┴────────┐
-        │              │                  │
-        │         Same files        Different files
-        │         changed?          changed?
-        │              │                  │
-        │         ⚠️ Flag for        commit → push
-        │         user review        → pull (auto)
-        │
-        └──────────────── Non-main branch?
-                           Yes → ⏭️ Skip (WIP)
-                           No  → process normally
-```
+| State | Condition | Script action |
+|---|---|---|
+| **Clean** | even, no uncommitted | nothing |
+| **Pullable** | clean, behind | `git pull --ff-only` (refuses if not a clean fast-forward) |
+| **Pushable** | clean, ahead, **origin owned** | `git push` (no force; a rejected push changes nothing) |
+| **No upstream / no remote, nothing pending** | clean | nothing (reported clean) |
+| Anything else | — | **flagged for the agent — no changes made** |
 
-## Repo States & Actions
-
-| State | Uncommitted | vs Upstream | Branch | Action |
-|---|---|---|---|---|
-| **Clean** | 0 | even | any | ✅ Skip — nothing to do |
-| **Pullable** | 0 | behind | any | `git pull --ff-only` |
-| **Pushable** | 0 | ahead | any | `git push` |
-| **Local work** | >0 | even | main/master | Stage all → commit → push |
-| **Local work** | >0 | even | other | ⏭️ Skip — WIP on feature branch |
-| **Diverged** | >0 | behind | main/master | Commit → push → pull |
-| **Diverged** | >0 | behind | other | ⏭️ Skip — WIP on feature branch |
-| **Conflict risk** | >0 | ahead+behind | main/master | Check file overlap → auto-merge or flag |
-| **No upstream** | any | n/a | any | Push with `--set-upstream` or skip if detached |
-| **In progress** | any | any | any | ⏭️ Skip — active merge/rebase/cherry-pick |
-| **Error** | any | any | any | Report error and continue |
-
-## Safety Behaviors (auto-handled)
-
-These are applied automatically on every live run so risky cases resolve
-correctly instead of leaving repos broken or losing work:
-
-| Situation | What the script does |
-|---|---|
-| **Auto-commit would delete a tracked file** | Refuses the commit, resets the index, and flags the repo `⚠️ NEEDS REVIEW`. An accidental `rm` is never captured (its deletion-vs-upstream-edit can't auto-merge). Override with `--allow-delete`. |
-| **Push rejected for being behind** | Rebases onto upstream and **re-pushes** in the same run, completing the sync (no leftover "committed but not pushed" repos). |
-| **`pull --rebase` hits a conflict** | Runs `git rebase --abort` so the repo returns to a clean, recoverable state, then flags `⚠️ needs manual merge`. Repos are never left mid-rebase. |
-| **Push denied (403, origin not yours)** | Looks for a fork remote owned by `--github-user` and pushes there instead; if none exists, reports "create a fork" rather than a generic error. |
-| **Remote not found (404)** | Classified distinctly as "origin deleted/renamed — update or remove the remote" instead of a generic fetch error. Never auto-deletes a remote. |
-
-## Rollback Safety
-
-Before any write operation, the script creates a backup tag:
-```
-git-audit-sync/backup-YYYYMMDD-HHMMSS-<reponame>
-```
-
-Restore with:
-```bash
-# Creates a branch from the tag so you're not in detached HEAD
-git switch -c recovery-<reponame> git-audit-sync/backup-YYYYMMDD-HHMMSS-<reponame>
-```
-
-## Known Limitations
-
-- **Binary files**: The script cannot detect or merge binary file conflicts. If a `.png`, `.ico`, or other binary file diverges, git's native merge will report the conflict.
-- **Detached HEAD**: If a repo is in detached HEAD state, the script reports it and skips it. Run `git switch <branch>` first.
-- **Active operations**: If a merge, rebase, cherry-pick, or revert is in progress, the script skips the repo and reports it.
-- **Large binary files in history**: The script is not designed for repos with large binary files or LFS-managed assets.
-- **Pre-commit hooks**: The script does not trigger pre-commit hooks during auto-commit. If hooks are configured, run `git commit` manually.
+Ownership is verified against your GitHub username (auto-detected via `gh api
+user`, then `git config github.user`; override with `--github-user`). If origin
+isn't yours, the script does **not** push and flags `NEEDS INPUT`.
 
 ## Installation
 
@@ -139,87 +70,78 @@ bash install.sh /usr/local/bin   # or a custom dir
 
 ## Automation Script
 
-The core logic is in [scripts/audit_sync.py](scripts/audit_sync.py). It handles all repo states deterministically and processes repos in **parallel** using independent worker threads — each repo has its own `.git` so no shared state or conflict is possible.
+The core logic is in [scripts/audit_sync.py](scripts/audit_sync.py). It inspects
+and classifies every repo, then performs only the two safe operations above, in
+**parallel** across independent worker threads — each repo has its own `.git`, so
+there is no shared state. The script writes **nothing** into the repos themselves
+(not even a plan file — that would dirty the tree); all actionable detail lives in
+the report.
 
-**Repo discovery**: Recursively walks the target directory tree (skipping `node_modules`, `.cache`, `venv`, build artifacts). Finds repos at any nesting depth — not just direct children.
+**Repo discovery**: recursively walks the tree (skipping `node_modules`,
+`.cache`, `venv`, build artifacts), finding repos at any nesting depth.
 
 ### Flags
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--workers N` | `min(8, cpu_count)` | Number of parallel workers. Each gets its own repos — zero shared state. |
-| `--since N` | all | Only process repos modified in the last N days (checks `.git` mtime). |
-| `--exclude repo1,repo2` | none | Comma or space-separated repo names to skip. |
-| `--maxdepth N` | 3 | Max directory depth for recursive repo discovery. |
-| `--commit-message "msg"` | `git-audit-sync: auto-commit` | Custom commit message for auto-commits. |
-| `--update-submodules` | off | Run `git submodule update --recursive` after pull. |
-| `--audit-only` | off | Read-only audit — no changes made. |
-| `--dry-run` | off | Simulate all operations without making changes. |
-| `--github-user NAME` | auto (gh/git) | GitHub username used to find a fork remote when origin push is denied. Auto-detected via `gh api user` then `git config github.user`. |
-| `--allow-delete` | off | Permit auto-commit of tracked-file **deletions**. By default deletions are refused and flagged for review (prevents an accidental `rm` from being captured and colliding with upstream). |
+| `--workers N` | `min(16, cpu*2)` | Parallel workers. Each gets its own repos — zero shared state. |
+| `--since-days N` | all | Only process repos modified in the last N days (`.git` mtime). |
+| `--exclude r1,r2` | none | Comma/space-separated repo names to skip. |
+| `--maxdepth N` | 3 | Max directory depth for discovery. |
+| `--github-user NAME` | auto (gh/git) | Your GitHub username; the script pushes only to an origin you own. |
+| `--audit-only` | off | Read-only audit — no writes at all. |
+| `--dry-run` | off | Simulate; show what the safe ops would do. |
+| `--check-only` | off | Exit non-zero if any repo is dirty/diverged/conflicted (CI). |
+| `--prune-backups N` | off | Remove `git-audit-sync/*` backup branches older than N days. |
 
 ```bash
-# Full sync (8 workers in parallel)
-python3 scripts/audit_sync.py ~/code
-
-# Read-only audit
-python3 scripts/audit_sync.py ~/code --audit-only
-
-# Dry run (show what would happen)
-python3 scripts/audit_sync.py ~/code --dry-run
-
-# Fast parallel scan with 12 workers, skip old repos
-python3 scripts/audit_sync.py ~/code --workers 12 --since 30
-
-# Skip specific repos
-python3 scripts/audit_sync.py ~/code --exclude whisper.cpp,agents
-
-# Custom commit message + update submodules
-python3 scripts/audit_sync.py ~/code --commit-message "chore: sync" --update-submodules
+repo ~/code                      # audit + safe sync (push owned, ff-pull)
+repo ~/code --audit-only         # read-only audit
+repo ~/code --dry-run            # show what the safe ops would do
+repo ~/code --workers 12 --since-days 30
+repo ~/code --exclude whisper.cpp,agents
 ```
 
-### Parallel workers (sub-agent pattern)
+### Parallel workers
 
-Each repo is dispatched to an independent worker thread. Workers don't share state — each has its own `GitRepo` object and writes results back through a thread-safe collector. This design:
-
-- **Scales linearly** with CPU count — 20 repos on 8 workers finishes in ~3 batches
-- **Eliminates conflict risk** — no two workers touch the same `.git`
-- **Preserves ordering** — results are merged in completion order, then sorted by severity
-- **Survives crashes** — one repo failing doesn't block the rest
+Each repo is dispatched to an independent worker thread with its own `GitRepo`
+object; results merge through a thread-safe collector, then sort by severity.
+One repo failing never blocks the rest.
 
 ## Output
 
-Creates a timestamped report at `~/git-audit-logs/` — both markdown (human) and JSON (machine):
-```
-📊 Report: ~/git-audit-logs/git-audit-2026-06-17-192525.md
+A timestamped report at `~/git-audit-logs/` — markdown (human) and JSON (machine).
+The JSON carries per-repo `state`, `ahead`/`behind`, `needs` (the agent's
+to-do), `conflict_files`, `secrets`, and `untracked` so the agent can act
+precisely:
 
-# Git Audit — /home/user/code
+```
 ## Summary
-| Stat | Count |
-|------|-------|
-| ✅ Clean / up-to-date | 8 |
-| ⏩ Pulled | 2 |
-| 💾 Committed + pushed | 1 |
-| ⚠️ Conflicts | 1 |
-| ⏭️ Skipped | 1 |
-| **Health** | **89%** |
+| ✅ Clean | 37 | ⏩ Pulled | 2 | 📤 Pushed | 1 | ⚠️ Needs agent | 10 | ❌ Errors | 2 |
 
 ## Per-repo results
-- ✅ surface-fixed-event-quell — clean, up-to-date
-- ⏩ wiki-memory — pulled (3 commits ff-only)
-- 💾 voice-agent — committed + pushed (6 files)
-- ⚠️ aaa-memory — DIVERGED in same files: src/config.py. Needs review.
-- ⏭️ AutoResearchClaw — active merge in progress (skipped)
+- 📤 ante-spec — would push (1 commits)
+- ⏩ wiki-memory — pulled (1 commits, ff-only)
+- ⚠️ custom-skills — NEEDS AGENT: 1 uncommitted file(s) on 'main' — review, commit, push
+- ⚠️ multi-agent-workflow — NEEDS INPUT: origin not owned by you (apolopena/…)
+- ❌ agents — remote repository not found — update or remove the remote
 ```
 
-## Cases that always need user input
+## Cases the agent must handle (never the script)
 
-- **Uncommitted work on a non-main branch** — may be work-in-progress, won't auto-commit
-- **Same-file divergence between local and upstream** — flagged for review with file list
-- **Auto-commit would delete a tracked file** — refused and flagged (likely an accidental `rm`); resolve or re-run with `--allow-delete`
-- **`pull --rebase` conflict** — auto-aborted to a clean state, then flagged for manual merge
-- **Push denied (403)** — pushed to your fork if one is configured, otherwise flagged to create a fork
-- **Remote not found (404)** — origin deleted/renamed; update or remove the remote (never auto-removed)
-- **Binary file conflicts** — can't auto-merge
-- **Active merge/rebase/cherry-pick** — skipped, user must resolve first
-- **Detached HEAD** — skipped, user must `git switch <branch>` first
+- **Any uncommitted work** — review the diff, exclude secrets/junk/accidental deletions, commit deliberately, push.
+- **Divergence** — reconcile keeping all functionality; understand the conflict before resolving; never delete to clear a conflict.
+- **Foreign origin (not yours)** — ask; fork to the user's account or leave local. Never push to a repo that isn't theirs.
+- **No / dead remote** — ask whether to add, repoint, or remove. Never auto-remove a remote.
+- **Active merge/rebase/cherry-pick** — finish or abort with the user first.
+- **Detached HEAD** — `git switch <branch>` first.
+
+## Rollback Safety
+
+The only writes are `pull --ff-only` (cannot lose committed work) and `push`
+(changes nothing locally), so there is little to undo. Backup branches created by
+older versions can be pruned with `--prune-backups N`, or restored with:
+
+```bash
+git switch -c recovery-<name> git-audit-sync/backup-YYYYMMDD-HHMMSS-<name>
+```
