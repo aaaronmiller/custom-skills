@@ -1,1 +1,0 @@
-/home/cheta/code/skills-USER/karpathy-wiki/SETUP.md

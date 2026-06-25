@@ -156,91 +156,92 @@ def process_session(
         return len(turns), 0, 0
 
     try:
-        # Upsert conversation
-        if existing:
-            conv_id = existing[0]
+        with conn:
+            # Upsert conversation
+            if existing:
+                conv_id = existing[0]
+                conn.execute(
+                    """UPDATE conversations SET
+                        session_title = ?, source_path = ?, source_hash = ?,
+                        updated_at = ?, ingested_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+                    WHERE id = ?""",
+                    (session_title, filepath, metadata["source_hash"], updated_at, conv_id),
+                )
+                # Delete old turns to re-ingest
+                conn.execute("DELETE FROM conversation_turns WHERE conversation_id = ?", (conv_id,))
+            else:
+                cursor = conn.execute(
+                    """INSERT INTO conversations
+                        (provider, session_id, session_title, project_name, source_path,
+                         source_hash, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (metadata["provider"], metadata["session_id"], session_title,
+                     metadata["project_name"], filepath, metadata["source_hash"],
+                     created_at, updated_at),
+                )
+                conv_id = cursor.lastrowid
+
+            # Insert turns
+            turn_count = 0
+            user_turn_count = 0
+            total_chars = 0
+
+            for idx, turn in enumerate(turns):
+                role = map_role(turn.get("type", "tool"))
+                content = turn.get("content", "")
+                if isinstance(content, list):
+                    # Anthropic-style content blocks
+                    content = " ".join(
+                        block.get("text", "") for block in content
+                        if isinstance(block, dict) and block.get("type") == "text"
+                    )
+                content_text = str(content) if content else ""
+                char_count = len(content_text)
+                total_chars += char_count
+
+                if role == "user":
+                    user_turn_count += 1
+
+                # Generate summary/truncated for long assistant responses
+                content_summary = None
+                content_truncated = None
+                if role == "assistant" and char_count > 2000:
+                    content_summary = generate_summary(content_text)
+                    content_truncated = generate_truncated(content_text)
+
+                # Extract tool calls
+                tool_calls_json = None
+                if turn.get("tool_uses"):
+                    tool_calls_json = json.dumps(turn["tool_uses"])
+
+                # Extract thinking content
+                thinking_content = None
+                if turn.get("thinking"):
+                    thinking_content = str(turn["thinking"])
+
+                timestamp = turn.get("timestamp") or turn.get("ts") or created_at
+                model_id = turn.get("model")
+
+                conn.execute(
+                    """INSERT INTO conversation_turns
+                        (conversation_id, turn_index, role, content_text, content_summary,
+                         content_truncated, thinking_content, model_id, tool_calls,
+                         char_count, token_estimate, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (conv_id, idx, role, content_text, content_summary, content_truncated,
+                     thinking_content, model_id, tool_calls_json, char_count,
+                     char_count // 4, timestamp),
+                )
+                turn_count += 1
+
+            # Update conversation aggregates
             conn.execute(
                 """UPDATE conversations SET
-                    session_title = ?, source_path = ?, source_hash = ?,
+                    turn_count = ?, user_turn_count = ?, total_chars = ?,
                     updated_at = ?, ingested_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
                 WHERE id = ?""",
-                (session_title, filepath, metadata["source_hash"], updated_at, conv_id),
+                (turn_count, user_turn_count, total_chars, updated_at, conv_id),
             )
-            # Delete old turns to re-ingest
-            conn.execute("DELETE FROM conversation_turns WHERE conversation_id = ?", (conv_id,))
-        else:
-            cursor = conn.execute(
-                """INSERT INTO conversations
-                    (provider, session_id, session_title, project_name, source_path,
-                     source_hash, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                (metadata["provider"], metadata["session_id"], session_title,
-                 metadata["project_name"], filepath, metadata["source_hash"],
-                 created_at, updated_at),
-            )
-            conv_id = cursor.lastrowid
-
-        # Insert turns
-        turn_count = 0
-        user_turn_count = 0
-        total_chars = 0
-
-        for idx, turn in enumerate(turns):
-            role = map_role(turn.get("type", "tool"))
-            content = turn.get("content", "")
-            if isinstance(content, list):
-                # Anthropic-style content blocks
-                content = " ".join(
-                    block.get("text", "") for block in content
-                    if isinstance(block, dict) and block.get("type") == "text"
-                )
-            content_text = str(content) if content else ""
-            char_count = len(content_text)
-            total_chars += char_count
-
-            if role == "user":
-                user_turn_count += 1
-
-            # Generate summary/truncated for long assistant responses
-            content_summary = None
-            content_truncated = None
-            if role == "assistant" and char_count > 2000:
-                content_summary = generate_summary(content_text)
-                content_truncated = generate_truncated(content_text)
-
-            # Extract tool calls
-            tool_calls_json = None
-            if turn.get("tool_uses"):
-                tool_calls_json = json.dumps(turn["tool_uses"])
-
-            # Extract thinking content
-            thinking_content = None
-            if turn.get("thinking"):
-                thinking_content = str(turn["thinking"])
-
-            timestamp = turn.get("timestamp") or turn.get("ts") or created_at
-            model_id = turn.get("model")
-
-            conn.execute(
-                """INSERT INTO conversation_turns
-                    (conversation_id, turn_index, role, content_text, content_summary,
-                     content_truncated, thinking_content, model_id, tool_calls,
-                     char_count, token_estimate, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (conv_id, idx, role, content_text, content_summary, content_truncated,
-                 thinking_content, model_id, tool_calls_json, char_count,
-                 char_count // 4, timestamp),
-            )
-            turn_count += 1
-
-        # Update conversation aggregates
-        conn.execute(
-            """UPDATE conversations SET
-                turn_count = ?, user_turn_count = ?, total_chars = ?,
-                updated_at = ?, ingested_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
-            WHERE id = ?""",
-            (turn_count, user_turn_count, total_chars, updated_at, conv_id),
-        )
 
         return turn_count, 0, 0
 

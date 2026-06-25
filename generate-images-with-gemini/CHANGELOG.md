@@ -4,7 +4,7 @@ All notable changes to the `generate-images-with-gemini` skill will be documente
 ## [Unreleased]
 ### Added
 - Standard `SKILL.md` entry point with YAML frontmatter.
-- Sample payload definition in `resources/sample-payload.json`.
+- Sample payload definition in `references/sample-payload.json`.
 - `settings.json` mirroring main Antigravity personal OAuth configuration.
 - Bash wrapper script `bin/nanobanana.sh` to simplify headless execution.
 - Headless execution documentation in `references/headless-guide.md` with Python integration details.

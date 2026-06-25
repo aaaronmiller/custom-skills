@@ -21,7 +21,7 @@ metadata:
 ---
 
 
-> ⚠️ **BEFORE USING THIS SKILL:** Review all files in `resources/`. These contain the 100-Dork query operators, source evaluation rubrics, verification strategies, and report templates required for execution.
+> ⚠️ **BEFORE USING THIS SKILL:** Review all files in `references/`. These contain the 100-Dork query operators, source evaluation rubrics, verification strategies, and report templates required for execution.
 # Deep Research Skill
 
 The skill operates on a strict mathematical model of **Decomposition (X)**, **Breadth (Y)**, and **Depth (Z)**.
@@ -63,10 +63,10 @@ Topic: [User's Request]
 
 ### Phase 2: Breadth (Multiweb Search)
 
-**Consult**: `resources/inference-guide.md` for query construction.
+**Consult**: `references/inference-guide.md` for query construction.
 **Use Case**: Building "Impossible Strings" that pierce SEO spam.
 
-1.  **Tool Selection**: Consult `resources/inference-guide.md`.
+1.  **Tool Selection**: Consult `references/inference-guide.md`.
     *   Construct specific queries using "Dorks" (`site:`, `filetype:`) and Technical Modifiers.
     *   Use the "Kill Chains" (Crypto, SaaS, BioTech) for industry-specific pivots.
     *   **Rule**: Do NOT use generic natural language queries. Use the operators.
@@ -85,7 +85,7 @@ Example: `mamba architecture "latency benchmarks" filetype:pdf -site:medium.com`
     *   **Social**: Search Reddit, X (Twitter), and Hacker News for specific discussions, "prior art," and community sentiment.
     *   *Adaptive Note*: If the topic is strictly non-technical (e.g., History), shift the "GitHub" mandate to "Primary/Academic Sources" (e.g., Google Scholar, JSTOR).
 4.  **Logging**: Append all findings to `scratch_findings.md`. 
-    *   **MANDATORY**: Score every source using `resources/verification-strategies.md` (Trust Tiers, AI-Tell Blacklist).
+    *   **MANDATORY**: Score every source using `references/verification-strategies.md` (Trust Tiers, AI-Tell Blacklist).
     *   Tag: `[Bias: Neutral/Commercial/Political]` and `[Credibility: High/Med/Low]`.
     *   *Rule*: If a source matches the "SEO Visual Catalog" patterns, DISCARD IT.
 5.  **Null Result Gate**: If the Y searches yield *zero* high-quality results:
@@ -96,7 +96,7 @@ Example: `mamba architecture "latency benchmarks" filetype:pdf -site:medium.com`
 
 ### Phase 3: Depth (Targeted Retrieval)
 
-**Consult**: `resources/refinement-patterns.md` for SOPs.
+**Consult**: `references/refinement-patterns.md` for SOPs.
 **Use Case**: Executing structured audits (GitHub Repo Audit, SaaS Due Diligence).
 
 1.  **Selection**: Identify the top **Z** most promising, high-density sources from Phase 2.
@@ -119,16 +119,16 @@ Claim: "[Source A says X is 100x faster]"
 
 ### Phase 4: Unification & Reporting
 
-**Consult**: `resources/refinement-patterns.md` for synthesis logic.
-**Consult**: `resources/report-template.md` for output templates.
+**Consult**: `references/refinement-patterns.md` for synthesis logic.
+**Consult**: `references/report-template.md` for output templates.
 
 1.  **Synthesize**: Read `scratch_findings.md` and all assessed local sources.
-    *   **Rule**: Use the dialectical synthesis loop described above AND `resources/refinement-patterns.md`.
+    *   **Rule**: Use the dialectical synthesis loop described above AND `references/refinement-patterns.md`.
     *   Apply **Dialectical Synthesis** (Thesis + Antithesis -> Synthesis). Do not just list facts.
     *   Apply the "No Orphan Facts" rule (Fact + Context + Constraint).
 2.  **Unify**: Merge conflicting data using the "Conflict of Laws" protocol (Recency > Legacy, Code > Docs).
 3.  **Output**: Generate the final artifact (e.g., `Deep_Research_Report.md`).
-    *   **Select Archetype** from `resources/report-template.md`:
+    *   **Select Archetype** from `references/report-template.md`:
         *   *Executive Brief*: BLUF + Decision Matrix.
         *   *Engineering Deep Dive*: RFC style with code.
         *   *Red Team Assessment*: Vulnerability focus.
@@ -283,11 +283,11 @@ When the research is complete, you may need to polish the prose.
 
 ## Reference Files
 
-- `resources/inference-guide.md`: R(W,D,S,V,F) parameter inference, search operator guide, signal detection
-- `resources/verification-strategies.md`: Source quality hierarchy, claim verification, confidence scoring
-- `resources/refinement-patterns.md`: Iterative refinement loop — widen, deepen, saturate operations
-- `resources/report-template.md`: Standardized research report output template
-- `resources/templates/scratchpad_template.md`: Scratchpad format for tracking research sessions
+- `references/inference-guide.md`: R(W,D,S,V,F) parameter inference, search operator guide, signal detection
+- `references/verification-strategies.md`: Source quality hierarchy, claim verification, confidence scoring
+- `references/refinement-patterns.md`: Iterative refinement loop — widen, deepen, saturate operations
+- `references/report-template.md`: Standardized research report output template
+- `references/templates/scratchpad_template.md`: Scratchpad format for tracking research sessions
 
 ---
 

@@ -1,11 +1,6 @@
 ---
 name: userprompt-mine-skill
-description: >
-  Mine, store, search, report, and continuously improve across all your coding agent
-  sessions (Claude Code, Codex, Cursor, ChatGPT, Aider, Gemini, Cline, and 15+ more).
-  Extracts prompts, patterns, and learnings from conversation history for reuse.
-  Triggers: "mine", "prompt mine", "extract prompts", "session mining", "agent prompts",
-  "mine sessions", "save prompt", "search prompts".
+description: "Use when: mining sessions, extracting prompts, searching past transcripts. Action: Search and extract developer prompt histories from logs..."
 tags:
   - ai/llm
   - data

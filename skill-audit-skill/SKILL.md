@@ -149,7 +149,7 @@ Use this for each skill under review:
 When you find a marketplace skill that overlaps with one you already have,
 or when deciding whether to adopt a new skill vs keep an existing one:
 
-1. **Load the rubric**: Read `resources/scoring-rubric.md` — it contains the
+1. **Load the rubric**: Read `references/scoring-rubric.md` — it contains the
    10-category scoring system, comparison protocol, and merging methodology.
 2. **Score both skills**: Grade each independently using the rubric.
 3. **Compare**: If yours wins by 10+ points, keep yours. If theirs wins,
@@ -200,7 +200,7 @@ Check for these red flags. ANY ONE indicates the description will under-trigger:
 | High-priority S-tier | Only 1-2 triggers | Has 10+ triggers with "Triggers:" section |
 
 **For detailed fix guidance** (how to rewrite bad descriptions, before/after examples,
-tiered length recommendations), see `resources/description-research-findings.md`.
+tiered length recommendations), see `references/description-research-findings.md`.
 
 ### What NOT to Do
 
@@ -239,11 +239,11 @@ Do not promise 5K unless the user explicitly accepts reduced trigger coverage.
 
 ## Resource File Understanding
 
-Resource files (`resources/`) do NOT need YAML frontmatter descriptions.
+Resource files (`references/`) do NOT need YAML frontmatter descriptions.
 They are loaded when the model reads the SKILL.md body and encounters a reference:
 
 ```markdown
-For detailed patterns, see `resources/patterns.md`.
+For the scoring rubric, see `references/scoring-rubric.md`.
 ```
 
 The model decides to load the file because the SKILL.md body INSTRUCTED it to.
@@ -322,20 +322,20 @@ TIER 3 — Undeployed:        Edge-case skills, manually triggered only
 ## Reference Files
 
 ### Detailed rubrics and templates:
-- **`resources/scoring-rubric.md`** — 100-point quality assessment rubric (10 categories) + cross-skill comparison protocol + marketplace gap analysis methodology + merging protocol. Use this when comparing two skills that do similar things to determine which is better, or when evaluating whether to adopt a marketplace skill. See the Comparison section for when to use this.
-- **`resources/audit-report-template.md`** — Standardized audit report format
-- **`resources/pre-curate-detection.md`** — Detailed heuristics for identifying auto-generated junk skills
-- **`resources/description-revision-guide.md`** — Complete guide for revising descriptions with before/after examples
-- **`resources/resource-file-audit.md`** — Reference file assessment methodology
+- **`references/scoring-rubric.md`** — 100-point quality assessment rubric (10 categories) + cross-skill comparison protocol + marketplace gap analysis methodology + merging protocol. Use this when comparing two skills that do similar things to determine which is better, or when evaluating whether to adopt a marketplace skill. See the Comparison section for when to use this.
+- **`references/audit-report-template.md`** — Standardized audit report format
+- **`references/pre-curate-detection.md`** — Detailed heuristics for identifying auto-generated junk skills
+- **`references/description-revision-guide.md`** — Complete guide for revising descriptions with before/after examples
+- **`references/resource-file-audit.md`** — Reference file assessment methodology
 
 ### Templates:
-- **`resources/templates/skill-audit-report.md`** — Blank report template for new audits
-- **`resources/templates/individual-skill-assessment.md`** — Per-skill assessment template
-- **`resources/templates/description-revision-template.md`** — Template for bulk description revisions
+- **`references/templates/skill-audit-report.md`** — Blank report template for new audits
+- **`references/templates/individual-skill-assessment.md`** — Per-skill assessment template
+- **`references/templates/description-revision-template.md`** — Template for bulk description revisions
 
 ### Key Reference: Research Findings on Description Mechanics
 
-**`resources/description-research-findings.md`** — Comprehensive research across 15+
+**`references/description-research-findings.md`** — Comprehensive research across 15+
 authoritative sources (Anthropic docs, Hermes Agent docs, GitHub issues, community guides)
 on how skill descriptions actually work in the system prompt. Covers:
 
@@ -348,4 +348,5 @@ on how skill descriptions actually work in the system prompt. Covers:
 
 This file should also be referenced in any skill-creation skill as a resource, since
 understanding description mechanics is essential for authoring skills that fire reliably.
+
 
