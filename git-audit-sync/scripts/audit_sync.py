@@ -335,13 +335,6 @@ class GitRepo:
         except OSError:
             pass
 
-        # Detect detached HEAD
-        try:
-            head = run_git(self.path, "rev-parse", "--symbolic-full-name", "HEAD", timeout=5)
-            self.is_detached = not head.startswith("refs/heads/")
-        except RuntimeError:
-            pass
-
         # Check for active merge/rebase/cherry-pick/revert
         GIT_LOCK_FILES = ["MERGE_HEAD", "REBASE_HEAD", "CHERRY_PICK_HEAD",
                           "REVERT_HEAD", "MERGE_MSG", "MERGE_MODE", "sequencer/todo"]
@@ -358,11 +351,19 @@ class GitRepo:
         if self.active_git_op:
             return
 
+        # Detect detached HEAD and get branch name
+        # Handle empty repos (no commits yet) - "ambiguous argument 'HEAD'" error
         try:
-            self.branch = run_git(self.path, "rev-parse", "--abbrev-ref", "HEAD",
-                                  timeout=10)
+            head = run_git(self.path, "rev-parse", "--symbolic-full-name", "HEAD", timeout=5)
+            self.is_detached = not head.startswith("refs/heads/")
+            self.branch = run_git(self.path, "rev-parse", "--abbrev-ref", "HEAD", timeout=10)
         except RuntimeError as e:
-            self.error = str(e)
+            err_str = str(e)
+            if "ambiguous argument 'HEAD'" in err_str:
+                # Empty repo - no commits yet
+                self.error = "empty-repo"
+                return
+            self.error = err_str
             return
 
         # Remote
@@ -422,6 +423,8 @@ class GitRepo:
             return "no-upstream"
         if self.behind > 0 and self.ahead > 0 and self.uncommitted > 0:
             return "conflict-risk"
+        if self.behind > 0 and self.ahead > 0:
+            return "diverged"
         if self.uncommitted > 0 and self.behind > 0:
             return "diverged"
         if self.uncommitted > 0 and self.ahead > 0:
@@ -514,8 +517,8 @@ def commit_push_pull(repo: GitRepo, dry_run: bool) -> str:
                                           "git add failed"]):
         return result
     try:
-        r = run_with_retry(["git", "pull", "--ff-only"], repo.path, timeout=30)
-        return f"{result}; pulled"
+        r = run_with_retry(["git", "pull", "--rebase"], repo.path, timeout=30)
+        return f"{result}; pulled (rebase)"
     except RuntimeError as e:
         return f"{result}; pull failed: {str(e)}"
 
@@ -612,7 +615,7 @@ def _find_git_repos_windows(root: Path) -> list[Path]:
             "target", "build", "dist", ".git"}
     try:
         for p in root.rglob(".git"):
-            if p.is_dir() and p.parent != root and p.parent.name not in SKIP:
+            if p.is_dir() and p.parent.name not in SKIP:
                 repos.append(p.parent)
     except PermissionError:
         pass
@@ -643,8 +646,7 @@ def find_git_repos(root: Path, maxdepth: int = 3) -> list[Path]:
             if not line:
                 continue
             repo_dir = Path(line).parent
-            if repo_dir != root:
-                repos.append(repo_dir)
+            repos.append(repo_dir)
         return sorted(set(repos))
     except Exception:
         repos = []
@@ -689,6 +691,8 @@ def process_repo(repo_path: Path, excludes: set[str], dry_run: bool,
         return (name, SKIP, f"{name} — .gitaudit-skip marker found (skipped)", None)
 
     if r.error:
+        if r.error == "empty-repo":
+            return (name, SKIP, f"{name} — empty repo (no commits yet, skipped)", {"state": "empty", "error": "empty repo"})
         return (name, ERROR, f"{name} — {r.error}",
                 {"state": "error", "error": r.error})
 
@@ -736,15 +740,60 @@ def process_repo(repo_path: Path, excludes: set[str], dry_run: bool,
             detail["secrets"] = secrets[:3] if secrets else []
             return (name, COMMITTED, f"{name} — {msg}", detail)
 
-        elif state == "diverged":
+        elif state == "local-ahead":
+            # Uncommitted changes + ahead of upstream
+            # Commit the changes then push both new and existing ahead commits
             if r.branch not in ("main", "master"):
                 return (name, SKIP, f"{name} — {r.uncommitted} uncommitted + "
-                        f"{r.behind} behind on '{r.branch}' (skipped)", detail)
+                        f"{r.ahead} ahead on '{r.branch}' branch (skipped)", detail)
             secrets = check_secrets(r)
             if secrets:
                 print(f"  SECRET RISK: {', '.join(secrets[:3])}")
-            msg = commit_push_pull(r, dry_run)
-            detail["action"] = "commit+push+pull"
+            # First commit uncommitted changes
+            if r.uncommitted > 0:
+                if dry_run:
+                    return (name, COMMITTED, f"{name} — would commit {r.uncommitted} files and push ({r.ahead} ahead)", detail)
+                try:
+                    run(["git", "add", "-A"], r.path, timeout=30)
+                    run(["git", "commit", "-m", commit_msg], r.path, timeout=30)
+                except RuntimeError as e:
+                    return (name, ERROR, f"{name} — commit failed: {e}", {"state": "error", "error": str(e)})
+            # Then push all ahead commits
+            msg = push(r, dry_run)
+            detail["action"] = "commit+push (local-ahead)"
+            detail["secrets"] = secrets[:3] if secrets else []
+            return (name, COMMITTED, f"{name} — {msg}", detail)
+
+        elif state == "diverged":
+            if r.branch not in ("main", "master"):
+                return (name, SKIP, f"{name} — diverged "
+                        f"({r.ahead} ahead, {r.behind} behind, {r.uncommitted} uncommitted) "
+                        f"on '{r.branch}' (skipped)", detail)
+            secrets = check_secrets(r)
+            if secrets:
+                print(f"  SECRET RISK: {', '.join(secrets[:3])}")
+            if r.uncommitted > 0:
+                # Has uncommitted changes: commit, push, then pull
+                msg = commit_push_pull(r, dry_run)
+                detail["action"] = "commit+push+pull"
+            else:
+                # No uncommitted changes: just pull then push
+                # First pull with rebase, then push
+                if dry_run:
+                    msg = f"would pull --rebase ({r.behind} commits) and push ({r.ahead} commits)"
+                else:
+                    try:
+                        run_with_retry(["git", "pull", "--rebase"], r.path, timeout=30)
+                        pull_msg = f"pulled --rebase ({r.behind} commits)"
+                    except RuntimeError as e:
+                        return (name, ERROR, f"{name} — pull --rebase failed: {e}", {"state": "error", "error": str(e)})
+                    try:
+                        run_with_retry(["git", "push"], r.path, timeout=30)
+                        push_msg = f"pushed ({r.ahead} commits)"
+                    except RuntimeError as e:
+                        return (name, ERROR, f"{name} — push failed: {e}", {"state": "error", "error": str(e)})
+                    msg = f"{pull_msg}; {push_msg}"
+                detail["action"] = "pull+push"
             detail["secrets"] = secrets[:3] if secrets else []
             if do_submodules:
                 sm = update_submodules(r, dry_run)
@@ -960,7 +1009,7 @@ def main():
         if args.table:
             print(f"\n{'Repo':30s} {'State':15s} {'Branch':20s} {'Files':>6s} {'Action':30s}")
             print("-" * 101)
-            for name, icon, msg, detail in sorted(results):
+            for name, icon, msg, detail in sorted(results, key=lambda x: x[0]):
                 d = detail or {}
                 state = d.get("state", "?")[:15]
                 branch = d.get("branch", "?")[:20]
@@ -970,49 +1019,52 @@ def main():
                 print(f"{name:30s} {state:15s} {branch:20s} {files:>6s} {action:30s}")
             print()
 
-        # Create REMEDIATION_PLAN.md in repos that need attention
-        for name, icon, msg, detail in results:
-            if icon in (CONFLICT, ERROR):
-                plan_path = Path(str(args.directory)) / name / "REMEDIATION_PLAN.md"
-                d = detail or {}
-                plan = [
-                    f"# REMEDIATION PLAN — {name}",
-                    f"**Generated**: {datetime.now().isoformat()}",
-                    f"**Status**: {icon} Needs attention",
-                    "",
-                    "## Issue",
-                    f"State: {d.get('state', 'unknown')}",
-                    f"Branch: {d.get('branch', '?')}",
-                    f"Uncommitted: {d.get('uncommitted', 0)} files",
-                    f"Ahead: {d.get('ahead', 0)} | Behind: {d.get('behind', 0)}",
-                    "",
-                    "## Investigation",
-                    d.get("error", "Same files changed in both local and upstream.") if isinstance(d.get("error"), str) else "",
-                    "",
-                    "## Recommended Actions",
-                    "- [ ] Review changes: `git diff HEAD..@{u}`" if d.get("behind", 0) > 0 else "",
-                    "- [ ] Commit or stash local changes" if d.get("uncommitted", 0) > 0 else "",
-                    "- [ ] Pull upstream: `git pull --rebase`" if d.get("behind", 0) > 0 else "",
-                    "- [ ] Push local: `git push`" if d.get("ahead", 0) > 0 else "",
-                    "- [ ] Resolve merge conflicts if any",
-                    "",
-                    "## Auto-sync will skip this repo until resolved.",
-                ]
-                try:
-                    plan_path.parent.mkdir(parents=True, exist_ok=True)
-                    marker = f"\n---\n*Generated by reposcan at {datetime.now().isoformat()}*\n"
-                    # Append if exists, create if not
-                    existing = plan_path.read_text() if plan_path.exists() else ""
-                    if existing:
-                        plan_text = existing + marker + "\n".join(filter(None, plan))
-                    else:
-                        plan_text = "\n".join(filter(None, plan)) + marker
-                    plan_path.write_text(plan_text)
-                    if not args.quiet:
-                        print(f"  📋 Remediation plan: {"updated" if existing else "created"} {plan_path}")
-                except (OSError, PermissionError) as e:
-                    if not args.quiet:
-                        print(f"  ⚠️  Could not write remediation plan: {e}")
+        # Create REMEDIATION_PLAN.md in repos that need attention during live runs only.
+        # Audit-only/dry-run must remain read-only aside from git fetch/report output.
+        if not dry_run:
+            for name, icon, msg, detail in results:
+                if icon in (CONFLICT, ERROR):
+                    plan_path = Path(str(args.directory)) / name / "REMEDIATION_PLAN.md"
+                    d = detail or {}
+                    plan = [
+                        f"# REMEDIATION PLAN — {name}",
+                        f"**Generated**: {datetime.now().isoformat()}",
+                        f"**Status**: {icon} Needs attention",
+                        "",
+                        "## Issue",
+                        f"State: {d.get('state', 'unknown')}",
+                        f"Branch: {d.get('branch', '?')}",
+                        f"Uncommitted: {d.get('uncommitted', 0)} files",
+                        f"Ahead: {d.get('ahead', 0)} | Behind: {d.get('behind', 0)}",
+                        "",
+                        "## Investigation",
+                        d.get("error", "Same files changed in both local and upstream.") if isinstance(d.get("error"), str) else "",
+                        "",
+                        "## Recommended Actions",
+                        "- [ ] Review changes: `git diff HEAD..@{u}`" if d.get("behind", 0) > 0 else "",
+                        "- [ ] Commit or stash local changes" if d.get("uncommitted", 0) > 0 else "",
+                        "- [ ] Pull upstream: `git pull --rebase`" if d.get("behind", 0) > 0 else "",
+                        "- [ ] Push local: `git push`" if d.get("ahead", 0) > 0 else "",
+                        "- [ ] Resolve merge conflicts if any",
+                        "",
+                        "## Auto-sync will skip this repo until resolved.",
+                    ]
+                    try:
+                        plan_path.parent.mkdir(parents=True, exist_ok=True)
+                        marker = f"\n---\n*Generated by reposcan at {datetime.now().isoformat()}*\n"
+                        # Append if exists, create if not
+                        existing = plan_path.read_text() if plan_path.exists() else ""
+                        if existing:
+                            plan_text = existing + marker + "\n".join(filter(None, plan))
+                        else:
+                            plan_text = "\n".join(filter(None, plan)) + marker
+                        plan_path.write_text(plan_text)
+                        if not args.quiet:
+                            action = "updated" if existing else "created"
+                            print(f"  📋 Remediation plan: {action} {plan_path}")
+                    except (OSError, PermissionError) as e:
+                        if not args.quiet:
+                            print(f"  ⚠️  Could not write remediation plan: {e}")
 
         # --check-only: exit 1 if any repo is dirty or conflicted
         if args.check_only:
