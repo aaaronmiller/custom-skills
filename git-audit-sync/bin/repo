@@ -1,0 +1,20 @@
+#!/bin/bash
+# Git Audit & Sync wrapper - "repo" command
+# Portable: resolves the script relative to this wrapper's real location,
+# so it works regardless of where the repo is checked out.
+
+SOURCE="${BASH_SOURCE[0]}"
+while [[ -L "$SOURCE" ]]; do
+    DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+SCRIPT="$DIR/../scripts/audit_sync.py"
+
+if [[ ! -f "$SCRIPT" ]]; then
+    echo "Error: git-audit-sync script not found at $SCRIPT" >&2
+    exit 1
+fi
+
+exec python3 "$SCRIPT" "$@"

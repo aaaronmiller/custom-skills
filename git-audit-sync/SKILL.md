@@ -92,6 +92,19 @@ If there are no conflicts, summarize the result as "X repos processed, all clean
 | **In progress** | any | any | any | ⏭️ Skip — active merge/rebase/cherry-pick |
 | **Error** | any | any | any | Report error and continue |
 
+## Safety Behaviors (auto-handled)
+
+These are applied automatically on every live run so risky cases resolve
+correctly instead of leaving repos broken or losing work:
+
+| Situation | What the script does |
+|---|---|
+| **Auto-commit would delete a tracked file** | Refuses the commit, resets the index, and flags the repo `⚠️ NEEDS REVIEW`. An accidental `rm` is never captured (its deletion-vs-upstream-edit can't auto-merge). Override with `--allow-delete`. |
+| **Push rejected for being behind** | Rebases onto upstream and **re-pushes** in the same run, completing the sync (no leftover "committed but not pushed" repos). |
+| **`pull --rebase` hits a conflict** | Runs `git rebase --abort` so the repo returns to a clean, recoverable state, then flags `⚠️ needs manual merge`. Repos are never left mid-rebase. |
+| **Push denied (403, origin not yours)** | Looks for a fork remote owned by `--github-user` and pushes there instead; if none exists, reports "create a fork" rather than a generic error. |
+| **Remote not found (404)** | Classified distinctly as "origin deleted/renamed — update or remove the remote" instead of a generic fetch error. Never auto-deletes a remote. |
+
 ## Rollback Safety
 
 Before any write operation, the script creates a backup tag:
@@ -113,6 +126,17 @@ git switch -c recovery-<reponame> git-audit-sync/backup-YYYYMMDD-HHMMSS-<reponam
 - **Large binary files in history**: The script is not designed for repos with large binary files or LFS-managed assets.
 - **Pre-commit hooks**: The script does not trigger pre-commit hooks during auto-commit. If hooks are configured, run `git commit` manually.
 
+## Installation
+
+The `repo` command is a thin wrapper at [bin/repo](bin/repo). Install it onto
+PATH with [install.sh](install.sh), which symlinks `~/.local/bin/repo` to the
+tracked wrapper so script and wrapper updates are picked up automatically:
+
+```bash
+bash install.sh            # installs to ~/.local/bin/repo
+bash install.sh /usr/local/bin   # or a custom dir
+```
+
 ## Automation Script
 
 The core logic is in [scripts/audit_sync.py](scripts/audit_sync.py). It handles all repo states deterministically and processes repos in **parallel** using independent worker threads — each repo has its own `.git` so no shared state or conflict is possible.
@@ -131,6 +155,8 @@ The core logic is in [scripts/audit_sync.py](scripts/audit_sync.py). It handles 
 | `--update-submodules` | off | Run `git submodule update --recursive` after pull. |
 | `--audit-only` | off | Read-only audit — no changes made. |
 | `--dry-run` | off | Simulate all operations without making changes. |
+| `--github-user NAME` | auto (gh/git) | GitHub username used to find a fork remote when origin push is denied. Auto-detected via `gh api user` then `git config github.user`. |
+| `--allow-delete` | off | Permit auto-commit of tracked-file **deletions**. By default deletions are refused and flagged for review (prevents an accidental `rm` from being captured and colliding with upstream). |
 
 ```bash
 # Full sync (8 workers in parallel)
@@ -190,6 +216,10 @@ Creates a timestamped report at `~/git-audit-logs/` — both markdown (human) an
 
 - **Uncommitted work on a non-main branch** — may be work-in-progress, won't auto-commit
 - **Same-file divergence between local and upstream** — flagged for review with file list
+- **Auto-commit would delete a tracked file** — refused and flagged (likely an accidental `rm`); resolve or re-run with `--allow-delete`
+- **`pull --rebase` conflict** — auto-aborted to a clean state, then flagged for manual merge
+- **Push denied (403)** — pushed to your fork if one is configured, otherwise flagged to create a fork
+- **Remote not found (404)** — origin deleted/renamed; update or remove the remote (never auto-removed)
 - **Binary file conflicts** — can't auto-merge
 - **Active merge/rebase/cherry-pick** — skipped, user must resolve first
 - **Detached HEAD** — skipped, user must `git switch <branch>` first
