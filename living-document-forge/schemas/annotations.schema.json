@@ -1,0 +1,36 @@
+{
+  "_meta": {
+    "file": "annotations.schema.json",
+    "purpose": "Validate target-specific living-document annotations."
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://living-document-forge.local/schemas/annotations.schema.json",
+  "title": "Living Document Annotations",
+  "type": "object",
+  "required": ["annotations"],
+  "properties": {
+    "_meta": { "type": "object" },
+    "annotations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "targetId", "kind", "text", "tags", "status", "author", "createdAt"],
+        "properties": {
+          "id": { "type": "string" },
+          "targetId": { "type": "string" },
+          "quote": { "type": "string" },
+          "kind": { "enum": ["note", "question", "objection", "decision", "evidence"] },
+          "text": { "type": "string", "minLength": 1 },
+          "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+          "status": { "enum": ["open", "resolved", "archived"] },
+          "author": { "type": "string" },
+          "createdAt": { "type": "string" },
+          "resolvedAt": { "type": "string" },
+          "files": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

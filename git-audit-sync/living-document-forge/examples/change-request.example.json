@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0.0",
+  "requestId": "change-request-example",
+  "createdAt": "2026-07-04T12:00:00.000Z",
+  "document": {
+    "id": "culture-foundry-living-canvas",
+    "title": "Culture Foundry",
+    "currentVersion": "0.2.0-latent",
+    "targetFiles": ["public/content.json"],
+    "preferredEditStrategy": "Edit content JSON unless interface behavior must change."
+  },
+  "instruction": "Apply approved proposals and preserve deferred alternatives.",
+  "decisions": {
+    "approved": [{"id": "X-02", "title": "Begin with paired visual and verbal artifacts"}],
+    "rejected": [],
+    "deferred": [{"id": "X-03", "title": "Treat councils as persistent characters"}]
+  },
+  "localEdits": {"dirtyIds": [], "sections": []},
+  "annotations": [],
+  "resources": [],
+  "visualRefactor": {"palette": "charcoal-brass-teal"},
+  "invariants": ["Append a worklog", "Add new proposals"],
+  "requestedResult": {"summary": true, "changedFiles": true, "validation": true}
+}

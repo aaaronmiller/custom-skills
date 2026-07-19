@@ -1,0 +1,254 @@
+{
+  "_meta": {
+    "file": "content/index.json",
+    "schema": "living-document-format-2.1.0",
+    "purpose": "Neutral manifest for a new living document."
+  },
+  "meta": {
+    "documentId": "new-living-document",
+    "title": "New Living Document",
+    "subtitle": "A structured starting point for an evolving, auditable body of work.",
+    "version": "1.0.0",
+    "updated": "2026-07-09",
+    "status": "exploration",
+    "thesis": "This document will become the durable source of truth for a bounded project, preserving what is known, what remains uncertain, and how decisions change over time.",
+    "audience": "The people and agents responsible for understanding, revising, and implementing this project.",
+    "compatibility": {
+      "formatVersion": "2.1.0",
+      "skillRange": {
+        "min": "1.2.0",
+        "max": "2.0.0"
+      }
+    }
+  },
+  "navigation": {
+    "defaultView": "dashboard",
+    "sectionOrder": [
+      "purpose-and-boundary",
+      "current-model",
+      "decisions-and-next-actions"
+    ],
+    "quickFilters": [
+      "foundation",
+      "model",
+      "decisions"
+    ],
+    "showInspector": true,
+    "showReadingProgress": true
+  },
+  "dashboard": {
+    "focus": "Replace the neutral thesis and section prompts with the project’s actual purpose, model, constraints, and first decisions.",
+    "health": [
+      {
+        "id": "purpose-defined",
+        "label": "Purpose defined",
+        "state": "attention",
+        "detail": "The neutral statement must be replaced with a project-specific reason for existence."
+      },
+      {
+        "id": "content-separated",
+        "label": "Content separation",
+        "state": "good",
+        "detail": "Canonical prose already lives in external Markdown files."
+      },
+      {
+        "id": "decision-ledger",
+        "label": "Decision ledger",
+        "state": "good",
+        "detail": "Proposals, releases, history, and worklogs are initialized and ready to extend."
+      }
+    ],
+    "metricDefinitions": [
+      {
+        "id": "sections",
+        "label": "Addressable sections",
+        "description": "Canonical Markdown modules with stable IDs."
+      },
+      {
+        "id": "annotations",
+        "label": "Open annotations",
+        "description": "Target-specific comments awaiting resolution."
+      },
+      {
+        "id": "proposals",
+        "label": "Pending decisions",
+        "description": "Individually decidable changes."
+      },
+      {
+        "id": "local",
+        "label": "Local changes",
+        "description": "Browser overlays not yet applied to source."
+      }
+    ],
+    "pinnedSectionIds": [
+      "purpose-and-boundary",
+      "current-model",
+      "decisions-and-next-actions"
+    ],
+    "decisionQueueLimit": 4
+  },
+  "sections": [
+    {
+      "id": "purpose-and-boundary",
+      "index": "01",
+      "eyebrow": "Foundation",
+      "title": "Purpose and boundary",
+      "dek": "Define the problem this document governs, its audience, and what lies outside its authority.",
+      "source": "content/sections/01-purpose-and-boundary.md",
+      "tags": [
+        "foundation",
+        "scope"
+      ],
+      "status": "draft",
+      "editable": true,
+      "owner": "Document steward",
+      "updated": "2026-07-09",
+      "estimatedMinutes": 3,
+      "dependencies": [],
+      "backlinks": [
+        "current-model",
+        "decisions-and-next-actions"
+      ]
+    },
+    {
+      "id": "current-model",
+      "index": "02",
+      "eyebrow": "Model",
+      "title": "Current model",
+      "dek": "Describe the project’s present structure, assumptions, mechanisms, evidence, and unresolved tensions.",
+      "source": "content/sections/02-current-model.md",
+      "tags": [
+        "model",
+        "assumptions",
+        "evidence"
+      ],
+      "status": "draft",
+      "editable": true,
+      "owner": "Document steward",
+      "updated": "2026-07-09",
+      "estimatedMinutes": 4,
+      "dependencies": [
+        "purpose-and-boundary"
+      ],
+      "backlinks": [
+        "decisions-and-next-actions"
+      ]
+    },
+    {
+      "id": "decisions-and-next-actions",
+      "index": "03",
+      "eyebrow": "Decisions",
+      "title": "Decisions and next actions",
+      "dek": "Separate accepted direction, rejected paths, experiments, risks, and immediate work.",
+      "source": "content/sections/03-decisions-and-next-actions.md",
+      "tags": [
+        "decisions",
+        "experiments",
+        "roadmap"
+      ],
+      "status": "draft",
+      "editable": true,
+      "owner": "Document steward",
+      "updated": "2026-07-09",
+      "estimatedMinutes": 3,
+      "dependencies": [
+        "purpose-and-boundary",
+        "current-model"
+      ],
+      "backlinks": []
+    }
+  ],
+  "proposals": [
+    {
+      "id": "P-001",
+      "title": "Replace neutral scaffold content",
+      "summary": "Rewrite the thesis, audience, dashboard focus, and three seed sections around the actual project before adding secondary features.",
+      "impact": "high",
+      "effort": "low",
+      "decision": "proposed",
+      "targetIds": [
+        "purpose-and-boundary",
+        "current-model",
+        "decisions-and-next-actions"
+      ],
+      "tags": [
+        "initialization"
+      ],
+      "createdAt": "2026-07-09T17:30:00Z",
+      "updatedAt": "2026-07-09T17:30:00Z"
+    }
+  ],
+  "releases": [
+    {
+      "version": "1.0.0",
+      "date": "2026-07-09",
+      "title": "Neutral scaffold created",
+      "summary": "The document begins with a complete interface, external content structure, governance ledgers, and three purposeful seed sections.",
+      "changes": [
+        {
+          "type": "added",
+          "text": "Created the initial purpose, model, and decision sections.",
+          "targetIds": [
+            "purpose-and-boundary",
+            "current-model",
+            "decisions-and-next-actions"
+          ]
+        }
+      ]
+    }
+  ],
+  "history": [
+    {
+      "id": "H-0001",
+      "timestamp": "2026-07-09T17:30:00Z",
+      "actor": "Living Document Forge",
+      "kind": "create",
+      "summary": "Created the neutral format-2 living-document scaffold.",
+      "targetIds": [
+        "document"
+      ],
+      "version": "1.0.0",
+      "source": "system",
+      "details": "The document is structurally complete but intentionally awaits project-specific content."
+    }
+  ],
+  "visual": {
+    "defaultTheme": "obsidian",
+    "themes": [
+      "system",
+      "obsidian",
+      "graphite",
+      "paper",
+      "high-contrast"
+    ],
+    "defaultMotion": "system",
+    "density": "comfortable",
+    "designDirection": "Obsidian Editorial Workbench"
+  },
+  "worklogs": [
+    {
+      "id": "W-0001",
+      "version": "1.0.0",
+      "date": "2026-07-09",
+      "agent": "Living Document Forge scaffold",
+      "summary": "Created the neutral project and its initial content contract.",
+      "changed": [
+        "Created the project shell",
+        "Created the manifest and three seed Markdown sections",
+        "Initialized annotations, proposals, releases, history, and worklog"
+      ],
+      "validated": [
+        "Required files",
+        "JSON parsing",
+        "Section source paths",
+        "Stable IDs and relationships"
+      ],
+      "suggested": [
+        "Replace neutral claims before expanding the section count"
+      ],
+      "warnings": []
+    }
+  ],
+  "modelReplies": [],
+  "resources": []
+}

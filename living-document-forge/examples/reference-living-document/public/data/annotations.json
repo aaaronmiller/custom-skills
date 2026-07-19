@@ -1,0 +1,50 @@
+{
+  "_meta": {
+    "file": "data/annotations.json",
+    "schema": "living-document-annotations-1.0.0"
+  },
+  "annotations": [
+    {
+      "id": "A-001",
+      "targetId": "workbench-views",
+      "kind": "objection",
+      "text": "The dashboard must not repeat the entire section outline or become the default place where substantive reading happens.",
+      "tags": ["dashboard", "editorial-hierarchy"],
+      "status": "open",
+      "author": "Editorial systems designer",
+      "createdAt": "2026-07-09T15:22:00Z"
+    },
+    {
+      "id": "A-002",
+      "targetId": "local-editing",
+      "kind": "decision",
+      "text": "The portable starter will preserve edits as browser-local overlays and export a bounded change request rather than writing source files directly.",
+      "tags": ["editing", "safety"],
+      "status": "resolved",
+      "author": "Interaction designer",
+      "createdAt": "2026-07-09T15:28:00Z",
+      "resolvedAt": "2026-07-09T15:40:00Z"
+    },
+    {
+      "id": "A-003",
+      "targetId": "themes-and-motion",
+      "kind": "evidence",
+      "text": "Motion is limited to feedback and orientation, with explicit reduction and operating-system preference support.",
+      "tags": ["accessibility", "motion"],
+      "status": "resolved",
+      "author": "Accessibility specialist",
+      "createdAt": "2026-07-09T15:34:00Z",
+      "resolvedAt": "2026-07-09T16:00:00Z"
+    },
+    {
+      "id": "A-004",
+      "targetId": "evolution-boundary",
+      "kind": "question",
+      "text": "Should the first server-backed extension use file commits, an object store, or a database-backed revision ledger as its canonical persistence layer?",
+      "tags": ["backend", "storage", "roadmap"],
+      "status": "open",
+      "author": "Data-governance engineer",
+      "createdAt": "2026-07-09T15:48:00Z"
+    }
+  ]
+}

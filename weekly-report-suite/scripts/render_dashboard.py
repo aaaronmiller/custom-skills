@@ -5,7 +5,7 @@ import argparse, json, shutil
 from pathlib import Path
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
-TEMPLATE = SKILL_ROOT / 'templates' / 'dashboard.html'
+TEMPLATE = SKILL_ROOT / 'references' / 'templates' / 'dashboard.html'
 
 
 def main():

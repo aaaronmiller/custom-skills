@@ -1,0 +1,615 @@
+{
+  "_meta": {
+    "file": "content/index.json",
+    "schema": "living-document-format-2.1.0",
+    "purpose": "Reference manifest for the Living Document Workbench."
+  },
+  "meta": {
+    "documentId": "living-document-reference",
+    "title": "Agent-Human Living Document",
+    "subtitle": "A browser-native review surface for asynchronous human-agent collaboration.",
+    "version": "1.2.0",
+    "updated": "2026-07-09",
+    "status": "review",
+    "thesis": "A document becomes genuinely living when it lets humans review agent work at human speed: sections, annotations, proposals, media, changelogs, and worklogs remain separately addressable but visibly connected.",
+    "audience": "Researchers, product architects, prompt engineers, and coding agents maintaining complex evolving documents.",
+    "compatibility": {
+      "formatVersion": "2.1.0",
+      "skillRange": {
+        "min": "1.2.0",
+        "max": "2.0.0"
+      }
+    }
+  },
+  "navigation": {
+    "defaultView": "dashboard",
+    "sectionOrder": [
+      "temporal-problem",
+      "source-architecture",
+      "workbench-views",
+      "local-editing",
+      "revision-ledgers",
+      "themes-and-motion",
+      "agent-handoff",
+      "evolution-boundary"
+    ],
+    "quickFilters": [
+      "architecture",
+      "workflow",
+      "interface",
+      "governance"
+    ],
+    "showInspector": true,
+    "showReadingProgress": true
+  },
+  "dashboard": {
+    "focus": "Demonstrate why chat and terminal scrollback are the wrong review surfaces for sustained agent work, and how a living document preserves human-paced review state.",
+    "health": [
+      {
+        "id": "content-separation",
+        "label": "Canonical content separation",
+        "state": "good",
+        "detail": "All section prose is stored in external Markdown files."
+      },
+      {
+        "id": "decision-clarity",
+        "label": "Decision clarity",
+        "state": "attention",
+        "detail": "Three proposals remain intentionally unresolved for demonstration."
+      },
+      {
+        "id": "accessibility",
+        "label": "Accessible interaction",
+        "state": "good",
+        "detail": "Keyboard controls, high contrast, semantic landmarks, and reduced motion are included."
+      },
+      {
+        "id": "server-write-path",
+        "label": "Canonical write path",
+        "state": "attention",
+        "detail": "The portable starter exports change requests rather than writing source files directly."
+      }
+    ],
+    "metricDefinitions": [
+      {
+        "id": "sections",
+        "label": "Addressable sections",
+        "description": "Canonical Markdown modules with stable IDs."
+      },
+      {
+        "id": "annotations",
+        "label": "Open annotations",
+        "description": "Questions, objections, decisions, and evidence attached to precise targets."
+      },
+      {
+        "id": "proposals",
+        "label": "Pending decisions",
+        "description": "Proposals still marked proposed after local decision overlays."
+      },
+      {
+        "id": "local",
+        "label": "Local changes",
+        "description": "Drafts, decision overlays, and local annotations not yet applied to source."
+      }
+    ],
+    "pinnedSectionIds": [
+      "source-architecture",
+      "local-editing",
+      "revision-ledgers"
+    ],
+    "decisionQueueLimit": 4
+  },
+  "sections": [
+    {
+      "id": "temporal-problem",
+      "index": "01",
+      "eyebrow": "Premise",
+      "title": "The temporal problem",
+      "dek": "Agents produce faster than humans can inspect, so the collaboration surface must decouple generation from review.",
+      "source": "content/sections/01-temporal-problem.md",
+      "tags": [
+        "architecture",
+        "collaboration",
+        "asynchrony"
+      ],
+      "status": "stable",
+      "editable": true,
+      "owner": "Document steward",
+      "updated": "2026-07-09",
+      "estimatedMinutes": 4,
+      "dependencies": [],
+      "backlinks": [
+        "workbench-views",
+        "agent-handoff"
+      ]
+    },
+    {
+      "id": "source-architecture",
+      "index": "02",
+      "eyebrow": "Architecture",
+      "title": "Canonical content stays outside the shell",
+      "dek": "The interface renders a manifest and external Markdown instead of hiding the document inside application code.",
+      "source": "content/sections/02-source-architecture.md",
+      "tags": [
+        "architecture",
+        "markdown",
+        "data-model"
+      ],
+      "status": "stable",
+      "editable": true,
+      "owner": "Information architect",
+      "updated": "2026-07-09",
+      "estimatedMinutes": 5,
+      "dependencies": [
+        "temporal-problem"
+      ],
+      "backlinks": [
+        "local-editing",
+        "agent-handoff",
+        "evolution-boundary"
+      ]
+    },
+    {
+      "id": "workbench-views",
+      "index": "03",
+      "eyebrow": "Interface",
+      "title": "One document, several retrieval questions",
+      "dek": "Dashboard, reader, search, history, and changelog are distinct views because each answers a different question.",
+      "source": "content/sections/03-workbench-views.md",
+      "tags": [
+        "interface",
+        "dashboard",
+        "navigation"
+      ],
+      "status": "review",
+      "editable": true,
+      "owner": "Interaction designer",
+      "updated": "2026-07-09",
+      "estimatedMinutes": 5,
+      "dependencies": [
+        "temporal-problem",
+        "source-architecture"
+      ],
+      "backlinks": [
+        "themes-and-motion"
+      ]
+    },
+    {
+      "id": "local-editing",
+      "index": "04",
+      "eyebrow": "Editing",
+      "title": "Quick edits are visible overlays",
+      "dek": "Browser edits remain reversible and explicitly local until exported into a bounded source change.",
+      "source": "content/sections/04-local-editing.md",
+      "tags": [
+        "workflow",
+        "editing",
+        "safety"
+      ],
+      "status": "review",
+      "editable": true,
+      "owner": "Interaction designer",
+      "updated": "2026-07-09",
+      "estimatedMinutes": 5,
+      "dependencies": [
+        "source-architecture"
+      ],
+      "backlinks": [
+        "revision-ledgers",
+        "agent-handoff"
+      ]
+    },
+    {
+      "id": "revision-ledgers",
+      "index": "05",
+      "eyebrow": "Governance",
+      "title": "History, changelog, and worklog are not synonyms",
+      "dek": "Three ledgers preserve different kinds of memory and should remain separately queryable.",
+      "source": "content/sections/05-revision-ledgers.md",
+      "tags": [
+        "governance",
+        "history",
+        "changelog"
+      ],
+      "status": "stable",
+      "editable": true,
+      "owner": "Data-governance engineer",
+      "updated": "2026-07-09",
+      "estimatedMinutes": 4,
+      "dependencies": [
+        "local-editing"
+      ],
+      "backlinks": [
+        "agent-handoff",
+        "evolution-boundary"
+      ]
+    },
+    {
+      "id": "themes-and-motion",
+      "index": "06",
+      "eyebrow": "Design system",
+      "title": "Dark-first does not mean dark-only",
+      "dek": "Themes and microinteractions support reading and state recognition while remaining optional and accessible.",
+      "source": "content/sections/06-themes-and-motion.md",
+      "tags": [
+        "interface",
+        "themes",
+        "accessibility",
+        "motion"
+      ],
+      "status": "active",
+      "editable": true,
+      "owner": "Accessibility specialist",
+      "updated": "2026-07-09",
+      "estimatedMinutes": 5,
+      "dependencies": [
+        "workbench-views"
+      ],
+      "backlinks": [
+        "evolution-boundary"
+      ]
+    },
+    {
+      "id": "agent-handoff",
+      "index": "07",
+      "eyebrow": "Agent protocol",
+      "title": "Handoffs must be bounded and replayable",
+      "dek": "An agent receives explicit targets, constraints, evidence, decisions, expected files, and validation commands.",
+      "source": "content/sections/07-agent-handoff.md",
+      "tags": [
+        "workflow",
+        "agents",
+        "provenance"
+      ],
+      "status": "review",
+      "editable": true,
+      "owner": "Agent-workflow engineer",
+      "updated": "2026-07-09",
+      "estimatedMinutes": 5,
+      "dependencies": [
+        "temporal-problem",
+        "source-architecture",
+        "local-editing",
+        "revision-ledgers"
+      ],
+      "backlinks": [
+        "evolution-boundary"
+      ]
+    },
+    {
+      "id": "evolution-boundary",
+      "index": "08",
+      "eyebrow": "Roadmap",
+      "title": "The portable starter is a floor, not a ceiling",
+      "dek": "Server writes, collaboration, semantic indexing, and model execution belong in explicit extensions rather than hidden starter behavior.",
+      "source": "content/sections/08-evolution-boundary.md",
+      "tags": [
+        "roadmap",
+        "architecture",
+        "extensions"
+      ],
+      "status": "active",
+      "editable": true,
+      "owner": "Document steward",
+      "updated": "2026-07-09",
+      "estimatedMinutes": 4,
+      "dependencies": [
+        "source-architecture",
+        "revision-ledgers",
+        "themes-and-motion",
+        "agent-handoff"
+      ],
+      "backlinks": []
+    }
+  ],
+  "proposals": [
+    {
+      "id": "P-001",
+      "title": "Add a server-backed canonical save adapter",
+      "summary": "Provide an optional authenticated Hono route with optimistic concurrency and schema validation while keeping the static export workflow intact.",
+      "impact": "high",
+      "effort": "medium",
+      "decision": "proposed",
+      "targetIds": [
+        "local-editing",
+        "agent-handoff",
+        "evolution-boundary"
+      ],
+      "tags": [
+        "backend",
+        "editing",
+        "security"
+      ],
+      "createdAt": "2026-07-09T16:00:00Z",
+      "updatedAt": "2026-07-09T16:00:00Z"
+    },
+    {
+      "id": "P-002",
+      "title": "Introduce paragraph-level anchors",
+      "summary": "Generate stable paragraph anchors so annotations and agent requests can target passages more precisely than a whole section.",
+      "impact": "high",
+      "effort": "high",
+      "decision": "proposed",
+      "targetIds": [
+        "source-architecture",
+        "local-editing"
+      ],
+      "tags": [
+        "annotations",
+        "identity",
+        "migration"
+      ],
+      "createdAt": "2026-07-09T16:05:00Z",
+      "updatedAt": "2026-07-09T16:05:00Z"
+    },
+    {
+      "id": "P-003",
+      "title": "Add a semantic relationship graph",
+      "summary": "Visualize dependencies, backlinks, proposals, and annotations as a navigable graph without replacing the section index.",
+      "impact": "medium",
+      "effort": "medium",
+      "decision": "defer",
+      "targetIds": [
+        "workbench-views",
+        "evolution-boundary"
+      ],
+      "tags": [
+        "visualization",
+        "navigation"
+      ],
+      "createdAt": "2026-07-09T16:10:00Z",
+      "updatedAt": "2026-07-09T16:15:00Z"
+    },
+    {
+      "id": "P-004",
+      "title": "Animate every section on scroll",
+      "summary": "Apply entrance motion whenever a section reaches the viewport.",
+      "impact": "low",
+      "effort": "low",
+      "decision": "reject",
+      "targetIds": [
+        "themes-and-motion"
+      ],
+      "tags": [
+        "motion",
+        "accessibility"
+      ],
+      "createdAt": "2026-07-09T16:20:00Z",
+      "updatedAt": "2026-07-09T16:22:00Z"
+    }
+  ],
+  "releases": [
+    {
+      "version": "1.2.0",
+      "date": "2026-07-09",
+      "title": "Ongoing collaboration model added",
+      "summary": "The reference now supports skill-first conversations, model reply queues, selection annotations, resources, and format evolution guidance.",
+      "changes": [
+        {
+          "type": "added",
+          "text": "Added dashboard, document, search, history, and changelog views around the human-paced review workflow.",
+          "targetIds": [
+            "workbench-views"
+          ]
+        },
+        {
+          "type": "added",
+          "text": "Added local quick edits, undo, redo, annotations, proposal decisions, and change-request export.",
+          "targetIds": [
+            "local-editing",
+            "agent-handoff"
+          ]
+        },
+        {
+          "type": "changed",
+          "text": "Moved canonical prose from a monolithic JSON field into external Markdown files.",
+          "targetIds": [
+            "source-architecture"
+          ]
+        },
+        {
+          "type": "added",
+          "text": "Added dark-first themes, a light paper theme, high contrast, motion preferences, and tactile control feedback.",
+          "targetIds": [
+            "themes-and-motion"
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-07-07",
+      "title": "The maintenance contract",
+      "summary": "The initial skill established stable IDs, proposals, annotations, compatibility metadata, worklogs, and controlled agent handoffs.",
+      "changes": [
+        {
+          "type": "added",
+          "text": "Defined the first living-document maintenance workflow and monolithic content model.",
+          "targetIds": [
+            "source-architecture",
+            "revision-ledgers"
+          ]
+        }
+      ]
+    }
+  ],
+  "history": [
+    {
+      "id": "H-0001",
+      "timestamp": "2026-07-07T23:30:00Z",
+      "actor": "Living Document Forge 0.3",
+      "kind": "create",
+      "summary": "Created the first maintenance skill and compatibility contract.",
+      "targetIds": [
+        "document"
+      ],
+      "version": "0.3.0",
+      "source": "agent",
+      "details": "The original architecture used a single public/content.json file."
+    },
+    {
+      "id": "H-0002",
+      "timestamp": "2026-07-09T15:10:00Z",
+      "actor": "Eight-perspective design council",
+      "kind": "decision",
+      "summary": "Rejected dashboard sprawl, direct browser writes, and decorative motion.",
+      "targetIds": [
+        "workbench-views",
+        "local-editing",
+        "themes-and-motion"
+      ],
+      "version": "1.1.0",
+      "source": "agent",
+      "details": "The revised thesis preserved the requested features while separating editorial reading from operational controls."
+    },
+    {
+      "id": "H-0003",
+      "timestamp": "2026-07-09T16:30:00Z",
+      "actor": "Living Document Forge 1.0",
+      "kind": "migration",
+      "summary": "Migrated canonical section prose to external Markdown and introduced format 2.0.0.",
+      "targetIds": [
+        "source-architecture",
+        "revision-ledgers"
+      ],
+      "version": "1.1.0",
+      "source": "agent",
+      "details": "Stable section IDs, proposals, annotations, and worklogs were preserved."
+    },
+    {
+      "id": "H-0004",
+      "timestamp": "2026-07-09T17:15:00Z",
+      "actor": "Living Document Forge 1.0",
+      "kind": "agent-run",
+      "summary": "Re-centered the package around the living-document raison d'etre and completed structural validation.",
+      "targetIds": [
+        "document",
+        "visual-system"
+      ],
+      "version": "1.1.0",
+      "source": "agent",
+      "details": "JavaScript syntax, JSON structure, source paths, IDs, relationships, themes, and exports were checked."
+    },
+    {
+      "id": "H-005",
+      "timestamp": "2026-07-09T07:45:00-07:00",
+      "actor": "Codex",
+      "kind": "migration",
+      "summary": "Added format 2.1 collaboration fields for model replies and resources.",
+      "targetIds": [
+        "document"
+      ],
+      "version": "1.2.0",
+      "source": "agent",
+      "details": "This is an additive schema revision. Existing format 2.0 documents can migrate by adding empty modelReplies and resources arrays."
+    }
+  ],
+  "visual": {
+    "defaultTheme": "obsidian",
+    "themes": [
+      "system",
+      "obsidian",
+      "graphite",
+      "paper",
+      "high-contrast"
+    ],
+    "defaultMotion": "system",
+    "density": "comfortable",
+    "designDirection": "Obsidian Editorial Workbench"
+  },
+  "worklogs": [
+    {
+      "id": "W-0001",
+      "version": "1.2.0",
+      "date": "2026-07-09",
+      "agent": "Living Document Forge revision agent",
+      "summary": "Converted the skill into a contract-first living document package with a dark-first browser review surface, external Markdown, and safe local-edit workflow.",
+      "changed": [
+        "Rewrote the operating skill",
+        "Added the portable starter application",
+        "Added format 2 schemas and migration guidance",
+        "Added dashboard, history, changelog, quick edit, search, themes, motion, and exports",
+        "Restored RAISON_DETRE.md as the first-class entry point for humans and agents",
+        "Added modelReplies and resources as first-class manifest collections",
+        "Added selection-based annotation support in the reference shell"
+      ],
+      "validated": [
+        "JavaScript syntax",
+        "JSON parsing",
+        "Stable and unique IDs",
+        "Section source existence",
+        "Relationship targets",
+        "Theme inventory",
+        "Package structure"
+      ],
+      "suggested": [
+        "Add an authenticated canonical write adapter only when a project has a server",
+        "Add paragraph-level IDs through an explicit schema migration"
+      ],
+      "warnings": [
+        "Visual interaction was designed and statically validated; browser automation is not bundled in the dependency-free starter"
+      ]
+    }
+  ],
+  "modelReplies": [
+    {
+      "id": "MR-001",
+      "prompt": "Which public-facing name should the concept use?",
+      "context": "The model can keep working on implementation, but naming affects launch copy and references.",
+      "targetIds": [
+        "source-architecture",
+        "evolution-boundary"
+      ],
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Agent-Human Living Document",
+          "text": "Precise and descriptive; strongest for early explanation."
+        },
+        {
+          "id": "B",
+          "label": "Living Review Surface",
+          "text": "Sharper on the review problem, less tied to documents."
+        },
+        {
+          "id": "C",
+          "label": "Custom answer",
+          "text": "Human supplies a better name through annotation or section draft."
+        }
+      ],
+      "createdAt": "2026-07-09T07:45:00-07:00",
+      "updatedAt": "2026-07-09T07:45:00-07:00"
+    }
+  ],
+  "resources": [
+    {
+      "id": "R-001",
+      "title": "Example screenshot placeholder",
+      "kind": "image",
+      "path": "resources/example-screenshot.png",
+      "originalName": "example-screenshot.png",
+      "mimeType": "image/png",
+      "targetIds": [
+        "workbench-views"
+      ],
+      "description": "Optional inspectable image bound to the section it explains.",
+      "status": "referenced",
+      "createdAt": "2026-07-09T07:45:00-07:00"
+    },
+    {
+      "id": "R-002",
+      "title": "Example conversation audio placeholder",
+      "kind": "audio",
+      "path": "resources/example-note.m4a",
+      "originalName": "example-note.m4a",
+      "mimeType": "audio/mp4",
+      "targetIds": [
+        "temporal-problem"
+      ],
+      "description": "Optional audio resource; arbitrary extensions are tracked, not executed.",
+      "status": "referenced",
+      "createdAt": "2026-07-09T07:45:00-07:00"
+    }
+  ]
+}

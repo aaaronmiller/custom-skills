@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "triptych-story-drum",
+  "version": "0.1.0",
+  "title": "Triptych Story Drum",
+  "medium": ["text", "image"],
+  "skin": "carved-wood-cinnabar",
+  "sections": [
+    {
+      "id": "story-bank",
+      "role": "primary",
+      "controls": [
+        {
+          "id": "subject",
+          "type": "editable-drum",
+          "valueType": "noun-phrase",
+          "value": "shell-faced wanderer",
+          "bank": ["shell-faced wanderer", "reed astronomer", "sleeping river"],
+          "authority": "manual",
+          "lock": {"enabled": true, "scope": "sequence"}
+        },
+        {
+          "id": "action",
+          "type": "editable-drum",
+          "valueType": "verb-phrase",
+          "value": "awakens the ember seed",
+          "authority": "bank",
+          "lock": {"enabled": false, "scope": "iteration"}
+        }
+      ]
+    },
+    {
+      "id": "execution-bay",
+      "role": "execution",
+      "controls": [
+        {"id": "output-count", "type": "mechanical-counter", "value": 3, "min": 1, "max": 9},
+        {"id": "quality", "type": "detented-knob", "value": "draft", "options": ["schematic", "draft", "review", "final"]},
+        {"id": "generate", "type": "guarded-button", "command": "generate"}
+      ]
+    }
+  ],
+  "serialization": {"stateVersion": 1},
+  "accessibility": {"keyboard": true, "reducedMotion": true},
+  "compiler": {"output": "creative-intent-graph/1.0"}
+}

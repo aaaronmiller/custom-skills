@@ -1,0 +1,24 @@
+{
+  "_meta": {
+    "file": "agent-result.schema.json",
+    "purpose": "Validate a bounded agent revision result."
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://living-document-forge.local/schemas/agent-result.schema.json",
+  "title": "Living Document Agent Result",
+  "type": "object",
+  "required": ["status", "documentId", "baseVersion", "resultVersion", "changedFiles", "applied", "notApplied", "validations", "warnings"],
+  "properties": {
+    "status": { "enum": ["complete", "partial", "blocked"] },
+    "documentId": { "type": "string" },
+    "baseVersion": { "type": "string" },
+    "resultVersion": { "type": "string" },
+    "changedFiles": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "applied": { "type": "array", "items": { "type": "string" } },
+    "notApplied": { "type": "array", "items": { "type": "string" } },
+    "validations": { "type": "array", "items": { "type": "object" } },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "nextProposals": { "type": "array", "items": { "type": "object" } }
+  },
+  "additionalProperties": true
+}

@@ -146,16 +146,32 @@ scrape_configs:
     static_configs:
       - targets: ['127.0.0.1:9109']
 """)
+    datasource = {
+        "apiVersion": 1,
+        "datasources": [
+            {
+                "uid": "weekly-report-prometheus",
+                "name": "Weekly Report Prometheus",
+                "type": "prometheus",
+                "access": "proxy",
+                "url": "http://127.0.0.1:9090",
+                "isDefault": True,
+                "editable": True,
+            }
+        ],
+    }
     (graf / 'provisioning' / 'datasources' / 'prometheus.yml').write_text("""apiVersion: 1
 
 datasources:
-  - name: Weekly Report Prometheus
+  - uid: weekly-report-prometheus
+    name: Weekly Report Prometheus
     type: prometheus
     access: proxy
     url: http://127.0.0.1:9090
     isDefault: true
     editable: true
 """)
+    (graf / 'provisioning' / 'datasources' / 'prometheus.json').write_text(json.dumps(datasource, indent=2))
     (graf / 'provisioning' / 'dashboards' / 'weekly-report.yml').write_text("""apiVersion: 1
 
 providers:
@@ -214,7 +230,7 @@ def panel(pid: int, title: str, expr: str, x: int, y: int):
         "id": pid,
         "title": title,
         "type": "stat",
-        "datasource": {"type": "prometheus", "uid": "Weekly Report Prometheus"},
+        "datasource": {"type": "prometheus", "uid": "weekly-report-prometheus"},
         "gridPos": {"h": 8, "w": 6 if pid < 5 else 12, "x": x, "y": y},
         "targets": [{"expr": expr, "refId": "A"}],
         "options": {"reduceOptions": {"values": False, "calcs": ["lastNotNull"], "fields": ""}},

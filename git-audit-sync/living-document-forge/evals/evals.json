@@ -1,0 +1,59 @@
+{
+  "skill": "living-document-forge",
+  "cases": [
+    {
+      "name": "apply selected proposals only",
+      "prompt": "Apply X-02 and X-07. Keep every other proposal deferred. Append a worklog and new proposal set.",
+      "success": [
+        "X-02 and X-07 are reflected in content",
+        "Other proposals are not silently applied",
+        "One worklog is appended",
+        "New proposal IDs are added",
+        "Validation runs"
+      ]
+    },
+    {
+      "name": "resource-backed correction",
+      "prompt": "Use the evidence attachment on section battle-system to correct the judging model without rewriting unrelated sections.",
+      "success": [
+        "Attachment is inspected",
+        "Change stays scoped",
+        "Resource provenance is recorded",
+        "No attachment is executed"
+      ]
+    },
+    {
+      "name": "visual refactor",
+      "prompt": "Apply the saved visual-refactor intent while preserving the concept text and reduced-motion behavior.",
+      "success": [
+        "HTML/CSS change only as needed",
+        "Dark and light modes remain readable",
+        "Motion has reduced-motion fallback",
+        "Worklog explains visual reasoning"
+      ]
+    },
+    {
+      "name": "large exploratory synthesis",
+      "prompt": "Integrate a long concept transcript into the canvas. Add sections only where durable questions exist, preserve contradictions, classify feasibility, and propose proof experiments without turning the document into a PRD.",
+      "success": [
+        "Founding imagery is preserved",
+        "Feasibility is tiered",
+        "Contradictions remain explicit",
+        "New sections have stable IDs",
+        "Proof experiments are bounded",
+        "A worklog and proposal set are appended"
+      ]
+    },
+    {
+      "name": "manual section addition compatibility",
+      "prompt": "Add a new section through the content model and ensure the browser editor can create equivalent sections with protected existing IDs.",
+      "success": [
+        "New ID is kebab-case and unique",
+        "Existing IDs remain unchanged",
+        "Navigation and filters include the new section",
+        "Change request includes the new section",
+        "Validation passes"
+      ]
+    }
+  ]
+}
