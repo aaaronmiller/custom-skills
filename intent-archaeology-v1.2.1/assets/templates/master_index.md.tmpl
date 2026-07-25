@@ -1,0 +1,32 @@
+---
+page_type: master_index
+generated_at: $generated_at
+project_count: $project_count
+---
+
+# Intent Archaeology — Master Index
+
+> Generated $generated_at from $project_count projects.
+> This index is machine-generated; do not edit inside fenced blocks.
+
+## Projects
+
+| Project | Lifecycle | Era | Last Audited |
+|---------|-----------|-----|--------------|
+<!-- BEGIN GENERATED: project_table -->
+$project_rows
+<!-- END GENERATED: project_table -->
+
+## Cross-cutting pages
+
+- [Standing Constraints](cross-cutting/standing-constraints.md) — frequency-ranked constitution discovered rather than authored
+- [Repeated Corrections](cross-cutting/repeated-corrections.md) — every behavioral correction issued more than twice; direct to-do for AGENTS.md
+- [Abandoned](cross-cutting/abandoned.md) — every scope-cut with its reason; stops the sleep-time agent resurrecting dead work
+- [Corrections by Era](cross-cutting/corrections-by-era.md) — answers whether the standing instructions are actually being read
+
+## How to read this wiki
+
+- Each project page has a status vector, not a completion percentage. The vector components are: `completed`, `in_progress`, `drifted`, `superseded`, `abandoned`, `not_begun`.
+- The status vector is the sleep-time agent's primary input. `abandoned` items are NEVER to be resurrected.
+- The cross-cutting pages are where the audit earns its keep — they cut across projects to surface patterns no single-project view shows.
+- Content inside `<!-- BEGIN GENERATED -->` / `<!-- END GENERATED -->` fences is machine-generated. Edits inside fences will be rejected by `lint_wiki.py`. Edit outside fences only.
