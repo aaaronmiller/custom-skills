@@ -35,10 +35,11 @@ const directDocumentRoot = process.env.LIVING_DOCUMENT_ROOT
   : null;
 const port = Number.parseInt(process.env.PORT || '4173', 10);
 const host = process.env.HOST || '127.0.0.1';
-const shellFiles = new Set(['index.html', 'app.js', 'styles.css', 'manifest.webmanifest']);
+const shellFiles = new Set(['index.html', 'app.js', 'navigation.mjs', 'styles.css', 'manifest.webmanifest']);
 const mime = new Map([
   ['.html', 'text/html; charset=utf-8'],
   ['.js', 'text/javascript; charset=utf-8'],
+  ['.mjs', 'text/javascript; charset=utf-8'],
   ['.css', 'text/css; charset=utf-8'],
   ['.json', 'application/json; charset=utf-8'],
   ['.md', 'text/markdown; charset=utf-8'],

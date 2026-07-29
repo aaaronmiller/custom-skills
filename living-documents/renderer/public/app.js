@@ -1189,8 +1189,16 @@ function scrollToSection(id, behavior = 'smooth') {
   if (behavior === 'auto') {
     const priorScrollBehavior = document.documentElement.style.scrollBehavior;
     document.documentElement.style.scrollBehavior = 'auto';
-    section.scrollIntoView({ behavior: 'auto', block: 'start' });
-    requestAnimationFrame(() => { document.documentElement.style.scrollBehavior = priorScrollBehavior; });
+    const placeSection = () => section.scrollIntoView({ behavior: 'auto', block: 'start' });
+    placeSection();
+    requestAnimationFrame(() => {
+      placeSection();
+      requestAnimationFrame(placeSection);
+    });
+    setTimeout(() => {
+      placeSection();
+      document.documentElement.style.scrollBehavior = priorScrollBehavior;
+    }, 150);
     return;
   }
   section.scrollIntoView({ behavior: motionReduced() ? 'auto' : 'smooth', block: 'start' });
