@@ -66,6 +66,23 @@ class ContinuityHookContractTests(unittest.TestCase):
         self.assertEqual(output["decision"], "block")
         self.assertIn("control-plane pivot", output["reason"])
 
+    def test_question_response_interrupts_stop_with_exact_receipt(self):
+        record = {
+            "continuation": {
+                "state": "review-pending",
+                "question_responses": [{
+                    "receipt_id": "qr-1234-abcd",
+                    "project": "agentic-operating-system",
+                    "section_id": "current-project-intake",
+                    "source_href": "/projects/agentic-operating-system/#current-project-intake",
+                }],
+            }
+        }
+        output = MODULE.harness_output({"hook_event_name": "Stop"}, record)
+        self.assertEqual(output["decision"], "block")
+        self.assertIn("qr-1234-abcd", output["reason"])
+        self.assertIn("Living Documents input received", output["reason"])
+
 
 if __name__ == "__main__":
     unittest.main()

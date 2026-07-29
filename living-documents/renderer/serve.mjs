@@ -27,6 +27,7 @@ const reconciliationMatrix = path.join(os.homedir(), 'LIVING_DOCUMENTS', 'projec
 const ledgerRoot = path.join(os.homedir(), '.local', 'state', 'living-documents', 'ledger');
 const handoffRoot = path.join(os.homedir(), '.local', 'state', 'living-documents', 'handoffs');
 const decisionReviewRoot = path.join(os.homedir(), '.local', 'state', 'living-documents', 'decision-reviews');
+const questionResponseRoot = path.join(os.homedir(), '.local', 'state', 'living-documents', 'question-responses');
 const execFileAsync = promisify(execFile);
 let gitPulseCache = { observedAt: 0, projects: [] };
 const defaultProjectId = process.env.LIVING_DOCUMENT_PROJECT || 'living-documents';
@@ -35,7 +36,7 @@ const directDocumentRoot = process.env.LIVING_DOCUMENT_ROOT
   : null;
 const port = Number.parseInt(process.env.PORT || '4173', 10);
 const host = process.env.HOST || '127.0.0.1';
-const shellFiles = new Set(['index.html', 'app.js', 'navigation.mjs', 'styles.css', 'manifest.webmanifest']);
+const shellFiles = new Set(['index.html', 'app.js', 'navigation.mjs', 'question-forms.mjs', 'styles.css', 'manifest.webmanifest']);
 const mime = new Map([
   ['.html', 'text/html; charset=utf-8'],
   ['.js', 'text/javascript; charset=utf-8'],
@@ -120,6 +121,64 @@ async function clearDecisionReview(urlPath) {
   const target = path.join(decisionReviewRoot, `decision-${priority}.json`);
   await unlink(target).catch((error) => { if (error?.code !== 'ENOENT') throw error; });
   return { priority, cleared: true, localOnly: true };
+}
+
+function questionIdentifier(value, label) {
+  const result = String(value || '');
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(result) || result.length > 120) {
+    throw Object.assign(new Error(`Invalid ${label}`), { code: 'EINVAL' });
+  }
+  return result;
+}
+
+async function validQuestionResponse(payload) {
+  const projectId = questionIdentifier(payload?.projectId, 'project ID');
+  const sectionId = questionIdentifier(payload?.sectionId, 'section ID');
+  const documentRoot = await currentDocumentRoot(projectId);
+  if (!documentRoot) throw Object.assign(new Error('Unknown project'), { code: 'ENOENT' });
+  const manifest = JSON.parse(await readFile(path.join(documentRoot, 'public', 'content', 'index.json'), 'utf8'));
+  if (!manifest.sections?.some((section) => section.id === sectionId)) {
+    throw Object.assign(new Error('Unknown project section'), { code: 'ENOENT' });
+  }
+  if (!Array.isArray(payload?.answers) || payload.answers.length < 1 || payload.answers.length > 100) {
+    throw Object.assign(new Error('Invalid answers'), { code: 'EINVAL' });
+  }
+  const seen = new Set();
+  const answers = payload.answers.map((answer) => {
+    const questionId = questionIdentifier(answer?.questionId, 'question ID');
+    const optionId = questionIdentifier(answer?.optionId, 'option ID');
+    const writeIn = String(answer?.writeIn || '').trim();
+    if (seen.has(questionId)) throw Object.assign(new Error('Duplicate question ID'), { code: 'EINVAL' });
+    if (writeIn.length > 4000) throw Object.assign(new Error('Write-in is too long'), { code: 'E2BIG' });
+    if (optionId === 'write-in' && !writeIn) throw Object.assign(new Error('Write-in answer is empty'), { code: 'EINVAL' });
+    seen.add(questionId);
+    return { questionId, optionId, writeIn };
+  });
+  return { projectId, sectionId, answers };
+}
+
+async function saveQuestionResponse(payload) {
+  const value = await validQuestionResponse(payload);
+  const submittedAt = new Date().toISOString();
+  const receiptId = `qr-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
+  const prompt = `Input received. Review Living Document ${value.projectId} / ${value.sectionId}, record the answers canonically, and continue only authorized unblocked work.`;
+  const receipt = {
+    schema: 'living-documents-question-response/v1',
+    receiptId,
+    ...value,
+    submittedAt,
+    status: 'pending',
+    localOnly: true,
+    sourceHref: `/projects/${value.projectId}/#${value.sectionId}`,
+    attention: { transport: 'local-continuity', prompt },
+  };
+  const directory = path.join(questionResponseRoot, value.projectId, value.sectionId);
+  await mkdir(directory, { recursive: true, mode: 0o700 });
+  const target = path.join(directory, `${receiptId}.json`);
+  const temporary = path.join(directory, `.${receiptId}.${process.pid}.tmp`);
+  await writeFile(temporary, `${JSON.stringify(receipt, null, 2)}\n`, { mode: 0o600 });
+  await rename(temporary, target);
+  return receipt;
 }
 
 async function currentDocumentRoot(projectId) {
@@ -377,6 +436,10 @@ const server = http.createServer(async (request, response) => {
     }
     if ((request.url || '/').startsWith('/api/decision-reviews') && request.method === 'DELETE') {
       jsonResponse(response, 200, { review: await clearDecisionReview(request.url || '/') });
+      return;
+    }
+    if ((request.url || '/') === '/api/question-responses' && request.method === 'POST') {
+      jsonResponse(response, 201, { receipt: await saveQuestionResponse(await requestJson(request, 128 * 1024)) });
       return;
     }
     if ((request.url || '/') === '/api/portfolio') {

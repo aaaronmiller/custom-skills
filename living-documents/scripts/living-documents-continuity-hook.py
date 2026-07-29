@@ -88,10 +88,21 @@ def continuation_state() -> dict[str, Any]:
                 "work_ids": review.get("work_ids", []),
                 "local_only": True,
             } for review in resolved.get("reviews", [])]
+            question_responses = [{
+                "receipt_id": response.get("receipt_id"),
+                "project": response.get("project"),
+                "section_id": response.get("section_id"),
+                "submitted_at": response.get("submitted_at"),
+                "source_href": response.get("source_href"),
+                "attention_prompt": response.get("attention_prompt"),
+                "source": response.get("source"),
+                "local_only": True,
+            } for response in resolved.get("question_responses", [])]
             return {
                 "state": "review-pending",
                 "reviews": reviews,
-                "required_action": "Inspect the local-only review, record any valid authorization canonically, then run only its named gate.",
+                "question_responses": question_responses,
+                "required_action": "Inspect the local-only review or question receipt, record valid intent and authorization canonically, acknowledge the receipt, then run only its named gate.",
             }
         if state == "pivot-required":
             return {
@@ -188,6 +199,16 @@ def continuation_prompt(continuation: dict[str, Any]) -> str | None:
             f"{continuation.get('next_action')}"
         )
     if state == "review-pending":
+        question_responses = continuation.get("question_responses") or []
+        if question_responses:
+            response = question_responses[0]
+            return (
+                "Living Documents input received. "
+                f"Inspect receipt {response.get('receipt_id')} for "
+                f"{response.get('project')} / {response.get('section_id')} at "
+                f"{response.get('source_href')}; record valid answers canonically, "
+                "acknowledge the receipt, then continue only authorized unblocked work."
+            )
         reviews = continuation.get("reviews") or []
         review = reviews[0] if reviews else {}
         return (

@@ -2305,6 +2305,87 @@ kbd {
   font-weight: 650;
 }
 
+.question-review-form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.question-review-intro,
+.question-submit-bar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--surface) 88%, var(--primary-wash));
+}
+
+.question-review-intro h3,
+.question-review-intro p,
+.question-submit-bar p {
+  margin: 0;
+}
+
+.question-review-intro p,
+.question-submit-bar p {
+  max-width: 54ch;
+  color: var(--text-muted);
+  font-size: .84rem;
+  line-height: 1.5;
+}
+
+.question-card {
+  min-width: 0;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.question-card > legend {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  max-width: calc(100% - 1rem);
+  padding: 0 .5rem;
+  color: var(--text-strong);
+  font-weight: 720;
+  line-height: 1.35;
+}
+
+.question-card .portfolio-choice-list {
+  margin-bottom: 0;
+  border: 0;
+  padding: .5rem 0 0;
+}
+
+.question-card textarea {
+  min-height: 5.5rem;
+}
+
+.question-submit-bar {
+  position: sticky;
+  bottom: 4.7rem;
+  z-index: 7;
+  border-color: var(--primary);
+  box-shadow: 0 -12px 30px color-mix(in srgb, var(--page) 82%, transparent);
+}
+
+@media (max-width: 720px) {
+  .question-review-intro,
+  .question-submit-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .question-submit-bar .primary-button {
+    width: 100%;
+  }
+}
+
 .portfolio-choice-list textarea {
   width: 100%;
   min-height: 5rem;

@@ -16,6 +16,7 @@ ROOT = HOME / ".local" / "state" / "living-documents"
 LEDGER = ROOT / "ledger"
 HANDOFFS = ROOT / "handoffs"
 DECISION_REVIEWS = ROOT / "decision-reviews"
+QUESTION_RESPONSES = ROOT / "question-responses"
 UNBLOCK_QUEUE = CORPUS / "living-documents" / "portfolio-unblock-queue.md"
 STATUSES = {"active", "blocked", "interrupted", "complete", "unclassified"}
 CONFIDENCE = {"verified", "inferred", "unverified"}
@@ -116,6 +117,58 @@ def pending_local_reviews() -> list[dict]:
     return sorted(reviews, key=lambda review: (review["priority"], review["updated_at"]))
 
 
+def pending_question_responses(project: str | None = None) -> list[dict]:
+    """Read submitted document questions without treating answers as canonical."""
+    responses: list[dict] = []
+    for source in sorted(QUESTION_RESPONSES.glob("*/*/*.json")):
+        try:
+            raw = json.loads(source.read_text(encoding="utf-8"))
+            if raw.get("schema") != "living-documents-question-response/v1":
+                continue
+            if raw.get("localOnly") is not True or raw.get("status") != "pending":
+                continue
+            project_id = identifier(str(raw.get("projectId") or ""), "project ID")
+            section_id = identifier(str(raw.get("sectionId") or ""), "section ID")
+            receipt_id = identifier(str(raw.get("receiptId") or ""), "receipt ID")
+            if project and project_id != project:
+                continue
+            if not (CORPUS / project_id / f"{section_id}.md").is_file():
+                continue
+            answers = raw.get("answers")
+            if not isinstance(answers, list) or not answers:
+                continue
+            responses.append({
+                "receipt_id": receipt_id,
+                "project": project_id,
+                "section_id": section_id,
+                "answers": answers,
+                "submitted_at": str(raw.get("submittedAt") or ""),
+                "source_href": str(raw.get("sourceHref") or ""),
+                "attention_prompt": str((raw.get("attention") or {}).get("prompt") or ""),
+                "source": str(source),
+                "local_only": True,
+            })
+        except (OSError, ValueError, json.JSONDecodeError):
+            continue
+    return sorted(responses, key=lambda response: (response["submitted_at"], response["receipt_id"]))
+
+
+def acknowledge_question_response(receipt_id: str) -> Path:
+    """Mark one exact local receipt consumed after canonical review."""
+    receipt_id = identifier(receipt_id, "receipt ID")
+    matches = list(QUESTION_RESPONSES.glob(f"*/*/{receipt_id}.json"))
+    if len(matches) != 1:
+        raise ValueError("question response receipt must resolve exactly once")
+    target = matches[0]
+    record = json.loads(target.read_text(encoding="utf-8"))
+    if record.get("schema") != "living-documents-question-response/v1":
+        raise ValueError("unsupported question response schema")
+    record["status"] = "consumed"
+    record["consumedAt"] = timestamp()
+    atomic_write(target, record)
+    return target
+
+
 def decision_work_ids() -> dict[str, list[str]]:
     try:
         source = UNBLOCK_QUEUE.read_text(encoding="utf-8")
@@ -130,6 +183,15 @@ def next_record(project: str | None = None) -> dict:
     """Resolve the next bounded action without changing ledger or project state."""
     if project:
         project = identifier(project, "project")
+    question_responses = pending_question_responses(project)
+    if question_responses:
+        return {
+            "state": "review-pending",
+            "project": project,
+            "message": "A human submitted Living Document answers. Inspect the exact receipt, record valid intent and authorization canonically, acknowledge the receipt, then return to the resolver. Submission itself does not execute work.",
+            "question_responses": question_responses,
+            "reviews": [],
+        }
     records: list[dict] = []
     for item in sorted(LEDGER.glob("*.json")):
         record = json.loads(item.read_text(encoding="utf-8"))
@@ -201,6 +263,8 @@ def main() -> int:
     sub.add_parser("list")
     next_parser = sub.add_parser("next")
     next_parser.add_argument("--project")
+    acknowledge = sub.add_parser("ack-question")
+    acknowledge.add_argument("--receipt-id", required=True)
     args = parser.parse_args()
     try:
         if args.command == "put":
@@ -211,6 +275,8 @@ def main() -> int:
             records = sorted(LEDGER.glob("*.json")); [validate(json.loads(item.read_text(encoding="utf-8"))) for item in records]; result={"validated":len(records)}
         elif args.command == "list":
             result = {"records": [json.loads(item.read_text(encoding="utf-8")) for item in sorted(LEDGER.glob("*.json"))]}
+        elif args.command == "ack-question":
+            result = {"acknowledged": str(acknowledge_question_response(args.receipt_id))}
         else:
             result = next_record(args.project)
         print(json.dumps(result, indent=2, ensure_ascii=False)); return 0

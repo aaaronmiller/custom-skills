@@ -32,7 +32,7 @@ for every substantial project task after the package is installed.
 2. Read the returned `start-here.md`.
 3. Read `project.md`, `what-to-do.md`, and only the linked pages needed for the current task.
 4. Preserve stable page IDs and existing history.
-5. Before a terminal response after substantial work, run the non-mutating continuity hook and inspect its `continuation` result. Record verified changes, evidence, decisions, blockers, and the next safe action. A `review-pending` result means a human chose a loopback-local direction: inspect it, record any valid authorization canonically, and run only its named gate. A `pivot-required` result means select and record a Living Documents control-plane pivot before replying; it is never permission to stop.
+5. Before a terminal response after substantial work, run the non-mutating continuity hook and inspect its `continuation` result. Record verified changes, evidence, decisions, blockers, and the next safe action. A `review-pending` result means a human chose a loopback-local direction or submitted a rendered question packet: inspect the exact receipt, record valid intent and authorization canonically, acknowledge it with `ld-ledger ack-question --receipt-id <id>` when applicable, and run only its named gate. A `pivot-required` result means select and record a Living Documents control-plane pivot before replying; it is never permission to stop.
 
 Do not reconstruct project intent from chat when a canonical page exists. Do not replace a direct user correction with a newer model summary.
 
@@ -51,12 +51,13 @@ Markdown autonomously. Raw transcripts remain evidence; CASS remains search;
 memory remains reusable agent context. The Living Document receives only the
 adjudicated state needed for a human or a fresh harness to resume safely.
 
-When the resolver reports `review-pending`, the selected option is an
-asynchronous handoff, not self-executing authority. Verify its target and
-scope, apply the user's valid direction to canonical Markdown and the ledger,
-then run the named acceptance gate. If no review is pending and every project
-record remains blocked, create the next independent control-plane pivot rather
-than ending the session.
+When the resolver reports `review-pending`, the selected option or question
+receipt is an asynchronous handoff, not self-executing authority. Verify its
+target and scope, apply the user's valid direction to canonical Markdown and
+the ledger, acknowledge a consumed question receipt, then run the named
+acceptance gate. If no review is pending and every project record remains
+blocked, create the next independent control-plane pivot rather than ending
+the session.
 
 Install lifecycle hooks at `SessionStart` and `Stop`, not on every user prompt.
 The start hook injects one compact orientation clause; the stop hook permits at
@@ -141,6 +142,20 @@ Newest filename is not authority. Direct user instructions, actual construction 
 - Content annotations target selected prose or a stable page ID.
 - Layout annotations target the renderer presentation of a page.
 - Questions that block only part of the work remain open while other tasks continue.
+- A canonical question packet uses `## Questions for the user`, followed by
+  `### Question N: ...`, two or more bold lettered choices such as
+  `**A. Choice. Recommended.** Rationale`, and a `**Write-in:**` prompt. The
+  renderer must convert this convention into one radio group plus a custom
+  answer field per question.
+- Submitting a question packet creates a private loopback receipt and a
+  continuity attention event. It does not edit canonical Markdown, launch
+  work, spend quota, or grant authority by itself.
+- The continuity resolver prioritizes pending question receipts, points the
+  agent to the exact project and page, and requires canonical application plus
+  explicit acknowledgement before normal queue work resumes.
+- A Gateway or harness adapter may deliver the same versioned attention event
+  immediately when available. The local receipt and Stop-hook path remain the
+  recovery-safe baseline.
 - Export page changes for an agent rather than silently merging browser state.
 - Record accepted changes in Markdown and append history; browser local state is not canonical.
 
@@ -177,6 +192,7 @@ ld-ledger import-handoffs
 ld-ledger validate
 ld-ledger list
 ld-ledger next [--project <project>]
+ld-ledger ack-question --receipt-id <receipt-id>
 ```
 
 Use `sync --no-index-write` only for the automatic projection refresher: it

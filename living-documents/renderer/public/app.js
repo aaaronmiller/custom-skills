@@ -5,6 +5,7 @@ version: 2.0.0
 --- */
 
 import { projectRouteFromHash, sectionIdFromHash } from './navigation.mjs';
+import { parseQuestionSection } from './question-forms.mjs';
 
 const app = document.querySelector('#app');
 const themeNames = {
@@ -199,6 +200,65 @@ function renderMarkdown(markdown = '') {
   closeList();
   if (codeFence) output.push(`<pre><code>${escapeHtml(codeLines.join('\n'))}</code></pre>`);
   return output.join('\n');
+}
+
+function questionResponseStorage() {
+  try {
+    const value = JSON.parse(localStorage.getItem(storageKey('question-responses')) || '{}');
+    return value && typeof value === 'object' ? value : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveQuestionResponseDraft(sectionId, questionId, update) {
+  const responses = questionResponseStorage();
+  responses[sectionId] ||= {};
+  responses[sectionId][questionId] = {
+    ...(responses[sectionId][questionId] || {}),
+    ...update,
+    updatedAt: new Date().toISOString(),
+  };
+  localStorage.setItem(storageKey('question-responses'), JSON.stringify(responses));
+}
+
+function renderQuestionForm(section) {
+  const parsed = parseQuestionSection(section.markdown);
+  if (!parsed) return `<div class="markdown-body">${renderMarkdown(section.markdown)}</div>`;
+  const responses = questionResponseStorage()[section.id] || {};
+  const questions = parsed.questions.map((question) => {
+    const response = responses[question.id] || {};
+    const choices = question.options.map((option) => `
+      <label class="portfolio-choice ${response.optionId === option.id ? 'active' : ''}">
+        <input type="radio" required name="${escapeHtml(section.id)}-${escapeHtml(question.id)}" value="${escapeHtml(option.id)}" data-action="question-option" data-section="${escapeHtml(section.id)}" data-question="${escapeHtml(question.id)}" ${response.optionId === option.id ? 'checked' : ''}>
+        <span><strong>${escapeHtml(option.id.toUpperCase())}. ${escapeHtml(option.label)}</strong>${option.recommended ? '<span class="tag">recommended</span>' : ''}${option.detail ? `<small>${escapeHtml(option.detail)}</small>` : ''}</span>
+      </label>`).join('');
+    return `
+      <fieldset class="question-card" data-question-card="${escapeHtml(question.id)}">
+        <legend><span class="decision-priority">${question.number}</span>${escapeHtml(question.title)}</legend>
+        <div class="portfolio-choice-list">${choices}
+          <label class="portfolio-choice ${response.optionId === 'write-in' ? 'active' : ''}">
+            <input type="radio" required name="${escapeHtml(section.id)}-${escapeHtml(question.id)}" value="write-in" data-action="question-option" data-section="${escapeHtml(section.id)}" data-question="${escapeHtml(question.id)}" ${response.optionId === 'write-in' ? 'checked' : ''}>
+            <span><strong>Write my own answer</strong><small>${escapeHtml(question.writeIn || 'Use this when none of the listed choices fit.')}</small></span>
+          </label>
+          <label class="portfolio-note-label" for="${escapeHtml(section.id)}-${escapeHtml(question.id)}-write-in">Custom answer</label>
+          <textarea id="${escapeHtml(section.id)}-${escapeHtml(question.id)}-write-in" data-question-write-in="${escapeHtml(question.id)}" data-section="${escapeHtml(section.id)}" placeholder="Explain the direction, constraint, or alternative you want.">${escapeHtml(response.writeIn || '')}</textarea>
+        </div>
+      </fieldset>`;
+  }).join('');
+  return `
+    <div class="markdown-body">${renderMarkdown(parsed.before)}</div>
+    <form class="question-review-form" data-question-response-form="${escapeHtml(section.id)}">
+      <div class="question-review-intro">
+        <div><span class="eyebrow">Decision packet</span><h3>Answer ${parsed.questions.length} questions</h3></div>
+        <p>${parsed.lead ? inlineMarkdown(parsed.lead) : 'Choose one option per question or write your own answer.'}</p>
+      </div>
+      ${questions}
+      <div class="question-submit-bar">
+        <p>Submission creates a loopback-local receipt and alerts the continuity resolver. It does not execute work or change canonical Markdown by itself.</p>
+        <button class="primary-button" type="submit">Submit answers for agent review</button>
+      </div>
+    </form>`;
 }
 
 async function fetchJson(url) {
@@ -790,7 +850,7 @@ function renderSectionArticle(section) {
       ${section.id === 'decisions' ? '<aside class="reader-mode-note"><strong>About this page:</strong> it records canonical project decisions, rejected directions, and unresolved policy. It is not the same as the workspace-wide blocker and decision queue, available from <a href="/#delegation">All blockers and decisions</a>.</aside>' : ''}
       ${state.drafts[section.id] ? `<div class="local-draft-banner"><span>Local draft overlays the canonical section.</span><button class="ghost-button" data-action="discard-draft" data-section="${section.id}">Discard</button></div>` : ''}
       <div class="section-toolbar section-tags">${tagMarkup(section.tags)}</div>
-      <div class="markdown-body">${renderMarkdown(section.markdown)}</div>
+      ${renderQuestionForm(section)}
     </section>`;
 }
 
@@ -1672,6 +1732,7 @@ app.addEventListener('submit', (event) => {
   event.preventDefault();
   if (event.target.id === 'quick-edit-form') saveQuickEdit(event.target);
   if (event.target.id === 'annotation-form') saveAnnotation(event.target);
+  if (event.target.dataset.questionResponseForm) void submitQuestionResponses(event.target);
 });
 
 app.addEventListener('input', (event) => {
@@ -1687,11 +1748,66 @@ app.addEventListener('input', (event) => {
     });
   }
   if (event.target.dataset.portfolioNote) savePortfolioReview(event.target.dataset.portfolioNote, { note: event.target.value });
+  if (event.target.dataset.questionWriteIn) {
+    saveQuestionResponseDraft(event.target.dataset.section, event.target.dataset.questionWriteIn, { writeIn: event.target.value });
+    if (event.target.value.trim()) {
+      const radio = event.target.closest('[data-question-card]')?.querySelector('input[value="write-in"]');
+      if (radio && !radio.checked) {
+        radio.checked = true;
+        saveQuestionResponseDraft(event.target.dataset.section, event.target.dataset.questionWriteIn, { optionId: 'write-in' });
+      }
+    }
+  }
   if (event.target.id === 'command-search') {
     state.commandIndex = 0;
     renderCommandList(event.target.value);
   }
 });
+
+app.addEventListener('change', (event) => {
+  if (event.target.dataset.action === 'question-option') {
+    saveQuestionResponseDraft(event.target.dataset.section, event.target.dataset.question, { optionId: event.target.value });
+    event.target.closest('[data-question-card]')?.querySelectorAll('.portfolio-choice').forEach((choice) => {
+      choice.classList.toggle('active', choice.contains(event.target));
+    });
+  }
+});
+
+async function submitQuestionResponses(form) {
+  const sectionId = form.dataset.questionResponseForm;
+  const parsed = parseQuestionSection(state.sectionContent.get(sectionId) || '');
+  if (!parsed || !form.reportValidity()) return;
+  const responses = questionResponseStorage()[sectionId] || {};
+  const answers = parsed.questions.map((question) => ({
+    questionId: question.id,
+    optionId: responses[question.id]?.optionId || '',
+    writeIn: responses[question.id]?.writeIn || '',
+  }));
+  if (answers.some((answer) => !answer.optionId || (answer.optionId === 'write-in' && !answer.writeIn.trim()))) {
+    toast('Answer every question before submitting');
+    return;
+  }
+  const button = form.querySelector('button[type="submit"]');
+  button.disabled = true;
+  button.textContent = 'Submitting…';
+  try {
+    const response = await fetch('/api/question-responses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectId: state.manifest.meta.documentId, sectionId, answers }),
+    });
+    if (!response.ok) throw new Error(`question response: ${response.status}`);
+    const payload = await response.json();
+    button.textContent = 'Submitted for agent review';
+    form.dataset.receiptId = payload.receipt.receiptId;
+    toast('Answers saved; agent attention queued');
+  } catch (error) {
+    console.error(error);
+    button.disabled = false;
+    button.textContent = 'Submit answers for agent review';
+    toast('Submission failed; your browser draft is preserved');
+  }
+}
 
 app.addEventListener('change', (event) => {
   if (['theme-select', 'inspector-theme'].includes(event.target.id)) applyTheme(event.target.value);
