@@ -15,6 +15,7 @@ const themeNames = {
   paper: 'Paper',
   'high-contrast': 'High contrast'
 };
+const projectViewIds = ['dashboard', 'document', 'projects', 'sources', 'ideas', 'timeline', 'history', 'changelog', 'search', 'changes'];
 const motionNames = { system: 'System motion', full: 'Full motion', reduced: 'Reduced motion' };
 const viewDefinitions = [
   ['dashboard', '⌂', 'Project overview'],
@@ -428,6 +429,15 @@ function localChangeCount() {
   return Object.keys(state.drafts).length + Object.keys(state.proposalDecisions).length + state.localAnnotations.length;
 }
 
+function submittedChangeReceipt() {
+  try {
+    const receipt = JSON.parse(localStorage.getItem(storageKey('last-change-receipt')) || 'null');
+    return receipt?.snapshot === snapshot() ? receipt : null;
+  } catch {
+    return null;
+  }
+}
+
 function currentSection() {
   return effectiveSection(state.activeSectionId || state.manifest.navigation.sectionOrder[0]);
 }
@@ -649,7 +659,7 @@ function renderReviewDock() {
         <button data-action="annotate-selection" data-scope="content" title="Select canonical text, then attach a browser-local note"><span aria-hidden="true">✦</span><span>Annotate content</span></button>
         <button data-action="quick-edit" title="Draft a browser-local Markdown change for the active page"><span aria-hidden="true">¶</span><span>Draft Markdown</span></button>
         <button data-action="add-annotation" data-scope="layout" title="Describe a change to the shared reader layout or behavior"><span aria-hidden="true">⌗</span><span>Edit layout</span></button>
-        <button data-action="view" data-view="changes" title="Review and export all local annotations, drafts, and decisions"><span aria-hidden="true">⇧</span><span>Review + export</span><span class="dock-count">${changes}</span></button>
+        <button data-action="view" data-view="changes" title="Review and send local annotations, drafts, and decisions to the loopback agent inbox"><span aria-hidden="true">⇧</span><span>Review + send</span><span class="dock-count">${changes}</span></button>
       </div>
     </footer>`;
 }
@@ -898,18 +908,28 @@ function renderChangeAnnotation(annotation) {
     </article>`;
 }
 
-function renderChangesPanel() {
+function renderChangesPanel({ standalone = false } = {}) {
   const annotations = allAnnotations();
   const drafts = Object.entries(state.drafts);
   const decisions = Object.entries(state.proposalDecisions);
+  const localChanges = localChangeCount();
+  const submitted = submittedChangeReceipt();
+  const sendLabel = submitted
+    ? `Sent ${submitted.changeCount} change${submitted.changeCount === 1 ? '' : 's'} to agent`
+    : localChanges
+      ? `Send ${localChanges} change${localChanges === 1 ? '' : 's'} to agent`
+      : 'Nothing to send yet';
   return `
     <section class="document-section" id="changes" aria-labelledby="changes-title">
-      <div class="section-kicker"><span>CH</span><span>Agent handoff</span></div>
-      <h2 id="changes-title">Changes</h2>
-      <p class="section-dek">Content notes, layout notes, local drafts, and proposal decisions collected without rewriting canonical Markdown.</p>
+      ${standalone ? '' : '<div class="section-kicker"><span>CH</span><span>Agent handoff</span></div>'}
+      <h2 id="changes-title" class="${standalone ? 'visually-hidden' : ''}">${standalone ? 'Submission contents' : 'Changes'}</h2>
+      <p class="section-dek">${standalone
+        ? 'These changes are still saved in this browser. Send them once to create a private loopback receipt for the agent; download and copy are optional backups.'
+        : 'Content notes, layout notes, local drafts, and proposal decisions collected without rewriting canonical Markdown.'}</p>
       <div class="section-toolbar">
-        <button class="primary-button" data-action="copy-change">Copy page changes for agent</button>
-        <button class="ghost-button" data-action="export-change">Download change request</button>
+        <button class="primary-button" data-action="submit-change" ${localChanges && !submitted ? '' : 'disabled'}>${sendLabel}</button>
+        <button class="ghost-button" data-action="copy-change">Copy backup</button>
+        <button class="ghost-button" data-action="export-change">Download backup</button>
       </div>
       <div class="ledger-grid">
         <section class="ledger-panel">
@@ -931,8 +951,8 @@ function renderChangesPanel() {
 function renderChanges() {
   return `
     <div class="view-frame">
-      ${pageHeader('Changes', 'Review content and layout annotations separately, then copy one structured request for an agent.', 'Local overlay')}
-      ${renderChangesPanel()}
+      ${pageHeader('Review and send changes', 'Inspect the browser-local changes below, then send one private receipt to the agent.', 'Agent handoff')}
+      ${renderChangesPanel({ standalone: true })}
     </div>`;
 }
 
@@ -1242,12 +1262,19 @@ function setView(view) {
   state.activeView = view;
   if (view === 'section' && state.activeSectionId) {
     replaceLocationHash(state.activeSectionId);
+  } else if (view !== 'dashboard') {
+    replaceLocationView(view);
   } else {
     replaceLocationHash('');
   }
   document.body.classList.remove('left-open', 'right-open');
   render();
   requestAnimationFrame(() => document.querySelector('#main-content')?.focus({ preventScroll: true }));
+}
+
+function replaceLocationView(view) {
+  const next = `${window.location.pathname}${window.location.search}#view=${encodeURIComponent(view)}`;
+  history.replaceState(null, '', next);
 }
 
 function sectionIdFromLocation() {
@@ -1601,6 +1628,34 @@ function exportChangeRequest() {
   toast('Change request exported');
 }
 
+async function submitChangeRequest(button) {
+  if (localChangeCount() < 1) return toast('Add a note, draft, or decision before sending');
+  button.disabled = true;
+  button.textContent = 'Sending…';
+  try {
+    const response = await fetch('/api/change-requests', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(changeRequestPayload()),
+    });
+    if (!response.ok) throw new Error(`change request: ${response.status}`);
+    const payload = await response.json();
+    localStorage.setItem(storageKey('last-change-receipt'), JSON.stringify({
+      receiptId: payload.receipt.receiptId,
+      submittedAt: payload.receipt.submittedAt,
+      changeCount: payload.receipt.changeCount,
+      snapshot: snapshot(),
+    }));
+    button.textContent = `Sent ${payload.receipt.changeCount} change${payload.receipt.changeCount === 1 ? '' : 's'} to agent`;
+    toast(`Sent ${payload.receipt.changeCount} change${payload.receipt.changeCount === 1 ? '' : 's'}; no download needed`);
+  } catch (error) {
+    console.error(error);
+    button.disabled = false;
+    button.textContent = `Send ${localChangeCount()} change${localChangeCount() === 1 ? '' : 's'} to agent`;
+    toast('Send failed; your browser changes are preserved');
+  }
+}
+
 async function copyChangeRequest() {
   const body = `${JSON.stringify(changeRequestPayload(), null, 2)}\n`;
   try {
@@ -1708,6 +1763,7 @@ app.addEventListener('click', (event) => {
   if (action === 'reader-guide') document.querySelector('#reader-guide-dialog').showModal();
   if (action === 'undo') undo();
   if (action === 'redo') redo();
+  if (action === 'submit-change') void submitChangeRequest(control);
   if (action === 'export-change') exportChangeRequest();
   if (action === 'copy-change') copyChangeRequest();
   if (action === 'export-json') exportJson();
@@ -1893,8 +1949,14 @@ window.addEventListener('scroll', () => {
 
 window.addEventListener('hashchange', () => {
   if (window.location.pathname === '/') return;
-  const sectionId = sectionIdFromLocation();
-  if (sectionId) goToSection(sectionId);
+  const route = projectRouteFromHash(
+    window.location.hash,
+    state.manifest?.sections.map((section) => section.id) || [],
+    state.manifest?.navigation.defaultView || 'dashboard',
+    projectViewIds,
+  );
+  if (route.sectionId) goToSection(route.sectionId);
+  else if (route.view !== state.activeView) setView(route.view);
 });
 
 async function init() {
@@ -1928,6 +1990,7 @@ async function init() {
       window.location.hash,
       manifest.sections.map((section) => section.id),
       manifest.navigation.defaultView || 'dashboard',
+      projectViewIds,
     );
     const linkedSectionId = route.sectionId;
     state.activeView = route.view;

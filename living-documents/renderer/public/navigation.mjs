@@ -8,10 +8,21 @@ export function sectionIdFromHash(hash, validSectionIds) {
   }
 }
 
-export function projectRouteFromHash(hash, validSectionIds, defaultView = 'dashboard') {
+export function viewIdFromHash(hash, validViewIds) {
+  if (!hash?.startsWith('#view=')) return null;
+  try {
+    const id = decodeURIComponent(hash.slice('#view='.length));
+    return validViewIds.includes(id) ? id : null;
+  } catch {
+    return null;
+  }
+}
+
+export function projectRouteFromHash(hash, validSectionIds, defaultView = 'dashboard', validViewIds = []) {
   const sectionId = sectionIdFromHash(hash, validSectionIds);
+  const viewId = viewIdFromHash(hash, validViewIds);
   return {
-    view: sectionId ? 'section' : defaultView,
+    view: sectionId ? 'section' : viewId || defaultView,
     sectionId,
   };
 }

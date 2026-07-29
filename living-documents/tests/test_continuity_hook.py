@@ -83,6 +83,23 @@ class ContinuityHookContractTests(unittest.TestCase):
         self.assertIn("qr-1234-abcd", output["reason"])
         self.assertIn("Living Documents input received", output["reason"])
 
+    def test_change_request_interrupts_stop_with_exact_receipt(self):
+        record = {
+            "continuation": {
+                "state": "review-pending",
+                "change_requests": [{
+                    "receipt_id": "cr-1234-abcd",
+                    "project": "living-documents",
+                    "change_count": 2,
+                    "source_href": "/projects/living-documents/#view=changes",
+                }],
+            }
+        }
+        output = MODULE.harness_output({"hook_event_name": "Stop"}, record)
+        self.assertEqual(output["decision"], "block")
+        self.assertIn("cr-1234-abcd", output["reason"])
+        self.assertIn("2 changes", output["reason"])
+
 
 if __name__ == "__main__":
     unittest.main()

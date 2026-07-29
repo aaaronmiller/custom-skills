@@ -98,11 +98,22 @@ def continuation_state() -> dict[str, Any]:
                 "source": response.get("source"),
                 "local_only": True,
             } for response in resolved.get("question_responses", [])]
+            change_requests = [{
+                "receipt_id": request.get("receipt_id"),
+                "project": request.get("project"),
+                "change_count": request.get("change_count"),
+                "submitted_at": request.get("submitted_at"),
+                "source_href": request.get("source_href"),
+                "attention_prompt": request.get("attention_prompt"),
+                "source": request.get("source"),
+                "local_only": True,
+            } for request in resolved.get("change_requests", [])]
             return {
                 "state": "review-pending",
                 "reviews": reviews,
                 "question_responses": question_responses,
-                "required_action": "Inspect the local-only review or question receipt, record valid intent and authorization canonically, acknowledge the receipt, then run only its named gate.",
+                "change_requests": change_requests,
+                "required_action": "Inspect the local-only change, review, or question receipt, record valid intent and authorization canonically, acknowledge the receipt, then run only its named gate.",
             }
         if state == "pivot-required":
             return {
@@ -199,6 +210,16 @@ def continuation_prompt(continuation: dict[str, Any]) -> str | None:
             f"{continuation.get('next_action')}"
         )
     if state == "review-pending":
+        change_requests = continuation.get("change_requests") or []
+        if change_requests:
+            request = change_requests[0]
+            return (
+                "Living Documents changes received. "
+                f"Inspect receipt {request.get('receipt_id')} for "
+                f"{request.get('project')} with {request.get('change_count')} changes at "
+                f"{request.get('source_href')}; record valid changes canonically, "
+                "acknowledge the receipt, then continue only authorized unblocked work."
+            )
         question_responses = continuation.get("question_responses") or []
         if question_responses:
             response = question_responses[0]

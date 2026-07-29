@@ -28,6 +28,7 @@ const ledgerRoot = path.join(os.homedir(), '.local', 'state', 'living-documents'
 const handoffRoot = path.join(os.homedir(), '.local', 'state', 'living-documents', 'handoffs');
 const decisionReviewRoot = path.join(os.homedir(), '.local', 'state', 'living-documents', 'decision-reviews');
 const questionResponseRoot = path.join(os.homedir(), '.local', 'state', 'living-documents', 'question-responses');
+const changeRequestRoot = path.join(os.homedir(), '.local', 'state', 'living-documents', 'change-requests');
 const execFileAsync = promisify(execFile);
 let gitPulseCache = { observedAt: 0, projects: [] };
 const defaultProjectId = process.env.LIVING_DOCUMENT_PROJECT || 'living-documents';
@@ -173,6 +174,101 @@ async function saveQuestionResponse(payload) {
     attention: { transport: 'local-continuity', prompt },
   };
   const directory = path.join(questionResponseRoot, value.projectId, value.sectionId);
+  await mkdir(directory, { recursive: true, mode: 0o700 });
+  const target = path.join(directory, `${receiptId}.json`);
+  const temporary = path.join(directory, `.${receiptId}.${process.pid}.tmp`);
+  await writeFile(temporary, `${JSON.stringify(receipt, null, 2)}\n`, { mode: 0o600 });
+  await rename(temporary, target);
+  return receipt;
+}
+
+function boundedText(value, label, limit = 8000) {
+  const result = String(value || '').trim();
+  if (result.length > limit) throw Object.assign(new Error(`${label} is too long`), { code: 'E2BIG' });
+  return result;
+}
+
+async function validChangeRequest(payload) {
+  const projectId = questionIdentifier(payload?.document?.documentId, 'project ID');
+  const documentRoot = await currentDocumentRoot(projectId);
+  if (!documentRoot) throw Object.assign(new Error('Unknown project'), { code: 'ENOENT' });
+  const manifest = JSON.parse(await readFile(path.join(documentRoot, 'public', 'content', 'index.json'), 'utf8'));
+  const sectionIds = new Set((manifest.sections || []).map((section) => section.id));
+  const drafts = Array.isArray(payload?.drafts) ? payload.drafts : [];
+  const proposalDecisions = Array.isArray(payload?.proposalDecisions) ? payload.proposalDecisions : [];
+  const annotations = Array.isArray(payload?.annotations) ? payload.annotations : [];
+  const changeCount = drafts.length + proposalDecisions.length + annotations.length;
+  if (changeCount < 1 || changeCount > 500) {
+    throw Object.assign(new Error('Change request must contain 1-500 changes'), { code: 'EINVAL' });
+  }
+  const cleanDrafts = drafts.map((draft) => {
+    const sectionId = questionIdentifier(draft?.sectionId, 'draft section ID');
+    if (!sectionIds.has(sectionId)) throw Object.assign(new Error('Unknown draft section'), { code: 'ENOENT' });
+    return {
+      sectionId,
+      title: boundedText(draft?.title, 'Draft title', 500),
+      dek: boundedText(draft?.dek, 'Draft description', 2000),
+      markdown: boundedText(draft?.markdown, 'Draft Markdown', 100000),
+    };
+  });
+  const cleanDecisions = proposalDecisions.map((decision) => ({
+    proposalId: questionIdentifier(decision?.proposalId, 'proposal ID'),
+    decision: questionIdentifier(decision?.decision, 'proposal decision'),
+  }));
+  const cleanAnnotations = annotations.map((annotation) => {
+    const targetId = questionIdentifier(annotation?.targetId, 'annotation target ID');
+    if (targetId !== 'document' && !sectionIds.has(targetId)) {
+      throw Object.assign(new Error('Unknown annotation target'), { code: 'ENOENT' });
+    }
+    return {
+      id: boundedText(annotation?.id, 'Annotation ID', 160),
+      targetId,
+      quote: boundedText(annotation?.quote, 'Annotation quote', 12000),
+      scope: ['content', 'layout'].includes(annotation?.scope) ? annotation.scope : 'content',
+      kind: boundedText(annotation?.kind, 'Annotation kind', 80),
+      text: boundedText(annotation?.text, 'Annotation text', 12000),
+      status: boundedText(annotation?.status, 'Annotation status', 80),
+      author: boundedText(annotation?.author, 'Annotation author', 200),
+      createdAt: boundedText(annotation?.createdAt, 'Annotation timestamp', 80),
+    };
+  });
+  return {
+    projectId,
+    changeCount,
+    request: {
+      document: {
+        documentId: projectId,
+        version: boundedText(payload?.document?.version, 'Document version', 80),
+        formatVersion: boundedText(payload?.document?.formatVersion, 'Format version', 80),
+      },
+      scope: Array.isArray(payload?.scope)
+        ? payload.scope.map((item) => questionIdentifier(item, 'scope ID')).filter((item) => item === 'document' || sectionIds.has(item))
+        : [],
+      drafts: cleanDrafts,
+      proposalDecisions: cleanDecisions,
+      annotations: cleanAnnotations,
+    },
+  };
+}
+
+async function saveChangeRequest(payload) {
+  const value = await validChangeRequest(payload);
+  const submittedAt = new Date().toISOString();
+  const receiptId = `cr-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
+  const receipt = {
+    schema: 'living-documents-change-request/v1',
+    receiptId,
+    ...value,
+    submittedAt,
+    status: 'pending',
+    localOnly: true,
+    sourceHref: `/projects/${value.projectId}/#view=changes`,
+    attention: {
+      transport: 'local-continuity',
+      prompt: `Input received. Review Living Document change receipt ${receiptId} for ${value.projectId}, record valid changes canonically, and continue only authorized unblocked work.`,
+    },
+  };
+  const directory = path.join(changeRequestRoot, value.projectId);
   await mkdir(directory, { recursive: true, mode: 0o700 });
   const target = path.join(directory, `${receiptId}.json`);
   const temporary = path.join(directory, `.${receiptId}.${process.pid}.tmp`);
@@ -440,6 +536,10 @@ const server = http.createServer(async (request, response) => {
     }
     if ((request.url || '/') === '/api/question-responses' && request.method === 'POST') {
       jsonResponse(response, 201, { receipt: await saveQuestionResponse(await requestJson(request, 128 * 1024)) });
+      return;
+    }
+    if ((request.url || '/') === '/api/change-requests' && request.method === 'POST') {
+      jsonResponse(response, 201, { receipt: await saveChangeRequest(await requestJson(request, 512 * 1024)) });
       return;
     }
     if ((request.url || '/') === '/api/portfolio') {

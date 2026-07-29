@@ -17,6 +17,7 @@ LEDGER = ROOT / "ledger"
 HANDOFFS = ROOT / "handoffs"
 DECISION_REVIEWS = ROOT / "decision-reviews"
 QUESTION_RESPONSES = ROOT / "question-responses"
+CHANGE_REQUESTS = ROOT / "change-requests"
 UNBLOCK_QUEUE = CORPUS / "living-documents" / "portfolio-unblock-queue.md"
 STATUSES = {"active", "blocked", "interrupted", "complete", "unclassified"}
 CONFIDENCE = {"verified", "inferred", "unverified"}
@@ -169,6 +170,58 @@ def acknowledge_question_response(receipt_id: str) -> Path:
     return target
 
 
+def pending_change_requests(project: str | None = None) -> list[dict]:
+    """Read submitted browser changes without treating them as canonical."""
+    requests: list[dict] = []
+    for source in sorted(CHANGE_REQUESTS.glob("*/*.json")):
+        try:
+            raw = json.loads(source.read_text(encoding="utf-8"))
+            if raw.get("schema") != "living-documents-change-request/v1":
+                continue
+            if raw.get("localOnly") is not True or raw.get("status") != "pending":
+                continue
+            project_id = identifier(str(raw.get("projectId") or ""), "project ID")
+            receipt_id = identifier(str(raw.get("receiptId") or ""), "receipt ID")
+            if project and project_id != project:
+                continue
+            if not (CORPUS / project_id / "start-here.md").is_file():
+                continue
+            change_count = raw.get("changeCount")
+            request = raw.get("request")
+            if not isinstance(change_count, int) or change_count < 1 or not isinstance(request, dict):
+                continue
+            requests.append({
+                "receipt_id": receipt_id,
+                "project": project_id,
+                "change_count": change_count,
+                "request": request,
+                "submitted_at": str(raw.get("submittedAt") or ""),
+                "source_href": str(raw.get("sourceHref") or ""),
+                "attention_prompt": str((raw.get("attention") or {}).get("prompt") or ""),
+                "source": str(source),
+                "local_only": True,
+            })
+        except (OSError, ValueError, json.JSONDecodeError):
+            continue
+    return sorted(requests, key=lambda request: (request["submitted_at"], request["receipt_id"]))
+
+
+def acknowledge_change_request(receipt_id: str) -> Path:
+    """Mark one exact browser-change receipt consumed after canonical review."""
+    receipt_id = identifier(receipt_id, "receipt ID")
+    matches = list(CHANGE_REQUESTS.glob(f"*/{receipt_id}.json"))
+    if len(matches) != 1:
+        raise ValueError("change request receipt must resolve exactly once")
+    target = matches[0]
+    record = json.loads(target.read_text(encoding="utf-8"))
+    if record.get("schema") != "living-documents-change-request/v1":
+        raise ValueError("unsupported change request schema")
+    record["status"] = "consumed"
+    record["consumedAt"] = timestamp()
+    atomic_write(target, record)
+    return target
+
+
 def decision_work_ids() -> dict[str, list[str]]:
     try:
         source = UNBLOCK_QUEUE.read_text(encoding="utf-8")
@@ -190,6 +243,16 @@ def next_record(project: str | None = None) -> dict:
             "project": project,
             "message": "A human submitted Living Document answers. Inspect the exact receipt, record valid intent and authorization canonically, acknowledge the receipt, then return to the resolver. Submission itself does not execute work.",
             "question_responses": question_responses,
+            "reviews": [],
+        }
+    change_requests = pending_change_requests(project)
+    if change_requests:
+        return {
+            "state": "review-pending",
+            "project": project,
+            "message": "A human submitted Living Document changes. Inspect the exact receipt, record valid changes canonically, acknowledge the receipt, then return to the resolver. Submission itself does not rewrite canonical Markdown.",
+            "change_requests": change_requests,
+            "question_responses": [],
             "reviews": [],
         }
     records: list[dict] = []
@@ -265,6 +328,8 @@ def main() -> int:
     next_parser.add_argument("--project")
     acknowledge = sub.add_parser("ack-question")
     acknowledge.add_argument("--receipt-id", required=True)
+    acknowledge_change = sub.add_parser("ack-change")
+    acknowledge_change.add_argument("--receipt-id", required=True)
     args = parser.parse_args()
     try:
         if args.command == "put":
@@ -277,6 +342,8 @@ def main() -> int:
             result = {"records": [json.loads(item.read_text(encoding="utf-8")) for item in sorted(LEDGER.glob("*.json"))]}
         elif args.command == "ack-question":
             result = {"acknowledged": str(acknowledge_question_response(args.receipt_id))}
+        elif args.command == "ack-change":
+            result = {"acknowledged": str(acknowledge_change_request(args.receipt_id))}
         else:
             result = next_record(args.project)
         print(json.dumps(result, indent=2, ensure_ascii=False)); return 0
