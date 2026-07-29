@@ -1544,11 +1544,11 @@ kbd {
 }
 
 .dialog[open] {
-  animation: dialog-in var(--duration-enter) var(--ease-enter) both;
+  animation: dialog-in 180ms cubic-bezier(.16, 1, .3, 1) both;
 }
 
 @keyframes dialog-in {
-  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  from { opacity: 0; transform: translateY(4px) scale(0.99); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
@@ -1568,6 +1568,12 @@ kbd {
 
 .dialog-footer {
   border-top: 1px solid var(--rule);
+  padding: .85rem 1rem max(1rem, env(safe-area-inset-bottom));
+}
+
+.dialog-footer > div {
+  display: flex;
+  gap: .5rem;
 }
 
 .dialog-header h2 {
@@ -2866,16 +2872,16 @@ summary:focus-visible,
 
 .review-dock {
   position: fixed;
-  inset: auto 0 0;
+  inset: auto 20px 20px auto;
   z-index: 90;
-  min-height: var(--dock-height);
-  display: grid;
-  grid-template-columns: minmax(220px, var(--left-rail)) minmax(0, 1fr);
+  max-width: calc(100vw - 40px);
+  display: flex;
   align-items: center;
-  border-top: 1px solid var(--rule-strong);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--rail) 96%, transparent);
-  box-shadow: 0 -12px 42px color-mix(in srgb, var(--canvas) 72%, transparent);
-  backdrop-filter: blur(18px);
+  box-shadow: 0 14px 44px color-mix(in srgb, var(--canvas) 58%, transparent);
+  backdrop-filter: blur(14px);
 }
 
 .review-state {
@@ -2883,7 +2889,7 @@ summary:focus-visible,
   display: flex;
   align-items: center;
   gap: .7rem;
-  padding: .7rem 1rem;
+  padding: .65rem .85rem;
   border-right: 1px solid var(--rule);
 }
 
@@ -2906,24 +2912,19 @@ summary:focus-visible,
   height: 9px;
   border-radius: 50%;
   background: var(--primary);
-  box-shadow: 0 0 0 5px var(--primary-wash);
-  animation: review-breathe 2.8s var(--ease-standard) infinite;
-}
-
-@keyframes review-breathe {
-  50% { box-shadow: 0 0 0 8px transparent; }
+  box-shadow: 0 0 0 4px var(--primary-wash);
 }
 
 .review-actions {
   display: flex;
   justify-content: flex-end;
   gap: .35rem;
-  padding: .55rem .8rem;
+  padding: .4rem;
 }
 
 .review-actions button {
   position: relative;
-  min-height: 46px;
+  min-height: 48px;
   display: inline-flex;
   align-items: center;
   gap: .48rem;
@@ -2934,35 +2935,31 @@ summary:focus-visible,
   color: var(--text);
   font-size: .76rem;
   font-weight: 750;
-  transition: transform var(--duration-fast) var(--ease-tactile), border-color var(--duration-fast), background var(--duration-fast), color var(--duration-fast);
+  border-color: var(--rule-strong);
+  background: var(--surface);
+  transition: transform 90ms cubic-bezier(.2, 0, 0, 1), border-color 100ms, background 100ms, color 100ms;
 }
 
 .review-actions button:hover {
   border-color: var(--rule-strong);
   background: var(--surface);
   color: var(--text-strong);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
-.review-actions button:nth-last-child(1) {
+.review-actions button:first-child {
   border-color: var(--primary);
   background: var(--primary);
   color: #06110f;
 }
 
-.dock-count {
-  min-width: 1.25rem;
-  height: 1.25rem;
-  display: inline-grid;
-  place-items: center;
-  border-radius: 50%;
-  background: color-mix(in srgb, #06110f 18%, transparent);
-  font: .65rem/1 var(--font-mono);
+.review-actions button:active {
+  transform: translateY(1px) scale(.985);
 }
 
 body.left-collapsed .review-dock,
 body.focused .review-dock {
-  grid-template-columns: 1fr;
+  display: flex;
 }
 
 body.left-collapsed .review-state,
@@ -2975,8 +2972,81 @@ body.focused .review-state {
   box-shadow: 0 30px 90px color-mix(in srgb, var(--canvas) 72%, transparent);
 }
 
+.annotation-target-summary {
+  display: grid;
+  gap: .3rem;
+  padding: .75rem .85rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.field[hidden],
+.annotation-markdown-action[hidden],
+.authored-tooltip[hidden] {
+  display: none !important;
+}
+
+.annotation-target-summary span {
+  color: var(--text-muted);
+  font: .68rem/1.2 var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.annotation-target-summary strong {
+  color: var(--text-strong);
+}
+
+.theme-toggle {
+  width: 44px;
+  height: 44px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text-strong);
+  font-size: 1rem;
+  transition: transform 90ms cubic-bezier(.2, 0, 0, 1), background 100ms, border-color 100ms;
+}
+
+.theme-toggle:hover {
+  border-color: var(--primary);
+  background: var(--primary-wash);
+}
+
+.theme-toggle:active {
+  transform: scale(.96);
+}
+
+.local-change-indicator {
+  border: 0;
+}
+
+.authored-tooltip {
+  position: fixed;
+  z-index: 220;
+  width: max-content;
+  max-width: min(300px, calc(100vw - 24px));
+  padding: .52rem .65rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-sm);
+  background: var(--text-strong);
+  color: var(--canvas);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--canvas) 55%, transparent);
+  font-size: .72rem;
+  line-height: 1.45;
+  pointer-events: none;
+  animation: tooltip-enter 100ms cubic-bezier(.16, 1, .3, 1);
+}
+
+@keyframes tooltip-enter {
+  from { opacity: 0; transform: translateY(2px); }
+}
+
 .toast-region {
-  bottom: calc(var(--dock-height) + 1rem);
+  bottom: 6.5rem;
 }
 
 /* Workspace portfolio */
@@ -3400,7 +3470,8 @@ body.focused .review-state {
   }
 
   .review-dock {
-    grid-template-columns: minmax(220px, var(--left-rail)) minmax(0, 1fr);
+    right: 12px;
+    bottom: 12px;
   }
 
   .review-actions button {
@@ -3497,7 +3568,13 @@ body.focused .review-state {
   }
 
   .review-dock {
-    grid-template-columns: 1fr;
+    inset: auto 0 0;
+    width: 100%;
+    max-width: none;
+    min-height: calc(64px + env(safe-area-inset-bottom));
+    border-width: 1px 0 0;
+    border-radius: 0;
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   .review-state {
@@ -3507,7 +3584,8 @@ body.focused .review-state {
   .review-actions {
     justify-content: stretch;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
     padding: .4rem;
   }
 
@@ -3516,7 +3594,7 @@ body.focused .review-state {
   }
 
   .review-actions button span:nth-child(2) {
-    display: none;
+    display: inline;
   }
 
   .view-frame {
@@ -3605,10 +3683,10 @@ body.focused .review-state {
   .review-actions button {
     min-width: 0;
     min-height: 54px;
-    flex-direction: column;
-    gap: .16rem;
-    padding: .35rem .2rem;
-    font-size: .65rem;
+    flex-direction: row;
+    gap: .4rem;
+    padding: .45rem .35rem;
+    font-size: .7rem;
   }
 
   .review-actions button span:nth-child(2) {
@@ -3698,20 +3776,26 @@ body.focused .review-state {
 [data-motion="reduced"] .toast,
 [data-motion="reduced"] .dialog,
 [data-motion="reduced"] .timeline-marker,
-[data-motion="reduced"] .review-actions button {
+[data-motion="reduced"] .review-actions button,
+[data-motion="reduced"] .theme-toggle,
+[data-motion="reduced"] .authored-tooltip {
   animation: none !important;
+  transition: none !important;
   transform: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-motion="system"] .review-pulse,
-  [data-motion="system"] .view-frame,
-  [data-motion="system"] .portfolio-main,
-  [data-motion="system"] .toast,
-  [data-motion="system"] .dialog,
-  [data-motion="system"] .timeline-marker,
-  [data-motion="system"] .review-actions button {
+  [data-motion] .review-pulse,
+  [data-motion] .view-frame,
+  [data-motion] .portfolio-main,
+  [data-motion] .toast,
+  [data-motion] .dialog,
+  [data-motion] .timeline-marker,
+  [data-motion] .review-actions button,
+  [data-motion] .theme-toggle,
+  [data-motion] .authored-tooltip {
     animation: none !important;
+    transition: none !important;
     transform: none !important;
   }
 }

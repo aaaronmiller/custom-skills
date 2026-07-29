@@ -6,6 +6,7 @@ version: 2.0.0
 
 import { projectRouteFromHash, sectionIdFromHash } from './navigation.mjs';
 import { parseQuestionSection } from './question-forms.mjs';
+import { annotationDialogConfig, darkThemes, resolveQuickTheme } from './review-actions.mjs';
 
 const app = document.querySelector('#app');
 const themeNames = {
@@ -76,6 +77,8 @@ let portfolioSnapshot = null;
 let portfolioRefreshTimer = null;
 let portfolioView = localStorage.getItem('ldf:portfolio-view') || 'overview';
 let drawerReturnFocus = null;
+let dialogReturnAction = null;
+let tooltipTimer = null;
 const portfolioViews = [
   ['overview', 'Overview'],
   ['decisions', 'Decisions'],
@@ -486,6 +489,10 @@ function matchingSections() {
 
 function renderTopbar() {
   const changes = localChangeCount();
+  const effectiveDark = state.theme === 'system'
+    ? matchMedia('(prefers-color-scheme: dark)').matches
+    : darkThemes.has(state.theme);
+  const quickThemeLabel = effectiveDark ? 'Switch to light theme' : 'Switch to dark theme';
   const leftExpanded = window.matchMedia('(max-width: 840px)').matches
     ? document.body.classList.contains('left-open')
     : !document.body.classList.contains('left-collapsed');
@@ -513,7 +520,8 @@ function renderTopbar() {
           <a href="/#decisions">Decisions</a>
           <a href="/#activity">Activity</a>
         </nav>
-        <span class="local-change-indicator" title="Browser-local drafts, selections, and annotations. They are not canonical Markdown.">${changes} local</span>
+        <button class="local-change-indicator" data-action="view" data-view="changes" data-tooltip="Review browser-local notes, drafts, and decisions before sending them.">${changes} local</button>
+        <button class="theme-toggle" data-action="quick-theme" aria-label="${quickThemeLabel}" data-tooltip="${quickThemeLabel}. All themes remain available in Context."><span aria-hidden="true">${effectiveDark ? '☀' : '☾'}</span></button>
         <button class="rail-toggle" data-action="toggle-right" aria-controls="context-inspector" aria-expanded="${rightExpanded}" title="Show or hide context and reader settings"><span class="rail-toggle-label">Context</span><span aria-hidden="true">◧</span></button>
       </div>
     </header>`;
@@ -651,15 +659,13 @@ function renderReviewDock() {
   const changes = localChangeCount();
   return `
     <footer class="review-dock" aria-label="Local review actions">
-      <div class="review-state" title="These actions create browser-local overlays. Canonical Markdown and renderer source are unchanged.">
+      <div class="review-state">
         <span class="review-pulse" aria-hidden="true"></span>
-        <span><strong>Review mode</strong><small>Local only · ${changes} change${changes === 1 ? '' : 's'}</small></span>
+        <span><strong>Local notes</strong><small>${changes} unsent change${changes === 1 ? '' : 's'}</small></span>
       </div>
       <div class="review-actions">
-        <button data-action="annotate-selection" data-scope="content" title="Select canonical text, then attach a browser-local note"><span aria-hidden="true">✦</span><span>Annotate content</span></button>
-        <button data-action="quick-edit" title="Draft a browser-local Markdown change for the active page"><span aria-hidden="true">¶</span><span>Draft Markdown</span></button>
-        <button data-action="add-annotation" data-scope="layout" title="Describe a change to the shared reader layout or behavior"><span aria-hidden="true">⌗</span><span>Edit layout</span></button>
-        <button data-action="view" data-view="changes" title="Review and send local annotations, drafts, and decisions to the loopback agent inbox"><span aria-hidden="true">⇧</span><span>Review + send</span><span class="dock-count">${changes}</span></button>
+        <button class="dock-primary" data-action="annotate-selection" data-scope="content" data-tooltip="Add a browser-local note to selected text or the active page."><span aria-hidden="true">✦</span><span>Annotate content</span></button>
+        <button class="dock-primary" data-action="add-annotation" data-scope="layout" data-tooltip="Suggest a change to the shared reader layout or behavior."><span aria-hidden="true">⌗</span><span>Edit layout</span></button>
       </div>
     </footer>`;
 }
@@ -1180,17 +1186,18 @@ function renderDialogs() {
     </dialog>
     <dialog class="dialog" id="annotation-dialog" aria-labelledby="annotation-title">
       <form id="annotation-form" method="dialog">
-        <div class="dialog-header"><h2 id="annotation-title">Add annotation</h2><button class="icon-button" type="button" data-action="close-dialog" data-dialog="annotation-dialog" aria-label="Close">×</button></div>
+        <div class="dialog-header"><div><p class="eyebrow" id="annotation-eyebrow"></p><h2 id="annotation-title">Add a content note</h2><p class="health-detail" id="annotation-help"></p></div><button class="icon-button" type="button" data-action="close-dialog" data-dialog="annotation-dialog" aria-label="Close">×</button></div>
         <div class="dialog-body form-grid">
           <input type="hidden" name="targetId" id="annotation-target" />
           <input type="hidden" name="quote" id="annotation-quote" />
-          <div class="field"><label for="annotation-scope">Annotates</label><select id="annotation-scope" name="scope"><option value="content">Content</option><option value="layout">Layout</option></select></div>
+          <input type="hidden" name="scope" id="annotation-scope" />
+          <div class="field full annotation-target-summary"><span>Target</span><strong id="annotation-target-label"></strong></div>
           <div class="field"><label for="annotation-kind">Kind</label><select id="annotation-kind" name="kind"><option>note</option><option>question</option><option>objection</option><option>decision</option><option>evidence</option></select></div>
           <div class="field"><label for="annotation-author">Author</label><input id="annotation-author" name="author" value="Local editor" required /></div>
-          <div class="field full"><label for="annotation-quote-preview">Selected quote</label><textarea id="annotation-quote-preview" readonly placeholder="Select text in the document, then choose Annotate selection."></textarea></div>
-          <div class="field full"><label for="annotation-text">Text</label><textarea id="annotation-text" name="text" required></textarea></div>
+          <div class="field full" id="annotation-quote-field" hidden><label for="annotation-quote-preview">Selected quote</label><textarea id="annotation-quote-preview" readonly></textarea></div>
+          <div class="field full"><label for="annotation-text" id="annotation-text-label">Your note</label><textarea id="annotation-text" name="text" required></textarea></div>
         </div>
-        <div class="dialog-footer"><button class="ghost-button" type="button" data-action="close-dialog" data-dialog="annotation-dialog">Cancel</button><button class="primary-button" type="submit">Save annotation</button></div>
+        <div class="dialog-footer"><button class="ghost-button annotation-markdown-action" type="button" data-action="annotation-markdown-draft">Draft a local Markdown change</button><div><button class="ghost-button" type="button" data-action="close-dialog" data-dialog="annotation-dialog">Cancel</button><button class="primary-button" id="annotation-submit" type="submit">Save content note</button></div></div>
       </form>
     </dialog>
     <dialog class="dialog" id="shortcuts-dialog" aria-labelledby="shortcuts-title">
@@ -1225,6 +1232,7 @@ function renderDialogs() {
         </dl>
       </div>
     </dialog>
+    <div class="authored-tooltip" id="authored-tooltip" role="tooltip" hidden></div>
     <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>`;
 }
 
@@ -1320,18 +1328,34 @@ function goToSection(id) {
 }
 
 function motionReduced() {
-  return state.motion === 'reduced' || (state.motion === 'system' && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  return state.motion === 'reduced' || matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 function applyTheme(theme) {
-  const update = () => {
-    state.theme = theme;
-    document.documentElement.dataset.theme = theme;
-    localStorage.setItem('ldf:theme', theme);
-    document.querySelectorAll('#theme-select, #inspector-theme').forEach((select) => { select.value = theme; });
-  };
-  if (!motionReduced() && document.startViewTransition) document.startViewTransition(update);
-  else update();
+  state.theme = theme;
+  document.documentElement.dataset.theme = theme;
+  localStorage.setItem('ldf:theme', theme);
+  if (darkThemes.has(theme)) localStorage.setItem('ldf:last-dark-theme', theme);
+  document.querySelectorAll('#theme-select, #inspector-theme').forEach((select) => { select.value = theme; });
+}
+
+function toggleQuickTheme() {
+  const readingPosition = window.scrollY;
+  const next = resolveQuickTheme({
+    theme: state.theme,
+    prefersDark: matchMedia('(prefers-color-scheme: dark)').matches,
+    lastDark: localStorage.getItem('ldf:last-dark-theme') || 'obsidian'
+  });
+  applyTheme(next);
+  render();
+  requestAnimationFrame(() => {
+    const restorePosition = () => window.scrollTo({ top: readingPosition, behavior: 'auto' });
+    restorePosition();
+    requestAnimationFrame(restorePosition);
+    setTimeout(restorePosition, 120);
+    document.querySelector('[data-action="quick-theme"]')?.focus({ preventScroll: true });
+  });
+  toast(`${themeNames[next]} theme selected`);
 }
 
 function applyMotion(motion) {
@@ -1359,7 +1383,7 @@ function setupSectionObserver() {
     document.querySelectorAll('.section-link').forEach((link) => link.classList.toggle('active', link.dataset.section === state.activeSectionId));
     const section = currentSection();
     const inspector = document.querySelector('.right-rail .rail-inner');
-    if (inspector && section) inspector.innerHTML = renderSectionInspector(section);
+    if (inspector && section && !inspector.contains(document.activeElement)) inspector.innerHTML = renderSectionInspector(section);
   }, { rootMargin: '-20% 0px -68% 0px', threshold: [0, 0.1, 0.5] });
   sections.forEach((section) => state.observer.observe(section));
 }
@@ -1393,6 +1417,7 @@ function quickEditMarkup(section) {
 function openQuickEdit(id = state.activeSectionId) {
   const section = effectiveSection(id || state.manifest.navigation.sectionOrder[0]);
   if (!section || !section.editable) return toast('This section is not editable');
+  if (!dialogReturnAction) dialogReturnAction = 'quick-edit';
   state.activeSectionId = section.id;
   const form = document.querySelector('#quick-edit-form');
   form.innerHTML = quickEditMarkup(section);
@@ -1429,6 +1454,7 @@ function saveQuickEdit(form) {
   persistLocalState();
   document.querySelector('#quick-edit-dialog').close();
   render();
+  restoreDialogFocus();
   toast('Local draft saved');
 }
 
@@ -1449,6 +1475,7 @@ function discardDraft(id) {
   persistLocalState();
   document.querySelector('#quick-edit-dialog')?.close();
   render();
+  restoreDialogFocus();
   toast('Local draft discarded');
 }
 
@@ -1473,11 +1500,25 @@ function saveProposalDecision(id, decision) {
 }
 
 function openAnnotationDialog(id = state.activeSectionId, quote = '', scope = 'content') {
-  const target = id || 'document';
+  const target = id || state.activeSectionId || state.manifest.navigation.sectionOrder[0] || 'document';
+  const section = effectiveSection(target);
+  const config = annotationDialogConfig(scope, {
+    targetTitle: scope === 'layout' ? state.manifest.meta.title : (section?.title || state.manifest.meta.title),
+    quote
+  });
+  dialogReturnAction = config.scope === 'layout' ? 'add-annotation' : 'annotate-selection';
   document.querySelector('#annotation-target').value = target;
-  document.querySelector('#annotation-quote').value = quote;
-  document.querySelector('#annotation-quote-preview').value = quote;
-  document.querySelector('#annotation-scope').value = scope === 'layout' ? 'layout' : 'content';
+  document.querySelector('#annotation-quote').value = config.quote;
+  document.querySelector('#annotation-quote-preview').value = config.quote;
+  document.querySelector('#annotation-quote-field').hidden = !config.showQuote;
+  document.querySelector('#annotation-scope').value = config.scope;
+  document.querySelector('#annotation-eyebrow').textContent = config.eyebrow;
+  document.querySelector('#annotation-title').textContent = config.title;
+  document.querySelector('#annotation-help').textContent = config.help;
+  document.querySelector('#annotation-target-label').textContent = config.target;
+  document.querySelector('#annotation-text-label').textContent = config.fieldLabel;
+  document.querySelector('#annotation-submit').textContent = config.submitLabel;
+  document.querySelector('.annotation-markdown-action').hidden = !config.showMarkdownDraft;
   document.querySelector('#annotation-text').value = '';
   document.querySelector('#annotation-dialog').showModal();
   requestAnimationFrame(() => document.querySelector('#annotation-text')?.focus());
@@ -1485,11 +1526,24 @@ function openAnnotationDialog(id = state.activeSectionId, quote = '', scope = 'c
 
 function openSelectionAnnotationDialog(scope = 'content') {
   const quote = selectedQuote();
-  if (!quote.text && scope === 'content') {
-    toast('Select document text before annotating');
-    return;
-  }
-  openAnnotationDialog(quote.sectionId, quote.text, scope);
+  openAnnotationDialog(quote.sectionId || state.activeSectionId, quote.text, scope);
+}
+
+function restoreDialogFocus() {
+  const action = dialogReturnAction;
+  dialogReturnAction = null;
+  if (!action) return;
+  requestAnimationFrame(() => document.querySelector(`[data-action="${action}"]`)?.focus({ preventScroll: true }));
+}
+
+function closeDialog(id, { restore = true } = {}) {
+  document.getElementById(id)?.close();
+  if (restore) restoreDialogFocus();
+}
+
+function openAnnotationMarkdownDraft() {
+  closeDialog('annotation-dialog', { restore: false });
+  openQuickEdit(state.activeSectionId);
 }
 
 function saveAnnotation(form) {
@@ -1522,7 +1576,8 @@ function saveAnnotation(form) {
   persistLocalState();
   document.querySelector('#annotation-dialog').close();
   render();
-  toast('Annotation added');
+  restoreDialogFocus();
+  toast(`${String(data.get('scope')) === 'layout' ? 'Layout' : 'Content'} note added`);
 }
 
 function commands(query = '') {
@@ -1731,6 +1786,33 @@ function isTypingTarget(target) {
   return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target?.isContentEditable;
 }
 
+function hideTooltip() {
+  clearTimeout(tooltipTimer);
+  const tooltip = document.querySelector('#authored-tooltip');
+  document.querySelectorAll('[aria-describedby="authored-tooltip"]').forEach((control) => control.removeAttribute('aria-describedby'));
+  if (tooltip) tooltip.hidden = true;
+}
+
+function showTooltip(control, immediate = false) {
+  if (!control?.dataset.tooltip) return;
+  hideTooltip();
+  const reveal = () => {
+    const tooltip = document.querySelector('#authored-tooltip');
+    if (!tooltip || !control.isConnected) return;
+    tooltip.textContent = control.dataset.tooltip;
+    tooltip.hidden = false;
+    control.setAttribute('aria-describedby', 'authored-tooltip');
+    const controlRect = control.getBoundingClientRect();
+    const tooltipRect = tooltip.getBoundingClientRect();
+    const left = Math.min(window.innerWidth - tooltipRect.width - 12, Math.max(12, controlRect.left + controlRect.width / 2 - tooltipRect.width / 2));
+    const top = Math.max(12, controlRect.top - tooltipRect.height - 10);
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+  };
+  if (immediate || motionReduced()) reveal();
+  else tooltipTimer = setTimeout(reveal, 450);
+}
+
 app.addEventListener('click', (event) => {
   const control = event.target.closest('[data-action]');
   if (!control) return;
@@ -1751,12 +1833,14 @@ app.addEventListener('click', (event) => {
   }
   if (action === 'close-drawers') closeDrawers();
   if (action === 'toggle-focused') toggleFocused();
+  if (action === 'quick-theme') toggleQuickTheme();
   if (action === 'quick-edit') openQuickEdit(control.dataset.section);
+  if (action === 'annotation-markdown-draft') openAnnotationMarkdownDraft();
   if (action === 'discard-draft') discardDraft(control.dataset.section);
   if (action === 'proposal-decision') saveProposalDecision(control.dataset.proposal, control.dataset.value);
   if (action === 'add-annotation') openAnnotationDialog(control.dataset.section, '', control.dataset.scope || 'content');
   if (action === 'annotate-selection') openSelectionAnnotationDialog(control.dataset.scope || 'content');
-  if (action === 'close-dialog') document.getElementById(control.dataset.dialog)?.close();
+  if (action === 'close-dialog') closeDialog(control.dataset.dialog);
   if (action === 'command') openCommandPalette();
   if (action === 'command-run') runCommand(Number(control.dataset.index));
   if (action === 'shortcuts') document.querySelector('#shortcuts-dialog').showModal();
@@ -1782,6 +1866,25 @@ app.addEventListener('click', (event) => {
   }
   if (action === 'clear-portfolio-decision') void clearPortfolioReview(control.dataset.priority);
   if (action === 'export-portfolio-reviews') exportPortfolioReviews();
+});
+
+app.addEventListener('pointerover', (event) => {
+  const control = event.target.closest('[data-tooltip]');
+  if (control) showTooltip(control);
+});
+
+app.addEventListener('pointerout', (event) => {
+  const control = event.target.closest('[data-tooltip]');
+  if (control && !control.contains(event.relatedTarget)) hideTooltip();
+});
+
+app.addEventListener('focusin', (event) => {
+  const control = event.target.closest('[data-tooltip]');
+  if (control) showTooltip(control, true);
+});
+
+app.addEventListener('focusout', (event) => {
+  if (event.target.closest('[data-tooltip]')) hideTooltip();
 });
 
 app.addEventListener('submit', (event) => {
@@ -1923,8 +2026,9 @@ window.addEventListener('keydown', (event) => {
     return;
   }
   if (event.key === 'Escape') {
+    hideTooltip();
     closeDrawers();
-    document.querySelectorAll('dialog[open]').forEach((dialog) => dialog.close());
+    document.querySelectorAll('dialog[open]').forEach((dialog) => closeDialog(dialog.id));
     return;
   }
   if (typing) return;
