@@ -4,7 +4,7 @@ purpose: Shared dependency-free Living Documents CMS renderer.
 version: 2.0.0
 --- */
 
-import { sectionIdFromHash } from './navigation.mjs';
+import { projectRouteFromHash, sectionIdFromHash } from './navigation.mjs';
 
 const app = document.querySelector('#app');
 const themeNames = {
@@ -542,7 +542,7 @@ function renderLeftRail() {
           <ol class="section-list">
             ${boundedSections.map((section) => `
               <li>
-                <button class="section-link ${state.activeSectionId === section.id && state.activeView === 'document' ? 'active' : ''}" data-action="section" data-section="${section.id}" title="${escapeHtml(sectionExplanations[section.id] || 'Open this canonical project page in the continuous reader.')}">
+              <button class="section-link ${state.activeSectionId === section.id && ['section', 'document'].includes(state.activeView) ? 'active' : ''}" data-action="section" data-section="${section.id}" title="${escapeHtml(sectionExplanations[section.id] || 'Open this canonical project page.')}">
                   <span class="section-number">${escapeHtml(section.index)}</span>
                   <span class="section-name">${escapeHtml(section.title)}</span>
                   ${state.drafts[section.id] ? '<span class="draft-dot" title="Local draft"></span>' : statusDot(section.status)}
@@ -781,6 +781,32 @@ function renderModelReply(reply) {
     </article>`;
 }
 
+function renderSectionArticle(section) {
+  return `
+    <section class="document-section" id="${section.id}" data-section-observe="${section.id}" aria-labelledby="${section.id}-title">
+      <div class="section-kicker"><span>${escapeHtml(section.index)}</span><span>${escapeHtml(section.eyebrow)}</span>${statusDot(section.status)}</div>
+      <h2 id="${section.id}-title">${escapeHtml(section.title)}</h2>
+      <p class="section-dek">${escapeHtml(section.dek)}</p>
+      ${section.id === 'decisions' ? '<aside class="reader-mode-note"><strong>About this page:</strong> it records canonical project decisions, rejected directions, and unresolved policy. It is not the same as the workspace-wide blocker and decision queue, available from <a href="/#delegation">All blockers and decisions</a>.</aside>' : ''}
+      ${state.drafts[section.id] ? `<div class="local-draft-banner"><span>Local draft overlays the canonical section.</span><button class="ghost-button" data-action="discard-draft" data-section="${section.id}">Discard</button></div>` : ''}
+      <div class="section-toolbar section-tags">${tagMarkup(section.tags)}</div>
+      <div class="markdown-body">${renderMarkdown(section.markdown)}</div>
+    </section>`;
+}
+
+function renderFocusedSection() {
+  const section = currentSection();
+  if (!section) return renderDashboard();
+  return `
+    <div class="view-frame document-view focused-section-view">
+      <div class="document-intro">
+        ${pageHeader(state.manifest.meta.title, section.title, 'Focused project page')}
+        <p class="reader-mode-note"><strong>Focused page:</strong> only this canonical page is shown. Use the section index for another page or <button class="text-button" data-action="view" data-view="document">read all ${state.manifest.sections.length} pages</button>.</p>
+      </div>
+      ${renderSectionArticle(section)}
+    </div>`;
+}
+
 function renderDocument() {
   const sections = matchingSections();
   return `
@@ -792,16 +818,7 @@ function renderDocument() {
         ${state.tagFilter !== 'all' ? `<p class="reader-mode-note"><strong>Tag filter active:</strong> showing the ${escapeHtml(state.tagFilter)} pages in this project. Choose <em>All</em> in the left rail to restore every page.</p>` : ''}
         <button class="focus-toggle" data-action="toggle-focused" title="Temporarily hide navigation rails for uninterrupted reading">${state.focused ? 'Exit focused reading' : 'Focused reading'} <kbd>F</kbd></button>
       </div>
-      ${sections.map((section) => `
-        <section class="document-section" id="${section.id}" data-section-observe="${section.id}" aria-labelledby="${section.id}-title">
-          <div class="section-kicker"><span>${escapeHtml(section.index)}</span><span>${escapeHtml(section.eyebrow)}</span>${statusDot(section.status)}</div>
-          <h2 id="${section.id}-title">${escapeHtml(section.title)}</h2>
-          <p class="section-dek">${escapeHtml(section.dek)}</p>
-          ${section.id === 'decisions' ? '<aside class="reader-mode-note"><strong>About this page:</strong> it records canonical project decisions, rejected directions, and unresolved policy. It is not the same as the workspace-wide blocker and decision queue, available from <a href="/#delegation">All blockers and decisions</a>.</aside>' : ''}
-          ${state.drafts[section.id] ? `<div class="local-draft-banner"><span>Local draft overlays the canonical section.</span><button class="ghost-button" data-action="discard-draft" data-section="${section.id}">Discard</button></div>` : ''}
-          <div class="section-toolbar section-tags">${tagMarkup(section.tags)}</div>
-          <div class="markdown-body">${renderMarkdown(section.markdown)}</div>
-        </section>`).join('')}
+      ${sections.map(renderSectionArticle).join('')}
       ${state.tagFilter === 'all' ? renderChangesPanel() : ''}
     </div>`;
 }
@@ -956,6 +973,7 @@ function renderSearch() {
 function renderMain() {
   const content = {
     dashboard: renderDashboard,
+    section: renderFocusedSection,
     document: renderDocument,
     projects: renderProjects,
     reconciliation: renderReconciliation,
@@ -1063,7 +1081,7 @@ function renderHistoryInspector() {
 
 function renderRightRail() {
   let content = renderDashboardInspector();
-  if (state.activeView === 'document') content = renderSectionInspector(currentSection());
+  if (['section', 'document'].includes(state.activeView)) content = renderSectionInspector(currentSection());
   if (state.activeView === 'history') content = renderHistoryInspector();
   if (state.activeView === 'changelog') content = `${renderDashboardInspector()}<section class="rail-section"><p class="rail-label">Releases</p>${state.manifest.releases.map((release) => `<a class="view-link" href="#release-${escapeHtml(release.version)}">${iconLabel('v', release.version)}</a>`).join('')}</section>`;
   if (state.activeView === 'search') content = `${renderDashboardInspector()}<section class="rail-section"><p class="rail-label">Search tips</p><p class="health-detail">Title matches rank above tags, summaries, and body text. Press <kbd>/</kbd> from anywhere outside a form.</p></section>`;
@@ -1162,7 +1180,7 @@ function syncBodyClasses() {
 
 function setView(view) {
   state.activeView = view;
-  if (view === 'document' && state.activeSectionId) {
+  if (view === 'section' && state.activeSectionId) {
     replaceLocationHash(state.activeSectionId);
   } else {
     replaceLocationHash('');
@@ -1206,7 +1224,7 @@ function scrollToSection(id, behavior = 'smooth') {
 
 function goToSection(id) {
   if (!sectionById(id)) return;
-  state.activeView = 'document';
+  state.activeView = 'section';
   state.activeSectionId = id;
   replaceLocationHash(id);
   document.body.classList.remove('left-open', 'right-open');
@@ -1790,8 +1808,13 @@ async function init() {
       state.projects = index.projects || [];
       state.blockingItems = index.blockingItems || [];
     }
-    const linkedSectionId = sectionIdFromLocation();
-    state.activeView = linkedSectionId ? 'document' : (manifest.navigation.defaultView || 'dashboard');
+    const route = projectRouteFromHash(
+      window.location.hash,
+      manifest.sections.map((section) => section.id),
+      manifest.navigation.defaultView || 'dashboard',
+    );
+    const linkedSectionId = route.sectionId;
+    state.activeView = route.view;
     state.activeSectionId = linkedSectionId || manifest.navigation.sectionOrder[0];
     if (!manifest.visual.themes.includes(state.theme)) state.theme = manifest.visual.defaultTheme;
     if (!['system', 'full', 'reduced'].includes(state.motion)) state.motion = manifest.visual.defaultMotion;

@@ -7,3 +7,11 @@ export function sectionIdFromHash(hash, validSectionIds) {
     return null;
   }
 }
+
+export function projectRouteFromHash(hash, validSectionIds, defaultView = 'dashboard') {
+  const sectionId = sectionIdFromHash(hash, validSectionIds);
+  return {
+    view: sectionId ? 'section' : defaultView,
+    sectionId,
+  };
+}
