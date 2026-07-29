@@ -1,0 +1,642 @@
+#!/usr/bin/env python3
+"""Create, index, validate, and render the canonical Markdown Living Documents corpus."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import time
+from urllib.error import URLError
+from urllib.request import urlopen
+from datetime import date, datetime, timezone
+from pathlib import Path
+
+FORMAT_VERSION = "3.0.0"
+SKILL_VERSION = (Path(__file__).resolve().parents[1] / "VERSION").read_text(encoding="utf-8").strip()
+INDEX_START = "<!-- living-documents:index:start -->"
+INDEX_END = "<!-- living-documents:index:end -->"
+
+
+def home() -> Path:
+    return Path(os.environ.get("LIVING_DOCUMENTS_HOME", "~/LIVING_DOCUMENTS")).expanduser().resolve()
+
+
+def runtime_home() -> Path:
+    return Path(os.environ.get("LIVING_DOCUMENTS_RUNTIME", "~/.cache/living-documents/runtime")).expanduser().resolve()
+
+
+def skill_root() -> Path:
+    return Path(__file__).resolve().parents[1]
+
+
+def renderer_root() -> Path:
+    configured = os.environ.get("LIVING_DOCUMENTS_RENDERER")
+    return Path(configured).expanduser().resolve() if configured else skill_root() / "renderer"
+
+
+def slug(value: str) -> str:
+    result = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+    if not result:
+        raise ValueError("identifier must contain a letter or number")
+    return result
+
+
+def now() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def scalar(value: str):
+    value = value.strip()
+    if not value:
+        return ""
+    if value[0:1] in {"[", "{", '"'} or value in {"true", "false", "null"} or re.fullmatch(r"-?\d+(?:\.\d+)?", value):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            pass
+    return value
+
+
+def read_page(path: Path) -> tuple[dict, str]:
+    text = path.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        raise ValueError(f"{path}: missing frontmatter")
+    try:
+        end = lines.index("---", 1)
+    except ValueError as error:
+        raise ValueError(f"{path}: unterminated frontmatter") from error
+    meta: dict = {}
+    for line in lines[1:end]:
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        if ":" not in line:
+            raise ValueError(f"{path}: invalid frontmatter line: {line}")
+        key, value = line.split(":", 1)
+        meta[key.strip()] = scalar(value)
+    return meta, "\n".join(lines[end + 1 :]).strip() + "\n"
+
+
+def write_page(path: Path, meta: dict, body: str) -> None:
+    ordered = ["id", "title", "type", "order", "status", "parent", "related", "updated"]
+    lines = ["---"]
+    for key in ordered:
+        if key not in meta:
+            continue
+        value = meta[key]
+        rendered = json.dumps(value, ensure_ascii=False) if isinstance(value, (list, dict, bool)) or value is None else str(value)
+        lines.append(f"{key}: {rendered}")
+    for key in sorted(set(meta) - set(ordered)):
+        value = meta[key]
+        rendered = json.dumps(value, ensure_ascii=False) if isinstance(value, (list, dict, bool)) or value is None else str(value)
+        lines.append(f"{key}: {rendered}")
+    lines.extend(["---", "", body.strip(), ""])
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines), encoding="utf-8")
+
+
+def project_root(project_id: str) -> Path:
+    return home() / "projects" / slug(project_id)
+
+
+def find_git_root(start: Path) -> Path | None:
+    start = start.resolve()
+    for candidate in (start, *start.parents):
+        if (candidate / ".git").exists():
+            return candidate
+    return None
+
+
+def resolve_project_id(project: str | None = None, scope: str = "auto") -> str:
+    if scope == "universal":
+        return "living-documents"
+    if project:
+        candidate = Path(project).expanduser()
+        if candidate.exists():
+            candidate = (find_git_root(candidate.resolve()) or candidate.resolve())
+        return slug(candidate.name)
+    git_root = find_git_root(Path.cwd())
+    if git_root:
+        return slug(git_root.name)
+    if scope == "project":
+        raise ValueError("project scope requires a Git worktree or --project")
+    return "living-documents"
+
+
+def all_project_roots() -> list[Path]:
+    root = home() / "projects"
+    return sorted(path for path in root.iterdir() if path.is_dir() and (path / "project.md").is_file()) if root.is_dir() else []
+
+
+def pages(root: Path) -> list[tuple[Path, dict, str]]:
+    found = []
+    for path in sorted(root.rglob("*.md")):
+        if any(part in {"archive", ".generated"} for part in path.relative_to(root).parts):
+            continue
+        meta, body = read_page(path)
+        found.append((path, meta, body))
+    return found
+
+
+def validate_project(root: Path) -> dict:
+    required = {"project.md", "start-here.md", "index.md", "what-to-do.md", "requirements.md", "plan.md", "tasks.md", "decisions.md", "history.md", "resources.md"}
+    missing = sorted(name for name in required if not (root / name).is_file())
+    if missing:
+        raise ValueError(f"{root}: missing required pages: {', '.join(missing)}")
+    seen: dict[str, Path] = {}
+    records = pages(root)
+    for path, meta, _ in records:
+        for key in ("id", "title", "type", "order", "status", "updated"):
+            if key not in meta or meta[key] == "":
+                raise ValueError(f"{path}: missing {key}")
+        page_id = str(meta["id"])
+        if slug(page_id) != page_id:
+            raise ValueError(f"{path}: id must be kebab-case: {page_id}")
+        if page_id in seen:
+            raise ValueError(f"{path}: duplicate id {page_id} also used by {seen[page_id]}")
+        seen[page_id] = path
+        if not isinstance(meta["order"], int):
+            raise ValueError(f"{path}: order must be an integer")
+    for path, meta, _ in records:
+        parent = meta.get("parent")
+        if parent and parent not in seen:
+            raise ValueError(f"{path}: unknown parent {parent}")
+        related = meta.get("related", [])
+        if not isinstance(related, list):
+            raise ValueError(f"{path}: related must be a JSON array")
+        for target in related:
+            if target not in seen:
+                raise ValueError(f"{path}: unknown related page {target}")
+    project_meta, _ = read_page(root / "project.md")
+    if project_meta.get("type") != "project":
+        raise ValueError(f"{root / 'project.md'}: type must be project")
+    if str(project_meta["id"]) != root.name:
+        raise ValueError(f"{root}: folder and project ID differ")
+    return {"projectId": root.name, "pages": len(records), "ids": sorted(seen)}
+
+
+def replace_index_block(path: Path, block: str) -> None:
+    text = path.read_text(encoding="utf-8")
+    replacement = f"{INDEX_START}\n{block.rstrip()}\n{INDEX_END}"
+    if INDEX_START in text and INDEX_END in text:
+        text = re.sub(re.escape(INDEX_START) + r".*?" + re.escape(INDEX_END), replacement, text, flags=re.S)
+    else:
+        text = text.rstrip() + f"\n\n{replacement}\n"
+    path.write_text(text, encoding="utf-8")
+
+
+def sync_indexes(root: Path) -> None:
+    records = sorted(pages(root), key=lambda item: (int(item[1]["order"]), str(item[1]["title"])))
+    links = []
+    for path, meta, _ in records:
+        if path.name in {"project.md", "index.md"}:
+            continue
+        relative = path.relative_to(root).as_posix()
+        links.append(f"- [{meta['title']}]({relative}) - `{meta['type']}` / `{meta['status']}`")
+    replace_index_block(root / "index.md", "\n".join(links))
+
+
+def manifest_for(root: Path, records: list[tuple[Path, dict, str]]) -> dict:
+    project_meta, project_body = read_page(root / "project.md")
+    ordered = sorted((item for item in records if item[0].name != "project.md"), key=lambda item: (int(item[1]["order"]), str(item[1]["title"])))
+    sections = []
+    for path, meta, _ in ordered:
+        sections.append({
+            "id": meta["id"],
+            "index": f"{int(meta['order']):02d}",
+            "eyebrow": meta["type"],
+            "title": meta["title"],
+            "dek": meta.get("summary", f"{meta['title']} for {project_meta['title']}."),
+            "source": f"content/sections/{path.relative_to(root).as_posix()}",
+            "tags": meta.get("tags", [meta["type"]]),
+            "status": meta["status"],
+            "editable": True,
+            "owner": meta.get("owner", "Document steward"),
+            "updated": str(meta["updated"]),
+            "estimatedMinutes": int(meta.get("minutes", 3)),
+            "dependencies": [meta["parent"]] if meta.get("parent") else [],
+            "backlinks": meta.get("related", []),
+        })
+    lifecycle = project_meta.get("lifecycle", "unknown")
+    approval_items: list[dict] = []
+    for _, meta, _ in records:
+        if meta.get("id") != "approval-queue":
+            continue
+        items = meta.get("review-items", [])
+        if not isinstance(items, list):
+            raise ValueError(f"{root / 'approval-queue.md'}: review-items must be a JSON array")
+        for item in items:
+            if not isinstance(item, dict) or not all(key in item for key in ("id", "title", "summary", "recommendation")):
+                raise ValueError(f"{root / 'approval-queue.md'}: every review item needs id, title, summary, and recommendation")
+            approval_items.append({
+                "id": str(item["id"]),
+                "title": str(item["title"]),
+                "summary": str(item["summary"]),
+                "recommendation": str(item["recommendation"]),
+                "alternative": str(item.get("alternative", "Defer for explicit review.")),
+                "details": str(item.get("details", "")),
+                "impact": str(item.get("impact", "review")),
+                "effort": str(item.get("effort", "review")),
+                "targetIds": item.get("targetIds", ["approval-queue"]),
+                "decision": "proposed",
+            })
+    return {
+        "_meta": {"schema": f"living-documents-{FORMAT_VERSION}", "generated": True, "generatedAt": now()},
+        "meta": {
+            "documentId": project_meta["id"],
+            "title": project_meta["title"],
+            "subtitle": project_meta.get("summary", project_body.splitlines()[0].lstrip("# ").strip()),
+            "version": project_meta.get("version", "1.0.0"),
+            "updated": str(project_meta["updated"]),
+            "status": project_meta["status"],
+            "thesis": project_meta.get("thesis", project_meta.get("summary", "")),
+            "audience": project_meta.get("audience", "The human operator and agents continuing this project."),
+            "compatibility": {"formatVersion": FORMAT_VERSION, "skillRange": {"min": SKILL_VERSION, "max": "2.1.0"}},
+            "scope": "project",
+            "projectRoot": project_meta.get("source-root", ""),
+            "lifecycle": lifecycle,
+        },
+        "navigation": {"defaultView": "dashboard", "sectionOrder": [item["id"] for item in sections], "quickFilters": [], "showInspector": True, "showReadingProgress": True},
+        "dashboard": {
+            "focus": project_meta.get("focus", "Follow what-to-do.md and the next safe action."),
+            "health": [{"id": "canonical-plan", "label": "Canonical plan", "state": "good", "detail": "Project truth is stored in one Markdown project folder."}],
+            "metricDefinitions": [],
+            "pinnedSectionIds": [item["id"] for item in sections[:4]],
+            "decisionQueueLimit": 12,
+        },
+        "sections": sections,
+        "proposals": approval_items,
+        "releases": [],
+        "history": [],
+        "visual": {"defaultTheme": "obsidian", "themes": ["system", "obsidian", "graphite", "paper", "high-contrast"], "defaultMotion": "system", "density": "comfortable", "designDirection": "Editorial project workbench"},
+        "worklogs": [],
+        "modelReplies": [],
+        "resources": [],
+        "federation": {"role": "project", "projectIndex": None, "masterDocumentId": "living-documents", "relatedDocumentIds": project_meta.get("related-projects", [])},
+    }
+
+
+def build_runtime(root: Path, *, write_indexes: bool = True) -> Path:
+    if write_indexes:
+        sync_indexes(root)
+    validate_project(root)
+    records = pages(root)
+    target = runtime_home() / "projects" / root.name / "current"
+    if target.exists():
+        shutil.rmtree(target)
+    (target / "public/content/sections").mkdir(parents=True)
+    (target / "public/data").mkdir(parents=True)
+    for path, meta, body in records:
+        if path.name == "project.md":
+            continue
+        relative = path.relative_to(root)
+        destination = target / "public/content/sections" / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(path, destination)
+    (target / "public/content/index.json").write_text(json.dumps(manifest_for(root, records), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    (target / "public/data/annotations.json").write_text('{"_meta":{"generated":true},"annotations":[]}\n', encoding="utf-8")
+    pointer = {"documentId": root.name, "root": str(target), "manifest": str(target / "public/content/index.json"), "sourceRoot": str(root), "updatedAt": now()}
+    pointer_path = target.parent / "current.json"
+    pointer_path.write_text(json.dumps(pointer, indent=2) + "\n", encoding="utf-8")
+    return target
+
+
+def create_project(project_id: str, title: str, source_root: str = "") -> Path:
+    project_id = slug(project_id)
+    root = project_root(project_id)
+    if root.exists() and any(root.iterdir()):
+        raise FileExistsError(f"refusing non-empty project: {root}")
+    root.mkdir(parents=True, exist_ok=True)
+    day = date.today().isoformat()
+    common = {"status": "active", "updated": day}
+    write_page(root / "project.md", {"id": project_id, "title": title, "type": "project", "order": 0, **common, "lifecycle": "not-started", "source-root": source_root, "related-projects": []}, f"# {title}\n\nThis page defines the project's identity, boundary, lifecycle, and relationships.")
+    definitions = [
+        ("start-here.md", "start-here", "Start here", "handoff", 5, "Minimal orientation for a fresh or recovered session."),
+        ("index.md", "index", "Project index", "index", 10, "The canonical entry point and automatically maintained page list."),
+        ("what-to-do.md", "what-to-do", "What to do", "queue", 20, "Priorities, blockers, and the next safe action."),
+        ("requirements.md", "requirements", "Requirements", "requirements", 30, "The canonical what and why."),
+        ("plan.md", "plan", "Plan", "plan", 40, "The canonical implementation approach and dependencies."),
+        ("tasks.md", "tasks", "Tasks", "tasks", 50, "Evidence-gated execution work."),
+        ("decisions.md", "decisions", "Decisions", "decisions", 60, "Accepted, rejected, deferred, and unresolved choices."),
+        ("history.md", "history", "History", "history", 70, "Append-only milestones and session handoffs."),
+        ("resources.md", "resources", "Resources", "resources", 80, "Canonical source documents and evidence."),
+    ]
+    ids = [item[1] for item in definitions]
+    for filename, page_id, page_title, page_type, order, description in definitions:
+        related = [item for item in ids if item != page_id][:3] if page_id == "index" else []
+        parent = "" if page_id == "index" else "index"
+        write_page(root / filename, {"id": page_id, "title": page_title, "type": page_type, "order": order, **common, "parent": parent, "related": related}, f"# {page_title}\n\n{description}")
+    build_runtime(root)
+    sync_portfolio()
+    return root
+
+
+def append_once(path: Path, marker: str, text: str) -> None:
+    current = path.read_text(encoding="utf-8")
+    if marker in current:
+        return
+    path.write_text(current.rstrip() + f"\n\n{text.strip()}\n", encoding="utf-8")
+
+
+def import_legacy(project_id: str, source: str, source_id: str) -> dict:
+    source_root = Path(source).expanduser().resolve()
+    manifest_path = source_root / "public/content/index.json"
+    if not manifest_path.is_file():
+        raise FileNotFoundError(f"legacy manifest missing: {manifest_path}")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    project_id = slug(project_id)
+    root = project_root(project_id)
+    project_source_root = str(manifest.get("meta", {}).get("projectRoot") or "")
+    if not root.exists():
+        create_project(project_id, manifest.get("meta", {}).get("title") or project_id.replace("-", " ").title(), project_source_root)
+    archive_id = slug(source_id)
+    archive_root = root / "archive" / archive_id
+    source_record = archive_root / "SOURCE.md"
+    if source_record.exists():
+        return {"action": "existing", "projectId": project_id, "archive": str(archive_root)}
+    archive_root.mkdir(parents=True)
+    records = []
+    copied_markdown = 0
+    for candidate in sorted(path for path in source_root.rglob("*") if path.is_file()):
+        relative = candidate.relative_to(source_root)
+        records.append((relative.as_posix(), candidate.stat().st_size, sha256(candidate)))
+        if candidate.suffix.lower() == ".md":
+            destination = archive_root / "markdown" / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(candidate, destination)
+            copied_markdown += 1
+    rows = "\n".join(f"| `{name}` | {size} | `{digest}` |" for name, size, digest in records)
+    source_record.write_text(
+        "\n".join([
+            "---",
+            f"id: {project_id}-{archive_id}-source",
+            f"title: {manifest.get('meta', {}).get('title', project_id)} predecessor",
+            "type: archived-source",
+            "status: preserved",
+            f"updated: {date.today().isoformat()}",
+            "---",
+            "",
+            f"# {manifest.get('meta', {}).get('title', project_id)} predecessor",
+            "",
+            f"- Original path: `{source_root}`",
+            f"- Document ID: `{manifest.get('meta', {}).get('documentId', 'unknown')}`",
+            f"- Declared version: `{manifest.get('meta', {}).get('version', 'unknown')}`",
+            f"- Declared updated date: `{manifest.get('meta', {}).get('updated', 'unknown')}`",
+            f"- Imported at: `{now()}`",
+            f"- Markdown files copied: `{copied_markdown}`",
+            f"- All original files remain at the original path.",
+            "",
+            "## File manifest",
+            "",
+            "| Original relative path | Bytes | SHA-256 |",
+            "| --- | ---: | --- |",
+            rows,
+            "",
+            "This predecessor is evidence, not an active canonical plan. Every material idea must receive a disposition before archive review is complete.",
+            "",
+        ]),
+        encoding="utf-8",
+    )
+    marker = f"legacy-source:{archive_id}"
+    append_once(
+        root / "resources.md",
+        marker,
+        f"## Imported predecessor: {source_id}\n\n<!-- {marker} -->\n\n- Source: `{source_root}`\n- Preserved record: [archive/{archive_id}/SOURCE.md](archive/{archive_id}/SOURCE.md)\n- Status: awaiting idea adjudication and canonical consolidation.",
+    )
+    append_once(
+        root / "tasks.md",
+        marker,
+        f"## Legacy consolidation: {source_id}\n\n<!-- {marker} -->\n\n- [ ] Read every preserved Markdown source in `archive/{archive_id}/markdown/`.\n- [ ] Classify every material idea as incorporated, deferred, rejected, unresolved, superseded, or duplicate.\n- [ ] Update canonical requirements, plan, tasks, decisions, and resources.\n- [ ] Compare the result with intent archaeology before retiring this predecessor.",
+    )
+    append_once(
+        root / "history.md",
+        marker,
+        f"## {date.today().isoformat()}: Imported predecessor {source_id}\n\n<!-- {marker} -->\n\nPreserved {copied_markdown} Markdown files and recorded {len(records)} file hashes from `{source_root}`. Originals remain untouched. The import is evidence and has not been declared canonical.",
+    )
+    runtime = build_runtime(root)
+    sync_portfolio()
+    return {
+        "action": "imported",
+        "projectId": project_id,
+        "archive": str(archive_root),
+        "copiedMarkdown": copied_markdown,
+        "hashedFiles": len(records),
+        "runtime": str(runtime),
+    }
+
+
+def sync_portfolio() -> None:
+    portfolio = home() / "INDEX.md"
+    if not portfolio.exists():
+        portfolio.parent.mkdir(parents=True, exist_ok=True)
+        portfolio.write_text("# Living Documents\n\nThe canonical index of project planning truth.\n", encoding="utf-8")
+    lines = []
+    for root in all_project_roots():
+        meta, _ = read_page(root / "project.md")
+        lines.append(f"- [{meta['title']}](projects/{root.name}/index.md) - `{meta.get('lifecycle', 'unknown')}` / `{meta['status']}`")
+    replace_index_block(portfolio, "\n".join(lines))
+
+
+def ensure_project(args: argparse.Namespace) -> dict:
+    project_id = resolve_project_id(args.project, args.scope)
+    if project_id == "living-documents" and args.scope == "universal":
+        source = Path("")
+        title = "Living Documents"
+    elif args.project:
+        source = Path(args.project).expanduser().resolve()
+        git_root = find_git_root(source)
+        source = git_root or source
+        title = source.name.replace("-", " ").replace("_", " ").title()
+    else:
+        git_root = find_git_root(Path.cwd())
+        if git_root:
+            source = git_root
+            title = source.name.replace("-", " ").replace("_", " ").title()
+        else:
+            source = Path("")
+            title = "Living Documents"
+    root = project_root(project_id)
+    action = "existing"
+    if not root.exists():
+        root = create_project(project_id, title, str(source) if str(source) != "." else "")
+        action = "created"
+    runtime = build_runtime(root)
+    sync_portfolio()
+    return {"action": action, "projectId": project_id, "root": str(root), "startHere": str(root / "start-here.md"), "index": str(root / "index.md"), "runtime": str(runtime), "formatVersion": FORMAT_VERSION}
+
+
+def command_doctor(project: str | None, all_projects: bool) -> dict:
+    if all_projects and project:
+        raise ValueError("doctor accepts either --all or --project, not both")
+    roots = all_project_roots() if all_projects else [project_root(resolve_project_id(project))]
+    checks: list[dict] = []
+
+    def check(name: str, path: Path, expected: Path | None = None) -> None:
+        resolved = path.resolve() if path.exists() or path.is_symlink() else None
+        ok = resolved is not None and (expected is None or resolved == expected.resolve())
+        checks.append({"name": name, "ok": ok, "path": str(path), "resolved": str(resolved) if resolved else None, "expected": str(expected) if expected else None})
+
+    def value_check(name: str, actual: object, expected: object) -> None:
+        checks.append({"name": name, "ok": actual == expected, "actual": actual, "expected": expected})
+
+    source = skill_root()
+    release_path = source / "RELEASE.json"
+    version_path = source / "VERSION"
+    check("living-documents skill source", source / "SKILL.md")
+    check("Living Documents release manifest", release_path)
+    check("Living Documents canonical release version", version_path)
+    release = json.loads(release_path.read_text(encoding="utf-8"))
+    renderer_package = json.loads((renderer_root() / "package.json").read_text(encoding="utf-8"))
+    value_check("operating skill version matches VERSION", release.get("operatingSkillVersion"), SKILL_VERSION)
+    value_check("renderer version matches VERSION", release.get("renderer", {}).get("version"), SKILL_VERSION)
+    value_check("renderer package version matches VERSION", renderer_package.get("version"), SKILL_VERSION)
+    check("renderer shell", renderer_root() / "public/index.html")
+    check("renderer server", renderer_root() / "serve.mjs")
+    check("Codex living-documents deployment", Path.home() / ".codex/skills/living-documents/SKILL.md", source / "SKILL.md")
+    forge_source = source.parent / "living-document-forge"
+    check("Codex living-document-forge deployment", Path.home() / ".codex/skills/living-document-forge/SKILL.md", forge_source / "SKILL.md")
+    projects = []
+    for root in roots:
+        validation = validate_project(root)
+        runtime = runtime_home() / "projects" / root.name / "current"
+        manifest = runtime / "public/content/index.json"
+        check(f"{root.name} runtime manifest", manifest)
+        projects.append({"projectId": root.name, "pages": validation["pages"], "runtime": str(runtime)})
+    return {"healthy": all(item["ok"] for item in checks), "projects": projects, "checks": checks}
+
+
+def command_serve(project: str | None) -> dict:
+    if project:
+        build_runtime(project_root(resolve_project_id(project)))
+    else:
+        for root in all_project_roots():
+            build_runtime(root)
+    unit = "living-documents-renderer.service"
+    result = subprocess.run(["systemctl", "--user", "start", unit], capture_output=True, text=True, check=False)
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout).strip()
+        raise ValueError(f"could not start {unit}: {detail}")
+    url = "http://127.0.0.1:4173/"
+    last_error = "not reachable"
+    for _ in range(10):
+        try:
+            with urlopen(url, timeout=0.5) as response:  # nosec B310 - fixed loopback URL
+                if response.status == 200:
+                    return {"service": unit, "url": url, "project": project or "all", "status": "ready"}
+                last_error = f"HTTP {response.status}"
+        except URLError as error:
+            last_error = str(error.reason)
+        time.sleep(0.2)
+    raise ValueError(f"{unit} started but {url} did not become ready: {last_error}")
+
+
+def command_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="ld", description="Operate the canonical Markdown Living Documents corpus.")
+    sub = parser.add_subparsers(dest="command")
+    ensure = sub.add_parser("ensure")
+    ensure.add_argument("--project")
+    ensure.add_argument("--scope", choices=["auto", "project", "universal"], default="auto")
+    create = sub.add_parser("create-project")
+    create.add_argument("--id", required=True)
+    create.add_argument("--title", required=True)
+    create.add_argument("--source-root", default="")
+    add = sub.add_parser("add-page")
+    add.add_argument("--project", required=True)
+    add.add_argument("--id", required=True)
+    add.add_argument("--title", required=True)
+    add.add_argument("--type", default="concept")
+    add.add_argument("--parent", default="index")
+    legacy = sub.add_parser("import-legacy")
+    legacy.add_argument("--project", required=True)
+    legacy.add_argument("--source", required=True)
+    legacy.add_argument("--source-id", required=True)
+    sync = sub.add_parser("sync")
+    sync.add_argument("--all", action="store_true")
+    sync.add_argument("--project")
+    sync.add_argument("--no-index-write", action="store_true")
+    validate = sub.add_parser("validate")
+    validate.add_argument("--all", action="store_true")
+    validate.add_argument("--project")
+    sub.add_parser("list")
+    status = sub.add_parser("status")
+    status.add_argument("--project")
+    status.add_argument("--scope", choices=["auto", "project", "universal"], default="auto")
+    doctor = sub.add_parser("doctor")
+    doctor.add_argument("--all", action="store_true")
+    doctor.add_argument("--project")
+    serve = sub.add_parser("serve")
+    serve.add_argument("--project")
+    return parser
+
+
+def main() -> int:
+    args = command_parser().parse_args()
+    try:
+        if args.command in {None, "ensure"}:
+            result = ensure_project(args)
+        elif args.command == "create-project":
+            root = create_project(args.id, args.title, args.source_root)
+            result = {"action": "created", "root": str(root)}
+        elif args.command == "add-page":
+            root = project_root(args.project)
+            if not root.is_dir():
+                raise FileNotFoundError(f"unknown project {args.project}")
+            page_id = slug(args.id)
+            target = root / f"{page_id}.md"
+            if target.exists():
+                raise FileExistsError(f"page exists: {target}")
+            write_page(target, {"id": page_id, "title": args.title, "type": args.type, "order": max([int(meta["order"]) for _, meta, _ in pages(root)] or [0]) + 10, "status": "active", "parent": args.parent, "related": [], "updated": date.today().isoformat()}, f"# {args.title}\n")
+            runtime = build_runtime(root)
+            result = {"action": "created", "page": str(target), "runtime": str(runtime)}
+        elif args.command == "import-legacy":
+            result = import_legacy(args.project, args.source, args.source_id)
+        elif args.command == "sync":
+            if args.all and args.project:
+                raise ValueError("sync accepts either --all or --project, not both")
+            roots = all_project_roots() if args.all else [project_root(resolve_project_id(args.project))]
+            result = {"projects": [{"projectId": root.name, "runtime": str(build_runtime(root, write_indexes=not args.no_index_write))} for root in roots]}
+            if not args.no_index_write:
+                sync_portfolio()
+        elif args.command == "validate":
+            if args.all and args.project:
+                raise ValueError("validate accepts either --all or --project, not both")
+            roots = all_project_roots() if args.all else [project_root(resolve_project_id(args.project))]
+            result = {"validated": [validate_project(root) for root in roots]}
+        elif args.command == "list":
+            result = {"home": str(home()), "projects": [root.name for root in all_project_roots()]}
+        elif args.command == "status":
+            project_id = resolve_project_id(args.project, args.scope)
+            root = project_root(project_id)
+            result = {"projectId": project_id, "exists": root.is_dir(), "root": str(root), "startHere": str(root / "start-here.md")}
+        elif args.command == "doctor":
+            result = command_doctor(args.project, args.all)
+            if not result["healthy"]:
+                print(json.dumps(result, indent=2, ensure_ascii=False))
+                return 1
+        elif args.command == "serve":
+            result = command_serve(args.project)
+        else:
+            raise ValueError(f"unknown command {args.command}")
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        return 0
+    except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
+        print(f"ld: {error}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

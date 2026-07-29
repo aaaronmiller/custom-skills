@@ -1,0 +1,16 @@
+{
+  "name": "living-documents",
+  "versionSource": "VERSION",
+  "operatingSkillVersion": "2.1.0",
+  "formatVersion": "3.0.0",
+  "forgeSkill": {
+    "source": "/home/cheta/code/custom-skills/living-document-forge",
+    "version": "1.3.0"
+  },
+  "renderer": {
+    "source": "renderer",
+    "version": "2.1.0"
+  },
+  "archivePredecessors": ["living-document-forge-v1.2.1"],
+  "candidates": ["living-document-forge-v1.3.1"]
+}

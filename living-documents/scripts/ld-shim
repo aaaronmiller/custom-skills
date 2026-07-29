@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+# Preserve the system linker while exposing the explicit Living Documents commands.
+SELF=$(readlink -f "$0")
+SCRIPT_DIR=$(dirname "$SELF")
+case "${1-}" in
+  "")
+    exec "$SCRIPT_DIR/ld" ensure
+    ;;
+  ensure|status|list|create-project|add-page|import-legacy|sync|validate|doctor|serve|-h|--help)
+    exec "$SCRIPT_DIR/ld" "$@"
+    ;;
+  *)
+    exec /usr/bin/ld "$@"
+    ;;
+esac

@@ -1,0 +1,15 @@
+[Unit]
+Description=Living Documents projection-only refresh watcher
+After=default.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 @SKILL_ROOT@/scripts/living-documents-projection-watcher.py
+Restart=on-failure
+RestartSec=3
+MemoryMax=128M
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,11 @@
+{
+  "name": "living-documents-renderer",
+  "private": true,
+  "version": "2.1.0",
+  "type": "module",
+  "scripts": {
+    "start": "node serve.mjs",
+    "check": "node --check serve.mjs && node --check public/app.js && node --check scripts/check-operations-api.mjs",
+    "check:operations-api": "node scripts/check-operations-api.mjs"
+  }
+}

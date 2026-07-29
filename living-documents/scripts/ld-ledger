@@ -1,0 +1,220 @@
+#!/usr/bin/env python3
+"""Bounded, atomic work-ledger operations for Living Documents."""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import tempfile
+from datetime import datetime, timezone
+from pathlib import Path
+
+HOME = Path.home()
+CORPUS = HOME / "LIVING_DOCUMENTS" / "projects"
+ROOT = HOME / ".local" / "state" / "living-documents"
+LEDGER = ROOT / "ledger"
+HANDOFFS = ROOT / "handoffs"
+DECISION_REVIEWS = ROOT / "decision-reviews"
+UNBLOCK_QUEUE = CORPUS / "living-documents" / "portfolio-unblock-queue.md"
+STATUSES = {"active", "blocked", "interrupted", "complete", "unclassified"}
+CONFIDENCE = {"verified", "inferred", "unverified"}
+
+
+def identifier(value: str, label: str) -> str:
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,79}", value):
+        raise ValueError(f"{label} must be kebab-case, 1-80 characters")
+    return value
+
+
+def atomic_write(path: Path, value: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+    try:
+        os.fchmod(fd, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            json.dump(value, stream, indent=2, ensure_ascii=False)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def validate(record: dict) -> None:
+    required = {"schema", "work_id", "project", "status", "summary", "next_action", "sessions", "evidence", "confidence", "updated_at"}
+    missing = sorted(required - set(record))
+    if missing:
+        raise ValueError(f"missing fields: {', '.join(missing)}")
+    if record["schema"] != "living-documents-work-ledger/v1":
+        raise ValueError("unsupported schema")
+    identifier(str(record["work_id"]), "work ID")
+    project = identifier(str(record["project"]), "project")
+    if not (CORPUS / project / "start-here.md").is_file():
+        raise ValueError(f"unknown canonical project: {project}")
+    if record["status"] not in STATUSES or record["confidence"] not in CONFIDENCE:
+        raise ValueError("invalid status or confidence")
+    if not isinstance(record["sessions"], list) or not isinstance(record["evidence"], list):
+        raise ValueError("sessions and evidence must be lists")
+    if not str(record["summary"]).strip() or not str(record["next_action"]).strip():
+        raise ValueError("summary and next action must not be blank")
+
+
+def timestamp() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def put(record: dict) -> Path:
+    validate(record)
+    target = LEDGER / f"{record['work_id']}.json"
+    atomic_write(target, record)
+    return target
+
+
+def import_handoffs() -> list[Path]:
+    created: list[Path] = []
+    for source in sorted(HANDOFFS.glob("*/*.json")):
+        raw = json.loads(source.read_text(encoding="utf-8"))
+        record = {
+            "schema": "living-documents-work-ledger/v1",
+            "work_id": raw["work_id"], "project": raw["project"], "status": raw["status"],
+            "summary": raw["summary"], "next_action": raw["next_action"],
+            "blocker": raw.get("blocker", ""), "sessions": raw.get("sessions", []),
+            "evidence": raw.get("evidence", []), "confidence": "verified",
+            "updated_at": raw.get("updated_at") or timestamp(), "source_handoff": str(source),
+        }
+        created.append(put(record))
+    return created
+
+
+def pending_local_reviews() -> list[dict]:
+    """Read bounded loopback review submissions without treating them as authority."""
+    reviews: list[dict] = []
+    for source in sorted(DECISION_REVIEWS.glob("decision-*.json")):
+        try:
+            raw = json.loads(source.read_text(encoding="utf-8"))
+            priority = raw.get("priority")
+            option_id = raw.get("optionId")
+            if not isinstance(priority, int) or priority < 1:
+                continue
+            if not isinstance(option_id, str) or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", option_id):
+                continue
+            if raw.get("localOnly") is not True:
+                continue
+            reviews.append({
+                "priority": priority,
+                "option_id": option_id,
+                "note": str(raw.get("note") or ""),
+                "updated_at": str(raw.get("updatedAt") or ""),
+                "source": str(source),
+                "local_only": True,
+            })
+        except (OSError, json.JSONDecodeError):
+            continue
+    return sorted(reviews, key=lambda review: (review["priority"], review["updated_at"]))
+
+
+def decision_work_ids() -> dict[str, list[str]]:
+    try:
+        source = UNBLOCK_QUEUE.read_text(encoding="utf-8")
+        match = re.search(r"^decision-work-ids:\s*(.+)$", source, re.MULTILINE)
+        raw = json.loads(match.group(1)) if match else {}
+        return {str(priority): [str(work_id) for work_id in work_ids] for priority, work_ids in raw.items() if isinstance(work_ids, list)}
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def next_record(project: str | None = None) -> dict:
+    """Resolve the next bounded action without changing ledger or project state."""
+    if project:
+        project = identifier(project, "project")
+    records: list[dict] = []
+    for item in sorted(LEDGER.glob("*.json")):
+        record = json.loads(item.read_text(encoding="utf-8"))
+        validate(record)
+        if project is None or record["project"] == project:
+            records.append(record)
+    if not records:
+        return {"state": "empty", "project": project, "message": "No matching work records exist."}
+    pending = [item for item in records if item["status"] != "complete"]
+    if not pending:
+        return {
+            "state": "complete",
+            "project": project,
+            "message": "No unfinished matching work records exist.",
+        }
+    priority = {"active": 0, "interrupted": 1, "unclassified": 2, "blocked": 3, "complete": 4}
+    best_priority = min(priority[item["status"]] for item in pending)
+    candidates = [item for item in pending if priority[item["status"]] == best_priority]
+    candidate = max(candidates, key=lambda item: (item.get("updated_at", ""), item["work_id"]))
+    if candidate["status"] == "blocked":
+        blocked = sorted((item for item in pending if item["status"] == "blocked"), key=lambda item: (item.get("updated_at", ""), item["work_id"]), reverse=True)
+        if project is None:
+            reviews = pending_local_reviews()
+            if reviews:
+                mapping = decision_work_ids()
+                by_id = {record["work_id"]: record for record in records}
+                for review in reviews:
+                    review["work_ids"] = mapping.get(str(review["priority"]), [])
+                    review["work"] = [by_id[work_id] for work_id in review["work_ids"] if work_id in by_id]
+                return {
+                    "state": "review-pending",
+                    "project": None,
+                    "message": "A human submitted a loopback-local decision review. Inspect it, record any valid authorization canonically, run only its named gate, then return to the resolver. The review itself does not execute work.",
+                    "reviews": reviews,
+                    "blockers": blocked,
+                }
+            return {
+                "state": "pivot-required",
+                "project": None,
+                "message": "All project work is explicitly blocked. Preserve these blockers, then create or select an independent Living Documents control-plane pivot; do not stop.",
+                "pivot_project": "living-documents",
+                "pivot_evidence": str(CORPUS / "living-documents" / "what-to-do.md"),
+                "blockers": blocked,
+            }
+        return {
+            "state": "requires-authority",
+            "project": project,
+            "message": "No active, interrupted, or unclassified record is available; resolve a named blocker before continuing.",
+            "blockers": blocked,
+        }
+    return {
+        "state": "actionable",
+        "project": project,
+        "record": candidate,
+        "next_action": candidate["next_action"],
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(prog="ld-ledger")
+    sub = parser.add_subparsers(dest="command", required=True)
+    add = sub.add_parser("put")
+    add.add_argument("--work-id", required=True); add.add_argument("--project", required=True)
+    add.add_argument("--status", required=True, choices=sorted(STATUSES)); add.add_argument("--summary", required=True)
+    add.add_argument("--next-action", required=True); add.add_argument("--confidence", default="unverified", choices=sorted(CONFIDENCE))
+    add.add_argument("--session", action="append", default=[]); add.add_argument("--evidence", action="append", default=[]); add.add_argument("--blocker", default="")
+    sub.add_parser("import-handoffs")
+    sub.add_parser("validate")
+    sub.add_parser("list")
+    next_parser = sub.add_parser("next")
+    next_parser.add_argument("--project")
+    args = parser.parse_args()
+    try:
+        if args.command == "put":
+            record = {"schema":"living-documents-work-ledger/v1", "work_id":args.work_id, "project":args.project, "status":args.status, "summary":args.summary, "next_action":args.next_action, "blocker":args.blocker, "sessions":args.session, "evidence":args.evidence, "confidence":args.confidence, "updated_at":timestamp()}
+            result = {"record": str(put(record))}
+        elif args.command == "import-handoffs": result = {"imported": [str(item) for item in import_handoffs()]}
+        elif args.command == "validate":
+            records = sorted(LEDGER.glob("*.json")); [validate(json.loads(item.read_text(encoding="utf-8"))) for item in records]; result={"validated":len(records)}
+        elif args.command == "list":
+            result = {"records": [json.loads(item.read_text(encoding="utf-8")) for item in sorted(LEDGER.glob("*.json"))]}
+        else:
+            result = next_record(args.project)
+        print(json.dumps(result, indent=2, ensure_ascii=False)); return 0
+    except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
+        print(f"ld-ledger: {error}", file=os.sys.stderr); return 1
+
+if __name__ == "__main__": raise SystemExit(main())
