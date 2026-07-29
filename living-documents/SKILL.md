@@ -216,6 +216,7 @@ project page set. Use the shared local reader instead of per-project servers:
 ```bash
 <skill-root>/scripts/install-living-documents.sh --enable-renderer
 <skill-root>/scripts/install-living-documents.sh --install-hooks
+<skill-root>/scripts/install-living-documents.sh --install-rules
 ld serve
 ```
 
@@ -224,6 +225,13 @@ unrelated hooks, creates timestamped configuration backups, and installs
 five-second `SessionStart` and `Stop` command handlers for Claude Code and
 Codex. Codex marks changed non-managed hooks for review; use `/hooks` after
 installation to inspect and trust the new hashes.
+
+`--install-rules` installs the bounded continuity and receipt-delivery contract
+from `references/harness-rules.md` into Claude Code and Codex global rule
+files. It follows symlinks, deduplicates a shared source, replaces only its
+marked managed block, preserves all unrelated instructions, and creates a
+timestamped backup before a change. The rules keep the protocol available
+after context compression; the hooks provide current state and receipts.
 
 The reader is available at `http://127.0.0.1:4173/`. The service is loopback
 only, memory-bounded, and reads the generated projection; it never becomes
