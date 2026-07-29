@@ -4,6 +4,8 @@ purpose: Shared dependency-free Living Documents CMS renderer.
 version: 2.0.0
 --- */
 
+import { sectionIdFromHash } from './navigation.mjs';
+
 const app = document.querySelector('#app');
 const themeNames = {
   system: 'System',
@@ -1160,17 +1162,48 @@ function syncBodyClasses() {
 
 function setView(view) {
   state.activeView = view;
+  if (view === 'document' && state.activeSectionId) {
+    replaceLocationHash(state.activeSectionId);
+  } else {
+    replaceLocationHash('');
+  }
   document.body.classList.remove('left-open', 'right-open');
   render();
   requestAnimationFrame(() => document.querySelector('#main-content')?.focus({ preventScroll: true }));
 }
 
+function sectionIdFromLocation() {
+  return sectionIdFromHash(window.location.hash, state.manifest?.sections.map((section) => section.id) || []);
+}
+
+function replaceLocationHash(id) {
+  const next = id
+    ? `${window.location.pathname}${window.location.search}#${encodeURIComponent(id)}`
+    : `${window.location.pathname}${window.location.search}`;
+  history.replaceState(null, '', next);
+}
+
+function scrollToSection(id, behavior = 'smooth') {
+  const section = document.getElementById(id);
+  if (!section) return;
+  if (behavior === 'auto') {
+    const priorScrollBehavior = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = 'auto';
+    section.scrollIntoView({ behavior: 'auto', block: 'start' });
+    requestAnimationFrame(() => { document.documentElement.style.scrollBehavior = priorScrollBehavior; });
+    return;
+  }
+  section.scrollIntoView({ behavior: motionReduced() ? 'auto' : 'smooth', block: 'start' });
+}
+
 function goToSection(id) {
+  if (!sectionById(id)) return;
   state.activeView = 'document';
   state.activeSectionId = id;
+  replaceLocationHash(id);
   document.body.classList.remove('left-open', 'right-open');
   render();
-  requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: motionReduced() ? 'auto' : 'smooth', block: 'start' }));
+  requestAnimationFrame(() => scrollToSection(id));
 }
 
 function motionReduced() {
@@ -1716,6 +1749,12 @@ window.addEventListener('scroll', () => {
   });
 }, { passive: true });
 
+window.addEventListener('hashchange', () => {
+  if (window.location.pathname === '/') return;
+  const sectionId = sectionIdFromLocation();
+  if (sectionId) goToSection(sectionId);
+});
+
 async function init() {
   if (window.location.pathname === '/') {
     await initPortfolio();
@@ -1743,8 +1782,9 @@ async function init() {
       state.projects = index.projects || [];
       state.blockingItems = index.blockingItems || [];
     }
-    state.activeView = manifest.navigation.defaultView || 'dashboard';
-    state.activeSectionId = manifest.navigation.sectionOrder[0];
+    const linkedSectionId = sectionIdFromLocation();
+    state.activeView = linkedSectionId ? 'document' : (manifest.navigation.defaultView || 'dashboard');
+    state.activeSectionId = linkedSectionId || manifest.navigation.sectionOrder[0];
     if (!manifest.visual.themes.includes(state.theme)) state.theme = manifest.visual.defaultTheme;
     if (!['system', 'full', 'reduced'].includes(state.motion)) state.motion = manifest.visual.defaultMotion;
     loadLocalState();
@@ -1753,6 +1793,9 @@ async function init() {
       state.sectionContent.set(section.id, await fetchText(section.source));
     }));
     render();
+    if (linkedSectionId) {
+      requestAnimationFrame(() => scrollToSection(linkedSectionId, 'auto'));
+    }
   } catch (error) {
     console.error(error);
     app.innerHTML = `<div class="boot-screen"><div class="boot-mark">!</div><h1>Document failed to open</h1><p>${escapeHtml(error.message)}</p><p>Serve the project with <code>npm run dev</code>; browsers block local file fetches.</p></div>`;

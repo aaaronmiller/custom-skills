@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node serve.mjs",
-    "check": "node --check serve.mjs && node --check public/app.js && node --check scripts/check-operations-api.mjs",
+    "check": "node --check serve.mjs && node --check public/app.js && node --check public/navigation.mjs && node --check scripts/check-operations-api.mjs && node scripts/check-section-deep-link.mjs",
     "check:operations-api": "node scripts/check-operations-api.mjs"
   }
 }
