@@ -48,8 +48,27 @@ a Living Documents edit.
 
 The hook may report missing context or a missing handoff. It must never write
 Markdown autonomously. Raw transcripts remain evidence; CASS remains search;
-memory remains reusable agent context. The Living Document receives only the
-adjudicated state needed for a human or a fresh harness to resume safely.
+memory remains reusable agent context.
+
+**Self-sufficiency rule.** The Living Document must hold everything needed to
+reconstruct project intent without any external store. External stores are
+rebuildable caches and indexes, never authorities. If losing an external
+database, index, or transcript archive would lose intent, the boundary is drawn
+in the wrong place and the boundary moves, not the data.
+
+An earlier form of this rule said the Living Document "receives only the
+adjudicated state needed to resume safely". That reading licensed real loss.
+Measured 2026-08-04: the prompt corpus in the Living Document held **26%** of
+the recorded prompt text, with 127 prompt bodies truncated mid-instruction and
+recoverable only from a 56 MB SQLite file that no Markdown page referenced.
+Removing the truncation raised it to 71%. Summarising is a display decision;
+discarding the source text is data loss wearing the word "adjudicated".
+
+The distinction that actually matters is **volume versus fidelity**, not raw
+versus adjudicated. The Living Document should not carry 230,947 machine events.
+It must carry every human instruction in full, because that is the intent it
+exists to preserve. Where a projection is lossy, the page states what was
+omitted and why, so the gap is auditable rather than invisible.
 
 When the resolver reports `review-pending`, the selected option or question
 receipt is an asynchronous handoff, not self-executing authority. Verify its

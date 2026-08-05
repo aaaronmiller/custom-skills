@@ -3933,3 +3933,189 @@ body.focused .review-state {
   .settings-flash { animation: none; }
   * { scroll-behavior: auto !important; }
 }
+
+
+/* ── Metrics: live vs inert (2026-08-04) ─────────────────────────────────────
+   Audited 2026-08-04: 9 metric tiles and 2 count badges rendered as things that
+   look clickable and did nothing. "8 Pending decisions" names somewhere you
+   obviously want to go. A number that reads as a control and is not one is the
+   reason the surface felt like placeholder. Live metrics now navigate and say
+   so; inert metrics are styled so they never claim to. */
+
+.metric-link {
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  padding: 0.35rem 0.1rem;
+  transition: border-color var(--duration-fast, 140ms) var(--ease-exit, ease),
+              color var(--duration-fast, 140ms) var(--ease-exit, ease);
+}
+
+.metric-link:hover,
+.metric-link:focus-visible {
+  border-bottom-color: var(--accent, #7fd1c4);
+  color: var(--accent, #7fd1c4);
+}
+
+.metric-link:focus-visible {
+  outline: 2px solid var(--accent, #7fd1c4);
+  outline-offset: 3px;
+}
+
+/* Affordance carried by more than colour: a live metric shows a trailing mark. */
+.metric-link .metric-label::after {
+  content: " \2192";
+  opacity: 0.55;
+}
+
+/* Inert metrics are readings, not controls, and must not imply otherwise. */
+.metric-inert { cursor: default; }
+.metric-inert .metric-value { opacity: 0.62; }
+.metric-inert .metric-label { opacity: 0.62; }
+
+
+/* ── Tags, links, and honest affordance (2026-08-04) ─────────────────────────
+   Audit found 378 elements across four views that read as interactive and were
+   not: 142 tags, 136 in-prose cross-references, and ~30 list rows. The rule
+   applied here is that a thing either does something and looks like it, or does
+   nothing and looks like a label. Nothing in between. */
+
+/* Live: filters the document to this tag. */
+.tag-filterable {
+  cursor: pointer;
+  font: inherit;
+  border: 1px solid transparent;
+  background: color-mix(in oklab, currentColor 8%, transparent);
+  transition: border-color var(--duration-fast, 140ms) var(--ease-exit, ease),
+              color var(--duration-fast, 140ms) var(--ease-exit, ease);
+}
+.tag-filterable:hover,
+.tag-filterable:focus-visible { border-color: var(--accent, #7fd1c4); color: var(--accent, #7fd1c4); }
+.tag-filterable:focus-visible { outline: 2px solid var(--accent, #7fd1c4); outline-offset: 2px; }
+
+/* Live: navigates to another project folder. */
+.tag-link { cursor: pointer; text-decoration: none; border-bottom: 1px solid currentColor; }
+.tag-link:hover { color: var(--accent, #7fd1c4); }
+
+/* Inert: a reading, not a control. Must not invite a click. */
+.tag-static { cursor: default; opacity: 0.72; }
+
+/* A cross-reference whose target does not exist is marked rather than silently
+   rendered as an ordinary link that goes nowhere. */
+.link-unresolved {
+  cursor: help;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  opacity: 0.75;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tag-filterable, .tag-link, .metric-link { transition: none; }
+}
+
+
+/* Children of an inert metric are part of the reading, not separate targets. */
+.metric-inert *, .nav-count, .status-badge.tag-static { cursor: default; }
+
+
+/* ── Answer delivery state (2026-08-04) ──────────────────────────────────────
+   The portfolio decision card had radios, a note field, and no way to tell
+   whether an answer had reached anyone. Delivery failure was logged to the
+   console and nowhere else, so a selection that never left the browser looked
+   identical to one an agent had received. State is now always visible. */
+
+.delivery-state {
+  margin: 0.6rem 0;
+  padding: 0.55rem 0.7rem;
+  border-left: 3px solid currentColor;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.delivery-sent    { color: #7fd1c4; }
+.delivery-sending { color: #9bb3c9; }
+.delivery-pending { color: #d9b36c; }
+.delivery-failed  { color: #e88b7d; }
+
+/* State is never carried by colour alone. */
+.delivery-sent::before    { content: "✓ "; font-weight: 700; }
+.delivery-sending::before { content: "· "; font-weight: 700; }
+.delivery-pending::before { content: "! "; font-weight: 700; }
+.delivery-failed::before  { content: "✕ "; font-weight: 700; }
+
+.delivery-state .ghost-button { margin-left: 0.4rem; cursor: pointer; }
+
+
+/* ── Operational views: changes and history (2026-08-04) ─────────────────────
+   Measured before this: H1 63.6px, H2 55.8px, H3 17.6px. The H2 all but matched
+   the page title and then fell 3.2x to the H3, so the middle of the hierarchy
+   was missing entirely and every group read as either a banner or a footnote.
+   These two views are workspaces for scanning and acting, not long-form reading,
+   so they take a scale of their own instead of the document prose scale. */
+
+:root[data-view="changes"] .page-header h1,
+:root[data-view="history"] .page-header h1 {
+  font-size: clamp(1.9rem, 3.2vw, 2.75rem);
+  line-height: 1.1;
+}
+
+:root[data-view="changes"] .view-frame h2,
+:root[data-view="history"] .view-frame h2 {
+  font-size: clamp(1.25rem, 1.9vw, 1.6rem);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  margin: 2.25rem 0 0.5rem;
+}
+
+:root[data-view="changes"] .view-frame h3,
+:root[data-view="history"] .view-frame h3 {
+  font-size: clamp(0.95rem, 1.1vw, 1.06rem);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0.72;
+  margin: 1.5rem 0 0.4rem;
+}
+
+/* A rule under each group gives the middle of the hierarchy something to hold,
+   which is what the 3.2x jump had been standing in for. */
+:root[data-view="changes"] .view-frame h2 {
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid color-mix(in oklab, currentColor 18%, transparent);
+}
+
+/* Records are scan targets: separated by rule, not floated as cards. */
+:root[data-view="changes"] .annotation-item,
+:root[data-view="history"] .timeline-item {
+  padding: 0.9rem 0;
+  border-bottom: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+}
+:root[data-view="changes"] .annotation-item:last-child,
+:root[data-view="history"] .timeline-item:last-child { border-bottom: 0; }
+
+/* A timestamp is a locator, not prose; it leads the row and stays out of the way. */
+:root[data-view="history"] .timeline-item time,
+:root[data-view="history"] .timeline-item .timeline-time {
+  display: block;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.78rem;
+  opacity: 0.6;
+  margin-bottom: 0.2rem;
+}
+
+/* Containers that render nothing should occupy nothing. A zero-height panel with
+   padding leaves an unexplained gap that reads as a rendering fault. */
+:root[data-view="changes"] .ledger-panel:empty,
+:root[data-view="history"] .ledger-panel:empty { display: none; }
+
+/* A prose measure (68ch) was tried here and was wrong: these rows are two
+   columns, timestamp beside content, so a reading-width cap forced three-line
+   wraps on titles that fit on one. Scanning layouts want width; only the prose
+   inside a row is capped. */
+:root[data-view="changes"] .view-frame,
+:root[data-view="history"] .view-frame { max-width: 96ch; }
+
+:root[data-view="history"] .timeline-item p,
+:root[data-view="changes"] .annotation-item p { max-width: 72ch; }

@@ -102,6 +102,41 @@ function safeHref(value = '') {
   return /^(https?:|mailto:|#|\/|\.\/|\.\.\/)/i.test(href) ? href : '#';
 }
 
+// Canonical Markdown cross-references point at files: [Requirements](requirements.md),
+// [Lineage](../ai-gateway/gateway-archive-lineage.md). safeHref rejected every one of
+// them, so all 136 in-prose links on a single page resolved to '#' and did nothing.
+// Those links are the corpus's own navigation; silently dropping them is what made
+// the reader feel like a set of disconnected documents. Audited 2026-08-04.
+function resolveDocHref(href = '') {
+  const raw = String(href).trim();
+  if (!raw) return '#';
+  if (/^(https?:|mailto:)/i.test(raw)) return raw;
+  if (raw.startsWith('#')) return raw;
+
+  // Cross-project: ../<project-id>/<page>.md[#frag]. The project segment must be
+  // a real id: '..' here means the link climbs above projects/ to a corpus-root
+  // file such as ../../system/SPECIFICATION.md. Those have no projected route,
+  // so they are marked unresolved rather than rendered as /projects/../#X, which
+  // looks like a working link and is not.
+  let m = raw.match(/^\.\.\/([A-Za-z0-9][A-Za-z0-9._-]*)\/(.+?)\.md(#.*)?$/i);
+  if (m && m[1] !== '..') {
+    const page = m[2].split('/').pop();
+    return `/projects/${m[1]}/#${m[3] ? m[3].slice(1) : page}`;
+  }
+
+  // Any remaining path that climbs out of the project folder is not projected.
+  if (raw.startsWith('../..') || /(^|\/)\.\.\//.test(raw.replace(/^\.\.\//, ''))) return '#';
+
+  // Same project: <page>.md, ./<page>.md, or concepts/<page>.md
+  m = raw.match(/^\.?\/?(.+?)\.md(#.*)?$/i);
+  if (m) {
+    const page = m[1].split('/').pop();
+    return `#${m[2] ? m[2].slice(1) : page}`;
+  }
+
+  return safeHref(raw);
+}
+
 function inlineMarkdown(value = '') {
   let output = escapeHtml(value);
   output = output.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, label, href) => {
@@ -112,9 +147,11 @@ function inlineMarkdown(value = '') {
   output = output.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   output = output.replace(/\*([^*]+)\*/g, '<em>$1</em>');
   output = output.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, href) => {
-    const safe = escapeHtml(safeHref(href));
+    const resolved = resolveDocHref(href);
+    const safe = escapeHtml(resolved);
     const external = /^https?:/i.test(href) ? ' target="_blank" rel="noreferrer"' : '';
-    return `<a href="${safe}"${external}>${label}</a>`;
+    const dead = resolved === '#' ? ' class="link-unresolved" title="This link has no resolvable target"' : '';
+    return `<a href="${safe}"${external}${dead}>${label}</a>`;
   });
   return output;
 }
@@ -235,7 +272,7 @@ function renderQuestionForm(section) {
     const choices = question.options.map((option) => `
       <label class="portfolio-choice ${response.optionId === option.id ? 'active' : ''}">
         <input type="radio" required name="${escapeHtml(section.id)}-${escapeHtml(question.id)}" value="${escapeHtml(option.id)}" data-action="question-option" data-section="${escapeHtml(section.id)}" data-question="${escapeHtml(question.id)}" ${response.optionId === option.id ? 'checked' : ''}>
-        <span><strong>${escapeHtml(option.id.toUpperCase())}. ${escapeHtml(option.label)}</strong>${option.recommended ? '<span class="tag">recommended</span>' : ''}${option.detail ? `<small>${escapeHtml(option.detail)}</small>` : ''}</span>
+        <span><strong>${escapeHtml(option.id.toUpperCase())}. ${escapeHtml(option.label)}</strong>${option.recommended ? '<span class="tag tag-static">recommended</span>' : ''}${option.detail ? `<small>${escapeHtml(option.detail)}</small>` : ''}</span>
       </label>`).join('');
     return `
       <fieldset class="question-card" data-question-card="${escapeHtml(question.id)}">
@@ -407,7 +444,7 @@ function renderResource(resource) {
       ${preview}
       <div class="annotation-title">${title} · ${escapeHtml(resource.kind || 'file')}</div>
       <p class="annotation-text">${detail}</p>
-      <div class="annotation-meta"><span class="tag">${escapeHtml(resource.id)}</span><a class="tag" href="${escapeHtml(href)}" target="_blank" rel="noreferrer">${escapeHtml(resource.path || resource.url || 'external')}</a></div>
+      <div class="annotation-meta"><span class="tag tag-static">${escapeHtml(resource.id)}</span><a class="tag" href="${escapeHtml(href)}" target="_blank" rel="noreferrer">${escapeHtml(resource.path || resource.url || 'external')}</a></div>
     </article>`;
 }
 
@@ -472,7 +509,7 @@ function statusDot(status) {
 }
 
 function tagMarkup(tags = []) {
-  return tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join('');
+  return tags.map((tag) => `<button class="tag tag-filterable" data-action="tag-filter" data-value="${escapeHtml(tag)}" title="Show only sections tagged ${escapeHtml(tag)}">${escapeHtml(tag)}</button>`).join('');
 }
 
 function iconLabel(icon, label) {
@@ -585,14 +622,14 @@ function renderLeftRail() {
   const advancedOpen = localStorage.getItem('ldf:advanced-navigation-open') === 'true';
   const primaryViews = viewDefinitions.filter(([id]) => primaryViewIds.has(id));
   const advancedViews = viewDefinitions.filter(([id]) => !primaryViewIds.has(id));
-  const renderView = ([id, icon, label]) => `<li><button class="view-link ${state.activeView === id ? 'active' : ''}" data-action="view" data-view="${id}" title="${id === 'dashboard' ? 'A concise project orientation and current focus.' : id === 'document' ? 'A continuous reader containing every canonical project page. The section index jumps within this reader.' : 'An optional project record or local tool.'}" ${state.activeView === id ? 'aria-current="page"' : ''}>${iconLabel(icon, label)}<span class="nav-count">${viewCounts[id]}</span></button></li>`;
+  const renderView = ([id, icon, label]) => `<li><button class="view-link ${state.activeView === id ? 'active' : ''}" data-action="view" data-view="${id}" title="${id === 'dashboard' ? 'A concise project orientation and current focus.' : id === 'document' ? 'A continuous reader containing every canonical project page. The section index jumps within this reader.' : 'An optional project record or local tool.'}" ${state.activeView === id ? 'aria-current="page"' : ''}>${iconLabel(icon, label)}<span class="nav-count tag-static">${viewCounts[id]}</span></button></li>`;
   return `
     <aside class="left-rail" id="project-navigation" aria-label="Project navigation">
       <div class="rail-inner">
         <section class="rail-section">
           <p class="rail-label">Workspace attention</p>
           <nav aria-label="Workspace attention">
-            <a class="view-link workspace-link" href="/#delegation" title="All preserved blockers and human decisions across every project">${iconLabel('!', 'All blockers and decisions')}<span class="nav-count">${globalBlockers ?? '…'}</span></a>
+            <a class="view-link workspace-link" href="/#delegation" title="All preserved blockers and human decisions across every project">${iconLabel('!', 'All blockers and decisions')}<span class="nav-count tag-static">${globalBlockers ?? '…'}</span></a>
           </nav>
           <p class="nav-hint">${globalDecisions === undefined ? 'Loading workspace status.' : `${globalBlockers} blockers · ${globalDecisions} decisions`}</p>
         </section>
@@ -610,7 +647,7 @@ function renderLeftRail() {
         <section class="rail-section">
           <div class="section-heading">
             <h3>Project pages</h3>
-            <span class="nav-count">${matching.length}</span>
+            <span class="nav-count tag-static">${matching.length}</span>
           </div>
           <label class="rail-search">
             <span class="visually-hidden">Filter project pages</span>
@@ -680,22 +717,24 @@ function pageHeader(title, subtitle, eyebrow = '') {
         <span>Updated ${formatDate(state.manifest.meta.updated)}</span>
         <span>${state.manifest.sections.length} sections</span>
         <span>${state.manifest.sections.reduce((total, section) => total + section.estimatedMinutes, 0)} min read</span>
-        <span class="status-badge">${escapeHtml(state.manifest.meta.status)}</span>
+        <span class="status-badge tag-static">${escapeHtml(state.manifest.meta.status)}</span>
       </div>
     </header>`;
 }
 
 function dashboardMetrics() {
+  // [count, label, destination view]. A metric without a destination is inert
+  // by intent, not by omission, and is rendered so it does not invite a click.
   return [
-    [state.manifest.sections.length, 'Addressable sections'],
-    [projectList().length, 'Related projects'],
-    [openBlockingItems().length, 'Cross-project blockers'],
-    [state.sources.filter((source) => source.readStatus === 'read_full').length, 'Sources read in full'],
-    [allAnnotations().filter((annotation) => annotation.status === 'open').length, 'Open annotations'],
-    [state.manifest.proposals.filter((proposal) => decisionFor(proposal) === 'proposed').length, 'Pending decisions'],
-    [modelReplies().filter((reply) => reply.status !== 'resolved').length, 'Model replies'],
-    [resourceList().length, 'Resources'],
-    [localChangeCount(), 'Local changes']
+    [state.manifest.sections.length, 'Addressable sections', 'document'],
+    [projectList().length, 'Related projects', null],
+    [openBlockingItems().length, 'Cross-project blockers', 'dashboard'],
+    [state.sources.filter((source) => source.readStatus === 'read_full').length, 'Sources read in full', null],
+    [allAnnotations().filter((annotation) => annotation.status === 'open').length, 'Open annotations', 'changes'],
+    [state.manifest.proposals.filter((proposal) => decisionFor(proposal) === 'proposed').length, 'Pending decisions', 'changes'],
+    [modelReplies().filter((reply) => reply.status !== 'resolved').length, 'Model replies', 'changes'],
+    [resourceList().length, 'Resources', null],
+    [localChangeCount(), 'Local changes', 'changes']
   ];
 }
 
@@ -710,21 +749,21 @@ function renderProjects() {
       ${pageHeader('Project index', 'One navigable surface for every project family, relationship, date association, and unresolved cross-project question.', 'Federated workspace')}
       <div class="ledger-grid">
         <section class="ledger-panel">
-          <div class="section-heading"><h2>Projects</h2><span class="nav-count">${projects.length}</span></div>
+          <div class="section-heading"><h2>Projects</h2><span class="nav-count tag-static">${projects.length}</span></div>
           <div class="record-list">${projects.map((project) => `
             <article class="record-item">
-              <div class="record-heading"><strong>${escapeHtml(project.title)}</strong><span class="status-badge">${escapeHtml(project.status)}</span></div>
+              <div class="record-heading"><strong>${escapeHtml(project.title)}</strong><span class="status-badge tag-static">${escapeHtml(project.status)}</span></div>
               <p>${escapeHtml(project.family)} · ${escapeHtml(project.dateAssociation || 'No date association')}</p>
-              <div class="record-meta"><span class="tag">${escapeHtml(project.projectId)}</span><span class="tag">${escapeHtml(project.reconciliationStatus)}</span></div>
+              <div class="record-meta"><a class="tag tag-link" href="/projects/${escapeHtml(project.projectId)}/" title="Open the ${escapeHtml(project.projectId)} project folder">${escapeHtml(project.projectId)}</a><span class="tag tag-static">${escapeHtml(project.reconciliationStatus)}</span></div>
               ${project.entry ? `<a href="${escapeHtml(safeHref(project.entry))}">Open project document</a>` : ''}
             </article>`).join('') || '<div class="empty-state"><strong>No projects indexed</strong>Add a project index to the manifest federation record.</div>'}</div>
         </section>
         <section class="ledger-panel">
-          <div class="section-heading"><h2>Blocking queue</h2><span class="nav-count">${blockers.length}</span></div>
+          <div class="section-heading"><h2>Blocking queue</h2><span class="nav-count tag-static">${blockers.length}</span></div>
           <div class="record-list">${blockers.map((item) => `
             <article class="record-item">
               <div class="record-heading"><strong>${escapeHtml(item.prompt)}</strong><span class="priority ${escapeHtml(item.priority)}">${escapeHtml(item.priority)}</span></div>
-              <div class="record-meta"><span class="tag">${escapeHtml(item.projectId)}</span><span class="tag">${escapeHtml(item.status)}</span></div>
+              <div class="record-meta"><a class="tag tag-link" href="/projects/${escapeHtml(item.projectId)}/" title="Open the ${escapeHtml(item.projectId)} project folder">${escapeHtml(item.projectId)}</a><span class="tag tag-static">${escapeHtml(item.status)}</span></div>
             </article>`).join('') || '<div class="empty-state"><strong>Queue clear</strong>No cross-project blocker awaits clarification.</div>'}</div>
         </section>
       </div>
@@ -744,11 +783,11 @@ function renderReconciliation() {
         <div class="metric"><strong class="metric-value">${unresolved.length}</strong><span class="metric-label">Awaiting disposition</span></div>
       </section>
       <div class="ledger-grid">
-        <section class="ledger-panel"><div class="section-heading"><h2>Source ledger</h2><span class="nav-count">${state.sources.length}</span></div><div class="record-list">
-          ${state.sources.map((source) => `<article class="record-item"><div class="record-heading"><strong>${escapeHtml(source.originalPath)}</strong><span class="status-badge">${escapeHtml(source.readStatus)}</span></div><p>${escapeHtml(source.notes || source.kind)}</p><div class="record-meta"><span class="tag">${escapeHtml(source.id)}</span><span class="tag">${escapeHtml(source.relevance)}</span><span class="tag">${escapeHtml(source.timestamps?.confidence || 'unknown')} date confidence</span></div></article>`).join('') || '<div class="empty-state"><strong>No source records</strong>Discovery has not started.</div>'}
+        <section class="ledger-panel"><div class="section-heading"><h2>Source ledger</h2><span class="nav-count tag-static">${state.sources.length}</span></div><div class="record-list">
+          ${state.sources.map((source) => `<article class="record-item"><div class="record-heading"><strong>${escapeHtml(source.originalPath)}</strong><span class="status-badge tag-static">${escapeHtml(source.readStatus)}</span></div><p>${escapeHtml(source.notes || source.kind)}</p><div class="record-meta"><span class="tag tag-static">${escapeHtml(source.id)}</span><span class="tag tag-static">${escapeHtml(source.relevance)}</span><span class="tag tag-static">${escapeHtml(source.timestamps?.confidence || 'unknown')} date confidence</span></div></article>`).join('') || '<div class="empty-state"><strong>No source records</strong>Discovery has not started.</div>'}
         </div></section>
-        <section class="ledger-panel"><div class="section-heading"><h2>Idea ledger</h2><span class="nav-count">${state.ideas.length}</span></div><div class="record-list">
-          ${state.ideas.map((idea) => `<article class="record-item"><div class="record-heading"><strong>${escapeHtml(idea.summary)}</strong><span class="status-badge">${escapeHtml(idea.status)}</span></div><p>${escapeHtml(idea.rationale || 'Rationale required before closure.')}</p><div class="record-meta"><span class="tag">${escapeHtml(idea.id)}</span><span class="tag">${escapeHtml(idea.type)}</span>${(idea.affectedProjectIds || []).map((id) => `<span class="tag">${escapeHtml(id)}</span>`).join('')}</div></article>`).join('') || '<div class="empty-state"><strong>No ideas extracted</strong>Read relevant sources before reconciliation.</div>'}
+        <section class="ledger-panel"><div class="section-heading"><h2>Idea ledger</h2><span class="nav-count tag-static">${state.ideas.length}</span></div><div class="record-list">
+          ${state.ideas.map((idea) => `<article class="record-item"><div class="record-heading"><strong>${escapeHtml(idea.summary)}</strong><span class="status-badge tag-static">${escapeHtml(idea.status)}</span></div><p>${escapeHtml(idea.rationale || 'Rationale required before closure.')}</p><div class="record-meta"><span class="tag tag-static">${escapeHtml(idea.id)}</span><span class="tag tag-static">${escapeHtml(idea.type)}</span>${(idea.affectedProjectIds || []).map((id) => `<span class="tag tag-static">${escapeHtml(id)}</span>`).join('')}</div></article>`).join('') || '<div class="empty-state"><strong>No ideas extracted</strong>Read relevant sources before reconciliation.</div>'}
         </div></section>
       </div>
     </div>`;
@@ -775,7 +814,9 @@ function renderDashboard() {
         <button class="primary-button" data-action="view" data-view="document" title="Read every canonical project page as one continuous document">Read all project pages</button>
       </section>
       <section class="metric-strip" aria-label="Document metrics">
-        ${dashboardMetrics().map(([value, label]) => `<div class="metric"><strong class="metric-value">${value}</strong><span class="metric-label">${escapeHtml(label)}</span></div>`).join('')}
+        ${dashboardMetrics().map(([value, label, view]) => (view && value > 0)
+          ? `<button class="metric metric-link" data-action="view" data-view="${view}" title="Go to ${escapeHtml(label.toLowerCase())}"><strong class="metric-value">${value}</strong><span class="metric-label">${escapeHtml(label)}</span></button>`
+          : `<div class="metric metric-inert"><strong class="metric-value">${value}</strong><span class="metric-label">${escapeHtml(label)}</span></div>`).join('')}
       </section>
       <div class="dashboard-grid">
         <div class="dashboard-section">
@@ -808,12 +849,12 @@ function renderDashboard() {
               </div>`).join('')}
           </div>
 
-          <div class="section-heading" style="margin-top:2.4rem"><h2>Decision queue</h2><span class="nav-count">${pending.length}</span></div>
+          <div class="section-heading" style="margin-top:2.4rem"><h2>Decision queue</h2><span class="nav-count tag-static">${pending.length}</span></div>
           <div class="proposal-list">
             ${pending.map(renderProposal).join('') || '<div class="empty-state"><strong>Queue clear</strong>No proposals await a decision.</div>'}
           </div>
 
-          <div class="section-heading" style="margin-top:2.4rem"><h2>Model replies</h2><span class="nav-count">${replies.length}</span></div>
+          <div class="section-heading" style="margin-top:2.4rem"><h2>Model replies</h2><span class="nav-count tag-static">${replies.length}</span></div>
           <div class="proposal-list">
             ${replies.map(renderModelReply).join('') || '<div class="empty-state"><strong>No pending replies</strong>Model questions and answer options appear here.</div>'}
           </div>
@@ -831,9 +872,9 @@ function renderProposal(proposal) {
       ${proposal.recommendation ? `<p class="proposal-recommendation"><strong>Recommended:</strong> ${escapeHtml(proposal.recommendation)}</p>` : ''}
       ${proposal.alternative ? `<details class="proposal-details"><summary>Alternative and context</summary><p><strong>Alternative:</strong> ${escapeHtml(proposal.alternative)}</p>${proposal.details ? `<p>${escapeHtml(proposal.details)}</p>` : ''}</details>` : ''}
       <div class="proposal-meta">
-        <span class="tag">${escapeHtml(proposal.id)}</span>
-        <span class="tag">impact ${escapeHtml(proposal.impact)}</span>
-        <span class="tag">effort ${escapeHtml(proposal.effort)}</span>
+        <span class="tag tag-static">${escapeHtml(proposal.id)}</span>
+        <span class="tag tag-static">impact ${escapeHtml(proposal.impact)}</span>
+        <span class="tag tag-static">effort ${escapeHtml(proposal.effort)}</span>
       </div>
       <fieldset class="decision-row" aria-label="Decision for ${escapeHtml(proposal.title)}">
         <legend>Decision</legend>
@@ -848,9 +889,9 @@ function renderModelReply(reply) {
       <div class="proposal-title">${escapeHtml(reply.prompt)}</div>
       <p class="proposal-summary">${escapeHtml(reply.context || '')}</p>
       <div class="proposal-meta">
-        <span class="tag">${escapeHtml(reply.id)}</span>
-        <span class="tag">${escapeHtml(reply.status || 'open')}</span>
-        ${(reply.targetIds || []).map((id) => `<span class="tag">${escapeHtml(id)}</span>`).join('')}
+        <span class="tag tag-static">${escapeHtml(reply.id)}</span>
+        <span class="tag tag-static">${escapeHtml(reply.status || 'open')}</span>
+        ${(reply.targetIds || []).map((id) => `<span class="tag tag-static">${escapeHtml(id)}</span>`).join('')}
       </div>
       ${(reply.options || []).length ? `<ol class="option-list">${reply.options.map((option) => `<li><strong>${escapeHtml(option.label)}</strong> ${escapeHtml(option.text)}</li>`).join('')}</ol>` : ''}
       <p class="health-detail">Human can annotate, answer in a section draft, or export a change request with a custom response.</p>
@@ -907,9 +948,9 @@ function renderChangeAnnotation(annotation) {
       ${annotation.quote ? `<blockquote class="annotation-quote">${escapeHtml(annotation.quote)}</blockquote>` : ''}
       <p class="annotation-text">${escapeHtml(annotation.text)}</p>
       <div class="annotation-meta">
-        <span class="tag">${escapeHtml(annotation.targetId)}</span>
-        <span class="tag">${escapeHtml(annotation.author)}</span>
-        <span class="tag">${formatDate(annotation.createdAt)}</span>
+        <span class="tag tag-static">${escapeHtml(annotation.targetId)}</span>
+        <span class="tag tag-static">${escapeHtml(annotation.author)}</span>
+        <span class="tag tag-static">${formatDate(annotation.createdAt)}</span>
       </div>
     </article>`;
 }
@@ -939,11 +980,11 @@ function renderChangesPanel({ standalone = false } = {}) {
       </div>
       <div class="ledger-grid">
         <section class="ledger-panel">
-          <div class="section-heading"><h3>Annotations</h3><span class="nav-count">${annotations.length}</span></div>
+          <div class="section-heading"><h3>Annotations</h3><span class="nav-count tag-static">${annotations.length}</span></div>
           <div class="annotation-list">${annotations.map(renderChangeAnnotation).join('') || '<p class="health-detail">No annotations yet.</p>'}</div>
         </section>
         <section class="ledger-panel">
-          <div class="section-heading"><h3>Local edits</h3><span class="nav-count">${drafts.length + decisions.length}</span></div>
+          <div class="section-heading"><h3>Local edits</h3><span class="nav-count tag-static">${drafts.length + decisions.length}</span></div>
           <div class="record-list">
             ${drafts.map(([sectionId]) => `<article class="record-item"><strong>Draft: ${escapeHtml(sectionId)}</strong><p>Canonical Markdown is unchanged.</p></article>`).join('')}
             ${decisions.map(([proposalId, decision]) => `<article class="record-item"><strong>${escapeHtml(proposalId)}</strong><p>Decision: ${escapeHtml(decision)}</p></article>`).join('')}
@@ -1100,20 +1141,20 @@ function renderSectionInspector(section) {
       ${backlinks.map((item) => `<button class="view-link" data-action="section" data-section="${item.id}">${iconLabel('↗', item.title)}</button>`).join('') || '<p class="health-detail">No declared backlinks.</p>'}
     </section>
     <section class="rail-section">
-      <div class="section-heading"><h3>Resources</h3><span class="nav-count">${resources.length}</span></div>
+      <div class="section-heading"><h3>Resources</h3><span class="nav-count tag-static">${resources.length}</span></div>
       <div class="annotation-list">
         ${resources.map(renderResource).join('') || '<p class="health-detail">No resources target this section.</p>'}
       </div>
     </section>
     <section class="rail-section">
-      <div class="section-heading"><h3>Annotations</h3><span class="nav-count">${annotations.length}</span></div>
+      <div class="section-heading"><h3>Annotations</h3><span class="nav-count tag-static">${annotations.length}</span></div>
       <div class="annotation-list">
         ${annotations.map((annotation) => `
           <article class="annotation-item">
             <div class="annotation-title">${escapeHtml(annotation.scope || 'content')} · ${escapeHtml(annotation.kind)} · ${escapeHtml(annotation.status)}</div>
             ${annotation.quote ? `<blockquote class="annotation-quote">${escapeHtml(annotation.quote)}</blockquote>` : ''}
             <p class="annotation-text">${escapeHtml(annotation.text)}</p>
-            <div class="annotation-meta"><span class="tag">${escapeHtml(annotation.author)}</span><span class="tag">${formatDate(annotation.createdAt)}</span></div>
+            <div class="annotation-meta"><span class="tag tag-static">${escapeHtml(annotation.author)}</span><span class="tag tag-static">${formatDate(annotation.createdAt)}</span></div>
           </article>`).join('') || '<p class="health-detail">No annotations target this section.</p>'}
       </div>
     </section>`;
@@ -1243,6 +1284,11 @@ function render() {
   document.documentElement.dataset.theme = state.theme;
   document.documentElement.dataset.motion = state.motion;
   document.documentElement.dataset.density = state.density;
+  // Operational views (changes, history) inherited the document-reading type
+  // scale, which is built for a long single column and makes an H2 nearly the
+  // size of the page title. Marking the active view lets those surfaces carry a
+  // scale suited to scanning and acting rather than reading.
+  document.documentElement.dataset.view = state.activeView;
   document.body.classList.toggle('focused', state.focused);
   app.innerHTML = `
     <div class="app-shell">
@@ -1885,6 +1931,7 @@ app.addEventListener('click', (event) => {
     savePortfolioReview(control.dataset.priority, { optionId: control.dataset.option });
     setTimeout(() => { if (window.location.pathname === '/') void initPortfolio(); }, 300);
   }
+  if (action === 'retry-portfolio-decision') void publishPortfolioReview(control.dataset.priority);
   if (action === 'clear-portfolio-decision') void clearPortfolioReview(control.dataset.priority);
   if (action === 'export-portfolio-reviews') exportPortfolioReviews();
 });
@@ -2139,14 +2186,14 @@ async function init() {
 
 function portfolioCard(project) {
   return `<a class="portfolio-card" href="${escapeHtml(project.href)}">
-    <div class="record-heading"><strong>${escapeHtml(project.title)}</strong><span class="status-badge">${escapeHtml(project.status)}</span></div>
+    <div class="record-heading"><strong>${escapeHtml(project.title)}</strong><span class="status-badge tag-static">${escapeHtml(project.status)}</span></div>
     <p>${escapeHtml(project.subtitle || 'Open the dossier for its canonical current state.')}</p>
-    <div class="record-meta"><span class="tag">${escapeHtml(project.lifecycle)}</span><span class="tag">${project.sectionCount} pages</span><span class="tag">projection ${escapeHtml(project.projection?.state || 'unknown')}</span><span class="tag">updated ${escapeHtml(project.updated || 'unknown')}</span></div>
+    <div class="record-meta"><span class="tag tag-static">${escapeHtml(project.lifecycle)}</span><span class="tag tag-static">${project.sectionCount} pages</span><span class="tag tag-static">projection ${escapeHtml(project.projection?.state || 'unknown')}</span><span class="tag tag-static">updated ${escapeHtml(project.updated || 'unknown')}</span></div>
   </a>`;
 }
 
 function operationWorkCard(work) {
-  return `<article class="operation-work-card"><div class="record-heading"><strong>${escapeHtml(work.project)}</strong><span class="status-badge">blocked</span></div><p>${escapeHtml(work.blocker)}</p><p class="operation-next"><strong>Next:</strong> ${escapeHtml(work.nextAction)}</p><a href="${escapeHtml(work.href)}">Open dossier</a></article>`;
+  return `<article class="operation-work-card"><div class="record-heading"><strong>${escapeHtml(work.project)}</strong><span class="status-badge tag-static">blocked</span></div><p>${escapeHtml(work.blocker)}</p><p class="operation-next"><strong>Next:</strong> ${escapeHtml(work.nextAction)}</p><a href="${escapeHtml(work.href)}">Open dossier</a></article>`;
 }
 
 const portfolioReviewStorageKey = 'ldf:portfolio-decision-review';
@@ -2170,16 +2217,34 @@ function savePortfolioReview(priority, update) {
 }
 
 async function publishPortfolioReview(priority) {
-  const review = portfolioReviewState()[String(priority)];
+  const key = String(priority);
+  const review = portfolioReviewState()[key];
   if (!review?.optionId) return;
+
+  // Delivery outcome is recorded and shown. It used to be swallowed by a
+  // console.warn: when the review inbox was unreachable the answer stayed in
+  // this browser only, while the card gave every appearance of having sent it.
+  // A submission surface that cannot report its own failure is worse than one
+  // with no submit at all, because the user stops waiting for an answer that
+  // was never delivered.
+  const record = (delivery, error) => {
+    const state = portfolioReviewState();
+    state[key] = { ...(state[key] || {}), delivery, deliveryError: error || '', deliveredAt: new Date().toISOString() };
+    localStorage.setItem(portfolioReviewStorageKey, JSON.stringify(state));
+    if (window.location.pathname === '/') void initPortfolio();
+  };
+
+  record('sending');
   try {
     const response = await fetch('/api/decision-reviews', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ priority: Number(priority), optionId: review.optionId, note: review.note || '' }),
     });
-    if (!response.ok) throw new Error(`review inbox: ${response.status}`);
+    if (!response.ok) throw new Error(`review inbox returned ${response.status}`);
+    record('sent');
   } catch (error) {
+    record('failed', error?.message || String(error));
     console.warn('Local decision review remains browser-only', error);
   }
 }
@@ -2195,10 +2260,38 @@ async function clearPortfolioReview(priority) {
 function mergeInboxReviews(inbox) {
   if (!Array.isArray(inbox?.reviews)) return;
   const local = portfolioReviewState();
+
+  // Merge fields; never replace the record wholesale. The previous version
+  // assigned the server copy over the local one, which discarded client-side
+  // delivery state on every poll, so an answer that had reached the inbox still
+  // displayed as unconfirmed.
+  //
+  // Presence in the inbox is itself the delivery proof: the server only holds a
+  // review because a POST succeeded. That is a stronger signal than anything the
+  // browser can assert about its own request, so it wins.
+  const seen = new Set();
   for (const review of inbox.reviews) {
-    const existing = local[String(review.priority)];
-    if (!existing || String(review.updatedAt) > String(existing.updatedAt || '')) local[String(review.priority)] = review;
+    const key = String(review.priority);
+    seen.add(key);
+    const existing = local[key] || {};
+    const serverIsNewer = String(review.updatedAt || '') > String(existing.updatedAt || '');
+    local[key] = {
+      ...existing,
+      ...(serverIsNewer ? review : {}),
+      delivery: 'sent',
+      deliveredAt: review.updatedAt || existing.deliveredAt || new Date().toISOString(),
+      deliveryError: '',
+    };
   }
+
+  // A selection this browser holds that the inbox does not is undelivered, and
+  // is marked so rather than left ambiguous.
+  for (const [key, value] of Object.entries(local)) {
+    if (!seen.has(key) && value?.optionId && value.delivery !== 'sending') {
+      local[key] = { ...value, delivery: value.delivery === 'failed' ? 'failed' : 'pending' };
+    }
+  }
+
   localStorage.setItem(portfolioReviewStorageKey, JSON.stringify(local));
 }
 
@@ -2207,26 +2300,40 @@ function exportPortfolioReviews() {
   download('living-documents-portfolio-decision-review.json', `${JSON.stringify({ schema: 'living-documents-portfolio-decision-review/v1', createdAt: new Date().toISOString(), localOnly: true, reviews: review }, null, 2)}\n`, 'application/json');
 }
 
+function deliveryStatus(review, priority) {
+  const when = review.deliveredAt ? new Date(review.deliveredAt).toLocaleString() : '';
+  if (review.delivery === 'sent') {
+    return `<p class="delivery-state delivery-sent" role="status"><strong>Sent to the review inbox</strong> at ${escapeHtml(when)}. An agent records it canonically from there.</p>`;
+  }
+  if (review.delivery === 'sending') {
+    return '<p class="delivery-state delivery-sending" role="status"><strong>Sending…</strong></p>';
+  }
+  if (review.delivery === 'failed') {
+    return `<p class="delivery-state delivery-failed" role="alert"><strong>Not sent.</strong> Your choice is saved in this browser only and no agent can see it. Reason: ${escapeHtml(review.deliveryError || 'unknown')}. <button class="ghost-button" data-action="retry-portfolio-decision" data-priority="${priority}">Retry sending</button></p>`;
+  }
+  return '<p class="delivery-state delivery-pending" role="status"><strong>Saved locally, delivery not confirmed.</strong> If this does not change, the review inbox is unreachable.</p>';
+}
+
 function decisionCard(decision) {
   const work = decision.work.map((item) => `<li><a href="${escapeHtml(item.href)}">${escapeHtml(item.project)}</a>: ${escapeHtml(item.nextAction)}</li>`).join('');
   const choice = decision.choice;
   const review = portfolioReviewState()[String(decision.priority)] || {};
-  const choices = choice?.options?.map((option) => `<label class="portfolio-choice ${review.optionId === option.id ? 'active' : ''}"><input type="radio" name="portfolio-decision-${decision.priority}" data-action="portfolio-decision" data-priority="${decision.priority}" data-option="${escapeHtml(option.id)}" ${review.optionId === option.id ? 'checked' : ''} /><span><strong>${escapeHtml(option.label)}</strong>${option.recommended ? '<span class="tag">recommended</span>' : ''}<small>${escapeHtml(option.text)}</small></span></label>`).join('') || '';
+  const choices = choice?.options?.map((option) => `<label class="portfolio-choice ${review.optionId === option.id ? 'active' : ''}"><input type="radio" name="portfolio-decision-${decision.priority}" data-action="portfolio-decision" data-priority="${decision.priority}" data-option="${escapeHtml(option.id)}" ${review.optionId === option.id ? 'checked' : ''} /><span><strong>${escapeHtml(option.label)}</strong>${option.recommended ? '<span class="tag tag-static">recommended</span>' : ''}<small>${escapeHtml(option.text)}</small></span></label>`).join('') || '';
   const trackingAge = Number.isInteger(decision.tracking?.ageDays)
     ? (decision.tracking.ageDays === 0 ? 'today' : `${decision.tracking.ageDays} ${decision.tracking.ageDays === 1 ? 'day' : 'days'}`)
     : 'an unknown interval';
   const tracking = decision.tracking?.trackedSince ? `<p class="health-detail"><strong>Queue tracking age:</strong> ${escapeHtml(trackingAge)} since ${escapeHtml(decision.tracking.trackedSince)}. This is not an inferred original decision age.</p>` : '';
-  return `<article class="decision-card"><div class="record-heading"><span class="decision-priority">${decision.priority}</span><strong>${escapeHtml(decision.decision)}</strong></div><p>${escapeHtml(decision.unblocks)}</p>${tracking}${choice ? `<div class="decision-recommendation"><strong>Recommended next action:</strong> ${escapeHtml(choice.recommendation)}</div><fieldset class="portfolio-choice-list"><legend>Choose a direction</legend>${choices}<label class="portfolio-note-label" for="portfolio-note-${decision.priority}">Optional instructions for the agent</label><textarea id="portfolio-note-${decision.priority}" data-portfolio-note="${decision.priority}" placeholder="Add a target, reporting period, path, or another instruction.">${escapeHtml(review.note || '')}</textarea><p class="health-detail">This selection is kept in the loopback local review inbox and in this browser until an agent records it canonically. It does not execute work by itself.</p>${review.optionId ? `<button class="ghost-button" data-action="clear-portfolio-decision" data-priority="${decision.priority}" title="Remove this local selection from the browser and loopback review inbox">Clear local selection</button>` : ''}</fieldset>` : '<p class="health-detail">This decision is already resolved in the canonical queue.</p>'}<div class="operation-next"><strong>Released work:</strong><ul>${work || '<li>Ledger mapping unavailable</li>'}</ul></div></article>`;
+  return `<article class="decision-card"><div class="record-heading"><span class="decision-priority">${decision.priority}</span><strong>${escapeHtml(decision.decision)}</strong></div><p>${escapeHtml(decision.unblocks)}</p>${tracking}${choice ? `<div class="decision-recommendation"><strong>Recommended next action:</strong> ${escapeHtml(choice.recommendation)}</div><fieldset class="portfolio-choice-list"><legend>Choose a direction</legend>${choices}<label class="portfolio-note-label" for="portfolio-note-${decision.priority}">Optional instructions for the agent</label><textarea id="portfolio-note-${decision.priority}" data-portfolio-note="${decision.priority}" placeholder="Add a target, reporting period, path, or another instruction.">${escapeHtml(review.note || '')}</textarea>${review.optionId ? deliveryStatus(review, decision.priority) : '<p class="health-detail">Choose an option above. Your selection is sent to the review inbox for an agent to record canonically; it does not execute work by itself.</p>'}${review.optionId ? `<button class="ghost-button" data-action="clear-portfolio-decision" data-priority="${decision.priority}" title="Remove this local selection from the browser and loopback review inbox">Clear local selection</button>` : ''}</fieldset>` : '<p class="health-detail">This decision is already resolved in the canonical queue.</p>'}<div class="operation-next"><strong>Released work:</strong><ul>${work || '<li>Ledger mapping unavailable</li>'}</ul></div></article>`;
 }
 
 function workstreamCard(workstream) {
   const projects = workstream.projects.map((project) => `<a class="tag" href="${escapeHtml(project.href)}">${escapeHtml(project.title)}</a>`).join('');
-  const relationships = workstream.relationships.map((relationship) => `<li><strong>${escapeHtml(relationship.from)} → ${escapeHtml(relationship.to)}</strong> <span class="tag">${escapeHtml(relationship.type)}</span><br />${escapeHtml(relationship.statement)}${relationship.work.length ? `<div class="workstream-work">${relationship.work.map((work) => `<a href="${escapeHtml(work.href)}">${escapeHtml(work.project)}: ${escapeHtml(work.nextAction)}</a>`).join('')}</div>` : ''}</li>`).join('');
-  return `<article class="workstream-card"><div class="record-heading"><strong>${escapeHtml(workstream.title)}</strong><span class="status-badge">${workstream.relationships.length} links</span></div><p>${escapeHtml(workstream.summary)}</p><div class="record-meta">${projects}</div><ol class="workstream-relationships">${relationships}</ol></article>`;
+  const relationships = workstream.relationships.map((relationship) => `<li><strong>${escapeHtml(relationship.from)} → ${escapeHtml(relationship.to)}</strong> <span class="tag tag-static">${escapeHtml(relationship.type)}</span><br />${escapeHtml(relationship.statement)}${relationship.work.length ? `<div class="workstream-work">${relationship.work.map((work) => `<a href="${escapeHtml(work.href)}">${escapeHtml(work.project)}: ${escapeHtml(work.nextAction)}</a>`).join('')}</div>` : ''}</li>`).join('');
+  return `<article class="workstream-card"><div class="record-heading"><strong>${escapeHtml(workstream.title)}</strong><span class="status-badge tag-static">${workstream.relationships.length} links</span></div><p>${escapeHtml(workstream.summary)}</p><div class="record-meta">${projects}</div><ol class="workstream-relationships">${relationships}</ol></article>`;
 }
 
 function activityCard(event) {
-  return `<article class="activity-card"><div class="record-heading"><strong>${escapeHtml(event.project)}</strong><span class="tag">${escapeHtml(event.kind)} · ${escapeHtml(event.status)}</span></div><p>${escapeHtml(event.summary)}</p><div class="record-meta"><span class="tag">${escapeHtml(event.timestamp)}</span><span class="tag">${escapeHtml(event.workId)}</span></div><a href="${escapeHtml(event.href)}">Open dossier</a></article>`;
+  return `<article class="activity-card"><div class="record-heading"><strong>${escapeHtml(event.project)}</strong><span class="tag tag-static">${escapeHtml(event.kind)} · ${escapeHtml(event.status)}</span></div><p>${escapeHtml(event.summary)}</p><div class="record-meta"><span class="tag tag-static">${escapeHtml(event.timestamp)}</span><span class="tag tag-static">${escapeHtml(event.workId)}</span></div><a href="${escapeHtml(event.href)}">Open dossier</a></article>`;
 }
 
 function timelineState(status) {
@@ -2246,13 +2353,13 @@ function renderWorkTimeline(events) {
 }
 
 function gitPulseCard(pulse) {
-  if (pulse.state !== 'git') return `<article class="git-pulse-card"><div class="record-heading"><strong>${escapeHtml(pulse.projectId)}</strong><span class="status-badge">${escapeHtml(pulse.state)}</span></div><p>Git status is unavailable for this registered source root; no repository action was attempted.</p></article>`;
-  return `<article class="git-pulse-card"><div class="record-heading"><strong>${escapeHtml(pulse.projectId)}</strong><span class="status-badge">${pulse.dirtyCount ? `${pulse.dirtyCount} dirty` : 'clean'}</span></div><p><strong>${escapeHtml(pulse.branch)}</strong>${pulse.upstream ? ` → ${escapeHtml(pulse.upstream)}` : ''} · ahead ${pulse.ahead}, behind ${pulse.behind}</p><p>${escapeHtml(pulse.shortSha)} · ${escapeHtml(pulse.committedAt)}<br />${escapeHtml(pulse.subject)}</p></article>`;
+  if (pulse.state !== 'git') return `<article class="git-pulse-card"><div class="record-heading"><strong>${escapeHtml(pulse.projectId)}</strong><span class="status-badge tag-static">${escapeHtml(pulse.state)}</span></div><p>Git status is unavailable for this registered source root; no repository action was attempted.</p></article>`;
+  return `<article class="git-pulse-card"><div class="record-heading"><strong>${escapeHtml(pulse.projectId)}</strong><span class="status-badge tag-static">${pulse.dirtyCount ? `${pulse.dirtyCount} dirty` : 'clean'}</span></div><p><strong>${escapeHtml(pulse.branch)}</strong>${pulse.upstream ? ` → ${escapeHtml(pulse.upstream)}` : ''} · ahead ${pulse.ahead}, behind ${pulse.behind}</p><p>${escapeHtml(pulse.shortSha)} · ${escapeHtml(pulse.committedAt)}<br />${escapeHtml(pulse.subject)}</p></article>`;
 }
 
 function evidenceHealthCard(record) {
   const missing = record.evidence.filter((item) => !item.available);
-  return `<article class="operation-work-card"><div class="record-heading"><strong>${escapeHtml(record.project)}</strong><span class="status-badge">${missing.length ? `${missing.length} missing` : 'evidence present'}</span></div><p>${escapeHtml(record.workId)}</p>${missing.length ? `<p class="operation-next"><strong>Missing:</strong> ${escapeHtml(missing.map((item) => item.path).join(', '))}</p>` : '<p>All cited local evidence paths resolve.</p>'}<a href="${escapeHtml(record.href)}">Open dossier</a></article>`;
+  return `<article class="operation-work-card"><div class="record-heading"><strong>${escapeHtml(record.project)}</strong><span class="status-badge tag-static">${missing.length ? `${missing.length} missing` : 'evidence present'}</span></div><p>${escapeHtml(record.workId)}</p>${missing.length ? `<p class="operation-next"><strong>Missing:</strong> ${escapeHtml(missing.map((item) => item.path).join(', '))}</p>` : '<p>All cited local evidence paths resolve.</p>'}<a href="${escapeHtml(record.href)}">Open dossier</a></article>`;
 }
 
 function projectSummaryRow(project) {
@@ -2270,17 +2377,17 @@ function sourceControlRiskCard(pulse) {
   const detail = pulse.state === 'git'
     ? `${escapeHtml(pulse.branch)}${pulse.upstream ? ` → ${escapeHtml(pulse.upstream)}` : ''} · ahead ${pulse.ahead}, behind ${pulse.behind}`
     : degradedState[pulse.state] || 'Git state could not be determined for this registered source root.';
-  return `<article class="git-pulse-card"><div class="record-heading"><strong>${escapeHtml(pulse.projectId)}</strong><span class="status-badge">${escapeHtml(pulse.conditions.join(' · '))}</span></div><p>${detail}</p><a href="${escapeHtml(pulse.href)}">Open dossier</a></article>`;
+  return `<article class="git-pulse-card"><div class="record-heading"><strong>${escapeHtml(pulse.projectId)}</strong><span class="status-badge tag-static">${escapeHtml(pulse.conditions.join(' · '))}</span></div><p>${detail}</p><a href="${escapeHtml(pulse.href)}">Open dossier</a></article>`;
 }
 
 function healthMetric(label, value, target) {
-  return `<a class="portfolio-card" href="${escapeHtml(target)}"><div class="record-heading"><strong>${escapeHtml(label)}</strong><span class="status-badge">${escapeHtml(value)}</span></div><p>Open the source-backed detail.</p></a>`;
+  return `<a class="portfolio-card" href="${escapeHtml(target)}"><div class="record-heading"><strong>${escapeHtml(label)}</strong><span class="status-badge tag-static">${escapeHtml(value)}</span></div><p>Open the source-backed detail.</p></a>`;
 }
 
 function delegationCard(item, kind) {
-  if (kind === 'decision') return `<article class="decision-card"><div class="record-heading"><span class="decision-priority">${item.priority}</span><strong>${escapeHtml(item.decision)}</strong></div><p>${escapeHtml(item.unblocks)}</p><div class="record-meta"><span class="tag">${item.workIds.join(', ')}</span></div></article>`;
+  if (kind === 'decision') return `<article class="decision-card"><div class="record-heading"><span class="decision-priority">${item.priority}</span><strong>${escapeHtml(item.decision)}</strong></div><p>${escapeHtml(item.unblocks)}</p><div class="record-meta"><span class="tag tag-static">${item.workIds.join(', ')}</span></div></article>`;
   const detail = kind === 'blocked' ? item.blocker : item.summary;
-  return `<article class="operation-work-card"><div class="record-heading"><strong>${escapeHtml(item.project)}</strong><span class="status-badge">${kind}</span></div><p>${escapeHtml(detail)}</p><p class="operation-next"><strong>Next:</strong> ${escapeHtml(item.nextAction)}</p><a href="${escapeHtml(item.href)}">Open dossier</a></article>`;
+  return `<article class="operation-work-card"><div class="record-heading"><strong>${escapeHtml(item.project)}</strong><span class="status-badge tag-static">${kind}</span></div><p>${escapeHtml(detail)}</p><p class="operation-next"><strong>Next:</strong> ${escapeHtml(item.nextAction)}</p><a href="${escapeHtml(item.href)}">Open dossier</a></article>`;
 }
 
 function portfolioMetric(label, value, target, tone = '') {
@@ -2340,25 +2447,25 @@ function renderPortfolioWork(operations) {
   return `
     ${portfolioViewHeader('Delegation surface', 'Work', 'Source-backed next actions grouped by what can continue, what awaits a decision, and what must not be bypassed.')}
     <section class="work-lanes" aria-label="Work board">
-      <div class="work-lane"><div class="section-heading"><h2>Continue now</h2><span class="nav-count">${operations.delegation.actionable.length}</span></div>${operations.delegation.actionable.map((item) => delegationCard(item, 'actionable')).join('') || '<p class="empty-state">No independently actionable work.</p>'}</div>
-      <div class="work-lane"><div class="section-heading"><h2>Needs direction</h2><span class="nav-count">${operations.delegation.decisions.length}</span></div>${operations.delegation.decisions.map((item) => delegationCard(item, 'decision')).join('') || '<p class="empty-state">No work awaits a decision.</p>'}</div>
-      <div class="work-lane"><div class="section-heading"><h2>Do not bypass</h2><span class="nav-count">${operations.delegation.blocked.length}</span></div>${operations.delegation.blocked.map((item) => delegationCard(item, 'blocked')).join('') || '<p class="empty-state">No explicit blockers.</p>'}</div>
+      <div class="work-lane"><div class="section-heading"><h2>Continue now</h2><span class="nav-count tag-static">${operations.delegation.actionable.length}</span></div>${operations.delegation.actionable.map((item) => delegationCard(item, 'actionable')).join('') || '<p class="empty-state">No independently actionable work.</p>'}</div>
+      <div class="work-lane"><div class="section-heading"><h2>Needs direction</h2><span class="nav-count tag-static">${operations.delegation.decisions.length}</span></div>${operations.delegation.decisions.map((item) => delegationCard(item, 'decision')).join('') || '<p class="empty-state">No work awaits a decision.</p>'}</div>
+      <div class="work-lane"><div class="section-heading"><h2>Do not bypass</h2><span class="nav-count tag-static">${operations.delegation.blocked.length}</span></div>${operations.delegation.blocked.map((item) => delegationCard(item, 'blocked')).join('') || '<p class="empty-state">No explicit blockers.</p>'}</div>
     </section>
-    <section class="workspace-panel"><div class="section-heading"><h2>Cross-project workstreams</h2><span class="nav-count">${operations.workstreams.length}</span></div><div class="workstream-grid">${operations.workstreams.map(workstreamCard).join('')}</div></section>`;
+    <section class="workspace-panel"><div class="section-heading"><h2>Cross-project workstreams</h2><span class="nav-count tag-static">${operations.workstreams.length}</span></div><div class="workstream-grid">${operations.workstreams.map(workstreamCard).join('')}</div></section>`;
 }
 
 function renderPortfolioProjects(operations) {
   return `
     ${portfolioViewHeader('Canonical dossiers', 'Projects', 'Compare current state, projection freshness, lifecycle, and next admissible action.', operations.portfolio.projects.length)}
     <section class="workspace-panel">${portfolioProjectTable(operations.portfolio.projects)}</section>
-    <section class="workspace-panel"><div class="section-heading"><h2>Reconciliation summary</h2><span class="nav-count">${operations.projectSummaries.length}</span></div><label class="workspace-filter" for="project-summary-filter">Filter by project, state, or next action<input id="project-summary-filter" type="search" placeholder="Start typing to filter" autocomplete="off" /></label><div class="table-scroll" role="region" aria-label="Project reconciliation summary" tabindex="0"><table class="portfolio-table"><caption>Current reconciliation state and next admissible action</caption><thead><tr><th scope="col">Project</th><th scope="col">Current state</th><th scope="col">Next admissible action</th></tr></thead><tbody>${operations.projectSummaries.map(projectSummaryRow).join('')}</tbody></table></div></section>`;
+    <section class="workspace-panel"><div class="section-heading"><h2>Reconciliation summary</h2><span class="nav-count tag-static">${operations.projectSummaries.length}</span></div><label class="workspace-filter" for="project-summary-filter">Filter by project, state, or next action<input id="project-summary-filter" type="search" placeholder="Start typing to filter" autocomplete="off" /></label><div class="table-scroll" role="region" aria-label="Project reconciliation summary" tabindex="0"><table class="portfolio-table"><caption>Current reconciliation state and next admissible action</caption><thead><tr><th scope="col">Project</th><th scope="col">Current state</th><th scope="col">Next admissible action</th></tr></thead><tbody>${operations.projectSummaries.map(projectSummaryRow).join('')}</tbody></table></div></section>`;
 }
 
 function renderPortfolioActivity(operations) {
   return `
     ${portfolioViewHeader('Explicit records', 'Activity', 'Recorded ledger and handoff milestones. Blank time means no explicit event, not inferred inactivity.', operations.activity.length)}
-    <section class="workspace-panel"><div class="section-heading"><h2>Work timeline</h2><span class="nav-count">latest 20 records</span></div>${renderWorkTimeline(operations.activity)}</section>
-    <section class="workspace-panel"><div class="section-heading"><h2>Recent milestones</h2><span class="nav-count">${operations.activity.length}</span></div><div class="activity-grid">${operations.activity.slice(0, 24).map(activityCard).join('')}</div></section>`;
+    <section class="workspace-panel"><div class="section-heading"><h2>Work timeline</h2><span class="nav-count tag-static">latest 20 records</span></div>${renderWorkTimeline(operations.activity)}</section>
+    <section class="workspace-panel"><div class="section-heading"><h2>Recent milestones</h2><span class="nav-count tag-static">${operations.activity.length}</span></div><div class="activity-grid">${operations.activity.slice(0, 24).map(activityCard).join('')}</div></section>`;
 }
 
 function renderPortfolioEvidence(operations) {
@@ -2366,10 +2473,10 @@ function renderPortfolioEvidence(operations) {
   return `
     ${portfolioViewHeader('Operational evidence', 'Git + evidence', 'Read-only repository and evidence health. This view never fetches, stages, commits, resets, or pushes.')}
     <div class="workspace-split">
-      <section class="workspace-panel"><div class="section-heading"><h2>Source-control risk</h2><span class="nav-count">${operations.sourceControlRisk.length}</span></div><div class="git-pulse-grid">${operations.sourceControlRisk.map(sourceControlRiskCard).join('') || '<p class="empty-state">No source-control risks observed.</p>'}</div></section>
-      <section class="workspace-panel"><div class="section-heading"><h2>Evidence health</h2><span class="nav-count">${evidenceRisks.length}</span></div><div class="work-list">${evidenceRisks.map(evidenceHealthCard).join('') || '<p class="empty-state">All cited evidence paths resolve.</p>'}</div></section>
+      <section class="workspace-panel"><div class="section-heading"><h2>Source-control risk</h2><span class="nav-count tag-static">${operations.sourceControlRisk.length}</span></div><div class="git-pulse-grid">${operations.sourceControlRisk.map(sourceControlRiskCard).join('') || '<p class="empty-state">No source-control risks observed.</p>'}</div></section>
+      <section class="workspace-panel"><div class="section-heading"><h2>Evidence health</h2><span class="nav-count tag-static">${evidenceRisks.length}</span></div><div class="work-list">${evidenceRisks.map(evidenceHealthCard).join('') || '<p class="empty-state">All cited evidence paths resolve.</p>'}</div></section>
     </div>
-    <section class="workspace-panel"><div class="section-heading"><h2>Git pulse</h2><span class="nav-count">${operations.gitPulse.projects.length}</span></div><div class="git-pulse-grid">${operations.gitPulse.projects.map(gitPulseCard).join('')}</div></section>`;
+    <section class="workspace-panel"><div class="section-heading"><h2>Git pulse</h2><span class="nav-count tag-static">${operations.gitPulse.projects.length}</span></div><div class="git-pulse-grid">${operations.gitPulse.projects.map(gitPulseCard).join('')}</div></section>`;
 }
 
 function renderPortfolioView(operations) {

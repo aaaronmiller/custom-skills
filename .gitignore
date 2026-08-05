@@ -5,3 +5,7 @@ __pycache__/
 *.bak
 node_modules/
 .gstack/
+
+# local artefacts, never source
+*.bak-2026*
+intent-archaeology/.intent-archaeology.db
