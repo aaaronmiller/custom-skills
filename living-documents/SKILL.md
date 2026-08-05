@@ -147,6 +147,48 @@ Newest filename is not authority. Direct user instructions, actual construction 
   `**A. Choice. Recommended.** Rationale`, and a `**Write-in:**` prompt. The
   renderer must convert this convention into one radio group plus a custom
   answer field per question.
+
+### Question packet format is exact, and failure is silent
+
+The renderer matches this convention literally. A packet that deviates still
+renders, but as ordinary prose with **no radio buttons and no answer form**.
+Nothing warns you. The human then cannot answer by clicking and must retype
+everything by hand, which is the exact friction this surface exists to remove.
+Do not invent your own heading, such as `## Open questions` or
+`## Questions`, and do not present options as a table, a bullet list, or an
+`**Answer:**` blank line.
+
+Required, in this order:
+
+1. Exactly `## Questions for the user`.
+2. Exactly `### Question N: <question text>`.
+3. Two or more options, each its own paragraph, each opening with a bold
+   letter: `**A. ...**`, `**B. ...**`. Mark exactly one `Recommended.` inside
+   its bold span.
+4. Exactly `**Write-in:**` followed by what a custom answer should specify.
+
+Minimal working template, copy it verbatim and replace the text:
+
+```markdown
+## Questions for the user
+
+Answer with the question number and option letter, such as `1A, 2B`.
+You may write your own answer for any question instead.
+
+### Question 1: <the decision, stated as a question>
+
+**A. <option>. Recommended.** <why this one, and what it costs>
+
+**B. <option>.** <what it buys, and what it costs>
+
+**Write-in:** <what a custom answer should name>
+```
+
+Verify before relying on it. Fetch
+`/projects/<id>/content/sections/<page-id>.md` from the local reader and
+confirm the exact `## Questions for the user` heading survived the projection.
+A `200` on the project page alone proves nothing, because the shell returns
+`200` for every route.
 - Submitting a question packet creates a private loopback receipt and a
   continuity attention event. It does not edit canonical Markdown, launch
   work, spend quota, or grant authority by itself.
@@ -206,6 +248,42 @@ for the whole corpus.
 Read `/home/cheta/LIVING_DOCUMENTS/RAISON_DETRE.md` before changing the format. Read `/home/cheta/LIVING_DOCUMENTS/system/SPECIFICATION.md` for invariants and `/home/cheta/LIVING_DOCUMENTS/system/LINKING.md` before changing relationships.
 
 The canonical worked example is the `living-documents` project itself. Do not create another example copy.
+
+## Terminology
+
+The vocabulary of this system is defined in one place: the `terminology` page in
+the `living-documents` dossier. Read it before using a term in a new way.
+
+The term that matters most for other skills: a **project folder** is the Living
+Documents dossier for one specific project, at
+`~/LIVING_DOCUMENTS/projects/<project-id>/`. It is the permanent home for that
+project's planning artifacts, outliving both the working directory and the code
+repository. When a skill is told to put plan files "in the project folder", that
+is the location meant.
+
+## Never write a page file directly
+
+Create every page with `ld add-page`, then edit the file it creates. Writing a
+Markdown file straight into a dossier skips index registration, so the page is
+**never projected** — it looks finished on disk and does not exist in the reader,
+with no error anywhere.
+
+This is not hypothetical. On 2026-08-01 twenty completed pages were lost this
+way, and one of them additionally carried a `related:` target that did not
+exist, which aborted the sync for the rest of the corpus.
+
+Audit the corpus with:
+
+```bash
+<skill-root>/scripts/ld-audit          # report; non-zero exit if anything is wrong
+<skill-root>/scripts/ld-audit --fix    # re-register orphans, drop dead links, sync
+```
+
+It reports ORPHAN (on disk, unindexed, never projected), GHOST (indexed, file
+missing) and BAD-LINK (`related:` naming a nonexistent page). Ghosts are never
+auto-repaired, since guessing would either resurrect a deleted page or hide a
+real loss. Full rationale: the `corpus-integrity-audit` page in the
+`living-documents` dossier.
 
 ## Local reader and installation
 

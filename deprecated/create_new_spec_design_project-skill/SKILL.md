@@ -456,6 +456,38 @@ Document any constitutional violations as amendments to the relevant output docu
    - If Speckit commands are re-run, depth-preservation directives must be re-applied
    - The constitution governs all amendments — review before any change
 
+7. **Offer the execution handoff (REQUIRED):**
+
+   This skill produces build-ready specs. It does not build. The natural next
+   step is `speckit-autonomous-run`, which takes `requirements.md` and
+   `design.md` and drives the full constitution → specify → plan → tasks →
+   implement pipeline.
+
+   **First check whether the user already authorized it.** If the original
+   request named that skill, said "then run speckit", "and build it", "take it
+   through to tasks", or otherwise asked for execution, that authorization
+   already covers this step. **Proceed directly and do not ask.** Re-confirming
+   work the user already requested wastes a turn and reads as not having
+   listened.
+
+   **Only when execution was not already requested**, ask once, in a single
+   question with the state made explicit:
+
+   > Specs are complete at `specs/{feature}/`: spec.md, plan.md, tasks.md
+   > ({N} tasks across {M} user stories). Would you like me to continue with
+   > `speckit-autonomous-run` to execute the pipeline, or stop here so you can
+   > review or delegate the build?
+
+   Rules for the ask:
+   - Ask **once**. A declined offer is a decision; do not re-offer later in the
+     same session.
+   - State what already exists and the task count, so the choice is informed.
+   - Offer stopping as a real option. Handing `tasks.md` to a separate model or
+     reviewing before building are both legitimate and common.
+   - If the user is not present to answer (batch, cron, or delegated run), stop
+     after writing the specs and say so. Never assume consent for a build step
+     that was not requested.
+
 ## Compatibility Notes
 
 ### SpecKit Alignment

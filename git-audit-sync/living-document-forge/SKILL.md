@@ -1,7 +1,17 @@
 ---
-name: living-document-forge
-description: Maintain, revise, validate, and extend a structured living HTML concept document with editable sections, annotations, attachments, proposal decisions, visual-refactor intent, immutable worklogs, and controlled local or remote agent handoffs. Use when asked to apply numbered changes, synthesize comments into the document, add or reorganize sections, update the canvas interface, package a revision, or preserve an auditable history of model-authored edits.
+name: living-document-forge-legacy
+description: Deprecated compatibility shim. Route Living Documents work to the canonical versioned skill at /home/cheta/code/custom-skills/living-document-forge/SKILL.md.
 ---
+
+# Deprecated compatibility shim
+
+This unversioned copy is retained only as historical reference. Do not use its
+format, paths, validators, or workflow for new work. Read and follow the
+canonical versioned skill at
+`/home/cheta/code/custom-skills/living-document-forge/SKILL.md` instead.
+
+The remaining legacy text below is preserved for provenance, not as active
+instructions.
 
 # Living Document Forge
 

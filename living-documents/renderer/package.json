@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node serve.mjs",
-    "check": "node --check serve.mjs && node --check public/app.js && node --check public/navigation.mjs && node --check public/question-forms.mjs && node --check public/review-actions.mjs && node --check scripts/check-operations-api.mjs && node scripts/check-section-deep-link.mjs && node scripts/check-question-forms.mjs && node scripts/check-change-review-flow.mjs && node scripts/check-reader-actions.mjs && node scripts/check-shell-assets.mjs",
+    "check": "node --check serve.mjs && node --check public/app.js && node --check public/navigation.mjs && node --check public/question-forms.mjs && node --check public/review-actions.mjs && node --check scripts/check-operations-api.mjs && node scripts/check-section-deep-link.mjs && node scripts/check-question-forms.mjs && node scripts/check-change-review-flow.mjs && node scripts/check-reader-actions.mjs && node scripts/check-shell-assets.mjs && node scripts/check-narrow-reachability.mjs",
     "check:operations-api": "node scripts/check-operations-api.mjs"
   }
 }

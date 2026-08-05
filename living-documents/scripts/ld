@@ -585,6 +585,7 @@ def command_parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = command_parser().parse_args()
+    exit_code = 0
     try:
         if args.command in {None, "ensure"}:
             result = ensure_project(args)
@@ -608,7 +609,24 @@ def main() -> int:
             if args.all and args.project:
                 raise ValueError("sync accepts either --all or --project, not both")
             roots = all_project_roots() if args.all else [project_root(resolve_project_id(args.project))]
-            result = {"projects": [{"projectId": root.name, "runtime": str(build_runtime(root, write_indexes=not args.no_index_write))} for root in roots]}
+            # Sync each project independently. This used to be one comprehension,
+            # so the first project that failed validation aborted every project
+            # after it. On 2026-08-01 a single unknown `related:` target left
+            # twenty finished pages unprojected, and the only signal was one
+            # stderr line. A broken project is now reported and skipped; the rest
+            # of the corpus still reaches the reader.
+            synced, failed = [], []
+            for root in roots:
+                try:
+                    runtime = build_runtime(root, write_indexes=not args.no_index_write)
+                    synced.append({"projectId": root.name, "runtime": str(runtime)})
+                except (ValueError, KeyError, OSError) as exc:
+                    failed.append({"projectId": root.name, "error": str(exc)})
+                    print(f"SKIPPED {root.name}: {exc}", file=sys.stderr)
+            result = {"projects": synced}
+            if failed:
+                result["failed"] = failed
+                exit_code = 1
             if not args.no_index_write:
                 sync_portfolio()
         elif args.command == "validate":
@@ -632,7 +650,7 @@ def main() -> int:
         else:
             raise ValueError(f"unknown command {args.command}")
         print(json.dumps(result, indent=2, ensure_ascii=False))
-        return 0
+        return exit_code
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
         print(f"ld: {error}", file=sys.stderr)
         return 1

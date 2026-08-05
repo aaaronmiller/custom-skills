@@ -521,7 +521,7 @@ function renderTopbar() {
           <a href="/#activity">Activity</a>
         </nav>
         <button class="local-change-indicator" data-action="view" data-view="changes" data-tooltip="Review browser-local notes, drafts, and decisions before sending them.">${changes} local</button>
-        <button class="theme-toggle" data-action="quick-theme" aria-label="${quickThemeLabel}" data-tooltip="${quickThemeLabel}. All themes remain available in Context."><span aria-hidden="true">${effectiveDark ? '☀' : '☾'}</span></button>
+        <button class="theme-toggle" data-action="quick-theme" aria-label="${quickThemeLabel}" data-tooltip="${quickThemeLabel}. Shortcut — full preferences live in Settings."><span aria-hidden="true">${effectiveDark ? '☀' : '☾'}</span></button><button class="theme-toggle settings-entry" data-action="open-settings" aria-label="Open reader settings" data-tooltip="Theme, motion, and density — every reader preference in one place."><span aria-hidden="true">⚙</span></button>
         <button class="rail-toggle" data-action="toggle-right" aria-controls="context-inspector" aria-expanded="${rightExpanded}" title="Show or hide context and reader settings"><span class="rail-toggle-label">Context</span><span aria-hidden="true">◧</span></button>
       </div>
     </header>`;
@@ -1122,15 +1122,17 @@ function renderSectionInspector(section) {
 function renderDashboardInspector() {
   const proposed = state.manifest.proposals.filter((proposal) => decisionFor(proposal) === 'proposed');
   return `
-    <div class="inspector-header"><h2>Reader settings and local tools</h2><p class="health-detail">These controls change this browser or produce a handoff. They do not edit canonical Markdown by themselves.</p></div>
-    <section class="rail-section">
+    <div class="inspector-header"><h2>Settings</h2><p class="health-detail">Reader preferences and local tools. Nothing here edits canonical Markdown.</p></div>
+    <section class="rail-section settings-block" id="reader-settings">
       <p class="rail-label">Appearance</p>
+      <p class="settings-note">Every reader preference lives here. Stored in this browser only.</p>
       <div class="field"><label for="inspector-theme">Theme</label><select class="select-control" id="inspector-theme">${Object.entries(themeNames).map(([id, label]) => `<option value="${id}" ${state.theme === id ? 'selected' : ''}>${label}</option>`).join('')}</select></div>
-      <div class="field" style="margin-top:.7rem"><label for="inspector-motion">Motion</label><select class="select-control" id="inspector-motion">${Object.entries(motionNames).map(([id, label]) => `<option value="${id}" ${state.motion === id ? 'selected' : ''}>${label}</option>`).join('')}</select></div>
-      <div class="field" style="margin-top:.7rem"><label for="density-select">Density</label><select class="select-control" id="density-select"><option value="comfortable" ${state.density === 'comfortable' ? 'selected' : ''}>Comfortable</option><option value="compact" ${state.density === 'compact' ? 'selected' : ''}>Compact</option></select></div>
+      <div class="field"><label for="inspector-motion">Motion</label><select class="select-control" id="inspector-motion">${Object.entries(motionNames).map(([id, label]) => `<option value="${id}" ${state.motion === id ? 'selected' : ''}>${label}</option>`).join('')}</select></div>
+      <div class="field"><label for="density-select">Density</label><select class="select-control" id="density-select"><option value="comfortable" ${state.density === 'comfortable' ? 'selected' : ''}>Comfortable</option><option value="compact" ${state.density === 'compact' ? 'selected' : ''}>Compact</option></select></div>
     </section>
     <section class="rail-section">
-      <p class="rail-label">Exports</p>
+      <p class="rail-label">Tools</p>
+      <p class="settings-note">Actions that produce a file or a handoff.</p>
       <button class="view-link" data-action="export-change" title="Download local drafts, annotations, and selections for an agent to review">${iconLabel('⇧', 'Download change request')}</button>
       <button class="view-link" data-action="copy-change" title="Copy a structured local change request to the clipboard">${iconLabel('⧉', 'Copy change request')}</button>
       <button class="view-link" data-action="export-json" title="Download a local merged preview; canonical Markdown is unchanged">${iconLabel('{}', 'Download local JSON preview')}</button>
@@ -1833,6 +1835,25 @@ app.addEventListener('click', (event) => {
   }
   if (action === 'close-drawers') closeDrawers();
   if (action === 'toggle-focused') toggleFocused();
+  if (action === 'open-settings') {
+    // Reuse the rail's own open path rather than poking state directly; the rail
+    // is a drawer below 1180px and a sidebar above it, and only these helpers
+    // know which. Setting a state flag skipped both and opened nothing.
+    if (matchMedia('(max-width: 1180px)').matches) {
+      if (!document.body.classList.contains('right-open')) toggleDrawer('right', control);
+    } else if (document.body.classList.contains('right-collapsed')) {
+      toggleSidebar('right');
+    }
+    requestAnimationFrame(() => {
+      const block = document.getElementById('reader-settings');
+      if (!block) return;
+      block.scrollIntoView({ block: 'start', behavior: state.motion === 'reduced' ? 'auto' : 'smooth' });
+      block.classList.add('settings-flash');
+      setTimeout(() => block.classList.remove('settings-flash'), 900);
+      document.getElementById('inspector-theme')?.focus({ preventScroll: true });
+    });
+    return;
+  }
   if (action === 'quick-theme') toggleQuickTheme();
   if (action === 'quick-edit') openQuickEdit(control.dataset.section);
   if (action === 'annotation-markdown-draft') openAnnotationMarkdownDraft();

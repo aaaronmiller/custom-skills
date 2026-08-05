@@ -1,0 +1,15 @@
+[
+  {"id": "evt_12f8de19b077", "type": "directive.feature",
+   "statement": "add rate limiting to the /auth endpoint",
+   "verbatim": "add rate limiting to the /auth endpoint",
+   "scope": "feature", "confidence": 0.95},
+  {"id": "evt_12f8de19b077", "type": "directive.constraint",
+   "statement": "never use npm in this repo, bun only",
+   "verbatim": "never use npm in this repo, bun only",
+   "scope": "project", "confidence": 0.95},
+  {"id": "evt_a3fef3b94ece", "type": "scope.cut",
+   "statement": "drop the plugin system",
+   "verbatim": "forget the plugin system entirely, drop it",
+   "scope": "project", "confidence": 0.95},
+  {"id": "evt_931511a75c15", "type": "noise"}
+]
