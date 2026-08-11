@@ -101,21 +101,18 @@ Characteristics:
 
 ### 5. Generate dashboard bundle
 
-Use `scripts/collect_weekly_evidence.py` to create or refresh a metrics JSON pack. Then use `scripts/render_dashboard.py` to produce a static HTML dashboard from the JSON and the two reports.
+Use `scripts/collect_weekly_evidence.py` to create or refresh a metrics JSON pack. Then use the canonical dashboard generator at `weekly-report-dashboard/scripts/build_dashboard.py` to produce the self-contained `index.html`.
 
-Recommended commands:
+Dashboard generation (canonical):
 
 ```bash
-python3 /home/cheta/code/custom-skills/weekly-report-suite/scripts/collect_weekly_evidence.py \
-  --start YYYY-MM-DD --end YYYY-MM-DD \
-  --out /home/cheta/code/weekly-report-dashboard/YYYY-MM-DD/weekly-metrics.json
-
-python3 /home/cheta/code/custom-skills/weekly-report-suite/scripts/render_dashboard.py \
-  --metrics /home/cheta/code/weekly-report-dashboard/YYYY-MM-DD/weekly-metrics.json \
-  --dad-report /home/cheta/code/weekly-report-YYYY-MM-DD.md \
-  --personal-report /home/cheta/code/weekly-report-YYYY-MM-DD-personal.md \
-  --out-dir /home/cheta/code/weekly-report-dashboard/YYYY-MM-DD
+python3 /home/cheta/code/weekly-report-dashboard/scripts/build_dashboard.py
+# or with flags:
+python3 /home/cheta/code/weekly-report-dashboard/scripts/build_dashboard.py --weeks 13 --dark-work-threshold 8.0 --stall-age 3
+python3 /home/cheta/code/weekly-report-dashboard/scripts/build_dashboard.py --check  # validate without writing
 ```
+
+The single-week renderer `scripts/render_dashboard.py` is retired; use the canonical generator above for all dashboard builds. Historic per-week bundles under `weekly-report-dashboard/YYYY-MM-DD/` are preserved.
 
 For live metrics, `scripts/prometheus_exporter.py` serves a Prometheus-compatible `/metrics` endpoint and a JSON `/data` endpoint. Grafana is the natural dashboard partner for Prometheus.
 

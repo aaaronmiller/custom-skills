@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Render a static weekly dashboard bundle from metrics JSON and report markdown."""
+"""RETIRED: Use weekly-report-dashboard/scripts/build_dashboard.py instead.
+
+This single-week renderer is retained for historic compatibility but is no longer
+the canonical dashboard generator. It will not be updated. See
+custom-skills/weekly-report-suite/SKILL.md for the canonical command.
+Historic per-week bundles are preserved; this script is retired.
+"""
 from __future__ import annotations
 import argparse, json, shutil
 from pathlib import Path
@@ -9,6 +15,7 @@ TEMPLATE = SKILL_ROOT / 'references' / 'templates' / 'dashboard.html'
 
 
 def main():
+
     ap = argparse.ArgumentParser()
     ap.add_argument('--metrics', required=True)
     ap.add_argument('--dad-report', required=False)

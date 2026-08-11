@@ -9,6 +9,10 @@ import { parseQuestionSection } from './question-forms.mjs';
 import { annotationDialogConfig, darkThemes, resolveQuickTheme } from './review-actions.mjs';
 
 const app = document.querySelector('#app');
+// Live companion surfaces. The weekly reports dashboard is a first-class
+// citizen of this portfolio: canonical planning truth here, rendered evidence
+// of shipped weeks there.
+const WEEKLY_DASHBOARD_URL = 'http://127.0.0.1:8765/index.html';
 const themeNames = {
   system: 'System',
   obsidian: 'Obsidian',
@@ -556,6 +560,7 @@ function renderTopbar() {
           <a href="/">Portfolio</a>
           <a href="/#decisions">Decisions</a>
           <a href="/#activity">Activity</a>
+          <a href="${WEEKLY_DASHBOARD_URL}" target="_blank" rel="noopener" title="Open the weekly reports dashboard">Weekly Reports</a>
         </nav>
         <button class="local-change-indicator" data-action="view" data-view="changes" data-tooltip="Review browser-local notes, drafts, and decisions before sending them.">${changes} local</button>
         <button class="theme-toggle" data-action="quick-theme" aria-label="${quickThemeLabel}" data-tooltip="${quickThemeLabel}. Shortcut — full preferences live in Settings."><span aria-hidden="true">${effectiveDark ? '☀' : '☾'}</span></button><button class="theme-toggle settings-entry" data-action="open-settings" aria-label="Open reader settings" data-tooltip="Theme, motion, and density — every reader preference in one place."><span aria-hidden="true">⚙</span></button>
@@ -2420,6 +2425,11 @@ function renderPortfolioOverview(operations) {
       ${portfolioMetric('Active work', operations.health.activeWork, 'work')}
       ${portfolioMetric('Projects', operations.health.dossiers, 'projects')}
       ${portfolioMetric('Git risks', operations.health.sourceControlRisk, 'evidence', operations.health.sourceControlRisk ? 'attention' : '')}
+    </section>
+    <section class="workspace-panel" aria-labelledby="overview-live-views">
+      <div class="section-heading"><h2 id="overview-live-views">Live views</h2><span class="nav-count tag-static">evidence</span></div>
+      <p class="empty-state" style="margin:0 0 0.6rem">Rendered evidence of the weekly cadence, fed by the same planning corpus.</p>
+      <a class="text-button" href="${WEEKLY_DASHBOARD_URL}" target="_blank" rel="noopener" title="Opens the weekly reports dashboard in a new tab">Open Weekly Reports Dashboard →</a>
     </section>
     <div class="workspace-split">
       <section class="workspace-panel" aria-labelledby="overview-decisions">
