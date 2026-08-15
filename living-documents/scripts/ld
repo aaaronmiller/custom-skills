@@ -479,6 +479,160 @@ def ensure_project(args: argparse.Namespace) -> dict:
     return {"action": action, "projectId": project_id, "root": str(root), "startHere": str(root / "start-here.md"), "index": str(root / "index.md"), "runtime": str(runtime), "formatVersion": FORMAT_VERSION}
 
 
+def command_onboard(args: argparse.Namespace) -> dict:
+    """Onboard a code project into Living Documents (stdlib, idempotent, offline).
+
+    Mirrors weekly-llm-analysis split: scripting owns canonical data, LLM supplements.
+    Does: ensure/create project, stat/du/git status, tree file index, prd check,
+    import dashboard __WEEKLY__/telemetry/vault_map if available, write prompt-corpus placeholder.
+    Never writes FORMAT_VERSION keys directly; writes only *.md body via write_page.
+    """
+    raw = args.project or ""
+    if not raw:
+        raise ValueError("onboard requires --project /code/<name> or --project <id>")
+    candidate = Path(raw).expanduser().resolve() if "/" in raw or raw.startswith(".") else None
+    if candidate and candidate.exists():
+        git_root = find_git_root(candidate) or candidate
+        source_root = str(git_root)
+        project_id = slug(git_root.name)
+        title = git_root.name.replace("-", " ").replace("_", " ").title()
+        source_path = git_root
+    else:
+        project_id = slug(raw)
+        source_path = None
+        source_root = ""
+        title = project_id.replace("-", " ").title()
+    root = project_root(project_id)
+    created = False
+    if not root.exists() or not (root / "project.md").is_file():
+        template_src = skill_root() / "template"
+        # template is symlink to living-documents-system/template when project owns it
+        if template_src.is_symlink():
+            template_src = template_src.resolve()
+        root = create_project(project_id, title, source_root)
+        created = True
+        if args.with_template and template_src.is_dir():
+            # template files already created via create_project; no overwrite needed
+            pass
+    # --- canonical stats (stdlib only, per-item isolation) ---
+    problems: list[str] = []
+    stats: dict = {"projectId": project_id, "sourceRoot": source_root}
+    if source_path and source_path.exists():
+        try:
+            files = [p for p in source_path.rglob("*") if p.is_file() and ".git" not in p.parts and "__pycache__" not in p.parts][:5000]
+            total_bytes = sum(p.stat().st_size for p in files)
+            md_files = [p for p in files if p.suffix == ".md"]
+            total_lines = 0
+            for p in md_files[:500]:
+                try:
+                    total_lines += len(p.read_text(encoding="utf-8", errors="replace").splitlines())
+                except Exception as e:
+                    problems.append(f"{p}: {e}")
+            stats.update({"fileCount": len(files), "mdCount": len(md_files), "totalBytes": total_bytes, "totalLinesMd": total_lines, "vaultMd": len(md_files)})
+            # git status (optional, isolated)
+            try:
+                out = subprocess.run(["git", "-C", str(source_path), "status", "--porcelain"], capture_output=True, text=True, timeout=5)
+                if out.returncode == 0:
+                    stats["gitDirty"] = bool(out.stdout.strip())
+                    stats["gitDirtyCount"] = len(out.stdout.strip().splitlines()) if out.stdout.strip() else 0
+            except Exception as e:
+                problems.append(f"git status: {e}")
+            # tree index (relative paths, capped)
+            try:
+                tree = sorted(str(p.relative_to(source_path)) for p in files[:200])
+                stats["fileIndexSample"] = tree[:50]
+                stats["fileIndexTruncated"] = len(files) > 200
+            except Exception as e:
+                problems.append(f"tree: {e}")
+            # prd check
+            prd_candidates = ["prd.md", "PRD.md", "requirements.md", "docs/prd.md", "spec.md"]
+            found_prd = None
+            for name in prd_candidates:
+                if (source_path / name).is_file():
+                    found_prd = name
+                    break
+            stats["prdFound"] = found_prd
+        except Exception as e:
+            problems.append(str(e))
+    # --- dashboard import (share one table, no duplicate collection) ---
+    dashboard_root = Path("/home/cheta/code/weekly-report-dashboard")
+    weekly_import = None
+    telemetry_import = None
+    vault_import = None
+    try:
+        idx = dashboard_root / "index.html"
+        if idx.is_file():
+            import re
+            html = idx.read_text(encoding="utf-8", errors="replace")
+            m = re.search(r"window\.__WEEKLY__\s*=\s*(\{.*?\});", html, re.S)
+            if m:
+                weekly_import = json.loads(m.group(1))
+                stats["weeklyWeeks"] = len(weekly_import.get("weeks", []))
+    except Exception as e:
+        problems.append(f"weekly import: {e}")
+    for name in ["telemetry.json", "vault_project_map.json"]:
+        try:
+            p = dashboard_root / name
+            if p.is_file():
+                data = json.loads(p.read_text(encoding="utf-8"))
+                if name == "telemetry.json":
+                    telemetry_import = True
+                    stats["telemetryWeeks"] = len(data.get("weeks", []))
+                else:
+                    vault_import = True
+                    stats["vaultFiles"] = len(data.get("files", []))
+        except Exception as e:
+            problems.append(f"{name}: {e}")
+    # --- prompt-corpus placeholder (idempotent) ---
+    corpus_path = root / "prompt-corpus.md"
+    if not corpus_path.is_file():
+        write_page(corpus_path, {"id": "prompt-corpus", "title": "Prompt corpus", "type": "evidence", "order": 90, "status": "active", "parent": "index", "related": [], "updated": date.today().isoformat()}, "# Prompt corpus\n\nPlaceholder written by `ld onboard`. LLM fills with spell-fixed user prompts, session evidence summary, file descriptions, user stories, changelog generalization. Script never invents body.\n")
+    # file index page (refresh when drift > threshold, keeps provenance honest)
+    file_index_path = root / "file-index.md"
+    needs_index = False
+    if source_path and source_path.exists():
+        if not file_index_path.is_file():
+            needs_index = True
+        else:
+            try:
+                existing = file_index_path.read_text(encoding="utf-8", errors="replace")
+                # count sample entries in existing file
+                existing_count = existing.count("\n")  # rough
+                sample_len = len(stats.get("fileIndexSample", []))
+                # refresh if fileCount drifted or sample changed by >2 entries
+                if abs(stats.get("fileCount", 0) - existing_count) > 5 or "weeklyWeeks" in stats:
+                    # check actual sample diff
+                    needs_index = any(s not in existing for s in stats.get("fileIndexSample", [])[:5])
+                    # also force refresh if total md count changed or bytes changed significantly
+                    if stats.get("mdCount", 0) > 0 and stats.get("fileCount", 0) != existing_count:
+                        needs_index = True
+            except Exception:
+                needs_index = True
+            # always refresh if we just synced template/tasks and sample is stale (first 5 mismatch)
+            if not needs_index and source_path:
+                try:
+                    if any(s not in existing for s in stats.get("fileIndexSample", [])[:5]):
+                        needs_index = True
+                except Exception:
+                    pass
+        if needs_index:
+            body = "# File index\n\nTree from `ld onboard` (capped 200, per-item isolation, provenance: generated). Full paths remain in `sourceRoot: {}`.\n\n```\n{}\n```\n\n*Generated {} — fileCount {}, mdCount {}, totalBytes {} — provenance: verified (stat/du) | estimated (dashboard import unavailable → noted) *\n".format(source_root, "\n".join(stats.get("fileIndexSample", [])[:50]), date.today().isoformat(), stats.get("fileCount",""), stats.get("mdCount",""), stats.get("totalBytes",""))
+            write_page(file_index_path, {"id": "file-index", "title": "File index", "type": "index", "order": 15, "status": "active", "parent": "index", "related": [], "updated": date.today().isoformat()}, body)
+    # ensure runtime and sync
+    try:
+        runtime = build_runtime(root)
+        stats["runtime"] = str(runtime)
+    except Exception as e:
+        problems.append(f"build_runtime: {e}")
+    sync_portfolio()
+    result: dict = {"action": "onboarded" if not created else "created+onboarded", "projectId": project_id, "root": str(root), "sourceRoot": source_root, "stats": stats}
+    if problems:
+        result["problems"] = problems
+    if weekly_import is not None:
+        result["weeklyImport"] = True
+    return result
+
+
 def command_doctor(project: str | None, all_projects: bool) -> dict:
     if all_projects and project:
         raise ValueError("doctor accepts either --all or --project, not both")
@@ -578,6 +732,10 @@ def command_parser() -> argparse.ArgumentParser:
     doctor = sub.add_parser("doctor")
     doctor.add_argument("--all", action="store_true")
     doctor.add_argument("--project")
+    onboard = sub.add_parser("onboard")
+    onboard.add_argument("--project", required=True, help="code path /code/<name> or project id")
+    onboard.add_argument("--with-template", action="store_true", help="populate from template/ when creating")
+    onboard.add_argument("--now", action="store_true", help="alias for immediate run (cron also uses onboard)")
     serve = sub.add_parser("serve")
     serve.add_argument("--project")
     return parser
@@ -645,6 +803,8 @@ def main() -> int:
             if not result["healthy"]:
                 print(json.dumps(result, indent=2, ensure_ascii=False))
                 return 1
+        elif args.command == "onboard":
+            result = command_onboard(args)
         elif args.command == "serve":
             result = command_serve(args.project)
         else:

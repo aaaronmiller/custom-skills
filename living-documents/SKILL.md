@@ -246,6 +246,7 @@ ld validate --project <project-id>
 ld sync --all
 ld sync --all --no-index-write
 ld validate --all
+ld onboard --project /code/<name> --with-template [--now]  # stdlib idempotent onboarding (see Project vs skill ownership)
 ld doctor --all
 ld serve
 ld-handoff --project <project> --work-id <id> --status active|blocked|interrupted|complete --summary "..." --next-action "..." --session <harness:id> --evidence <path-or-gate>
@@ -263,6 +264,8 @@ blocks. Ordinary explicit `sync` retains its canonical index-maintenance role.
 Bare `sync`, `validate`, and `status` infer the project from the current Git
 worktree, matching `ensure`. Use `--project` for an explicit project or `--all`
 for the whole corpus.
+
+`ld onboard` is stdlib-only, offline, idempotent. It never mutates corpus historic files and shares the dashboard table (`__WEEKLY__`/`telemetry`/`vault_map`) without duplicate collection. The template symlink at `<skill-root>/template -> ../../living-documents-system/template` resolves via `LIVING_DOCUMENTS_RENDERER` fallback; installer copies the directory when symlink cannot be created (Windows).
 
 Read `/home/cheta/LIVING_DOCUMENTS/RAISON_DETRE.md` before changing the format. Read `/home/cheta/LIVING_DOCUMENTS/system/SPECIFICATION.md` for invariants and `/home/cheta/LIVING_DOCUMENTS/system/LINKING.md` before changing relationships.
 
@@ -348,3 +351,19 @@ Do not claim a Living Document update complete unless:
 - content and layout annotations remain separate;
 - page changes can be copied for an agent;
 - a fresh session can resume using `start-here.md` without the preceding chat.
+
+## Project vs skill ownership + onboarding (comprehensive, Option A)
+
+Project `living-documents-system` owns `template/` — single source of truth, git history in project, no skill bump. Skill `custom-skills/living-documents/template` is symlink `-> ../../living-documents-system/template` for harness distribution; installer copies directory when symlink cannot be created (Windows). Skill owns `scripts/ld`, `ld-shim`, `VERSION`, `renderer/`, and `skills/onboard.md`. Renderer resolves via `LIVING_DOCUMENTS_RENDERER` env, fallback to skill `renderer/`.
+
+### Onboarding — one stdlib script + one LLM skill (mirrors weekly-llm-analysis)
+
+**Script `ld onboard --project /code/<name> --with-template [--now]`** (stdlib, offline, idempotent, byte-identical): `create_project` if missing with `source-root` = code path; stats via `rglob` (`fileCount`/`mdCount`/`totalBytes`/`totalLinesMd`), `git status --porcelain` (`gitDirty`/`gitDirtyCount`), `tree` sample 50/200 (`fileIndexSample`, `fileIndexTruncated`), `prd.md` check (`prd.md`/`PRD.md`/`requirements.md`/`docs/prd.md`/`spec.md`); imports dashboard canonical `window.__WEEKLY__` weeks + `telemetry.json` + `vault_project_map.json` from `/home/cheta/code/weekly-report-dashboard` (share one table, no duplicate collection); writes `prompt-corpus.md` placeholder + `file-index.md` tree via `write_page` only; `generated_at` from newest input `mtime`, `sort_keys` idempotence; per-item `problems` isolation, provenance `verified`/`estimated`/`unavailable` on stats; never writes `FORMAT_VERSION`, never mutates historic corpus files.
+
+**Skill `living-documents:onboard`** (`skills/onboard.md`): consumes script JSON + `cass triage --json` + `cass search` + `~/.local/share/muse/sessions/**/*.jsonl` (muse not in cass) + vault scan 10-50 md. Writes only `*.md` body in `LIVING_DOCUMENTS/projects/<id>/`: `prompt-corpus.md` (spell-fixed full prompt, 100% fidelity, no truncation), `project.md` (2-para summary + boundary), `file-index.md` (1-liner per file), `requirements.md` (user stories), `history.md` (changelog generalization, raw `session.jsonl` stays evidence), `what-to-do.md` (phases → todo + next item). Model pinning via `.env` `MODEL=opencode/deepseek-v4-flash`; resolver `.env` → `$MODEL` → `config.env` → default. Token budget 4KB/page, 32KB total. If LLM disagrees with canonical stats, canonical wins, disagreement logged to `problems`.
+
+**Failure modes:** no API key / no network / provider down → deterministic heuristic supplement with `model: heuristic-fallback`, `data_quality: estimated`, so `ld validate` still passes; malformed LLM JSON → log to `problems`, retain prior body; missing dashboard table → `weeklyImport: false`, `provenance: unavailable`, LLM notes gap; never aborts canonical page.
+
+**Schedule + loop:** script nightly `0 20 * * 5` like dashboard, skill headless `omp run --model opencode/deepseek-v4-flash` on change or `ld onboard --now`. Meta-improve: `scripts/audit_onboard.py --json` scores prompt completeness / file-desc coverage, `meta_improve.py` proposes deltas that raise `overall_avg`/`Actionability` without regressing `Truthfulness/Provenance`, applied only if `ld validate` stays green.
+
+**Gates:** `ld onboard` exit 0 + JSON `stats.fileCount` + `weeklyImport` when dashboard present; `ld validate --project <id>` + `ld doctor` healthy; rerun idempotent (same bytes when source unchanged).

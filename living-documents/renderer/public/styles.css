@@ -4013,6 +4013,15 @@ body.focused .review-state {
   opacity: 0.75;
 }
 
+/* Apple shippable — 2026-08-14 frontend-design-masterclass + taste */
+* { font-variant-ligatures: common-ligatures; }
+html { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; }
+body { line-height: 1.6; }
+.metric-grid { gap: 20px; } /* Bento breathing room, not 8px */
+.portfolio-card, .metric-card { border-radius: 16px; box-shadow: 0 8px 28px rgba(0,0,0,0.06); border: 1px solid var(--rule); }
+a { text-underline-offset: 3px; }
+
 @media (prefers-reduced-motion: reduce) {
   .tag-filterable, .tag-link, .metric-link { transition: none; }
 }

@@ -6,7 +6,7 @@ case "${1-}" in
   "")
     exec "$SCRIPT_DIR/ld" ensure
     ;;
-  ensure|status|list|create-project|add-page|import-legacy|sync|validate|doctor|serve|-h|--help)
+  ensure|status|list|create-project|add-page|import-legacy|sync|validate|doctor|serve|onboard|-h|--help)
     exec "$SCRIPT_DIR/ld" "$@"
     ;;
   *)
