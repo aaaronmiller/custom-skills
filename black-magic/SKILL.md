@@ -14,6 +14,70 @@ under `~/LIVING_DOCUMENTS/projects`, intents in
 repositories, as of 2026-08-20.** It works on any of them, not only the ones
 with a dossier.
 
+## Resource readiness gate — run this FIRST
+
+Before the loop, verify every resource the loop reads. Any gap becomes task #1:
+fix it, then run the loop with the corrected intent. A loop run against a
+missing resource answers nothing and manufactures false blockers.
+
+Checklist (all must pass before step 1 of the loop):
+
+1. `intent-find` on PATH (`which intent-find`).
+2. The target project has a record: `intent-find --resolve <project>` — if it
+   reports no recorded intent anywhere, build the corpus FIRST (step 2 below)
+   before working the punchlist.
+3. Dossier sections complete: `prompt-corpus`,
+   `intent-archaeology-findings`, `intent-archaeology-source-adjudication`.
+   `ld-audit` reports a missing section as a `SECTION` finding and exits
+   non-zero. Fix the section before looping. (Confirmed 2026-08-20:
+   quartermaster was missing `intent-archaeology-findings` while the other
+   two existed.)
+4. CASS index is not stale: `cass status --json`. A stale index means the
+   Tier-2 intent source below is incomplete. On a named need
+   (checkpoint/database mismatch, pending sessions, partial coverage,
+   quarantine), run `cass index` first. If `cass index` refuses with
+   "unhealthy canonical archive" (exit 5), the archive has interrupted
+   operation artifacts. Recovery, verified 2026-08-21:
+   `cass doctor check --json` → clear stale `raw-mirror/v1/tmp/capture.*`
+   dirs (partial `.tmp` blobs, inspect mtimes first) → `cass doctor --fix`
+   (it reclaims stale repair locks itself) → `cass index`. Known residual
+   defect: the lexical checkpoint fingerprint can lag the DB
+   (`content-v1:<n>` mismatch) so status reports stale even after a
+   successful run — cross-check with `cass doctor check` (which reports
+   search ready) before treating the stale flag as real.
+5. Muse coverage: `cass onboarding --json`. If `muse` is NOT listed as a
+   provider, the Tier-3 muse supplement below is REQUIRED, not optional.
+6. `ld-audit` on PATH. If missing:
+   `ln -sf /home/cheta/code/living-documents/skill/scripts/ld-audit /home/cheta/.local/bin/ld-audit`
+
+If any item fails, that item is task #1. Do the fix, then run the loop.
+
+## Intent sourcing — three tiers, in order
+
+Search all three before declaring anything unanswered.
+
+- **Tier 1 — the six-month intent scan.** The archaeology database
+  (`~/.intent-archaeology/archaeology.db`) and the archaeology pages under
+  `~/LIVING_DOCUMENTS/projects/*/intent-archaeology-*.md`, produced by the
+  intent-archaeology scan. This is the baseline; it is not current by itself.
+- **Tier 2 — CASS updates since the scan.** `cass search` / `cass view` over
+  claude, codex, gemini, hermes, opencode, antigravity, pi_agent, qwen,
+  openclaw sessions (cass 0.6.24 as of 2026-08-20). If `cass status` reports
+  stale, refresh before searching.
+- **Tier 3 — muse, direct session audit.** Muse is NOT integrated into CASS
+  as of 2026-08-20 (confirmed: `cass onboarding` lists no muse provider;
+  `cass upgrade --force` fetched no newer build). When that integration lands,
+  run `cass upgrade` + `cass index`, re-confirm, and demote this tier. Until
+  then, audit muse sessions directly:
+  - `muse export --session <uuid|path> --out <file>` — one self-contained JSON
+    per session (timestamps, messages, reasoning, tool calls, approvals,
+    model ids).
+  - Or read the raw logs:
+    `~/.local/share/muse/sessions/YYYY/MM/DD/<uuid>/session.jsonl` plus
+    `subagent/` trees (8,784 session files present as of 2026-08-20).
+  - Mine user prompts from those exports exactly as the prompt-corpus builder
+    does, and fold the result into the dossier corpus.
+
 ## Why it works
 
 Instructions get given once, on one project. Months later a different project
@@ -109,6 +173,14 @@ without a search is not a blocker, it is an unread file.
 the record has no answer, propose the one you would pick and why, so the
 decision is a yes or no rather than an open question.
 
+**Present every escalated item in plain language, never as an id or code
+alone.** A "blocked on B2" or "safety 0.40" means nothing to the human being
+asked to authorize it. Name the thing: which project, which artifact, what the
+blocker is, what the proposal is, and what exactly the human must say yes or no
+to. If the answer already exists in live config or a record the loop reads
+(example: an active loadout already encodes which skills are vetted), say so
+and do not ask.
+
 ## The four shapes of "already answered"
 
 Name which one applies.
@@ -135,7 +207,9 @@ The fourth is the one most often mistaken for a blocker.
   evidence window. A corpus can say 2026-08-01 and end at 2026-06-28. Check the
   content range against the repository's last commit.
 - **Relative timestamps in `find`.** `bfs` rejects `-newermt "-90 minutes"` and
-  the failure is easy to miss. Use an absolute timestamp.
+  the failure is easy to miss. Use an absolute timestamp. (`bfs` is not
+  installed on this machine as of 2026-08-20; use `find` with an absolute
+  timestamp when it is absent.)
 
 ## Revision log
 
@@ -147,3 +221,20 @@ Append whenever a run teaches something. This skill improves during use.
   intents and no corpus; delegated inventories need their load-bearing claims
   verified before action; `--resolve` added so the loop can start on any of the
   207 folders rather than only ones with a dossier.
+- **2026-08-20, second run.** Added the resource readiness gate (any missing
+  resource becomes task #1 before the loop runs) and the three-tier intent
+  sourcing (six-month scan → CASS → muse CLI direct audit). Confirmed muse is
+  NOT in CASS (cass 0.6.24; `cass upgrade --force` fetched nothing newer);
+  the muse tier documents `muse export --session` and raw `session.jsonl`
+  reading. Wired `ld-audit` onto PATH (was present in
+  `living-documents/skill/scripts/` but unreachable). Added the plain-language
+  escalation rule after a run that asked the human to authorize codes instead
+  of decisions, and failed to notice the vetted-skill answer already encoded
+  in the active loadout (`baseline-223`).
+
+- **2026-08-21.** Added the blocking gate to the global rules: no blocker
+  reaches the operator until `intent-find` has been run across all projects and
+  the four dispositions applied. Also recorded the steering protocol, after the
+  model tier definition was rewritten four times in one session, once per
+  steering message. Steering is refinement; buffer it and apply once at a work
+  boundary, rather than servicing each interjection on arrival.
