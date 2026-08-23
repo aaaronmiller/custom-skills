@@ -34,6 +34,33 @@ source: custom
 
 > Systematic evaluation of skill quality using binary PASS/FAIL + heuristic categorization.
 
+## Mechanical checks (run these first)
+
+Two checks are arithmetic, not judgement, and neither is reliable done by eye.
+Run them before any deep read so the judgement work starts from facts.
+
+```bash
+python3 scripts/audit_mechanical.py <skills-root>
+python3 scripts/audit_mechanical.py <skills-root> --json --threshold 50
+```
+
+**Trigger collision.** Two skills quoting the same trigger phrases compete for
+the same activation, and which one loads is arbitrary. Name similarity does not
+find this: in the 2026-08-22 audit, `deprecated/strata` and `strata-authoring`
+shared 100% of their quoted triggers while two skills with near-identical names
+turned out to be a pipeline split rather than a duplicate. The inverse matters
+as much - a skill quoting no trigger phrases cannot activate on intent at all,
+and is a resource in everything but filing.
+
+**Progressive-disclosure integrity.** A skill whose `references/`, `scripts/`
+or `assets/` targets are missing is inert regardless of how good its prose is.
+On that corpus, 21 of 39 skills had every target missing, silently: a script
+had emptied the directories five weeks earlier and the SKILL.md files were
+untouched, so nothing looked wrong from the index.
+
+Exit status is non-zero when a collision at or above the threshold exists, so
+this can gate a commit.
+
 ## Core Audit Framework
 
 ### The 5 FAIL Criteria (Binary — PASS or FAIL)
