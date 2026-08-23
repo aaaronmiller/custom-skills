@@ -1,0 +1,1851 @@
+[
+  {
+    "company": "Yoodli",
+    "domain": "yoodli.ai",
+    "role": "Senior Software Engineer - Backend (Platform)",
+    "salary_band": "$160k \u2013 $190k",
+    "company_size": "11-50",
+    "what_they_do": "AI-powered communication coaching platform (roleplay simulator) serving Google Cloud, Snowflake, and Databricks; raised $60M including $40M Series B.",
+    "apply_url": "https://wellfound.com/jobs/4584512-senior-software-engineer-backend-platform",
+    "company_url": "https://wellfound.com/company/yoodli",
+    "requirements": [
+      "5+ years backend experience",
+      "GCP/AWS/Azure cloud infra",
+      "TypeScript or Python",
+      "IaC experience",
+      "On-site Seattle 3 days/week"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Yoodli",
+    "domain": "yoodli.ai",
+    "role": "Deal Desk Lead",
+    "salary_band": "Not listed",
+    "company_size": "11-50",
+    "what_they_do": "AI communication coaching platform for enterprise sales enablement.",
+    "apply_url": "https://wellfound.com/jobs/4589611-deal-desk-lead",
+    "company_url": "https://wellfound.com/company/yoodli",
+    "requirements": [
+      "Sales/operations experience",
+      "Startup environment"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Yoodli",
+    "domain": "yoodli.ai",
+    "role": "Solutions Engineer",
+    "salary_band": "Not listed",
+    "company_size": "11-50",
+    "what_they_do": "AI communication coaching platform for enterprise sales enablement.",
+    "apply_url": "https://wellfound.com/jobs/4481270-solutions-engineer",
+    "company_url": "https://wellfound.com/company/yoodli",
+    "requirements": [
+      "Technical sales experience",
+      "Enterprise SaaS"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "MOLTEN Cloud",
+    "domain": "moltencloud.com",
+    "role": "Senior Software Engineer, Royalties (Fully Remote)",
+    "salary_band": "$100k \u2013 $150k \u2022 0.0% \u2013 0.15%",
+    "company_size": "11-50",
+    "what_they_do": "Multi-cloud SaaS arming digital rights holders with better operations to manage and monetize content.",
+    "apply_url": "https://wellfound.com/jobs/4607173-senior-software-engineer-royalties-fully-remote-us-and-latin-america-only",
+    "company_url": "https://wellfound.com/company/molten-cloud",
+    "requirements": [
+      "5 years of experience",
+      "Backend/platform engineering",
+      "Remote (US & LatAm only)"
+    ],
+    "location": "Remote only \u2022 US & Latin America",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "MOLTEN Cloud",
+    "domain": "moltencloud.com",
+    "role": "Lead Software Engineer",
+    "salary_band": "$140k \u2013 $170k \u2022 0.0% \u2013 0.1%",
+    "company_size": "11-50",
+    "what_they_do": "Multi-cloud SaaS for digital rights management and content monetization.",
+    "apply_url": "https://wellfound.com/jobs/4385811-lead-software-engineer",
+    "company_url": "https://wellfound.com/company/molten-cloud",
+    "requirements": [
+      "5 years of experience",
+      "Full-stack or backend leadership",
+      "Remote only"
+    ],
+    "location": "Remote only",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Archesys",
+    "domain": "archesys.io",
+    "role": ".NET Software Engineer \u2013 Frontend Focus (Remote)",
+    "salary_band": "$65k \u2013 $95k \u2022 No equity",
+    "company_size": "11-50",
+    "what_they_do": "Improving government services that impact everyday lives through technology.",
+    "apply_url": "https://wellfound.com/jobs/2776321-net-software-engineer-frontend-focus-u-s-citizen-remote",
+    "company_url": "https://wellfound.com/company/archesys",
+    "requirements": [
+      ".NET/C# experience",
+      "Frontend focus",
+      "U.S. Citizen required",
+      "5 years of experience"
+    ],
+    "location": "Remote only \u2022 United States",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Adronite",
+    "domain": "adronite.com",
+    "role": "Software Engineer (Senior)",
+    "salary_band": "$190k \u2013 $270k",
+    "company_size": "1-10",
+    "what_they_do": "Platform enabling companies to gain deep understanding of complex codebases using AI; on-premise deployment for regulated industries.",
+    "apply_url": "https://wellfound.com/jobs/3188951-software-engineer",
+    "company_url": "https://wellfound.com/company/adronite",
+    "requirements": [
+      "7+ years SWE experience",
+      "Strong system design",
+      "Python/JS/TypeScript",
+      "Docker/K8s preferred",
+      "Django/React/AWS experience",
+      "BSc+ in CS"
+    ],
+    "location": "Seattle \u2022 Remote",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "MenloExchange",
+    "domain": "menloexchange.com",
+    "role": "Founding Full Stack Engineer (Equity First)",
+    "salary_band": "Equity First \u2022 0.5% \u2013 3.0%",
+    "company_size": "1-10",
+    "what_they_do": "Building the commercialization layer for invention and IP \u2013 the operating system for invention commercialization.",
+    "apply_url": "https://wellfound.com/jobs/4218449-founding-full-stack-engineer",
+    "company_url": "https://wellfound.com/company/menloexchange",
+    "requirements": [
+      "3+ years experience",
+      "React/Next.js/TypeScript",
+      "Node.js/APIs/databases",
+      "OpenAI APIs/embeddings",
+      "AWS/cloud infrastructure"
+    ],
+    "location": "Seattle \u2022 Remote",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "CreativeLens",
+    "domain": "creativelens.ai",
+    "role": "Founding Engineer",
+    "salary_band": "$80k \u2013 $150k \u2022 1.0% \u2013 5.0%",
+    "company_size": "1-10",
+    "what_they_do": "AI-powered content review, compliance, and brand governance for modern marketing teams.",
+    "apply_url": "https://wellfound.com/jobs/4589473-founding-engineer",
+    "company_url": "https://wellfound.com/company/creativelens",
+    "requirements": [
+      "5+ years full-stack experience",
+      ".NET/PostgreSQL/AWS/Angular",
+      "Remote-first, US timezone"
+    ],
+    "location": "Seattle \u2022 Remote",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Klutch AI",
+    "domain": "klutch.ai",
+    "role": "Full-Stack Engineer",
+    "salary_band": "$80k \u2013 $150k \u2022 0.01% \u2013 1.0%",
+    "company_size": "1-10",
+    "what_they_do": "AI operating system for the multi-trillion-dollar construction industry \u2013 automating field workflows, interpreting blueprints, and eliminating bottlenecks.",
+    "apply_url": "https://wellfound.com/jobs/4547650-ai-mobile-engineer-clone",
+    "company_url": "https://wellfound.com/company/klutch-ai-1",
+    "requirements": [
+      "3+ years SWE experience",
+      "Strong coding skills (any language)",
+      "Interest in AI/ML/agentic systems",
+      "React Native/Java/Scala a plus",
+      "Generalist mindset"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Uniblox",
+    "domain": "uniblox.io",
+    "role": "Machine Learning Engineer",
+    "salary_band": "\u20b915L \u2013 \u20b925L (India remote)",
+    "company_size": "11-50",
+    "what_they_do": "eCommerce for Insurance \u2013 modernizing the insurance industry using AI, NLP, LLMs, and machine learning.",
+    "apply_url": "https://wellfound.com/jobs/3244716-machine-learning-engineer",
+    "company_url": "https://wellfound.com/company/uniblox",
+    "requirements": [
+      "3-5 years ML experience",
+      "Python/TensorFlow/PyTorch",
+      "AWS/GCP/Azure cloud",
+      "MLOps (MLflow/Docker/K8s)",
+      "NLP/time-series/RAG experience"
+    ],
+    "location": "Remote only \u2022 India",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Off The Record",
+    "domain": "offtherecord.com",
+    "role": "Software Engineer",
+    "salary_band": "Not listed",
+    "company_size": "11-50",
+    "what_they_do": "Fight your traffic tickets directly from your smartphone.",
+    "apply_url": "https://wellfound.com/company/off-the-record",
+    "company_url": "https://wellfound.com/company/off-the-record",
+    "requirements": [
+      "Full-stack development",
+      "Mobile-first product"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Kick Health",
+    "domain": "kickhealth.com",
+    "role": "Software Engineer",
+    "salary_band": "Not listed",
+    "company_size": "11-50",
+    "what_they_do": "Online performance medicine clinic for energizing sleep and confident presentations.",
+    "apply_url": "https://wellfound.com/company/kick-health",
+    "company_url": "https://wellfound.com/company/kick-health",
+    "requirements": [
+      "Full-stack engineering",
+      "Health/wellness tech"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Vannevar Labs",
+    "domain": "vannevarlabs.com",
+    "role": "Software Engineer",
+    "salary_band": "Not listed",
+    "company_size": "11-50",
+    "what_they_do": "Defense technology for the digital domain.",
+    "apply_url": "https://wellfound.com/company/vannevar-labs",
+    "company_url": "https://wellfound.com/company/vannevar-labs",
+    "requirements": [
+      "Security clearance eligible",
+      "Systems engineering"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Humanly",
+    "domain": "humanly.io",
+    "role": "Software Engineer",
+    "salary_band": "Not listed",
+    "company_size": "11-50",
+    "what_they_do": "AI-powered recruiting platform for candidate screening and engagement.",
+    "apply_url": "https://wellfound.com/company/humanly",
+    "company_url": "https://wellfound.com/company/humanly",
+    "requirements": [
+      "Full-stack development",
+      "AI/ML experience preferred"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Harmonize",
+    "domain": "harmonize.com",
+    "role": "Software Engineer",
+    "salary_band": "Not listed",
+    "company_size": "11-50",
+    "what_they_do": "Sales and marketing software for enterprise.",
+    "apply_url": "https://wellfound.com/company/harmonize",
+    "company_url": "https://wellfound.com/company/harmonize",
+    "requirements": [
+      "Full-stack development"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Scholarly Software",
+    "domain": "scholarlysoftware.com",
+    "role": "Software Engineer",
+    "salary_band": "Not listed",
+    "company_size": "11-50",
+    "what_they_do": "EdTech company building AI-powered faculty data platform.",
+    "apply_url": "https://wellfound.com/company/scholarly-software",
+    "company_url": "https://wellfound.com/company/scholarly-software",
+    "requirements": [
+      "EdTech or SaaS experience",
+      "Data platform engineering"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Backpack",
+    "domain": "backpack.co",
+    "role": "Software Engineer",
+    "salary_band": "Not listed",
+    "company_size": "11-50",
+    "what_they_do": "Building financial infrastructure for higher education.",
+    "apply_url": "https://wellfound.com/company/backpack",
+    "company_url": "https://wellfound.com/company/backpack",
+    "requirements": [
+      "Financial systems or fintech experience",
+      "Full-stack development"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "SpendAi",
+    "domain": "spendai.com",
+    "role": "Software Engineer",
+    "salary_band": "Not listed",
+    "company_size": "1-10",
+    "what_they_do": "Focused on procurement data and business analytics using AI.",
+    "apply_url": "https://wellfound.com/company/spendai",
+    "company_url": "https://wellfound.com/company/spendai",
+    "requirements": [
+      "Data/analytics engineering",
+      "AI/ML for procurement"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Stripecraft",
+    "domain": "stripecraft.dev",
+    "role": "Software Engineer",
+    "salary_band": "Not listed",
+    "company_size": "1-10",
+    "what_they_do": "Building applied AI infrastructure.",
+    "apply_url": "https://wellfound.com/company/stripecraft",
+    "company_url": "https://wellfound.com/company/stripecraft",
+    "requirements": [
+      "AI infrastructure experience",
+      "Systems engineering"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Tamarack Software",
+    "domain": "tamaracksoftware.com",
+    "role": "Software Engineer",
+    "salary_band": "Not listed",
+    "company_size": "11-50",
+    "what_they_do": "Modern, end-to-end software for the wood processing industry.",
+    "apply_url": "https://wellfound.com/company/tamarack-software-1",
+    "company_url": "https://wellfound.com/company/tamarack-software-1",
+    "requirements": [
+      "Industrial software experience",
+      "Full-stack development"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Crema Social",
+    "domain": "cremasocial.com",
+    "role": "Software Engineer",
+    "salary_band": "Not listed",
+    "company_size": "1-10",
+    "what_they_do": "International dating platform through social meal experiences.",
+    "apply_url": "https://wellfound.com/company/crema-social",
+    "company_url": "https://wellfound.com/company/crema-social",
+    "requirements": [
+      "Mobile app development",
+      "Social/network features"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Uniblox",
+    "domain": "uniblox.io",
+    "role": "Staff Software Engineer",
+    "salary_band": "Not listed",
+    "company_size": "11-50",
+    "what_they_do": "eCommerce for Insurance using AI, NLP, and LLMs.",
+    "apply_url": "https://wellfound.com/jobs/4574551-staff-software-engineer",
+    "company_url": "https://wellfound.com/company/uniblox",
+    "requirements": [
+      "7+ years SWE experience",
+      "Architecture/design skills",
+      "Insurance/fintech domain a plus"
+    ],
+    "location": "Seattle \u2022 Remote",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Orchard Robotics",
+    "domain": "orchardrobotics.com",
+    "role": "Software Engineer",
+    "salary_band": "Not listed",
+    "company_size": "11-50",
+    "what_they_do": "Securing America's food supply by building the AI farmer that automates nation's farms.",
+    "apply_url": "https://wellfound.com/company/orchard-robotics",
+    "company_url": "https://wellfound.com/company/orchard-robotics",
+    "requirements": [
+      "Robotics/ML experience",
+      "Agricultural tech"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Thresh Consulting",
+    "domain": "threshconsulting.com",
+    "role": "Software Engineer",
+    "salary_band": "Not listed",
+    "company_size": "11-50",
+    "what_they_do": "Modern digital consulting firm built for the AI era.",
+    "apply_url": "https://wellfound.com/company/thresh-consulting",
+    "company_url": "https://wellfound.com/company/thresh-consulting",
+    "requirements": [
+      "AI consulting experience",
+      "Full-stack development"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "CityZeen",
+    "domain": "cityzeen.com",
+    "role": "Software Engineer",
+    "salary_band": "Not listed",
+    "company_size": "11-50",
+    "what_they_do": "Build Wealth, Heal Earth \u2013 sustainability and real estate technology.",
+    "apply_url": "https://wellfound.com/company/cityzeeninc",
+    "company_url": "https://wellfound.com/company/cityzeeninc",
+    "requirements": [
+      "Sustainability tech experience",
+      "Full-stack development"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/location/seattle",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Comcast",
+    "domain": "comcast.com",
+    "role": "Advertising Account Executive 1",
+    "salary_band": "$55K-$100K",
+    "company_size": "10000+",
+    "what_they_do": "Digital media and entertainment conglomerate providing cable, broadband, streaming, and advertising services.",
+    "apply_url": "https://builtin.com/job/advertising-account-executive-1/10050321",
+    "company_url": "https://builtin.com/company/comcast-3",
+    "requirements": [
+      "CRM proficiency",
+      "Prospecting and closing skills",
+      "Small business portfolio management"
+    ],
+    "location": "Seattle, WA (Hybrid)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "Airwallex",
+    "domain": "airwallex.com",
+    "role": "Senior Employment Counsel, Americas",
+    "salary_band": "$160K-$270K",
+    "company_size": "1000-5000",
+    "what_they_do": "Global fintech platform enabling cross-border payments and financial infrastructure for businesses.",
+    "apply_url": "https://builtin.com/job/senior-employment-counsel-americas/10787385",
+    "company_url": "https://builtin.com/company/airwallex",
+    "requirements": [
+      "Employment law expertise",
+      "Multi-jurisdiction experience",
+      "Fintech regulatory knowledge"
+    ],
+    "location": "Seattle, WA (Hybrid)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "Airwallex",
+    "domain": "airwallex.com",
+    "role": "Sales Development Representative, Commercial",
+    "salary_band": "$90K-$101K",
+    "company_size": "1000-5000",
+    "what_they_do": "Global fintech platform enabling cross-border payments and financial infrastructure for businesses.",
+    "apply_url": "https://builtin.com/job/sales-development-representative-commercial/10769315",
+    "company_url": "https://builtin.com/company/airwallex",
+    "requirements": [
+      "Sales prospecting",
+      "LinkedIn Sales Navigator",
+      "Outreach",
+      "Salesforce"
+    ],
+    "location": "Seattle, WA (Remote)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "Airwallex",
+    "domain": "airwallex.com",
+    "role": "Account Executive, Commercial",
+    "salary_band": "$136K-$166K",
+    "company_size": "1000-5000",
+    "what_they_do": "Global fintech platform enabling cross-border payments and financial infrastructure for businesses.",
+    "apply_url": "https://builtin.com/job/account-executive-commercial/10769299",
+    "company_url": "https://builtin.com/company/airwallex",
+    "requirements": [
+      "B2B sales cycle management",
+      "Fintech/payments knowledge",
+      "CRM systems"
+    ],
+    "location": "Seattle, WA (Remote)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "Snap Inc.",
+    "domain": "snap.com",
+    "role": "Product Manager, Lead Generation",
+    "salary_band": "$178K-$313K",
+    "company_size": "5000-10000",
+    "what_they_do": "Multimedia messaging app and camera company known for Snapchat, AR lenses, and advertising platform.",
+    "apply_url": "https://builtin.com/job/product-manager-lead-generation/9518285",
+    "company_url": "https://builtin.com/company/snap-inc",
+    "requirements": [
+      "Data Studio",
+      "Looker",
+      "SQL",
+      "Tableau",
+      "Product strategy"
+    ],
+    "location": "Seattle, WA (Hybrid)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "Snap Inc.",
+    "domain": "snap.com",
+    "role": "People Application Developer",
+    "salary_band": "$133K-$235K",
+    "company_size": "5000-10000",
+    "what_they_do": "Multimedia messaging app and camera company known for Snapchat, AR lenses, and advertising platform.",
+    "apply_url": "https://builtin.com/job/people-application-developer/9673497",
+    "company_url": "https://builtin.com/company/snap-inc",
+    "requirements": [
+      "Java",
+      "Python",
+      "React",
+      "GCP",
+      "LLM APIs",
+      "Angular",
+      "Node.js",
+      "Workday"
+    ],
+    "location": "Seattle, WA (Hybrid)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "Snap Inc.",
+    "domain": "snap.com",
+    "role": "Staff Machine Learning Engineer, Search Ranking",
+    "salary_band": "$195K-$343K",
+    "company_size": "5000-10000",
+    "what_they_do": "Multimedia messaging app and camera company known for Snapchat, AR lenses, and advertising platform.",
+    "apply_url": "https://builtin.com/job/staff-machine-learning-engineer-search-ranking/9509342",
+    "company_url": "https://builtin.com/company/snap-inc",
+    "requirements": [
+      "PyTorch",
+      "TensorFlow",
+      "Python",
+      "C++",
+      "Spark",
+      "Flink",
+      "Beam",
+      "Scala"
+    ],
+    "location": "Seattle, WA (Hybrid)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "JPMorgan Chase",
+    "domain": "jpmorganchase.com",
+    "role": "Software Engineer III - Machine Learning Platform",
+    "salary_band": "Not listed",
+    "company_size": "10000+",
+    "what_they_do": "Global financial services firm providing banking, investment, and asset management services.",
+    "apply_url": "https://builtin.com/job/software-engineer-iii-machine-learning-platform/10787245",
+    "company_url": "https://builtin.com/company/jpmorgan-chase",
+    "requirements": [
+      "AWS",
+      "Kubernetes",
+      "Python",
+      "PyTorch",
+      "Spark",
+      "GPU computing",
+      "CI/CD"
+    ],
+    "location": "Seattle, WA (Hybrid)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "JPMorgan Chase",
+    "domain": "jpmorganchase.com",
+    "role": "Software Engineer III - AI/ML Platform Engineer",
+    "salary_band": "Not listed",
+    "company_size": "10000+",
+    "what_they_do": "Global financial services firm providing banking, investment, and asset management services.",
+    "apply_url": "https://builtin.com/job/software-engineer-iii-ai-ml-platform-engineer/10782556",
+    "company_url": "https://builtin.com/company/jpmorgan-chase",
+    "requirements": [
+      "Kubernetes",
+      "Docker",
+      "Java",
+      "Python",
+      "React",
+      "LLMs",
+      "RAG",
+      "Elasticsearch"
+    ],
+    "location": "Seattle, WA (Hybrid)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "CoreWeave",
+    "domain": "coreweave.com",
+    "role": "Learning Partner- Operations, Systems & Platforms",
+    "salary_band": "$127K-$168K",
+    "company_size": "1000-5000",
+    "what_they_do": "Cloud infrastructure provider specializing in GPU-accelerated computing for AI/ML workloads.",
+    "apply_url": "https://builtin.com/job/learning-partner-operations-systems-platforms/10008455",
+    "company_url": "https://builtin.com/company/coreweave",
+    "requirements": [
+      "LMS administration",
+      "AI tools",
+      "BI tools",
+      "HRIS",
+      "Data analysis"
+    ],
+    "location": "Seattle, WA (In-Office)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "CoreWeave",
+    "domain": "coreweave.com",
+    "role": "Engineering Manager, Fleet Engineering",
+    "salary_band": "$165K-$242K",
+    "company_size": "1000-5000",
+    "what_they_do": "Cloud infrastructure provider specializing in GPU-accelerated computing for AI/ML workloads.",
+    "apply_url": "https://builtin.com/job/engineering-manager-fleet-engineering/10782809",
+    "company_url": "https://builtin.com/company/coreweave",
+    "requirements": [
+      "Go",
+      "React",
+      "TypeScript",
+      "Kubernetes",
+      "CI/CD",
+      "Prometheus",
+      "Grafana"
+    ],
+    "location": "Seattle, WA (In-Office)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "CoreWeave",
+    "domain": "coreweave.com",
+    "role": "Finance Manager",
+    "salary_band": "$127K-$168K",
+    "company_size": "1000-5000",
+    "what_they_do": "Cloud infrastructure provider specializing in GPU-accelerated computing for AI/ML workloads.",
+    "apply_url": "https://builtin.com/job/finance-manager/10481691",
+    "company_url": "https://builtin.com/company/coreweave",
+    "requirements": [
+      "FP&A",
+      "Excel",
+      "SQL",
+      "Tableau",
+      "Budgeting and forecasting"
+    ],
+    "location": "Seattle, WA (In-Office)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "Remitly",
+    "domain": "remitly.com",
+    "role": "Senior Marketing Analyst",
+    "salary_band": "$132K-$165K",
+    "company_size": "2500-5000",
+    "what_they_do": "Digital remittance service enabling fast, affordable international money transfers.",
+    "apply_url": "https://builtin.com/job/senior-marketing-analyst/9668817",
+    "company_url": "https://builtin.com/company/remitly",
+    "requirements": [
+      "Python",
+      "R",
+      "SQL",
+      "KPI dashboards",
+      "Experiment design"
+    ],
+    "location": "Seattle, WA (In-Office)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "Remitly",
+    "domain": "remitly.com",
+    "role": "Senior Software Engineer, Decision Intelligence Platform",
+    "salary_band": "$180K-$225K",
+    "company_size": "2500-5000",
+    "what_they_do": "Digital remittance service enabling fast, affordable international money transfers.",
+    "apply_url": "https://builtin.com/job/senior-software-engineer-decision-intelligence-platform/9173905",
+    "company_url": "https://builtin.com/company/remitly",
+    "requirements": [
+      "Java",
+      "Kotlin",
+      "Python",
+      "Go",
+      "Event-driven systems",
+      "Cloud platforms"
+    ],
+    "location": "Seattle, WA (In-Office)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "Remitly",
+    "domain": "remitly.com",
+    "role": "Staff Engineer, Receiver Products",
+    "salary_band": "$208K-$260K",
+    "company_size": "2500-5000",
+    "what_they_do": "Digital remittance service enabling fast, affordable international money transfers.",
+    "apply_url": "https://builtin.com/job/staff-engineer-receiver-products/10552157",
+    "company_url": "https://builtin.com/company/remitly",
+    "requirements": [
+      "Full-stack development",
+      "AWS/GCP/Azure",
+      "React",
+      "Java/Kotlin",
+      "Distributed systems",
+      "AI-native workflows"
+    ],
+    "location": "Seattle, WA (In-Office)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "Whatnot",
+    "domain": "whatnot.com",
+    "role": "Payroll Analyst",
+    "salary_band": "$95K-$105K",
+    "company_size": "500-1000",
+    "what_they_do": "Live-stream shopping marketplace for collectibles, sneakers, and other enthusiast goods.",
+    "apply_url": "https://builtin.com/job/payroll-analyst/8561847",
+    "company_url": "https://builtin.com/company/whatnot",
+    "requirements": [
+      "Workday Payroll",
+      "ADP",
+      "Multi-state compliance",
+      "Excel"
+    ],
+    "location": "Seattle, WA (In-Office or Remote)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "Whatnot",
+    "domain": "whatnot.com",
+    "role": "Data Engineer",
+    "salary_band": "$180K-$260K",
+    "company_size": "500-1000",
+    "what_they_do": "Live-stream shopping marketplace for collectibles, sneakers, and other enthusiast goods.",
+    "apply_url": "https://builtin.com/job/data-engineer/7415754",
+    "company_url": "https://builtin.com/company/whatnot",
+    "requirements": [
+      "Airflow",
+      "BigQuery",
+      "Snowflake",
+      "Python",
+      "Kafka",
+      "Spark",
+      "dbt",
+      "SQL"
+    ],
+    "location": "Seattle, WA (In-Office)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "Whatnot",
+    "domain": "whatnot.com",
+    "role": "Data Scientist, Risk & Fraud",
+    "salary_band": "$194K-$215K",
+    "company_size": "500-1000",
+    "what_they_do": "Live-stream shopping marketplace for collectibles, sneakers, and other enthusiast goods.",
+    "apply_url": "https://builtin.com/job/data-scientist-risk-fraud/8336612",
+    "company_url": "https://builtin.com/company/whatnot",
+    "requirements": [
+      "Python",
+      "SQL",
+      "BigQuery",
+      "Snowflake",
+      "dbt",
+      "Spark",
+      "Fraud analytics"
+    ],
+    "location": "Seattle, WA (In-Office)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "ZS",
+    "domain": "zs.com",
+    "role": "Strategy Insights & Planning Manager (High Tech clients)",
+    "salary_band": "$200K-$230K",
+    "company_size": "10000+",
+    "what_they_do": "Professional services firm specializing in sales and marketing consulting for life sciences and tech.",
+    "apply_url": "https://builtin.com/job/strategy-insights-planning-manager-beyond-healthcare/8203503",
+    "company_url": "https://builtin.com/company/zs",
+    "requirements": [
+      "Data science",
+      "Project management",
+      "Client relationship management",
+      "Business development"
+    ],
+    "location": "Seattle, WA (Hybrid)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "ServiceNow",
+    "domain": "servicenow.com",
+    "role": "Sr Staff Product Manager \u2014 AI & Product Led Motion",
+    "salary_band": "$191K-$334K",
+    "company_size": "10000+",
+    "what_they_do": "Enterprise cloud platform providing digital workflow automation and IT service management solutions.",
+    "apply_url": "https://builtin.com/job/sr-staff-product-manager-ai-product-led-motion/10561832",
+    "company_url": "https://builtin.com/company/servicenow",
+    "requirements": [
+      "AI agents",
+      "Amplitude",
+      "Mixpanel",
+      "Pendo",
+      "Generative AI",
+      "Experimentation"
+    ],
+    "location": "Seattle, WA (Remote or Hybrid)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "ServiceNow",
+    "domain": "servicenow.com",
+    "role": "Sr Staff Product Manager \u2013 AI Monetization (Pricing & Packaging)",
+    "salary_band": "$191K-$334K",
+    "company_size": "10000+",
+    "what_they_do": "Enterprise cloud platform providing digital workflow automation and IT service management solutions.",
+    "apply_url": "https://builtin.com/job/sr-staff-product-manager-ai-monetization-pricing-packaging/10783072",
+    "company_url": "https://builtin.com/company/servicenow",
+    "requirements": [
+      "AI/ML platform architecture",
+      "SaaS pricing",
+      "Consumption models",
+      "Go-to-market strategy"
+    ],
+    "location": "Seattle, WA (Hybrid)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "ServiceNow",
+    "domain": "servicenow.com",
+    "role": "Staff Reliability Engineer",
+    "salary_band": "$167K-$291K",
+    "company_size": "10000+",
+    "what_they_do": "Enterprise cloud platform providing digital workflow automation and IT service management solutions.",
+    "apply_url": "https://builtin.com/job/staff-reliability-engineer/10783070",
+    "company_url": "https://builtin.com/company/servicenow",
+    "requirements": [
+      "Kubernetes",
+      "CI/CD",
+      "GitOps",
+      "Terraform",
+      "Prometheus",
+      "Go",
+      "Python",
+      "Ansible"
+    ],
+    "location": "Seattle, WA (Hybrid)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "Superhuman",
+    "domain": "superhuman.com",
+    "role": "Systems Specialist, Lifecycle Marketing",
+    "salary_band": "$85K-$130K",
+    "company_size": "100-200",
+    "what_they_do": "AI-powered email client designed for speed and productivity with advanced keyboard shortcuts.",
+    "apply_url": "https://builtin.com/job/systems-specialist-lifecycle-marketing/10108222",
+    "company_url": "https://builtin.com/company/superhuman-1",
+    "requirements": [
+      "Hightouch",
+      "Braze",
+      "Iterable",
+      "BigQuery",
+      "Snowflake",
+      "SQL",
+      "Claude AI"
+    ],
+    "location": "Seattle, WA (Remote or Hybrid)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "Superhuman",
+    "domain": "superhuman.com",
+    "role": "Product Security Engineer",
+    "salary_band": "$188K-$250K",
+    "company_size": "100-200",
+    "what_they_do": "AI-powered email client designed for speed and productivity with advanced keyboard shortcuts.",
+    "apply_url": "https://builtin.com/job/corporate-security-engineer/10567669",
+    "company_url": "https://builtin.com/company/superhuman-1",
+    "requirements": [
+      "Threat modeling",
+      "SAST/DAST",
+      "Pentesting",
+      "Python",
+      "Java",
+      "Bugcrowd",
+      "HackerOne"
+    ],
+    "location": "Seattle, WA (Hybrid)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "Atlassian",
+    "domain": "atlassian.com",
+    "role": "Senior Principal Forward Deployed Engineer",
+    "salary_band": "$202K-$318K",
+    "company_size": "10000+",
+    "what_they_do": "Collaboration software company behind Jira, Confluence, Trello, and Rovo AI products.",
+    "apply_url": "https://builtin.com/job/senior-principal-forward-deployed-engineer/10552093",
+    "company_url": "https://builtin.com/company/atlassian",
+    "requirements": [
+      "Python",
+      "JavaScript",
+      "AI/ML",
+      "LLMs",
+      "Rovo",
+      "APIs",
+      "Microservices",
+      "GDPR"
+    ],
+    "location": "Seattle, WA (In-Office or Remote)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.991Z"
+  },
+  {
+    "company": "Atlassian",
+    "domain": "atlassian.com",
+    "role": "Product Manager, Rovo",
+    "salary_band": "$120K-$189K",
+    "company_size": "10000+",
+    "what_they_do": "Collaboration software company behind Jira, Confluence, Trello, and Rovo AI products.",
+    "apply_url": "https://builtin.com/job/product-manager-rovo/10552137",
+    "company_url": "https://builtin.com/company/atlassian",
+    "requirements": [
+      "Conversational AI",
+      "LLMs",
+      "RAG pipelines",
+      "Prompt engineering",
+      "JIRA",
+      "Confluence"
+    ],
+    "location": "Seattle, WA (In-Office or Remote)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "CrowdStrike",
+    "domain": "crowdstrike.com",
+    "role": "Professional Services Technical Operations Engineer - Agentic AI",
+    "salary_band": "$120K-$180K",
+    "company_size": "10000+",
+    "what_they_do": "Cybersecurity company providing endpoint protection, threat intelligence, and incident response.",
+    "apply_url": "https://builtin.com/job/professional-services-technical-operations-engineer-agentic-ai-remote/10326081",
+    "company_url": "https://builtin.com/company/crowdstrike",
+    "requirements": [
+      "Agentic AI",
+      "LangGraph",
+      "CrewAI",
+      "Python",
+      "AWS",
+      "LLMs",
+      "Slack bot frameworks"
+    ],
+    "location": "Remote or Hybrid",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "CrowdStrike",
+    "domain": "crowdstrike.com",
+    "role": "Next-Gen SIEM Resident Consultant",
+    "salary_band": "$85K-$120K",
+    "company_size": "10000+",
+    "what_they_do": "Cybersecurity company providing endpoint protection, threat intelligence, and incident response.",
+    "apply_url": "https://builtin.com/job/crowdstrike-next-gen-siem-resident-consultant-remote/10353639",
+    "company_url": "https://builtin.com/company/crowdstrike",
+    "requirements": [
+      "AWS/Azure/GCP",
+      "SIEM",
+      "Detection engineering",
+      "Python",
+      "Splunk",
+      "KQL"
+    ],
+    "location": "Remote or Hybrid",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "DigitalOcean",
+    "domain": "digitalocean.com",
+    "role": "Software Engineer, Automation",
+    "salary_band": "$98K-$122K",
+    "company_size": "1000-5000",
+    "what_they_do": "Cloud infrastructure provider offering simple, developer-friendly hosting and compute services.",
+    "apply_url": "https://builtin.com/job/software-engineer-automation/10784938",
+    "company_url": "https://builtin.com/company/digitalocean",
+    "requirements": [
+      "Go",
+      "Python",
+      "AI-assisted development",
+      "Concourse",
+      "GitHub Actions",
+      "Linux"
+    ],
+    "location": "Seattle, WA (In-Office)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "DigitalOcean",
+    "domain": "digitalocean.com",
+    "role": "Principal Software Engineer",
+    "salary_band": "$235K-$294K",
+    "company_size": "1000-5000",
+    "what_they_do": "Cloud infrastructure provider offering simple, developer-friendly hosting and compute services.",
+    "apply_url": "https://builtin.com/job/principal-software-engineer/10765369",
+    "company_url": "https://builtin.com/company/digitalocean",
+    "requirements": [
+      "Go",
+      "IAM/KMS",
+      "OAUTH2",
+      "OIDC",
+      "Kubernetes",
+      "OPA/Rego",
+      "HSM",
+      "Terraform"
+    ],
+    "location": "Seattle, WA (In-Office)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "DigitalOcean",
+    "domain": "digitalocean.com",
+    "role": "Senior Software Engineer, Identity & Access Management",
+    "salary_band": "$141K-$176K",
+    "company_size": "1000-5000",
+    "what_they_do": "Cloud infrastructure provider offering simple, developer-friendly hosting and compute services.",
+    "apply_url": "https://builtin.com/job/senior-software-engineer-identity-access-management/10765338",
+    "company_url": "https://builtin.com/company/digitalocean",
+    "requirements": [
+      "Go",
+      "OIDC",
+      "SAML",
+      "Kubernetes",
+      "OPA",
+      "Terraform",
+      "ABAC/RBAC"
+    ],
+    "location": "Seattle, WA (In-Office)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "Opendoor",
+    "domain": "opendoor.com",
+    "role": "Sr. Manager, Performance Marketing",
+    "salary_band": "Not listed",
+    "company_size": "1000-5000",
+    "what_they_do": "PropTech company using technology to buy and sell homes online with instant cash offers.",
+    "apply_url": "https://builtin.com/job/sr-manager-performance-marketing/9872966",
+    "company_url": "https://builtin.com/company/opendoor",
+    "requirements": [
+      "Paid social",
+      "Programmatic",
+      "CTV/TV",
+      "GA4",
+      "DV360",
+      "SQL",
+      "LLMs",
+      "MMM"
+    ],
+    "location": "Seattle, WA (Hybrid)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "Opendoor",
+    "domain": "opendoor.com",
+    "role": "Product Manager, Search & Discovery",
+    "salary_band": "Not listed",
+    "company_size": "1000-5000",
+    "what_they_do": "PropTech company using technology to buy and sell homes online with instant cash offers.",
+    "apply_url": "https://builtin.com/job/product-manager-search-discovery/9872957",
+    "company_url": "https://builtin.com/company/opendoor",
+    "requirements": [
+      "Search/Recommendations",
+      "Data analysis",
+      "User research",
+      "A/B testing"
+    ],
+    "location": "Seattle, WA (Hybrid)",
+    "source_url": "https://builtinseattle.com/jobs",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "Crexi",
+    "domain": "crexi.com",
+    "role": "Various (Commercial Real Estate AI)",
+    "salary_band": "Not listed",
+    "company_size": "100-500",
+    "what_they_do": "AI-powered commercial real estate platform for property intelligence, deal management, and auctions.",
+    "apply_url": "https://builtin.com/company/crexi",
+    "company_url": "https://www.crexi.com",
+    "requirements": [
+      "AI/ML",
+      "Real estate domain knowledge",
+      "Full-stack engineering"
+    ],
+    "location": "Seattle, WA (listed as Seattle startup)",
+    "source_url": "https://builtin.com/companies/seattle-wa/startups",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "Digible",
+    "domain": "digible.com",
+    "role": "Various (Apartment Marketing AI)",
+    "salary_band": "Not listed",
+    "company_size": "11-50",
+    "what_they_do": "AI-driven apartment marketing company with predictive analytics platform Fiona for property management.",
+    "apply_url": "https://builtin.com/company/digible",
+    "company_url": "https://www.digible.com",
+    "requirements": [
+      "Digital marketing",
+      "Paid search/social",
+      "Geofencing",
+      "AI analytics"
+    ],
+    "location": "Seattle, WA (listed as Seattle startup)",
+    "source_url": "https://builtin.com/companies/seattle-wa/startups",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "Posh",
+    "domain": "poshevents.com",
+    "role": "Various (Social Events Platform)",
+    "salary_band": "Not listed",
+    "company_size": "11-50",
+    "what_they_do": "Social media platform dedicated to real-life social experiences and event creation/discovery.",
+    "apply_url": "https://builtin.com/company/posh",
+    "company_url": "https://www.poshevents.com",
+    "requirements": [
+      "Platform engineering",
+      "Community building",
+      "Social product experience"
+    ],
+    "location": "Seattle, WA (listed as Seattle startup)",
+    "source_url": "https://builtin.com/companies/seattle-wa/startups",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "Spade",
+    "domain": "spade.io",
+    "role": "Various (Transaction Data Enrichment)",
+    "salary_band": "Not listed",
+    "company_size": "11-50",
+    "what_they_do": "Transaction data enrichment platform providing merchant, category, and geolocation details for fintech.",
+    "apply_url": "https://builtin.com/company/spade",
+    "company_url": "https://www.spade.io",
+    "requirements": [
+      "Data engineering",
+      "Fintech domain",
+      "API development",
+      "ML"
+    ],
+    "location": "Seattle, WA (listed as Seattle startup)",
+    "source_url": "https://builtin.com/companies/seattle-wa/startups",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "ARB Interactive",
+    "domain": "arbinteractive.com",
+    "role": "Various (Social Gaming Platform)",
+    "salary_band": "Not listed",
+    "company_size": "11-50",
+    "what_they_do": "Team behind Modo Casino, a top Social+ gaming and sweepstakes platform in the U.S.",
+    "apply_url": "https://builtin.com/company/arb-interactive",
+    "company_url": "https://www.arbinteractive.com",
+    "requirements": [
+      "Gaming/sweepstakes tech",
+      "Platform engineering",
+      "Full-stack development"
+    ],
+    "location": "Seattle, WA (listed as Seattle startup)",
+    "source_url": "https://builtin.com/companies/seattle-wa/startups",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "Mastery",
+    "domain": "mastery.io",
+    "role": "Various (Logistics SaaS)",
+    "salary_band": "Not listed",
+    "company_size": "51-200",
+    "what_they_do": "World's first Lovable Transportation Management System (TMS) for logistics and supply chain automation.",
+    "apply_url": "https://builtin.com/company/mastery",
+    "company_url": "https://www.mastery.io",
+    "requirements": [
+      "Logistics domain",
+      "SaaS platform",
+      "Cloud infrastructure",
+      "Supply chain knowledge"
+    ],
+    "location": "Seattle, WA (listed as Seattle startup)",
+    "source_url": "https://builtin.com/companies/seattle-wa/startups",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "Yext",
+    "domain": "yext.com",
+    "role": "Various (Agentic Marketing Platform)",
+    "salary_band": "Not listed",
+    "company_size": "1000-5000",
+    "what_they_do": "Enterprise agentic marketing platform with structured data for local businesses across AI search.",
+    "apply_url": "https://builtin.com/company/yext",
+    "company_url": "https://www.yext.com",
+    "requirements": [
+      "APIs",
+      "MCP servers",
+      "Generative AI",
+      "Search/discovery",
+      "Enterprise SaaS"
+    ],
+    "location": "Seattle, WA (listed as Seattle startup)",
+    "source_url": "https://builtin.com/companies/seattle-wa/startups",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "Tufin",
+    "domain": "tufin.com",
+    "role": "Various (Network Security Automation)",
+    "salary_band": "Not listed",
+    "company_size": "500-1000",
+    "what_they_do": "Network security policy management company automating firewall and network device security changes.",
+    "apply_url": "https://builtin.com/company/tufin",
+    "company_url": "https://www.tufin.com",
+    "requirements": [
+      "Network security",
+      "Firewall management",
+      "Cloud security",
+      "Automation orchestration"
+    ],
+    "location": "Seattle, WA (listed as Seattle startup)",
+    "source_url": "https://builtin.com/companies/seattle-wa/startups",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "Piaggio Fast Forward",
+    "domain": "piaggiofastforward.com",
+    "role": "Various (Robotics)",
+    "salary_band": "Not listed",
+    "company_size": "51-200",
+    "what_they_do": "Robotics company solving human-robot interaction in dynamic environments, spinoff of Piaggio Group.",
+    "apply_url": "https://builtin.com/company/piaggio-fast-forward",
+    "company_url": "https://www.piaggiofastforward.com",
+    "requirements": [
+      "Robotics",
+      "Computer vision",
+      "Motion planning",
+      "ROS"
+    ],
+    "location": "Seattle, WA (listed as Seattle startup)",
+    "source_url": "https://builtin.com/companies/seattle-wa/startups",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "MongoDB",
+    "domain": "mongodb.com",
+    "role": "Various (Developer Data Platform)",
+    "salary_band": "Not listed",
+    "company_size": "5000-10000",
+    "what_they_do": "Developer data platform company providing NoSQL database and cloud services for modern applications.",
+    "apply_url": "https://builtin.com/company/mongodb",
+    "company_url": "https://www.mongodb.com",
+    "requirements": [
+      "Database engineering",
+      "Cloud platforms",
+      "Developer tools",
+      "Distributed systems"
+    ],
+    "location": "Seattle, WA (listed as Seattle startup)",
+    "source_url": "https://builtin.com/companies/seattle-wa/startups",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "Skillsoft",
+    "domain": "skillsoft.com",
+    "role": "Various (AI-native Skills Management)",
+    "salary_band": "Not listed",
+    "company_size": "5000-10000",
+    "what_they_do": "Global leader in AI-native skills management for the human+AI era with enterprise learning solutions.",
+    "apply_url": "https://builtin.com/company/skillsoft",
+    "company_url": "https://www.skillsoft.com",
+    "requirements": [
+      "Enterprise SaaS",
+      "AI/ML",
+      "Learning management",
+      "Workforce analytics"
+    ],
+    "location": "Seattle, WA (listed as Seattle startup)",
+    "source_url": "https://builtin.com/companies/seattle-wa/startups",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "Wolverine Trading",
+    "domain": "wolverinetrading.com",
+    "role": "Various (Financial Technology)",
+    "salary_band": "Not listed",
+    "company_size": "500-1000",
+    "what_they_do": "Diversified financial institutions specializing in proprietary trading, asset management, and technology.",
+    "apply_url": "https://builtin.com/company/the-wolverine-companies",
+    "company_url": "https://www.wolverinetrading.com",
+    "requirements": [
+      "Quantitative finance",
+      "Derivatives",
+      "Technology engineering",
+      "Market data"
+    ],
+    "location": "Seattle, WA (listed as Seattle startup)",
+    "source_url": "https://builtin.com/companies/seattle-wa/startups",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "iManage",
+    "domain": "imanage.com",
+    "role": "Various (Knowledge Work Platform)",
+    "salary_band": "Not listed",
+    "company_size": "1000-5000",
+    "what_they_do": "Intelligent cloud-enabled knowledge work platform used by 1M+ professionals across 65+ countries.",
+    "apply_url": "https://builtin.com/company/imanage",
+    "company_url": "https://www.imanage.com",
+    "requirements": [
+      "Cloud platform",
+      "Enterprise security",
+      "Document management",
+      "AI/ML"
+    ],
+    "location": "Seattle, WA (listed as Seattle startup)",
+    "source_url": "https://builtin.com/companies/seattle-wa/startups",
+    "scraped_at": "2026-08-21T03:11:11.992Z"
+  },
+  {
+    "company": "Karius",
+    "domain": "kariusdx.com",
+    "role": "Clinical Sales Manager (Seattle)",
+    "salary_band": "Not listed",
+    "company_size": "101-200",
+    "what_they_do": "Khosla Ventures; $165M Series B in 2020",
+    "apply_url": "https://jobs.lever.co/kariusdx/35522b16-8ef7-47d8-b6ce-e5dec9017ed7",
+    "company_url": "http://kariusdx.com?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Zum",
+    "domain": "ridezum.com",
+    "role": "Dispatcher",
+    "salary_band": "Not listed",
+    "company_size": "101-200",
+    "what_they_do": "Sequoia; $140M Series E in 2024; $1.3B valuation",
+    "apply_url": "https://jobs.lever.co/ridezum/ddb3c736-93e8-4ff9-a15e-3bfa85d12928",
+    "company_url": "http://ridezum.com?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Zum",
+    "domain": "ridezum.com",
+    "role": "Lead Dispatcher",
+    "salary_band": "Not listed",
+    "company_size": "101-200",
+    "what_they_do": "Sequoia; $140M Series E in 2024; $1.3B valuation",
+    "apply_url": "https://jobs.lever.co/ridezum/52ffa7cf-ce63-4f7d-9b56-0d61e25fce66",
+    "company_url": "http://ridezum.com?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Zum",
+    "domain": "ridezum.com",
+    "role": "Senior Manager, Revenue Operations (Remote, Seattle)",
+    "salary_band": "Not listed",
+    "company_size": "101-200",
+    "what_they_do": "Sequoia; $140M Series E in 2024; $1.3B valuation",
+    "apply_url": "https://jobs.lever.co/ridezum/f5939343-978b-4cf0-b902-632352a24284",
+    "company_url": "http://ridezum.com?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Zum",
+    "domain": "ridezum.com",
+    "role": "Collections & AR Manager (Remote, Seattle)",
+    "salary_band": "Not listed",
+    "company_size": "101-200",
+    "what_they_do": "Sequoia; $140M Series E in 2024; $1.3B valuation",
+    "apply_url": "https://jobs.lever.co/ridezum/a3aa04e9-b386-41b7-9d8c-0084372f9624",
+    "company_url": "http://ridezum.com?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "Zum",
+    "domain": "ridezum.com",
+    "role": "Technician I",
+    "salary_band": "Not listed",
+    "company_size": "101-200",
+    "what_they_do": "Sequoia; $140M Series E in 2024; $1.3B valuation",
+    "apply_url": "https://jobs.lever.co/ridezum/a80ca7d0-f7eb-4b58-a0a9-84628377804d",
+    "company_url": "http://ridezum.com?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Facilities Coordinator",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/8113229",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Senior Product Manager, OlmoEarth",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/8110027",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Senior Software Engineer, Agent Platform (AI for the Planet)",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/8110068",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Head of People",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/8110258",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Payroll Lead",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/8100227",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Young Investigator, Open Language Models for Biology",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/8090222",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Recruiting Coordinator, Temporary",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/8079682",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Senior Software Engineer, AI for the Planet",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/8051877",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Senior Accountant, Temp",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/8065042",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Predoctoral Young Investigator, Open Ecosystem",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/8054878",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Senior Engineering Manager, AI Infrastructure",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/8029564",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Grants Coordinator",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/8024840",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Partnerships Manager",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/8024772",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Senior People Operations Business Partner",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/7992878",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Technical Partner Operations Specialist, OlmoEarth",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/8001511",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Senior Software Engineer, AI Infrastructure",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/7985437",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Senior Research Engineer, Olmo + Molmo",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/7980660",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Senior Lead Product Designer",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/7936724",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Research Engineer, Asta",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/7899565",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Infrastructure Engineer",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/7902196",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Software Engineer, AI for the Planet",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/7909771",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  },
+  {
+    "company": "AI2",
+    "domain": "allenai.org",
+    "role": "Senior Software Engineer, Fullstack",
+    "salary_band": "Not listed",
+    "company_size": "201-500",
+    "what_they_do": "Sequoia; Raised $10M in 2020",
+    "apply_url": "https://job-boards.greenhouse.io/thealleninstitute/jobs/7872642",
+    "company_url": "https://allenai.org/?utm_source=topstartups.io",
+    "requirements": [
+      "Not listed"
+    ],
+    "location": "Seattle",
+    "source_url": "topstartups.io",
+    "scraped_at": "2026-08-20"
+  }
+]

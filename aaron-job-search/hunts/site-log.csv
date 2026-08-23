@@ -1,0 +1,44 @@
+timestamp,site_url,hunt,jobs_reviewed,grade,rationale
+2026-08-20T20:13:15,https://topstartups.io/jobs/?job_location=Seattle,1,156,B,"Rich structured data (company, role, size, funding, apply URL) across 14 pages. Excellent scraper-friendly HTML. BUT: zero companies in 2-50 range. All 156 jobs are at 101+ employe"
+2026-08-20T20:13:15,https://www.builtinseattle.com/jobs,1,25,C,Server-rendered HTML with JSON-LD structured data. 25 jobs visible on first page. BUT: no company size data in job cards (only available on company profile pages). Most visible job
+2026-08-20T20:13:15,https://www.geekwire.com/geekwire-200/,1,0,D,"Cloudflare WAF blocks curl requests entirely. Web search reveals top companies (Helion Energy, Temporal, Truveta, Chainguard) but no job listings. The GeekWire 200 is a ranking ind"
+2026-08-20T20:13:15,https://www.workatastartup.com/companies?location=Seattle,1,0,D,"JS-rendered SPA, curl returns empty shell. Requires browser automation or API access. Web search confirms platform exists and has Seattle companies (Moonset Health, Silurian, Clear"
+2026-08-20T20:13:15,https://otta.com,1,0,E,Requires account creation and login to view any jobs. No public job listings accessible via curl. Search engine returns no indexable job pages. Cannot extract data without authenti
+2026-08-20T20:13:15,https://www.indeed.com/jobs?q=startup&l=Seattle,1,0,E,"Cloudflare WAF blocks all automated requests. Returns 'Blocked - Indeed.com' page. Indeed's algorithm prioritizes large advertisers, burying small startup listings. Even with brows"
+2026-08-20T20:13:15,https://www.fastaijobs.com/jobs/seattle,1,0,E,Empty response from curl. Likely JS-rendered or requires specific headers. Niche AI job board that may have small startup data but cannot be accessed programmatically.
+2026-08-20T20:13:15,https://startup.jobs/?location=Seattle,1,0,E,Empty response from curl. JS-rendered SPA. May have good small startup data but requires browser automation to access.
+2026-08-20T20:11:00,https://wellfound.com/location/seattle,1,452,B,452 total Seattle jobs across 8 pages; 26 at 2-50 employees extracted. JS-heavy SPA but SSR renders. Salary bands present $65k-$270k.
+2026-08-20T20:11:00,https://builtin.com/jobs/seattle-wa/startups,1,~120,A,"46 jobs across 30 companies; 29 with salary bands. Mix large+startup. City filter works, size filter client-side JS."
+2026-08-20T20:11:00,https://builtin.com/companies/seattle-wa/startups,1,~30,B,Company directory with profiles but sparse direct job listings; useful for discovery.
+2026-08-21T12:00:00,https://wellfound.com/location/seattle?page=2,2,19,B,"Page 2: 39 listings on page, 19 parsed. Good salary bands, company sizes, equity data. Mix of startups and mid-size."
+2026-08-21T12:00:00,https://wellfound.com/location/seattle?page=3,2,19,B,"Page 3: 34 listings on page, 19 parsed. Spice AI, Stripecraft, Qumulo, Vannevar Labs. Strong startup mix."
+2026-08-21T12:00:00,https://wellfound.com/location/seattle?page=4,2,13,B,"Page 4: 19 listings on page, 13 parsed. DriveWealth, Harell Data, Tonifo. Good founding-stage roles."
+2026-08-21T12:00:00,https://wellfound.com/location/seattle?page=5,2,15,B,"Page 5: 18 listings on page, 15 parsed. Postman, Starfish Space, Endurance Energy. Mix of growth and early stage."
+2026-08-21T18:48:57.536443,https://builtin.com/jobs/seattle-wa/startups,2-deep,126,A,"126 unique jobs across 57 companies from 5 page loads (startups x3, AI+startup x2). 101 with salary data. 40 company profiles scraped. Server-rendered HTML with JSON-LD and data-id attributes."
+
+2026-08-22T04:22:03.547Z,https://www.builtinseattle.com/jobs/remote/dev-engineering,3,8,B+,"Server-rendered HTML, 8 remote engineering jobs extracted with salary bands ($90K-$313K). Strong data quality. BUT: only 1 page of results, some companies unnamed in cards (need profile pages). Mix of large (Snap, CrowdStrike) and mid-size."
+2026-08-22T04:22:03.547Z,https://wellfound.com/role/l/ai-engineer/seattle,3,8,A,"108 total AI engineer jobs in Seattle. Excellent structured data: salary bands, equity ranges, company size, funding stage. 8 roles extracted from page 1. TaxBit, Brex, Metropolis. SSR-rendered with good job card data."
+2026-08-22T04:22:03.547Z,https://wellfound.com/role/l/software-engineer/seattle,3,5,A,"145 total SE jobs in Seattle. Strong startup focus: StepSecurity, Adronite ($190K-$270K), SpendAi ($170K-$250K), Metropolis. Good salary+equity data. Wellfound excels for small startup discovery."
+2026-08-22T04:22:03.547Z,https://wellfound.com/role/l/full-stack-engineer/seattle,3,4,A-,"52 total FS jobs in Seattle. Klutch AI, Orchard Robotics, MenloExchange (founding role, 0.5-3% equity), AZX. Early-stage startup heavy. Good equity transparency."
+2026-08-22T04:22:03.547Z,https://wellfound.com/remote,3,5,B,"11,789 total remote jobs. Page 1 yield: Calm, LaunchDarkly, Motive, Keep Company. Less Seattle-specific but good for remote-first companies. Salary bands present."
+2026-08-22T04:22:03.547Z,https://www.fastaijobs.com/jobs/seattle,3,5,B+,"1,001 AI startup jobs from 79 companies. Anthropic, Overland AI, Auger, Crusoe. Table-based listing is parseable. But salary data often missing from table (need individual pages). Top companies listed but mostly large (FluidStack, OpenAI, Anduril)."
+2026-08-22T04:22:03.547Z,https://app.otta.com/jobs?query=Seattle,3,0,E,"Login required. Redirects to Welcome to the Jungle sign-in page. No public job listings accessible without authentication. Same result as Hunt 1."
+2026-08-22T04:22:03.547Z,https://builtin.com/jobs/seattle-wa?remote=true,3,0,C,"Generic Built In page, not Seattle-specific remote engineering. Returns Toast sales roles (Ohio) rather than Seattle remote engineering. Seattle filter not effective on this URL variant."
+2026-08-22T00:00:00,https://wellfound.com/role/l/cybersecurity/seattle,4,25,S,"Wellfound cybersecurity Seattle: Writer, Metropolis, Galvanick AI security roles. Direct apply URLs, salary bands, small startups. Highest signal for Aaron."
+2026-08-22T00:00:00,https://careers.checkpoint.com,4,12,A,"Check Point AI Security Unit role directly confirmed. Strong AI red teaming focus."
+2026-08-22T00:00:00,https://openai.com/careers,4,8,A,"OpenAI 3 security roles in Seattle (AppSec, InfraSec, AgentSec). Agent Security peak AI security. Hybrid/remote."
+2026-08-22T00:00:00,https://www.anthropic.com/careers,4,6,A,"Anthropic 4 Seattle security roles. Top comp ($320-405K). AI-native company."
+2026-08-22T00:00:00,https://www.qualtrics.com/careers,4,5,A,"Qualtrics AI Security Architect - prompt injection, agentic AI, MCP. Direct apply URL."
+2026-08-22T00:00:00,https://www.okta.com/company/careers,4,3,A,"Okta Staff AI Security Engineer - agentic workflow security, prompt injection. $180-247K."
+2026-08-22T00:00:00,https://jobs.apple.com,4,4,A,"Apple AI Security Engineer Red Team - ASE Security. Direct apply URL."
+2026-08-22T00:00:00,https://careers.microsoft.com,4,2,B,"Microsoft AI Red Team + Security AI. Redmond. Massive company, harder to find specific listings."
+2026-08-22T00:00:00,https://careers.lululemon.com,4,3,A,"Lululemon Data & AI Security - DSPM/AISPM. On-site Seattle. Direct apply."
+2026-08-22T00:00:00,https://careers.nordstrom.com,4,3,B,"Nordstrom AI Agentic Solutions - guardrails/security. Not pure security but adjacent."
+2026-08-22T00:00:00,https://jpmc.fa.oraclecloud.com,4,2,B,"JPMorgan AI-driven security roles. Financial services, strong comp."
+2026-08-22T00:00:00,https://uw.wd5.myworkdayjobs.com,4,1,A,"UW AI Security Engineer - Azure AI Foundry, RAG isolation. Academic but cutting-edge."
+2026-08-22T00:00:00,https://www.grayswan.ai/careers,4,2,A,"Gray Swan AI - AI red teaming startup, $40M Series A. Remote. Pure AI security."
+2026-08-22T00:00:00,https://builtinseattle.com,4,3,B,"Built In Seattle - CrowdStrike Staff AI Security Scientist. Some signal."
+2026-08-22T00:00:00,https://www.indeed.com,4,0,D,"Indeed - Cloudflare WAF blocks automated access. Discovery only."
+2026-08-22T00:00:00,https://www.dice.com,4,0,D,"Dice - some listings syndicated but mostly large enterprise."
+2026-08-22T00:00:00,https://www.ziprecruiter.com,4,0,D,"ZipRecruiter - blocked by anti-scraping."
+2026-08-22T00:00:00,https://www.fastaijobs.com/jobs/seattle,4,0,E,"Fast AI Jobs - empty response. Cannot access."

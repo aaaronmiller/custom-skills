@@ -1,0 +1,50 @@
+[
+  {
+    "query": "Convert this YouTube transcript into a structured Obsidian note: [transcript text]",
+    "should_trigger": true
+  },
+  {
+    "query": "I pasted a transcript below. Make it an Obsidian-ready knowledge artifact with prompts and tools extracted.",
+    "should_trigger": true
+  },
+  {
+    "query": "Turn these subtitles into a YT-Transcription note with appendices and implementation checklist.",
+    "should_trigger": true
+  },
+  {
+    "query": "Extract commands, frameworks, and examples from this lecture transcript for my vault.",
+    "should_trigger": true
+  },
+  {
+    "query": "Here's a caption dump from a maker video; make it a detailed knowledge note.",
+    "should_trigger": true
+  },
+  {
+    "query": "Make a brief one sentence summary of this paragraph.",
+    "should_trigger": false
+  },
+  {
+    "query": "Download this YouTube video as mp4.",
+    "should_trigger": false
+  },
+  {
+    "query": "Fetch the transcript from this URL only, don't analyze it.",
+    "should_trigger": false
+  },
+  {
+    "query": "Create a PowerPoint from this meeting transcript.",
+    "should_trigger": false
+  },
+  {
+    "query": "Rewrite this email to sound more professional.",
+    "should_trigger": false
+  },
+  {
+    "query": "Can you explain what Obsidian callouts are?",
+    "should_trigger": false
+  },
+  {
+    "query": "Generate a generic Markdown template for project notes.",
+    "should_trigger": false
+  }
+]

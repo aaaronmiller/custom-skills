@@ -1,0 +1,820 @@
+{
+  "hunt_id": 4,
+  "hunt_name": "AI Infrastructure / LLM Ops / Vector DB / MLOps",
+  "date": "2026-08-22",
+  "total_jobs": 36,
+  "sources_used": [
+    {
+      "site": "Wellfound",
+      "url": "wellfound.com",
+      "grade": "A",
+      "notes": "108 AI Engineer + 251 AI Engineer listings in Seattle; best for startup-focused AI infra roles"
+    },
+    {
+      "site": "Built In Seattle",
+      "url": "builtinseattle.com",
+      "grade": "A",
+      "notes": "Strong AI/ML and platform engineering listings; good for enterprise/startup mix"
+    },
+    {
+      "site": "Indeed",
+      "url": "indeed.com",
+      "grade": "B",
+      "notes": "Blocked curl but search returned quality summaries; use for volume"
+    },
+    {
+      "site": "Fast AI Jobs",
+      "url": "fastaijobs.com",
+      "grade": "A",
+      "notes": "Specialized AI job board; tracks funding stages; good for AI infra specifically"
+    },
+    {
+      "site": "Amazon Jobs",
+      "url": "amazon.jobs",
+      "grade": "A",
+      "notes": "Direct listings; OpenSearch Vector Search team actively hiring"
+    },
+    {
+      "site": "Nordstrom Careers",
+      "url": "nordstromcareers.com",
+      "grade": "A",
+      "notes": "AI Agentic Solutions team actively hiring multiple levels"
+    },
+    {
+      "site": "Zoom Careers",
+      "url": "careers.zoom.us",
+      "grade": "A",
+      "notes": "AI Infrastructure Engineer active in Seattle"
+    },
+    {
+      "site": "Anduril Greenhouse",
+      "url": "job-boards.greenhouse.io",
+      "grade": "A",
+      "notes": "Staff AI Infrastructure Engineer with Seattle option"
+    },
+    {
+      "site": "Robinhood Careers",
+      "url": "careers.robinhood.com",
+      "grade": "B",
+      "notes": "ML/AI platform roles in Bellevue; in-office required"
+    },
+    {
+      "site": "CrowdStrike Workday",
+      "url": "crowdstrike.wd5.myworkdayjobs.com",
+      "grade": "B",
+      "notes": "Remote/hybrid AI Platform roles; Redmond hub"
+    },
+    {
+      "site": "ZipRecruiter",
+      "url": "ziprecruiter.com",
+      "grade": "B",
+      "notes": "Volume aggregator; blocked curl but search results useful"
+    },
+    {
+      "site": "GeekWire",
+      "url": "geekwire.com",
+      "grade": "B",
+      "notes": "Industry context articles; good for market intelligence"
+    },
+    {
+      "site": "Haystack",
+      "url": "haystackapp.io",
+      "grade": "B",
+      "notes": "ML job aggregator; daily updates"
+    },
+    {
+      "site": "JoinByteDance",
+      "url": "joinbytedance.com",
+      "grade": "A",
+      "notes": "Direct listings for Seed/Inference team roles"
+    },
+    {
+      "site": "Databricks Careers",
+      "url": "databricks.com/company/careers",
+      "grade": "B",
+      "notes": "Model serving team roles; fluctuating availability in Seattle"
+    },
+    {
+      "site": "Boeing Careers",
+      "url": "jobs.boeing.com",
+      "grade": "A",
+      "notes": "AI Solutions Architect with vector DB/RAG focus"
+    },
+    {
+      "site": "Dice",
+      "url": "dice.com",
+      "grade": "B",
+      "notes": "ML engineering volume listings"
+    },
+    {
+      "site": "Carbon Robotics",
+      "url": "builtinseattle.com",
+      "grade": "B",
+      "notes": "Physical AI / computer vision infrastructure"
+    },
+    {
+      "site": "Nominal",
+      "url": "geekwire.com",
+      "grade": "B",
+      "notes": "Industrial AI startup; recently arrived in Seattle"
+    }
+  ],
+  "jobs": [
+    {
+      "id": 1,
+      "company": "Anduril Industries",
+      "title": "Founding Staff AI Infrastructure Engineer",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Greenhouse",
+      "url": "https://job-boards.greenhouse.io/andurilindustries/jobs/5212860007",
+      "description": "Architect, build, and scale end-to-end ML platform for autonomous systems. Own technical roadmap, build MLOps tooling, create infrastructure to train/host/serve LLMs, CV, and RL agents in cloud and air-gapped tactical edge environments.",
+      "tech_stack": [
+        "Python",
+        "Go",
+        "C++",
+        "Kubernetes",
+        "Ray",
+        "PyTorch Distributed",
+        "MLOps"
+      ],
+      "clearance_required": "US Top Secret",
+      "hunt_category": "AI Infra / MLOps",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 2,
+      "company": "Zoom",
+      "title": "AI Infrastructure Engineer",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Zoom Careers",
+      "url": "https://careers.zoom.us/jobs/ai-infrastructure-engineer-seattle-washington-united-states-75da904a-bb8e-4c8a-8415-a1d229d8cc41",
+      "description": "Design scalable training infrastructure for LLMs, optimize GPU/CUDA utilization, manage containerized environments (Kubernetes, Docker). Focus on production reliability and inference optimization.",
+      "tech_stack": [
+        "Kubernetes",
+        "Docker",
+        "PyTorch",
+        "CUDA",
+        "GPU orchestration",
+        "Distributed systems"
+      ],
+      "hunt_category": "AI Infra",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 3,
+      "company": "Amazon",
+      "title": "SDE - OpenSearch Vector Search",
+      "location": "Bellevue, WA",
+      "work_model": "Hybrid",
+      "source": "Amazon Jobs",
+      "url": "https://www.amazon.jobs/en/jobs/10492148/software-development-engineer-amazon-opensearch-vectorsearch-opensearch",
+      "salary": "$143,700-$194,400/yr base + RSUs",
+      "description": "Build high-performance vector search systems at billion-vector scale. Implement HNSW, cluster-based ANN, GPU-accelerated indexing. Contribute to OpenSearch k-NN plugin.",
+      "tech_stack": [
+        "Java",
+        "Rust",
+        "Python",
+        "Go",
+        "GPU indexing",
+        "ANN algorithms",
+        "HNSW",
+        "OpenSearch"
+      ],
+      "hunt_category": "Vector DB / Search",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 4,
+      "company": "Nordstrom",
+      "title": "Engineer 2 - AI Agentic Solutions",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Nordstrom Careers",
+      "url": "https://careers.nordstrom.com/engineer-1-ai-agentic-solutions-hybrid-seattle-wa/job/034F0C6F37A50C0C40305F43D608E50C",
+      "salary": "$121,500-$188,500/yr",
+      "description": "Design agentic modules, context engineering, ensure reliability/safety of agentic workflows. Agent Engineering, Context Engineering, Evaluations/Guardrails, Memory/State Management.",
+      "tech_stack": [
+        "LangGraph",
+        "CrewAI",
+        "Semantic Kernel",
+        "Claude Agent SDK",
+        "OpenAI Assistants API",
+        "Vector stores",
+        "AWS"
+      ],
+      "hunt_category": "AI Infra / Agentic",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 5,
+      "company": "Nordstrom",
+      "title": "Senior Engineer - AI Agentic Solutions",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Nordstrom Careers",
+      "url": "https://careers.nordstrom.com/senior-engineer-ai-agentic-solutions-hybrid-seattle-wa/job/B6EB8774EE995C9885B4BD2883EF4C54",
+      "description": "End-to-end system architecture, orchestration, mentoring. Define 'art of the possible' for agentic AI within Nordstrom retail strategy.",
+      "tech_stack": [
+        "LangGraph",
+        "CrewAI",
+        "Semantic Kernel",
+        "Claude Agent SDK",
+        "Vector stores",
+        "AWS/GCP"
+      ],
+      "hunt_category": "AI Infra / Agentic",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 6,
+      "company": "Nordstrom",
+      "title": "Senior Engineer 2 - AI Agentic Platform",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Nordstrom Workday",
+      "url": "https://nordstrom.wd501.myworkdayjobs.com/en-US/nordstrom_careers/job/Senior-Engineer-2---AI-Agentic-Platform--Hybrid---Seattle--WA-_R-848075",
+      "description": "Platform-level engineering for agentic AI systems. Building orchestration layers, memory systems, and production reliability frameworks.",
+      "tech_stack": [
+        "LangGraph",
+        "Claude Agent SDK",
+        "AWS",
+        "Kubernetes",
+        "MLOps tooling"
+      ],
+      "hunt_category": "AI Platform",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 7,
+      "company": "Microsoft",
+      "title": "Principal Applied AI Engineer",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Built In",
+      "url": "https://builtin.com/job/principal-applied-ai-engineer/10604074",
+      "description": "Principal-level applied AI engineering. Build production AI systems, optimize model serving infrastructure, lead technical strategy for AI platform components.",
+      "tech_stack": [
+        "Azure AI",
+        "Kubernetes",
+        "PyTorch",
+        "MLOps",
+        "Distributed systems"
+      ],
+      "hunt_category": "AI Infra / Applied AI",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 8,
+      "company": "Mastercard",
+      "title": "Principal AI Platform Engineer - AI Center of Excellence",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Built In",
+      "url": "https://builtin.com/job/principal-ai-platform-engineer-ai-center-excellence/10532430",
+      "description": "Lead AI Center of Excellence. Build enterprise AI platform infrastructure, design retrieval and agent workflows, manage compliance-ready AI systems.",
+      "tech_stack": [
+        "AWS/Azure/GCP",
+        "Kubernetes",
+        "RAG",
+        "LLM orchestration",
+        "CI/CD for ML"
+      ],
+      "hunt_category": "AI Platform",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 9,
+      "company": "Pfizer",
+      "title": "Head of AI & Agentic Platform Engineering",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Built In",
+      "url": "https://builtin.com/job/head-ai-agentic-platform-engineering/10398098",
+      "description": "Lead AI and agentic platform engineering for pharmaceutical applications. Build LLM gateways, inference optimization, multi-model routing, and model serving frameworks.",
+      "tech_stack": [
+        "LLM gateways",
+        "Inference optimization",
+        "Model serving",
+        "Multi-model routing",
+        "Kubernetes"
+      ],
+      "hunt_category": "AI Platform / LLMOps",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 10,
+      "company": "Bright Vision Technologies",
+      "title": "MLOps Engineer",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Built In",
+      "url": "https://builtin.com/job/mlops-engineer/10646293",
+      "description": "Production ML lifecycle management, CI/CD for ML, model deployment, and infrastructure automation.",
+      "tech_stack": [
+        "Python",
+        "MLflow",
+        "Kubernetes",
+        "Docker",
+        "AWS SageMaker",
+        "CI/CD"
+      ],
+      "hunt_category": "MLOps",
+      "profile_fit": "MODERATE"
+    },
+    {
+      "id": 11,
+      "company": "Feather",
+      "title": "Founding Engineer",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Wellfound",
+      "url": "https://wellfound.com/jobs/4101636-founding-engineer",
+      "description": "Founding engineer building infrastructure and runtime layer for autonomous enterprise AI agents. Unified AI Agentic Platform for Enterprises.",
+      "tech_stack": [
+        "LLM orchestration",
+        "Agentic workflows",
+        "Cloud-native",
+        "Distributed systems"
+      ],
+      "hunt_category": "AI Infra / Agentic",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 12,
+      "company": "Sobek AI",
+      "title": "Software Engineer, Applied AI",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Wellfound",
+      "url": "https://wellfound.com/jobs/4324422-software-engineer-applied-ai",
+      "description": "Build secure AI infrastructure for agentic workflows in high-stakes environments (life sciences, emergency response).",
+      "tech_stack": [
+        "LLM integration",
+        "RAG",
+        "Secure AI",
+        "Agentic workflows",
+        "Python"
+      ],
+      "hunt_category": "AI Infra",
+      "profile_fit": "MODERATE"
+    },
+    {
+      "id": 13,
+      "company": "Ravenna Software",
+      "title": "AI Engineer",
+      "location": "Seattle, WA / Remote",
+      "work_model": "Remote-friendly",
+      "source": "Wellfound",
+      "url": "https://wellfound.com/jobs/3982817-ai-engineer",
+      "description": "AI engineer role with focus on LLM integration, production reliability, and evaluation frameworks. Remote-friendly.",
+      "tech_stack": [
+        "LLMs",
+        "RAG",
+        "Evaluation frameworks",
+        "Prompt pipelines",
+        "Production ML"
+      ],
+      "hunt_category": "AI Infra / Applied AI",
+      "profile_fit": "MODERATE"
+    },
+    {
+      "id": 14,
+      "company": "TaxBit",
+      "title": "Agentic AI Engineer",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Wellfound",
+      "url": "https://wellfound.com/jobs/4437006-agentic-ai-engineer",
+      "description": "Automated real-time cryptocurrency tax compliance using agentic AI. Build autonomous agent systems for fintech.",
+      "tech_stack": [
+        "Agentic AI",
+        "LLM orchestration",
+        "Real-time systems",
+        "Python",
+        "Fintech"
+      ],
+      "hunt_category": "AI Infra / Agentic",
+      "profile_fit": "MODERATE"
+    },
+    {
+      "id": 15,
+      "company": "Metropolis",
+      "title": "Senior AI Engineer",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Wellfound",
+      "url": "https://wellfound.com/jobs/4125963-senior-ai-engineer",
+      "description": "End-to-end AI stack ownership from LLM prompt layer through production deployment and data platform integration.",
+      "tech_stack": [
+        "LLM deployment",
+        "Data platform integration",
+        "Production ML",
+        "Cloud infrastructure"
+      ],
+      "hunt_category": "AI Infra",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 16,
+      "company": "Suede AI",
+      "title": "Senior/Staff Founding Engineer (AI/ML & Full-Stack)",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Wellfound",
+      "url": "https://wellfound.com/jobs/4348243-senior-staff-founding-engineer-ai-ml-full-stack",
+      "description": "Founding engineering role building AI/ML platform infrastructure. Full-stack with focus on model deployment and production systems.",
+      "tech_stack": [
+        "AI/ML platform",
+        "Full-stack",
+        "Model deployment",
+        "Cloud-native"
+      ],
+      "hunt_category": "AI Platform",
+      "profile_fit": "MODERATE"
+    },
+    {
+      "id": 17,
+      "company": "CrowdStrike",
+      "title": "Principal Data Engineer - LLM/AI Platforms",
+      "location": "Remote / Redmond, WA",
+      "work_model": "Remote / Hybrid",
+      "source": "CrowdStrike Workday",
+      "url": "https://crowdstrike.wd5.myworkdayjobs.com/en-US/crowdstrikecareers/job/Principal-Data-Engineer--LLM-AI-Platforms--Remote-_R28829",
+      "description": "Build data infrastructure for LLM and AI platforms. Design pipelines for training data, feature engineering, and model evaluation at cybersecurity scale.",
+      "tech_stack": [
+        "LLM platforms",
+        "Data engineering",
+        "Python",
+        "Spark",
+        "Kubernetes"
+      ],
+      "hunt_category": "AI Platform / LLMOps",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 18,
+      "company": "CrowdStrike",
+      "title": "Staff AI Platform Engineer - LLMs/Data Systems",
+      "location": "Remote / Redmond, WA",
+      "work_model": "Remote / Hybrid",
+      "source": "JobLeads",
+      "url": "https://www.jobleads.com/us/job/staff-ai-platform-engineer-llms-data-systems--united-states--e329f6ef14a04af97fbab914eb2a2d3eb",
+      "description": "Staff-level AI platform engineering focused on LLMs, data infrastructure, and AI-driven security products. Build on-sensor ML inference infrastructure.",
+      "tech_stack": [
+        "LLM infrastructure",
+        "ML inference",
+        "Sensor platforms",
+        "Distributed systems"
+      ],
+      "hunt_category": "AI Platform",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 19,
+      "company": "Robinhood",
+      "title": "Engineering Manager - AI/ML Platform Infrastructure Lead",
+      "location": "Bellevue, WA",
+      "work_model": "In-office (3 days/wk)",
+      "source": "Built In",
+      "url": "https://www.builtinseattle.com/job/engineering-manager-ai-infrastructure/4813440",
+      "description": "Lead AI/ML platform infrastructure team. Design and scale ML pipelines, feature stores, vector databases. Support model development lifecycles.",
+      "tech_stack": [
+        "ML pipelines",
+        "Feature stores",
+        "Vector databases",
+        "Python",
+        "Real-time inference"
+      ],
+      "hunt_category": "AI Platform / MLOps",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 20,
+      "company": "Robinhood",
+      "title": "Staff Machine Learning Engineer (AI R&D)",
+      "location": "Bellevue, WA",
+      "work_model": "In-office (3 days/wk)",
+      "source": "Haystack / Teal",
+      "url": "https://haystackapp.io/jobs/9b95ca7d-2dc0-40b9-b3b1-ba5a5b4334f5",
+      "description": "Staff ML engineer in AI R&D. Build personalization and recommendation systems. Scale infrastructure for high-concurrency and real-time inference.",
+      "tech_stack": [
+        "Python",
+        "ML infrastructure",
+        "LLM fine-tuning",
+        "Agentic workflows",
+        "Real-time inference"
+      ],
+      "hunt_category": "AI Infra / MLOps",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 21,
+      "company": "ByteDance",
+      "title": "Inference Infrastructure Engineer (Seed Team)",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "JoinByteDance",
+      "url": "https://joinbytedance.com/search/7553580852757661960",
+      "description": "Build inference infrastructure for Seed AI team. Optimize model serving at massive scale, GPU/CUDA optimization, distributed inference systems.",
+      "tech_stack": [
+        "CUDA",
+        "GPU optimization",
+        "Distributed inference",
+        "C++",
+        "Python",
+        "PyTorch"
+      ],
+      "hunt_category": "Inference Optimization",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 22,
+      "company": "ByteDance",
+      "title": "ML Inference Optimization Engineer (Seed Team)",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "JoinByteDance",
+      "url": "https://joinbytedance.com/search/7626495609468012805",
+      "description": "Specialized inference optimization: quantization (FP8/INT8), KV cache management, continuous batching, speculative decoding. Build and optimize vLLM, TensorRT-LLM.",
+      "tech_stack": [
+        "vLLM",
+        "TensorRT-LLM",
+        "CUDA",
+        "Quantization",
+        "KV cache",
+        "Speculative decoding"
+      ],
+      "hunt_category": "Inference Optimization",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 23,
+      "company": "Apple",
+      "title": "ML Systems / Search & Knowledge Platform Engineer",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Indeed / GeekWire",
+      "url": "https://www.indeed.com/q-ai-infrastructure-l-seattle,-wa-jobs.html",
+      "description": "Build ML systems for Search & Knowledge Platform. Design inference optimization, model serving infrastructure, and distributed training systems.",
+      "tech_stack": [
+        "ML systems",
+        "Distributed training",
+        "Model serving",
+        "GPU optimization"
+      ],
+      "hunt_category": "AI Infra",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 24,
+      "company": "Boeing",
+      "title": "Senior AI Solutions Architect",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Boeing Careers",
+      "url": "https://jobs.boeing.com/job/seattle/senior-artificial-intelligence-ai-solutions-architect/185/95870768368",
+      "description": "End-to-end technical architecture for AI systems including vector databases, RAG pipelines, and enterprise AI platform integration.",
+      "tech_stack": [
+        "Vector databases",
+        "RAG",
+        "Enterprise AI",
+        "Cloud architecture",
+        "AWS/Azure"
+      ],
+      "hunt_category": "AI Platform / Vector DB",
+      "profile_fit": "MODERATE"
+    },
+    {
+      "id": 25,
+      "company": "Disney",
+      "title": "Software Engineer II - GenAI",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Disney Careers",
+      "url": "https://www.disneycareers.com/en/job/seattle/software-engineer-ii-genai/391/96312342176",
+      "description": "Build GenAI applications requiring familiarity with MongoDB Atlas Vector Search, LLM integration, and cloud-native development.",
+      "tech_stack": [
+        "MongoDB Atlas Vector Search",
+        "GenAI",
+        "Python",
+        "AWS/GCP",
+        "Docker"
+      ],
+      "hunt_category": "Vector DB / GenAI",
+      "profile_fit": "MODERATE"
+    },
+    {
+      "id": 26,
+      "company": "JPMorganChase",
+      "title": "AI/ML Platform Engineer",
+      "location": "Seattle, WA (hybrid)",
+      "work_model": "Hybrid",
+      "source": "Built In / Indeed",
+      "url": "https://www.builtinseattle.com/jobs/ai-machine-learning/search/ai",
+      "description": "Build AI/ML platform workflows using retrieval and agent patterns. Enterprise-scale RAG and agentic infrastructure for financial services.",
+      "tech_stack": [
+        "RAG",
+        "LLM orchestration",
+        "Enterprise AI",
+        "AWS/Azure",
+        "Compliance"
+      ],
+      "hunt_category": "AI Platform / LLMOps",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 27,
+      "company": "Expedia Group",
+      "title": "ML Infrastructure Engineer",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Built In Seattle",
+      "url": "https://www.builtinseattle.com/jobs/dev-engineering/search/platform-engineer",
+      "description": "ML infrastructure and data pipelines for travel AI. Build and maintain production ML systems at global scale.",
+      "tech_stack": [
+        "ML pipelines",
+        "Data engineering",
+        "Cloud infrastructure",
+        "Kubernetes",
+        "Python"
+      ],
+      "hunt_category": "MLOps / Data Platform",
+      "profile_fit": "MODERATE"
+    },
+    {
+      "id": 28,
+      "company": "Databricks",
+      "title": "Senior Software Engineer - Model Serving",
+      "location": "Seattle/Bellevue, WA",
+      "work_model": "Hybrid",
+      "source": "Databricks Careers",
+      "url": "https://www.databricks.com/company/careers/engineering/senior-software-engineer-model-serving-8211648002",
+      "description": "Build model serving infrastructure for Databricks platform. Design high-throughput, low-latency inference systems for enterprise customers.",
+      "tech_stack": [
+        "Model serving",
+        "Distributed systems",
+        "Python",
+        "Scala",
+        "Kubernetes",
+        "GPU optimization"
+      ],
+      "hunt_category": "Model Serving / AI Infra",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 29,
+      "company": "Carbon Robotics",
+      "title": "ML Engineer - Physical AI",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Built In Seattle",
+      "url": "https://www.builtinseattle.com/jobs/ai-machine-learning/search/ai",
+      "description": "Computer vision and AI infrastructure for commercial laser weeding systems. Build ML pipelines for edge inference in physical environments.",
+      "tech_stack": [
+        "Computer vision",
+        "Edge ML",
+        "PyTorch",
+        "CUDA",
+        "Embedded systems"
+      ],
+      "hunt_category": "AI Infra / Edge ML",
+      "profile_fit": "LOW-MODERATE"
+    },
+    {
+      "id": 30,
+      "company": "Nominal",
+      "title": "ML Platform Engineer",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "GeekWire",
+      "url": "https://www.geekwire.com/2026/seattle-lands-another-1b-startup-heres-the-latest-arrival-in-the-industrial-ai-boom/",
+      "description": "Industrial AI software for building, testing, and validating complex hardware systems. Recently established significant Seattle presence.",
+      "tech_stack": [
+        "ML platform",
+        "Industrial AI",
+        "Python",
+        "Cloud infrastructure"
+      ],
+      "hunt_category": "AI Platform / Industrial",
+      "profile_fit": "MODERATE"
+    },
+    {
+      "id": 31,
+      "company": "Featherless AI",
+      "title": "Inference Optimization Engineer",
+      "location": "Remote / Seattle",
+      "work_model": "Remote-friendly",
+      "source": "Ashby",
+      "url": "https://jobs.ashbyhq.com/featherlessai/1762b15b-9c0b-4a20-a2b3-ed12c8222156",
+      "description": "Specialized inference optimization: quantization, KV cache, continuous batching, speculative decoding. Optimize vLLM and TensorRT-LLM frameworks for open-weight models.",
+      "tech_stack": [
+        "vLLM",
+        "TensorRT-LLM",
+        "CUDA",
+        "Quantization",
+        "Speculative decoding",
+        "GPU optimization"
+      ],
+      "hunt_category": "Inference Optimization",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 32,
+      "company": "Intel",
+      "title": "Sr Inference Optimization Engineer (Edge Runtime)",
+      "location": "Seattle area / Remote",
+      "work_model": "Hybrid",
+      "source": "Intel Workday",
+      "url": "https://intel.wd1.myworkdayjobs.com/en-US/External/job/Sr-Inference-Optimization-Engineer--local---edge-runtime-_JR0285967",
+      "description": "Inference optimization for edge runtime environments. Optimize model performance on Intel hardware for constrained deployment scenarios.",
+      "tech_stack": [
+        "Inference optimization",
+        "Edge computing",
+        "C++",
+        "Model compression",
+        "Hardware-specific optimization"
+      ],
+      "hunt_category": "Inference Optimization / Edge",
+      "profile_fit": "MODERATE"
+    },
+    {
+      "id": 33,
+      "company": "ServiceNow",
+      "title": "AI Infrastructure Engineer",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Indeed / ZipRecruiter",
+      "url": "https://www.ziprecruiter.com/Jobs/Ai-Infrastructure/-in-Seattle,WA",
+      "description": "Build internal platforms for RAG and agentic workflows. Design and maintain production AI infrastructure for enterprise service management.",
+      "tech_stack": [
+        "RAG",
+        "LLM orchestration",
+        "Kubernetes",
+        "Cloud infrastructure",
+        "Enterprise AI"
+      ],
+      "hunt_category": "AI Platform",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 34,
+      "company": "NVIDIA",
+      "title": "AI Infrastructure Engineer",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "NVIDIA Careers",
+      "url": "https://jobs.nvidia.com/careers/job/893396900943",
+      "description": "Build infrastructure for AI compute and agentic tool infrastructure. GPU systems optimization and CUDA kernel development.",
+      "tech_stack": [
+        "CUDA",
+        "GPU systems",
+        "Inference optimization",
+        "Distributed computing",
+        "C++"
+      ],
+      "hunt_category": "AI Infra / GPU Systems",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 35,
+      "company": "FluidStack",
+      "title": "ML Infrastructure Engineer",
+      "location": "Seattle / Remote",
+      "work_model": "Remote-friendly",
+      "source": "Fast AI Jobs",
+      "url": "https://www.fastaijobs.com/jobs/seattle",
+      "description": "Build distributed GPU cloud infrastructure for LLM training and inference. Scale AI compute infrastructure for startup customers.",
+      "tech_stack": [
+        "GPU orchestration",
+        "Distributed systems",
+        "Kubernetes",
+        "Python",
+        "Cloud infrastructure"
+      ],
+      "hunt_category": "AI Infra / GPU Cloud",
+      "profile_fit": "STRONG"
+    },
+    {
+      "id": 36,
+      "company": "Anthropic",
+      "title": "MLOps / Infrastructure Engineer",
+      "location": "Seattle, WA",
+      "work_model": "Hybrid",
+      "source": "Fast AI Jobs / GeekWire",
+      "url": "https://www.fastaijobs.com/jobs/seattle",
+      "description": "Build and maintain infrastructure for Claude model training and inference. MLOps tooling, deployment pipelines, and production reliability for frontier AI models.",
+      "tech_stack": [
+        "MLOps",
+        "Model deployment",
+        "Kubernetes",
+        "Python",
+        "GPU orchestration",
+        "Production reliability"
+      ],
+      "hunt_category": "AI Infra / MLOps",
+      "profile_fit": "STRONG"
+    }
+  ]
+}

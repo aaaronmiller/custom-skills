@@ -1,0 +1,1663 @@
+[
+  {
+    "company": "Boundary",
+    "domain": "usebaml.com",
+    "role": "Engineer (Compilers)",
+    "salary_band": "$100K-$180K + 0.15%-0.75% equity",
+    "company_size": "2-10",
+    "what_they_do": "Building BAML (Boundary AI Markup Language), a programming language for AI agents that manages structured LLM outputs. Rust-based compiler/runtime with React/TS frontend.",
+    "apply_url": "https://www.ycombinator.com/companies/boundary/jobs/f31pAPu-engineers-that-enjoy-hard-things-like-compilers",
+    "company_url": "https://www.usebaml.com",
+    "requirements": [
+      "Compiler/language design experience",
+      "Rust or systems programming",
+      "AI/LLM tooling interest",
+      "US work authorization",
+      "New grads welcome"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://www.ycombinator.com/companies/boundary/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Clearly AI",
+    "domain": "clearly.security",
+    "role": "Forward Deployed Security Engineer",
+    "salary_band": "$125K-$175K + 0.10%-0.50% equity",
+    "company_size": "2-10",
+    "what_they_do": "AI-powered platform automating security and privacy reviews (threat modeling, privacy impact assessments, vendor risk evaluations). Customers include Rivian, Ericsson, Okta, Affirm.",
+    "apply_url": "https://www.ycombinator.com/companies/clearly-ai/jobs/zdixMrj-forward-deployed-security-engineer",
+    "company_url": "https://clearly.security",
+    "requirements": [
+      "3+ years security engineering experience",
+      "Enterprise security domain knowledge",
+      "Python/software engineering skills",
+      "AI/LLM familiarity a plus"
+    ],
+    "location": "Seattle, WA / Remote (US/CA)",
+    "source_url": "https://www.ycombinator.com/companies/clearly-ai/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Terrakotta",
+    "domain": "terrakotta.com",
+    "role": "Senior Full-Stack Engineer",
+    "salary_band": "Not listed",
+    "company_size": "~5",
+    "what_they_do": "AI-powered sales platform for phone-first sellers, particularly commercial real estate. Power-dialer with AI-generated voicemails and A/B testing.",
+    "apply_url": "https://www.ycombinator.com/companies/terrakotta/jobs",
+    "company_url": "https://terrakotta.com",
+    "requirements": [
+      "Full-stack engineering experience",
+      "AI/voice technology interest",
+      "Startup scrappiness"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://www.ycombinator.com/companies/terrakotta/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Terrakotta",
+    "domain": "terrakotta.com",
+    "role": "Software Engineer (Product, New Grad)",
+    "salary_band": "Not listed",
+    "company_size": "~5",
+    "what_they_do": "AI-powered sales platform for phone-first sellers, particularly commercial real estate.",
+    "apply_url": "https://www.ycombinator.com/companies/terrakotta/jobs",
+    "company_url": "https://terrakotta.com",
+    "requirements": [
+      "New grad or early career",
+      "Product engineering interest",
+      "AI/voice technology interest"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://www.ycombinator.com/companies/terrakotta/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Terrakotta",
+    "domain": "terrakotta.com",
+    "role": "Founding Sales Development Representative",
+    "salary_band": "Not listed",
+    "company_size": "~5",
+    "what_they_do": "AI-powered sales platform for phone-first sellers, particularly commercial real estate.",
+    "apply_url": "https://www.ycombinator.com/companies/terrakotta/jobs",
+    "company_url": "https://terrakotta.com",
+    "requirements": [
+      "Sales/SDR experience or raw ambition",
+      "B2B SaaS interest",
+      "Scrappiness and autonomy"
+    ],
+    "location": "Seattle, WA / Los Angeles, CA",
+    "source_url": "https://www.ycombinator.com/companies/terrakotta/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Silurian",
+    "domain": "silurian.ai",
+    "role": "Machine Learning Research Engineer/Scientist",
+    "salary_band": "Not listed",
+    "company_size": "2-10",
+    "what_they_do": "Building foundation models for simulating Earth's systems (weather forecasting, wildfire risk, energy grid load). Generative Forecasting Transformer (GFT) model predicts global weather 14 days ahead.",
+    "apply_url": "https://www.ycombinator.com/companies/silurian/jobs",
+    "company_url": "https://silurian.ai",
+    "requirements": [
+      "ML/deep learning experience",
+      "Climate science or physical modeling interest",
+      "New grads considered",
+      "Python, PyTorch"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://www.ycombinator.com/companies/silurian/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Quindar",
+    "domain": "quindar.space",
+    "role": "Backend Engineer",
+    "salary_band": "$120K-$180K",
+    "company_size": "10-50",
+    "what_they_do": "Cloud-native software for satellite mission operations ('DataDog for space'). Mission planning, telemetry handling, automation, and command-and-control systems.",
+    "apply_url": "https://jobs.ashbyhq.com/quindar",
+    "company_url": "https://quindar.space",
+    "requirements": [
+      "Python, AWS",
+      "Cloud-native software development",
+      "Aerospace experience a plus",
+      "Strong general SWE background"
+    ],
+    "location": "Seattle, WA (hybrid)",
+    "source_url": "https://www.ycombinator.com/companies/quindar/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Kivo Health",
+    "domain": "kivohealth.com",
+    "role": "Product Manager",
+    "salary_band": "$180K-$250K + 0.15%-0.25% equity",
+    "company_size": "10-50",
+    "what_they_do": "AI-powered virtual pulmonary rehabilitation for chronic lung disease (COPD). 9-week insurance-billed telehealth program with guided exercise and live education.",
+    "apply_url": "https://www.ycombinator.com/companies/kivo-health/jobs/h08SWMI-product-manager",
+    "company_url": "https://kivohealth.com",
+    "requirements": [
+      "6+ years PM experience at tech company",
+      "Strong SQL skills",
+      "Experience shipping AI-driven features",
+      "Healthcare domain knowledge a plus"
+    ],
+    "location": "Seattle, WA (in-office)",
+    "source_url": "https://www.ycombinator.com/companies/kivo-health/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Kivo Health",
+    "domain": "kivohealth.com",
+    "role": "Full Stack Engineer",
+    "salary_band": "Not listed",
+    "company_size": "10-50",
+    "what_they_do": "AI-powered virtual pulmonary rehabilitation for chronic lung disease (COPD).",
+    "apply_url": "https://www.ycombinator.com/companies/kivo-health/jobs/L6oQv63-full-stack-engineer",
+    "company_url": "https://kivohealth.com",
+    "requirements": [
+      "Full-stack web development",
+      "Healthcare tech interest",
+      "Fast-paced startup culture fit"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://www.ycombinator.com/companies/kivo-health/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Kivo Health",
+    "domain": "kivohealth.com",
+    "role": "Senior Engineer",
+    "salary_band": "Not listed",
+    "company_size": "10-50",
+    "what_they_do": "AI-powered virtual pulmonary rehabilitation for chronic lung disease (COPD).",
+    "apply_url": "https://kivo-inc.breezy.hr/",
+    "company_url": "https://kivohealth.com",
+    "requirements": [
+      "Senior engineering experience",
+      "Healthcare tech a plus",
+      "Startup culture fit"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://www.ycombinator.com/companies/kivo-health/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Moonset Health",
+    "domain": "moonsethealth.com",
+    "role": "Product Engineer",
+    "salary_band": "Not listed",
+    "company_size": "2-10",
+    "what_they_do": "AI clinical co-pilot for post-acute senior care. Automates documentation and compliance for hospice, home health, and skilled nursing. Formerly Summed AI.",
+    "apply_url": "https://builtinseattle.com/job/product-engineer/9299500",
+    "company_url": "https://moonsethealth.com",
+    "requirements": [
+      "Engineering + product sense",
+      "Healthcare domain interest",
+      "AI/automation experience"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://www.ycombinator.com/companies/moonset-health/jobs/",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Moonset Health",
+    "domain": "moonsethealth.com",
+    "role": "Founding Customer Experience Lead",
+    "salary_band": "Not listed",
+    "company_size": "2-10",
+    "what_they_do": "AI clinical co-pilot for post-acute senior care.",
+    "apply_url": "https://builtin.com/job/founding-customer-experience-lead/9273395",
+    "company_url": "https://moonsethealth.com",
+    "requirements": [
+      "Customer success/support experience",
+      "Healthcare industry knowledge",
+      "Startup founding team mindset"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://www.ycombinator.com/companies/moonset-health/jobs/",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Hubble",
+    "domain": "hubble.ai",
+    "role": "Engineering (General)",
+    "salary_band": "Not listed",
+    "company_size": "2-5",
+    "what_they_do": "Medical record retrieval intelligence layer. Aggregates patient medical history from providers into structured data for AI agents. Founded by ex-Grow Therapy/Meta and ex-Amazon One Medical.",
+    "apply_url": "https://www.workatastartup.com/companies/hubble-ai",
+    "company_url": "https://hubble.ai",
+    "requirements": [
+      "Engineering experience",
+      "Healthcare tech interest",
+      "AI/data engineering skills"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://www.ycombinator.com/companies/hubble-ai",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Red Barn Robotics",
+    "domain": "redbarnrobotics.com",
+    "role": "Field Application Engineer",
+    "salary_band": "Not listed",
+    "company_size": "2-10",
+    "what_they_do": "Autonomous robots for precision intra-row weeding in agriculture. Robot nicknamed 'Field Hand'. USDA grant funded.",
+    "apply_url": "https://www.workatastartup.com/companies/red-barn-robotics",
+    "company_url": "https://redbarnrobotics.com",
+    "requirements": [
+      "Robotics/controls engineering",
+      "Agricultural domain interest",
+      "Field deployment experience a plus"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://www.ycombinator.com/companies/red-barn-robotics",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "ClaimGlide",
+    "domain": "claimglide.com",
+    "role": "Early Team (not yet posted)",
+    "salary_band": "Not listed",
+    "company_size": "1-2",
+    "what_they_do": "AI-automated prior-authorization for private medical practices. End-to-end submission, tracking, and appeal generation.",
+    "apply_url": "https://claimglide.com",
+    "company_url": "https://claimglide.com",
+    "requirements": [
+      "Healthcare automation interest",
+      "AI/ML experience",
+      "Early-stage founding team mindset"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://www.ycombinator.com/companies/claimglide",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "CopyCat",
+    "domain": "runcopycat.com",
+    "role": "Early Team (not yet posted)",
+    "salary_band": "Not listed",
+    "company_size": "2-4",
+    "what_they_do": "AI agents for commercial insurance CSR and sales workflows. Browser-based RPA replacing legacy automation tools.",
+    "apply_url": "https://runcopycat.com",
+    "company_url": "https://runcopycat.com",
+    "requirements": [
+      "AI/agent development experience",
+      "Insurance domain knowledge a plus",
+      "Browser automation"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://www.ycombinator.com/companies/copycat",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "HERA",
+    "domain": "manufacturingintelligence (YC slug)",
+    "role": "Engineering (not yet posted)",
+    "salary_band": "Not listed",
+    "company_size": "2-5",
+    "what_they_do": "Automates design reviews for heavy manufacturing. Reviews engineering drawings against ASME/ISO standards for aerospace, medical devices, pressure vessels.",
+    "apply_url": "https://www.workatastartup.com/companies/manufacturingintelligence",
+    "company_url": "https://www.ycombinator.com/companies/manufacturingintelligence",
+    "requirements": [
+      "Manufacturing engineering knowledge",
+      "Computer vision/CAD parsing",
+      "GD&T understanding"
+    ],
+    "location": "Remote (US)",
+    "source_url": "https://www.ycombinator.com/companies/manufacturingintelligence",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Whatnot",
+    "domain": "whatnot.com",
+    "role": "Fullstack Engineer, Seller Merchandising",
+    "salary_band": "$190K-$215K",
+    "company_size": "500+",
+    "what_they_do": "Live shopping marketplace. $20B valuation. Seattle hub for product and engineering. Focus on ML, marketplace integrity, trust & safety.",
+    "apply_url": "https://www.ycombinator.com/companies/whatnot/jobs/62xsZbo-fullstack-engineer-seller-merchandising",
+    "company_url": "https://whatnot.com",
+    "requirements": [
+      "6+ years engineering experience",
+      "JavaScript/React proficiency",
+      "Product instincts",
+      "Ship-fast mentality"
+    ],
+    "location": "Seattle, WA / Remote (US)",
+    "source_url": "https://www.ycombinator.com/companies/whatnot/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Whatnot",
+    "domain": "whatnot.com",
+    "role": "Engineering Manager, Seller Scaling",
+    "salary_band": "$230K-$260K",
+    "company_size": "500+",
+    "what_they_do": "Live shopping marketplace. $20B valuation.",
+    "apply_url": "https://www.ycombinator.com/companies/whatnot/jobs/wi8QJXI-engineering-manager-seller-scaling",
+    "company_url": "https://whatnot.com",
+    "requirements": [
+      "6+ years engineering + management",
+      "Team leadership experience",
+      "Marketplace/platform systems"
+    ],
+    "location": "Seattle, WA / Remote (US)",
+    "source_url": "https://www.ycombinator.com/companies/whatnot/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Whatnot",
+    "domain": "whatnot.com",
+    "role": "Backend Engineer, Logistics",
+    "salary_band": "$190K-$245K",
+    "company_size": "500+",
+    "what_they_do": "Live shopping marketplace. $20B valuation.",
+    "apply_url": "https://www.ycombinator.com/companies/whatnot/jobs/eSYBHk3-backend-engineer-logistics",
+    "company_url": "https://whatnot.com",
+    "requirements": [
+      "6+ years backend engineering",
+      "Logistics/supply chain systems",
+      "Distributed systems"
+    ],
+    "location": "Seattle, WA / Remote (US)",
+    "source_url": "https://www.ycombinator.com/companies/whatnot/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Whatnot",
+    "domain": "whatnot.com",
+    "role": "Frontend Engineer, Customer Experience",
+    "salary_band": "$185K-$245K",
+    "company_size": "500+",
+    "what_they_do": "Live shopping marketplace. $20B valuation.",
+    "apply_url": "https://www.ycombinator.com/companies/whatnot/jobs/ahUpZwM-frontend-engineer-customer-experience",
+    "company_url": "https://whatnot.com",
+    "requirements": [
+      "6+ years frontend engineering",
+      "JavaScript/React deep proficiency",
+      "Product instincts"
+    ],
+    "location": "Seattle, WA / Remote (US)",
+    "source_url": "https://www.ycombinator.com/companies/whatnot/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Whatnot",
+    "domain": "whatnot.com",
+    "role": "Software Engineer, Developer Productivity",
+    "salary_band": "$190K-$245K",
+    "company_size": "500+",
+    "what_they_do": "Live shopping marketplace. $20B valuation.",
+    "apply_url": "https://www.ycombinator.com/companies/whatnot/jobs/SeFlBBK-software-engineer-developer-productivity",
+    "company_url": "https://whatnot.com",
+    "requirements": [
+      "DevEx/Platform engineering",
+      "CI/CD and build tooling",
+      "Developer experience focus"
+    ],
+    "location": "Seattle, WA / Remote (US)",
+    "source_url": "https://www.ycombinator.com/companies/whatnot/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Whatnot",
+    "domain": "whatnot.com",
+    "role": "Software Engineer, Video",
+    "salary_band": "$190K-$260K",
+    "company_size": "500+",
+    "what_they_do": "Live shopping marketplace. $20B valuation.",
+    "apply_url": "https://www.builtinseattle.com/job/software-engineer-video/9452947",
+    "company_url": "https://whatnot.com",
+    "requirements": [
+      "Video engineering (WebRTC)",
+      "AWS/DevOps",
+      "Streaming infrastructure"
+    ],
+    "location": "Seattle, WA / Remote",
+    "source_url": "https://www.builtinseattle.com/job/software-engineer-video/9452947",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Whatnot",
+    "domain": "whatnot.com",
+    "role": "Software Engineer, 2026 New Grad",
+    "salary_band": "Not listed (est. $120K-$160K)",
+    "company_size": "500+",
+    "what_they_do": "Live shopping marketplace. $20B valuation.",
+    "apply_url": "https://builtinseattle.com/job/2026-software-engineer-new-grad/6891728",
+    "company_url": "https://whatnot.com",
+    "requirements": [
+      "CS degree or equivalent",
+      "Strong fundamentals",
+      "New grad 2026"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://builtinseattle.com/job/2026-software-engineer-new-grad/6891728",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Mason",
+    "domain": "bymason.com",
+    "role": "Technical Product Manager, Software",
+    "salary_band": "Not listed",
+    "company_size": "50-200",
+    "what_they_do": "Smart device infrastructure platform (IoT). Enables companies to build, deploy, and manage purpose-built smart devices.",
+    "apply_url": "https://www.ycombinator.com/companies/mason/jobs/qQ3AgTS-technical-product-manager-software",
+    "company_url": "https://bymason.com",
+    "requirements": [
+      "TPM experience",
+      "IoT/embedded systems knowledge",
+      "Product management skills"
+    ],
+    "location": "Seattle, WA / Remote (US)",
+    "source_url": "https://www.ycombinator.com/companies/mason/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Mason",
+    "domain": "bymason.com",
+    "role": "Full Stack Software Engineer",
+    "salary_band": "Not listed",
+    "company_size": "50-200",
+    "what_they_do": "Smart device infrastructure platform (IoT).",
+    "apply_url": "https://www.ycombinator.com/companies/mason/jobs/eO4bkD3xo-full-stack-software-engineer",
+    "company_url": "https://bymason.com",
+    "requirements": [
+      "6+ years engineering experience",
+      "Full-stack web development",
+      "IoT experience a plus"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://www.ycombinator.com/companies/mason/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Mason",
+    "domain": "bymason.com",
+    "role": "Software Engineer - Backend",
+    "salary_band": "$80K-$140K + 0.05%-0.15% equity",
+    "company_size": "50-200",
+    "what_they_do": "Smart device infrastructure platform (IoT).",
+    "apply_url": "https://www.ycombinator.com/companies/mason/jobs/cQEF4lG86-software-engineer-backend",
+    "company_url": "https://bymason.com",
+    "requirements": [
+      "3+ years backend engineering",
+      "API design",
+      "Cloud infrastructure"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://www.ycombinator.com/companies/mason/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Mason",
+    "domain": "bymason.com",
+    "role": "Technical Program Manager",
+    "salary_band": "Not listed",
+    "company_size": "50-200",
+    "what_they_do": "Smart device infrastructure platform (IoT).",
+    "apply_url": "https://www.ycombinator.com/companies/mason/jobs/gSh1SDw-technical-program-manager",
+    "company_url": "https://bymason.com",
+    "requirements": [
+      "TPM experience",
+      "Program management",
+      "Technical background"
+    ],
+    "location": "Seattle, WA / Remote (US)",
+    "source_url": "https://www.ycombinator.com/companies/mason/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Craniometrix",
+    "domain": "craniometrix.com",
+    "role": "Partnerships Manager | West (Mountain + Pacific NW)",
+    "salary_band": "$140K-$200K",
+    "company_size": "10-50",
+    "what_they_do": "Care infrastructure for dementia patients using Medicare's GUIDE model. Non-clinical coaching and support. $8M ARR in first year, $15M Series A.",
+    "apply_url": "https://www.ycombinator.com/companies/craniometrix/jobs/JBGItXQ-partnerships-manager-west-mountain-pacific-nw",
+    "company_url": "https://craniometrix.com",
+    "requirements": [
+      "1+ years sales/partnerships",
+      "Healthcare sales experience",
+      "Travel within region (70% virtual, 30% in-person)"
+    ],
+    "location": "Seattle, WA / Remote (regional)",
+    "source_url": "https://www.ycombinator.com/companies/craniometrix/jobs",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "SavvyCal",
+    "domain": "savvycal.com",
+    "role": "Senior Full-Stack Developer",
+    "salary_band": "Not listed",
+    "company_size": "~5",
+    "what_they_do": "Scheduling software focused on making scheduling more human. Indie/remote-first SaaS backed by TinySeed.",
+    "apply_url": "https://savvycal.com/jobs/full-stack-developer",
+    "company_url": "https://savvycal.com",
+    "requirements": [
+      "5+ years professional experience",
+      "Full-stack development",
+      "American time zones (UTC-3 to UTC-8)",
+      "Small team autonomy"
+    ],
+    "location": "Remote (US/Americas)",
+    "source_url": "https://savvycal.com/jobs/full-stack-developer",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Userlist",
+    "domain": "userlist.com",
+    "role": "Customer Support Manager",
+    "salary_band": "Not listed",
+    "company_size": "5-10",
+    "what_they_do": "Email automation platform for SaaS companies. Behavioral messaging, user onboarding, lifecycle campaigns.",
+    "apply_url": "https://userlist.com/careers/customer-support/",
+    "company_url": "https://userlist.com",
+    "requirements": [
+      "Technical support experience",
+      "SaaS customer communication",
+      "Troubleshooting skills"
+    ],
+    "location": "Remote",
+    "source_url": "https://userlist.com/careers",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "ScrapingBee",
+    "domain": "scrapingbee.com",
+    "role": "Web Scraping Engineer (intermittent)",
+    "salary_band": "Not listed",
+    "company_size": "10-20",
+    "what_they_do": "Web scraping API and headless browser service. Proxy management, anti-bot bypass, structured data extraction. Remote-first.",
+    "apply_url": "https://weworkremotely.com/company/scrapingbee",
+    "company_url": "https://scrapingbee.com",
+    "requirements": [
+      "Python/Node.js",
+      "Puppeteer/Playwright",
+      "Browser automation",
+      "Anti-bot systems experience"
+    ],
+    "location": "Remote (Global)",
+    "source_url": "https://weworkremotely.com/company/scrapingbee",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "OutboundSync",
+    "domain": "outboundsync.com",
+    "role": "No open roles",
+    "salary_band": "N/A",
+    "company_size": "2-5",
+    "what_they_do": "HubSpot outbound sales automation. Syncs HubSpot data for outbound workflows. TinySeed Spring 2024 batch.",
+    "apply_url": "https://outboundsync.com/jobs/",
+    "company_url": "https://outboundsync.com",
+    "requirements": [],
+    "location": "Remote (US/Americas)",
+    "source_url": "https://outboundsync.com/jobs/",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Senior Place",
+    "domain": "seniorplace.com",
+    "role": "No open roles",
+    "salary_band": "N/A",
+    "company_size": "2-10",
+    "what_they_do": "CRM platform for senior placement and referral agencies. Seattle-based, TinySeed Spring 2021 batch. Founded by ex-Microsoft engineers.",
+    "apply_url": "https://seniorplace.com",
+    "company_url": "https://seniorplace.com",
+    "requirements": [],
+    "location": "Seattle, WA",
+    "source_url": "https://tinyseed.com/portfolio",
+    "scraped_at": "2026-08-22T04:20:00Z"
+  },
+  {
+    "company": "Snap Inc.",
+    "domain": "snap.com",
+    "role": "Software Engineer, Android, Level 5",
+    "salary_band": "$178K-$313K",
+    "company_size": "5000+",
+    "what_they_do": "Social media / camera platform (Snapchat)",
+    "apply_url": "https://www.builtinseattle.com/job/software-engineer-android-level-5/10296595",
+    "company_url": "https://snap.com",
+    "requirements": [
+      "Android",
+      "Dagger",
+      "Java",
+      "Kotlin",
+      "RxJava",
+      "AI Tools"
+    ],
+    "location": "Remote Seattle, WA",
+    "source_url": "https://www.builtinseattle.com/jobs/remote/dev-engineering",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Snap Inc.",
+    "domain": "snap.com",
+    "role": "Software Engineer, Level 3 (Backend)",
+    "salary_band": "$100K-$176K",
+    "company_size": "5000+",
+    "what_they_do": "Social media / camera platform (Snapchat)",
+    "apply_url": "https://www.builtinseattle.com/job/software-engineer-level-3/10632348",
+    "company_url": "https://snap.com",
+    "requirements": [
+      "AWS",
+      "C++",
+      "GCP",
+      "Java",
+      "Kubernetes",
+      "Python",
+      "Redis",
+      "Swift"
+    ],
+    "location": "Remote Seattle, WA",
+    "source_url": "https://www.builtinseattle.com/jobs/remote/dev-engineering",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Snap Inc.",
+    "domain": "snap.com",
+    "role": "Software Engineer, iOS, Level 4",
+    "salary_band": "$133K-$235K",
+    "company_size": "5000+",
+    "what_they_do": "Social media / camera platform (Snapchat)",
+    "apply_url": "https://www.builtinseattle.com/job/software-engineer-ios-level-4/10051124",
+    "company_url": "https://snap.com",
+    "requirements": [
+      "Objective-C",
+      "Swift",
+      "iOS",
+      "C++",
+      "Metal",
+      "AI Tools"
+    ],
+    "location": "Remote Seattle, WA",
+    "source_url": "https://www.builtinseattle.com/jobs/remote/dev-engineering",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "CrowdStrike",
+    "domain": "crowdstrike.com",
+    "role": "Software Engineer 3, Sensor - Platform API (Remote)",
+    "salary_band": "$120K-$180K",
+    "company_size": "5000+",
+    "what_they_do": "Cybersecurity / endpoint protection",
+    "apply_url": "https://www.builtinseattle.com/job/software-engineer-3-sensor-platform-api-remote/10793330",
+    "company_url": "https://crowdstrike.com",
+    "requirements": [
+      "C",
+      "C++",
+      "Linux",
+      "macOS",
+      "Windows",
+      "ML Inference",
+      "API Design"
+    ],
+    "location": "Remote Seattle, WA",
+    "source_url": "https://www.builtinseattle.com/jobs/remote/dev-engineering",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "MongoDB",
+    "domain": "mongodb.com",
+    "role": "Software Engineer, Platform",
+    "salary_band": "$120K-$180K",
+    "company_size": "5000+",
+    "what_they_do": "Developer data platform / NoSQL database",
+    "apply_url": "https://www.builtinseattle.com/job/software-engineer/",
+    "company_url": "https://mongodb.com",
+    "requirements": [
+      "Cloud",
+      "Computer Vision",
+      "Security"
+    ],
+    "location": "Remote Seattle, WA",
+    "source_url": "https://www.builtinseattle.com/jobs/remote/dev-engineering",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Legal Tech Co",
+    "domain": "unknown",
+    "role": "Software Engineer",
+    "salary_band": "$90K-$140K",
+    "company_size": "unknown",
+    "what_they_do": "eCommerce / Legal Tech / Data Privacy",
+    "apply_url": "https://www.builtinseattle.com/job/software-engineer/7166789",
+    "company_url": "N/A",
+    "requirements": [
+      "Ruby",
+      "JavaScript",
+      "AWS",
+      "React",
+      "Vue",
+      "Docker",
+      "CI/CD"
+    ],
+    "location": "Remote Seattle, WA",
+    "source_url": "https://www.builtinseattle.com/jobs/remote/dev-engineering",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "HealthTech Co",
+    "domain": "unknown",
+    "role": "Software Engineer 2 - RCM (Remote)",
+    "salary_band": "$140K-$171K",
+    "company_size": "unknown",
+    "what_they_do": "Healthtech / Telehealth / Revenue Cycle Management",
+    "apply_url": "https://www.builtinseattle.com/job/software-engineer-2-rcm-remote/10738171",
+    "company_url": "N/A",
+    "requirements": [
+      "APIs",
+      "AWS",
+      "Kafka",
+      "Node.js",
+      "React",
+      "TypeScript"
+    ],
+    "location": "Remote Seattle, WA",
+    "source_url": "https://www.builtinseattle.com/jobs/remote/dev-engineering",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "PropTech Co",
+    "domain": "unknown",
+    "role": "iOS Mobile Software Developer II (Remote or Hybrid)",
+    "salary_band": "$139K-$170K",
+    "company_size": "unknown",
+    "what_they_do": "Real Estate / PropTech",
+    "apply_url": "https://www.builtinseattle.com/job/ios-mobile-software-developer-ii-remote-or-hybrid/10640860",
+    "company_url": "N/A",
+    "requirements": [
+      "iOS",
+      "Swift",
+      "Anthropic Claude",
+      "Cursor",
+      "GitHub Copilot"
+    ],
+    "location": "Remote Seattle, WA",
+    "source_url": "https://www.builtinseattle.com/jobs/remote/dev-engineering",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "TaxBit",
+    "domain": "taxbit.com",
+    "role": "Agentic AI Engineer",
+    "salary_band": "$130K-$170K",
+    "company_size": "51-200",
+    "what_they_do": "Automated cryptocurrency tax calculations",
+    "apply_url": "https://wellfound.com/jobs/4437006-agentic-ai-engineer",
+    "company_url": "https://taxbit.com",
+    "requirements": [
+      "AI/ML",
+      "Agentic AI",
+      "Python"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/role/l/ai-engineer/seattle",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Brex",
+    "domain": "brex.com",
+    "role": "Staff Software Engineer, Travel & Expense",
+    "salary_band": "$240K-$285K",
+    "company_size": "501-1000",
+    "what_they_do": "AI-powered spend platform",
+    "apply_url": "https://wellfound.com/jobs/4470264-staff-software-engineer-travel-expense",
+    "company_url": "https://brex.com",
+    "requirements": [
+      "Staff-level engineering",
+      "Travel & Expense domain"
+    ],
+    "location": "Onsite or Remote, Seattle",
+    "source_url": "https://wellfound.com/role/l/ai-engineer/seattle",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Brex",
+    "domain": "brex.com",
+    "role": "AI Engineer, Ecosystem",
+    "salary_band": "$171K-$240K",
+    "company_size": "501-1000",
+    "what_they_do": "AI-powered spend platform",
+    "apply_url": "https://wellfound.com/jobs/4391263-ai-engineer-ecosystem",
+    "company_url": "https://brex.com",
+    "requirements": [
+      "AI Engineering",
+      "Platform/Ecosystem"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/role/l/ai-engineer/seattle",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Brex",
+    "domain": "brex.com",
+    "role": "Software Engineer, Forward Deployed Agent Builder",
+    "salary_band": "$152K-$240K",
+    "company_size": "501-1000",
+    "what_they_do": "AI-powered spend platform",
+    "apply_url": "https://wellfound.com/jobs/4144710-software-engineer-forward-deployed-agent-builder",
+    "company_url": "https://brex.com",
+    "requirements": [
+      "AI Agents",
+      "Software Engineering"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/role/l/ai-engineer/seattle",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Metropolis",
+    "domain": "metropolis.com",
+    "role": "Senior AI Engineer",
+    "salary_band": "$170K-$210K",
+    "company_size": "51-200",
+    "what_they_do": "AI-powered parking / transportation tech",
+    "apply_url": "https://wellfound.com/jobs/4125963-senior-ai-engineer",
+    "company_url": "https://metropolis.com",
+    "requirements": [
+      "AI/ML",
+      "Senior-level"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/role/l/ai-engineer/seattle",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Metropolis",
+    "domain": "metropolis.com",
+    "role": "Senior Security Engineer, Product & AppSec",
+    "salary_band": "$160K-$225K",
+    "company_size": "51-200",
+    "what_they_do": "AI-powered parking / transportation tech",
+    "apply_url": "https://wellfound.com/jobs/4335863-senior-security-engineer-product-application-security",
+    "company_url": "https://metropolis.com",
+    "requirements": [
+      "Security Engineering",
+      "AppSec",
+      "Product Security"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/role/l/ai-engineer/seattle",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Metropolis",
+    "domain": "metropolis.com",
+    "role": "Senior Software Engineer, Product Foundations",
+    "salary_band": "$150K-$250K",
+    "company_size": "51-200",
+    "what_they_do": "AI-powered parking / transportation tech",
+    "apply_url": "https://wellfound.com/jobs/4276186-senior-software-engineer-product-foundations",
+    "company_url": "https://metropolis.com",
+    "requirements": [
+      "Platform Engineering",
+      "Senior-level"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/role/l/ai-engineer/seattle",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Orchard Robotics",
+    "domain": "orchardrobotics.com",
+    "role": "Machine Learning Engineer",
+    "salary_band": "$135K-$210K + 0.1%-0.25% equity",
+    "company_size": "11-50",
+    "what_they_do": "AI-powered farming automation",
+    "apply_url": "https://wellfound.com/jobs/3982780-machine-learning-engineer",
+    "company_url": "https://orchardrobotics.com",
+    "requirements": [
+      "ML",
+      "Robotics",
+      "Computer Vision"
+    ],
+    "location": "Seattle +1",
+    "source_url": "https://wellfound.com/role/l/full-stack-engineer/seattle",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "MenloExchange",
+    "domain": "menloexchange.com",
+    "role": "Founding Full Stack Engineer",
+    "salary_band": "Unlisted + 0.5%-3.0% equity",
+    "company_size": "1-10",
+    "what_they_do": "Commercialization layer for invention and IP",
+    "apply_url": "https://wellfound.com/jobs/4218449-founding-full-stack-engineer",
+    "company_url": "https://menloexchange.com",
+    "requirements": [
+      "Full-stack",
+      "Founding role",
+      "3 years exp"
+    ],
+    "location": "Onsite or Remote, Seattle +2",
+    "source_url": "https://wellfound.com/role/l/full-stack-engineer/seattle",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "AZX",
+    "domain": "azx.io",
+    "role": "Senior Engineer (Full Stack)",
+    "salary_band": "$140K-$225K",
+    "company_size": "11-50",
+    "what_they_do": "AI solutions for energy, real estate, supply chain",
+    "apply_url": "https://wellfound.com/jobs/3321303-senior-engineer-full-stack",
+    "company_url": "https://azx.io",
+    "requirements": [
+      "Full-stack",
+      "Senior-level",
+      "AI/ML"
+    ],
+    "location": "Remote, Seattle",
+    "source_url": "https://wellfound.com/role/l/full-stack-engineer/seattle",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Adronite",
+    "domain": "adronite.com",
+    "role": "Software Engineer",
+    "salary_band": "$190K-$270K",
+    "company_size": "1-10",
+    "what_they_do": "Deep understanding of complex codebases (AI dev tools)",
+    "apply_url": "https://wellfound.com/jobs/3188951-software-engineer",
+    "company_url": "https://adronite.com",
+    "requirements": [
+      "7 years exp",
+      "AI/ML",
+      "Code analysis"
+    ],
+    "location": "Onsite or Remote, Seattle +2",
+    "source_url": "https://wellfound.com/role/l/software-engineer/seattle",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "SpendAi",
+    "domain": "spendai.com",
+    "role": "Staff Software Engineer",
+    "salary_band": "$170K-$250K",
+    "company_size": "1-10",
+    "what_they_do": "Procurement data analytics / spend intelligence",
+    "apply_url": "https://wellfound.com/jobs/4574551-staff-software-engineer",
+    "company_url": "https://spendai.com",
+    "requirements": [
+      "Staff-level",
+      "4 years exp",
+      "AI/ML"
+    ],
+    "location": "In office, Seattle",
+    "source_url": "https://wellfound.com/role/l/software-engineer/seattle",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Metropolis",
+    "domain": "metropolis.com",
+    "role": "Senior Software Engineer, Platform",
+    "salary_band": "$150K-$200K",
+    "company_size": "51-200",
+    "what_they_do": "AI-powered parking / transportation tech",
+    "apply_url": "https://wellfound.com/jobs/4546390-senior-software-engineer-platform",
+    "company_url": "https://metropolis.com",
+    "requirements": [
+      "Platform Engineering",
+      "Senior-level"
+    ],
+    "location": "Seattle",
+    "source_url": "https://wellfound.com/role/l/software-engineer/seattle",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "StepSecurity",
+    "domain": "stepsecurity.io",
+    "role": "Software Engineer",
+    "salary_band": "Unlisted",
+    "company_size": "11-50",
+    "what_they_do": "Software supply chain security platform",
+    "apply_url": "https://wellfound.com/jobs/4573085-software-engineer",
+    "company_url": "https://stepsecurity.io",
+    "requirements": [
+      "Supply chain security",
+      "2 years exp"
+    ],
+    "location": "Remote only, Canada +1",
+    "source_url": "https://wellfound.com/role/l/software-engineer/seattle",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Calm",
+    "domain": "calm.com",
+    "role": "Senior Data Scientist",
+    "salary_band": "$172K-$225K",
+    "company_size": "201-500",
+    "what_they_do": "Meditation / mental wellness app",
+    "apply_url": "https://wellfound.com/jobs/4617923-senior-data-scientist",
+    "company_url": "https://calm.com",
+    "requirements": [
+      "Data Science",
+      "Senior-level"
+    ],
+    "location": "Remote, New York City +2",
+    "source_url": "https://wellfound.com/remote",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "LaunchDarkly",
+    "domain": "launchdarkly.com",
+    "role": "Senior Backend Engineer, Experimentation",
+    "salary_band": "$164K-$264K",
+    "company_size": "501-1000",
+    "what_they_do": "Feature management / experimentation platform",
+    "apply_url": "https://wellfound.com/jobs/4616915-senior-backend-engineer-experimentation",
+    "company_url": "https://launchdarkly.com",
+    "requirements": [
+      "Backend",
+      "A/B testing",
+      "Senior-level"
+    ],
+    "location": "Remote",
+    "source_url": "https://wellfound.com/remote",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "LaunchDarkly",
+    "domain": "launchdarkly.com",
+    "role": "Staff Engineer, Experience Engineering",
+    "salary_band": "$183K-$295K",
+    "company_size": "501-1000",
+    "what_they_do": "Feature management / experimentation platform",
+    "apply_url": "https://wellfound.com/jobs/4616909-staff-engineer-experience-engineering",
+    "company_url": "https://launchdarkly.com",
+    "requirements": [
+      "Staff-level",
+      "Experience Engineering"
+    ],
+    "location": "Remote",
+    "source_url": "https://wellfound.com/remote",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Motive",
+    "domain": "gomotive.com",
+    "role": "Staff System Software Engineer, AOSP (Android OS)",
+    "salary_band": "$185K-$273K",
+    "company_size": "1001-5000",
+    "what_they_do": "AI-powered fleet management / physical economy",
+    "apply_url": "https://wellfound.com/jobs/4612705-staff-system-software-engineer-aosp-android-os",
+    "company_url": "https://gomotive.com",
+    "requirements": [
+      "AOSP",
+      "Android OS",
+      "System Software",
+      "Staff-level"
+    ],
+    "location": "Remote",
+    "source_url": "https://wellfound.com/remote",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Motive",
+    "domain": "gomotive.com",
+    "role": "GTM AI Engineer",
+    "salary_band": "$112K-$140K",
+    "company_size": "1001-5000",
+    "what_they_do": "AI-powered fleet management / physical economy",
+    "apply_url": "https://wellfound.com/jobs/4610062-gtm-ai-engineer",
+    "company_url": "https://gomotive.com",
+    "requirements": [
+      "AI Engineering",
+      "Go-to-market"
+    ],
+    "location": "Remote",
+    "source_url": "https://wellfound.com/remote",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Keep Company",
+    "domain": "keep.company",
+    "role": "Full-Stack Engineer II",
+    "salary_band": "$150K",
+    "company_size": "unknown",
+    "what_they_do": "Unknown startup",
+    "apply_url": "https://wellfound.com/jobs/4618130-full-stack-engineer-ii",
+    "company_url": "https://keep.company",
+    "requirements": [
+      "Full-stack",
+      "Mid-level"
+    ],
+    "location": "Remote only, Everywhere",
+    "source_url": "https://wellfound.com/remote",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Anthropic",
+    "domain": "anthropic.com",
+    "role": "Business Systems Analyst",
+    "salary_band": "Unlisted",
+    "company_size": "500+",
+    "what_they_do": "AI safety company building Claude",
+    "apply_url": "https://job-boards.greenhouse.io/anthropic/jobs/5394958008",
+    "company_url": "https://anthropic.com",
+    "requirements": [
+      "Business Systems",
+      "Data Analysis"
+    ],
+    "location": "Remote (Travel-Required)",
+    "source_url": "https://www.fastaijobs.com/jobs/seattle",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Overland AI",
+    "domain": "overland.ai",
+    "role": "Technical Recruiter (Contract)",
+    "salary_band": "Unlisted",
+    "company_size": "unknown",
+    "what_they_do": "Autonomous defense vehicles / off-road AI",
+    "apply_url": "https://ats.rippling.com/overland-ai/jobs/6f845317-f5e0-46e5-8c16-abfb4db99d41",
+    "company_url": "https://overland.ai",
+    "requirements": [
+      "Technical Recruiting"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://www.fastaijobs.com/jobs/seattle",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Auger",
+    "domain": "auger.ai",
+    "role": "Data Engineer",
+    "salary_band": "Unlisted",
+    "company_size": "unknown",
+    "what_they_do": "AI / data infrastructure",
+    "apply_url": "https://jobs.gem.com/auger/am9icG9zdDpi4G6_s-J5p8mgMx3IlQjG",
+    "company_url": "https://auger.ai",
+    "requirements": [
+      "Data Engineering"
+    ],
+    "location": "Bellevue, WA",
+    "source_url": "https://www.fastaijobs.com/jobs/seattle",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Auger",
+    "domain": "auger.ai",
+    "role": "Sr. Data Engineer",
+    "salary_band": "Unlisted",
+    "company_size": "unknown",
+    "what_they_do": "AI / data infrastructure",
+    "apply_url": "https://jobs.gem.com/auger/am9icG9zdDq8l9KuUpYvHlYmGgJ0mie6",
+    "company_url": "https://auger.ai",
+    "requirements": [
+      "Senior Data Engineering"
+    ],
+    "location": "Bellevue, WA",
+    "source_url": "https://www.fastaijobs.com/jobs/seattle",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Crusoe",
+    "domain": "crusoecloud.com",
+    "role": "Senior Software Engineer, Network Tooling",
+    "salary_band": "Unlisted",
+    "company_size": "200+",
+    "what_they_do": "Renewable-powered AI infrastructure",
+    "apply_url": "https://jobs.ashbyhq.com/Crusoe/a6043dea-1b46-456c-8d2c-5b44e1660975",
+    "company_url": "https://crusoecloud.com",
+    "requirements": [
+      "Network Engineering",
+      "Senior-level"
+    ],
+    "location": "San Francisco, CA",
+    "source_url": "https://www.fastaijobs.com/jobs/seattle",
+    "scraped_at": "2026-08-22T04:21:33.030Z"
+  },
+  {
+    "company": "Collaboration.Ai",
+    "domain": "",
+    "role": "Senior AI Engineer - Agentic Systems & Data Pipelines",
+    "salary_band": "$100,000+",
+    "company_size": "startup",
+    "what_they_do": "",
+    "apply_url": "https://weworkremotely.com/remote-jobs/collaboration-ai-senior-ai-engineer-agentic-systems-data-pipelines",
+    "company_url": "",
+    "requirements": [],
+    "location": "Minneapolis, MN (Remote US)",
+    "source_url": "weworkremotely",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Reveleer",
+    "domain": "",
+    "role": "Full Stack AI Engineer",
+    "salary_band": "$100,000+",
+    "company_size": "startup",
+    "what_they_do": "",
+    "apply_url": "https://weworkremotely.com/remote-jobs/reveleer-full-stack-ai-engineer",
+    "company_url": "",
+    "requirements": [],
+    "location": "United States (Remote)",
+    "source_url": "weworkremotely",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Coinbase",
+    "domain": "",
+    "role": "Senior Staff Software Engineer, Legal Automation",
+    "salary_band": "$253,895-$298,700",
+    "company_size": "large",
+    "what_they_do": "",
+    "apply_url": "https://weworkremotely.com/remote-jobs/coinbase-senior-staff-software-engineer-legal-automation",
+    "company_url": "",
+    "requirements": [],
+    "location": "Remote-first",
+    "source_url": "weworkremotely",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "LaunchDarkly",
+    "domain": "",
+    "role": "Backend Engineer, Flag Delivery",
+    "salary_band": "undisclosed",
+    "company_size": "mid-size",
+    "what_they_do": "",
+    "apply_url": "https://weworkremotely.com/remote-jobs/launchdarkly-backend-engineer-flag-delivery",
+    "company_url": "",
+    "requirements": [],
+    "location": "Remote",
+    "source_url": "weworkremotely",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Lemon.io",
+    "domain": "",
+    "role": "Senior AI Engineer",
+    "salary_band": "undisclosed",
+    "company_size": "startup",
+    "what_they_do": "",
+    "apply_url": "https://weworkremotely.com/remote-jobs/lemon-io-senior-ai-engineer-4",
+    "company_url": "",
+    "requirements": [],
+    "location": "Anywhere in the World",
+    "source_url": "weworkremotely",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Collaboration.Ai",
+    "domain": "",
+    "role": "Senior Software Engineer",
+    "salary_band": "undisclosed",
+    "company_size": "startup",
+    "what_they_do": "",
+    "apply_url": "https://weworkremotely.com/remote-jobs/collaboration-ai-senior-software-engineer",
+    "company_url": "",
+    "requirements": [],
+    "location": "Remote",
+    "source_url": "weworkremotely",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Toptal",
+    "domain": "",
+    "role": "AI/ML Engineer for AI-Driven E-Commerce Platform",
+    "salary_band": "undisclosed",
+    "company_size": "mid-size",
+    "what_they_do": "",
+    "apply_url": "https://weworkremotely.com/remote-jobs/toptal-ai-ml-engineer-for-an-ai-driven-e-commerce-platform",
+    "company_url": "",
+    "requirements": [],
+    "location": "Anywhere in the World",
+    "source_url": "weworkremotely",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Toptal",
+    "domain": "",
+    "role": "Senior Software Engineer for AI-Powered Banking Platform",
+    "salary_band": "undisclosed",
+    "company_size": "mid-size",
+    "what_they_do": "",
+    "apply_url": "https://weworkremotely.com/remote-jobs/toptal-senior-software-engineer-for-ai-powered-banking-platform",
+    "company_url": "",
+    "requirements": [],
+    "location": "Anywhere in the World",
+    "source_url": "weworkremotely",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Bjak",
+    "domain": "",
+    "role": "Applied AI Engineer",
+    "salary_band": "undisclosed",
+    "company_size": "startup",
+    "what_they_do": "",
+    "apply_url": "https://remoteok.com/remote-jobs/remote-applied-ai-engineer-bjak-1132964",
+    "company_url": "",
+    "requirements": [],
+    "location": "Remote",
+    "source_url": "remoteok",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Qonto",
+    "domain": "",
+    "role": "Backend Software Engineer",
+    "salary_band": "~$90,000",
+    "company_size": "mid-size",
+    "what_they_do": "",
+    "apply_url": "https://remoteok.com/remote-jobs/99757-remote-backend-software-engineer-qonto",
+    "company_url": "",
+    "requirements": [],
+    "location": "Remote (EU)",
+    "source_url": "remoteok",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Tech Innovations Inc.",
+    "domain": "",
+    "role": "Software Engineer",
+    "salary_band": "~$100,000",
+    "company_size": "startup",
+    "what_they_do": "",
+    "apply_url": "https://remoteok.com/remote-jobs/remote-software-engineer-tech-innovations-inc-1128760",
+    "company_url": "",
+    "requirements": [],
+    "location": "San Francisco (Remote)",
+    "source_url": "remoteok",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Capital Technology Group",
+    "domain": "",
+    "role": "Lead AI/ML Engineer",
+    "salary_band": "$180,000-$230,000",
+    "company_size": "mid-size",
+    "what_they_do": "",
+    "apply_url": "https://job-boards.greenhouse.io/capitaltg/jobs/4369277007",
+    "company_url": "",
+    "requirements": [],
+    "location": "Remote (US)",
+    "source_url": "greenhouse",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Rackner",
+    "domain": "",
+    "role": "AI/ML Engineer \u2014 Generative AI Mission Systems",
+    "salary_band": "undisclosed",
+    "company_size": "small",
+    "what_they_do": "",
+    "apply_url": "https://job-boards.greenhouse.io/rackner/jobs/4717776005",
+    "company_url": "",
+    "requirements": [],
+    "location": "Remote (US, mostly remote MD)",
+    "source_url": "greenhouse",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Prophecy",
+    "domain": "",
+    "role": "Software Engineer",
+    "salary_band": "undisclosed",
+    "company_size": "startup",
+    "what_they_do": "",
+    "apply_url": "https://job-boards.greenhouse.io/prophecysimpledatalabs/jobs/5181938007",
+    "company_url": "",
+    "requirements": [],
+    "location": "Remote",
+    "source_url": "greenhouse",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Weights & Biases",
+    "domain": "",
+    "role": "ML Engineer",
+    "salary_band": "undisclosed",
+    "company_size": "mid-size",
+    "what_they_do": "",
+    "apply_url": "https://wellfound.com/role/r/machine-learning-engineer",
+    "company_url": "",
+    "requirements": [],
+    "location": "Remote",
+    "source_url": "wellfound",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Roadpass Digital",
+    "domain": "",
+    "role": "AI/ML Engineer",
+    "salary_band": "undisclosed",
+    "company_size": "startup",
+    "what_they_do": "",
+    "apply_url": "https://wellfound.com/role/r/machine-learning-engineer",
+    "company_url": "",
+    "requirements": [],
+    "location": "Remote",
+    "source_url": "wellfound",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Unknown (Defense)",
+    "domain": "",
+    "role": "AI Engineering Lead",
+    "salary_band": "undisclosed",
+    "company_size": "unknown",
+    "what_they_do": "",
+    "apply_url": "https://www.clearancejobs.com/jobs/9111570/ai-engineering-lead",
+    "company_url": "",
+    "requirements": [],
+    "location": "Remote (US)",
+    "source_url": "clearancejobs",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "OpenSesame",
+    "domain": "",
+    "role": "Software Engineering Internship Summer 2026",
+    "salary_band": "undisclosed",
+    "company_size": "mid-size",
+    "what_they_do": "",
+    "apply_url": "https://remoteok.com/remote-jobs/remote-software-engineering-internship-summer-2026-opensesame-1129018",
+    "company_url": "",
+    "requirements": [],
+    "location": "Remote",
+    "source_url": "remoteok",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Various (via Arc.dev)",
+    "domain": "",
+    "role": "Remote Machine Learning Engineer",
+    "salary_band": "varies",
+    "company_size": "various",
+    "what_they_do": "",
+    "apply_url": "https://arc.dev/remote-jobs/machine-learning",
+    "company_url": "",
+    "requirements": [],
+    "location": "Remote (PT-friendly)",
+    "source_url": "arc.dev",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Proxify AB",
+    "domain": "",
+    "role": "Backend Developer (Top 100)",
+    "salary_band": "undisclosed",
+    "company_size": "mid-size",
+    "what_they_do": "",
+    "apply_url": "https://weworkremotely.com/categories/remote-back-end-programming-jobs",
+    "company_url": "",
+    "requirements": [],
+    "location": "Anywhere in the World",
+    "source_url": "weworkremotely",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Magic Compass Limited",
+    "domain": "",
+    "role": "GenAI Engineer - AI Builder / AI Agent Associate Specialist",
+    "salary_band": "~$15,000/yr",
+    "company_size": "startup",
+    "what_they_do": "",
+    "apply_url": "https://remoteok.com/remote-jobs/remote-genai-engineer-ai-builder-ai-agent-associate-specialist-magic-compass-limited-1135735",
+    "company_url": "",
+    "requirements": [],
+    "location": "Remote",
+    "source_url": "remoteok",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Various (via ZipRecruiter)",
+    "domain": "",
+    "role": "MLOps Engineer - Seattle",
+    "salary_band": "varies",
+    "company_size": "various",
+    "what_they_do": "",
+    "apply_url": "https://www.ziprecruiter.com/Jobs/Remote-MLOps/-in-Seattle,WA",
+    "company_url": "",
+    "requirements": [],
+    "location": "Seattle, WA (Remote)",
+    "source_url": "ziprecruiter",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Various (via Indeed)",
+    "domain": "",
+    "role": "Remote Software Developer - Seattle",
+    "salary_band": "$136k-$400k",
+    "company_size": "various",
+    "what_they_do": "",
+    "apply_url": "https://www.indeed.com/q-remote-developer-l-seattle,-wa-jobs.html",
+    "company_url": "",
+    "requirements": [],
+    "location": "Seattle, WA (Remote)",
+    "source_url": "indeed",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Various (via Haystack)",
+    "domain": "",
+    "role": "Machine Learning Engineer - Seattle",
+    "salary_band": "varies",
+    "company_size": "various",
+    "what_they_do": "",
+    "apply_url": "https://haystackapp.io/jobs/machine-learning-jobs-in-seattle",
+    "company_url": "",
+    "requirements": [],
+    "location": "Seattle, WA (Remote)",
+    "source_url": "haystack",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Various (via Built In Seattle)",
+    "domain": "",
+    "role": "Remote ML Engineer - Seattle",
+    "salary_band": "varies",
+    "company_size": "various",
+    "what_they_do": "",
+    "apply_url": "https://www.builtinseattle.com/jobs/remote/data-analytics/machine-learning",
+    "company_url": "",
+    "requirements": [],
+    "location": "Seattle, WA (Remote)",
+    "source_url": "builtinseattle",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Various (via startup.jobs)",
+    "domain": "",
+    "role": "Software Engineer - Seattle",
+    "salary_band": "$124k-$163k",
+    "company_size": "various",
+    "what_they_do": "",
+    "apply_url": "https://startup.jobs/locations/seattle",
+    "company_url": "",
+    "requirements": [],
+    "location": "Seattle, WA (Remote)",
+    "source_url": "startup.jobs",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Various (via startup.jobs)",
+    "domain": "",
+    "role": "AI/ML Engineer - Seattle Startup",
+    "salary_band": "$124k-$163k",
+    "company_size": "various",
+    "what_they_do": "",
+    "apply_url": "https://startup.jobs/locations/seattle",
+    "company_url": "",
+    "requirements": [],
+    "location": "Seattle, WA (Remote)",
+    "source_url": "startup.jobs",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Prophecy",
+    "domain": "",
+    "role": "Senior Software Engineer",
+    "salary_band": "undisclosed",
+    "company_size": "startup",
+    "what_they_do": "",
+    "apply_url": "https://job-boards.greenhouse.io/prophecysimpledatalabs/jobs/5181938007",
+    "company_url": "",
+    "requirements": [],
+    "location": "Remote",
+    "source_url": "greenhouse",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Prophecy",
+    "domain": "",
+    "role": "ML Engineer",
+    "salary_band": "undisclosed",
+    "company_size": "startup",
+    "what_they_do": "",
+    "apply_url": "https://job-boards.greenhouse.io/prophecysimpledatalabs/jobs/5181938007",
+    "company_url": "",
+    "requirements": [],
+    "location": "Remote",
+    "source_url": "greenhouse",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Various (via Wellfound)",
+    "domain": "",
+    "role": "AI Engineer - Seattle",
+    "salary_band": "varies",
+    "company_size": "various",
+    "what_they_do": "",
+    "apply_url": "https://wellfound.com/role/l/ai-engineer/seattle",
+    "company_url": "",
+    "requirements": [],
+    "location": "Seattle / Remote",
+    "source_url": "wellfound",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Various (via Wellfound)",
+    "domain": "",
+    "role": "ML Engineer - Seattle",
+    "salary_band": "varies",
+    "company_size": "various",
+    "what_they_do": "",
+    "apply_url": "https://wellfound.com/role/l/machine-learning-engineer/seattle",
+    "company_url": "",
+    "requirements": [],
+    "location": "Seattle / Remote",
+    "source_url": "wellfound",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Various (via Arc.dev)",
+    "domain": "",
+    "role": "Remote AI Engineer",
+    "salary_band": "varies",
+    "company_size": "various",
+    "what_they_do": "",
+    "apply_url": "https://arc.dev/remote-jobs",
+    "company_url": "",
+    "requirements": [],
+    "location": "Remote (PT-friendly)",
+    "source_url": "arc.dev",
+    "scraped_at": "2026-08-21"
+  }
+]

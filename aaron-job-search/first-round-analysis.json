@@ -1,0 +1,1569 @@
+[
+  {
+    "rank": 31,
+    "company": "AZX",
+    "role": "Senior Engineer (Full Stack)",
+    "score": 62,
+    "grade": "B",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "Small startup",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 50.9,
+    "submit": "ashby",
+    "ats": "Ashby"
+  },
+  {
+    "rank": 33,
+    "company": "Hyperproof",
+    "role": "Senior DevSecOps Engineer",
+    "score": 60,
+    "grade": "B",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "Growth-stage",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 50.7,
+    "submit": "ashby",
+    "ats": "Ashby"
+  },
+  {
+    "rank": 7,
+    "company": "AI Training Jobs",
+    "role": "Senior Software Engineer \u2014 AI Automation",
+    "score": 54,
+    "grade": "B",
+    "factors": [
+      "Remote",
+      "Senior match",
+      "Small startup",
+      "High composite",
+      "Redirect"
+    ],
+    "composite": 54.5,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 35,
+    "company": "LaunchDarkly",
+    "role": "Staff Engineer, Experience Engineering",
+    "score": 54,
+    "grade": "B",
+    "factors": [
+      "Remote",
+      "Staff stretch",
+      "Small startup",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 50.5,
+    "submit": "greenhouse",
+    "ats": "Greenhouse"
+  },
+  {
+    "rank": 16,
+    "company": "ServiceNow",
+    "role": "Sr Staff Product Manager \u2014 AI & Product Led Motion",
+    "score": 53,
+    "grade": "B",
+    "factors": [
+      "Seattle",
+      "Staff stretch",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 53.0,
+    "submit": "workday",
+    "ats": "Workday"
+  },
+  {
+    "rank": 50,
+    "company": "Adronite",
+    "role": "Software Engineer (Senior)",
+    "score": 53,
+    "grade": "B",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "Small startup",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 49.2,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 52,
+    "company": "MongoDB",
+    "role": "Staff Site Reliability Engineer, Infrastructure Security",
+    "score": 53,
+    "grade": "B",
+    "factors": [
+      "Seattle",
+      "Staff stretch",
+      "Small startup",
+      "Med composite",
+      "Direct ATS"
+    ],
+    "composite": 49.0,
+    "submit": "workday",
+    "ats": "Workday"
+  },
+  {
+    "rank": 65,
+    "company": "Yoodli",
+    "role": "Senior Software Engineer - Backend (Platform)",
+    "score": 53,
+    "grade": "B",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "Small startup",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 47.9,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 10,
+    "company": "Nordstrom",
+    "role": "Senior Engineer 2 \u2013 AI Agentic Solutions",
+    "score": 52,
+    "grade": "B",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 54.4,
+    "submit": "workday",
+    "ats": "Workday"
+  },
+  {
+    "rank": 17,
+    "company": "Gray Swan AI",
+    "role": "Senior AI Security Deployment Engineer",
+    "score": 52,
+    "grade": "B",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 52.9,
+    "submit": "ashby",
+    "ats": "Ashby"
+  },
+  {
+    "rank": 18,
+    "company": "Nordstrom",
+    "role": "Senior Engineer - AI Agentic Solutions",
+    "score": 52,
+    "grade": "B",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 52.9,
+    "submit": "workday",
+    "ats": "Workday"
+  },
+  {
+    "rank": 19,
+    "company": "Nordstrom",
+    "role": "Senior Engineer 2 - AI Agentic Platform",
+    "score": 52,
+    "grade": "B",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 52.9,
+    "submit": "workday",
+    "ats": "Workday"
+  },
+  {
+    "rank": 24,
+    "company": "Suede AI",
+    "role": "Senior/Staff Founding Engineer (AI/ML & Full-Stack)",
+    "score": 52,
+    "grade": "B",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 52.1,
+    "submit": "ashby",
+    "ats": "Ashby"
+  },
+  {
+    "rank": 76,
+    "company": "Metropolis",
+    "role": "Senior AI Engineer",
+    "score": 51,
+    "grade": "B",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "Growth-stage",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 47.4,
+    "submit": "manual_redirect",
+    "ats": "Wellfound"
+  },
+  {
+    "rank": 95,
+    "company": "Metropolis",
+    "role": "Senior Software Engineer, Product Foundations",
+    "score": 51,
+    "grade": "B",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "Growth-stage",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 46.4,
+    "submit": "manual_redirect",
+    "ats": "Wellfound"
+  },
+  {
+    "rank": 96,
+    "company": "Metropolis",
+    "role": "Senior Software Engineer, Platform",
+    "score": 51,
+    "grade": "B",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "Growth-stage",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 46.4,
+    "submit": "manual_redirect",
+    "ats": "Wellfound"
+  },
+  {
+    "rank": 2,
+    "company": "Anduril Industries",
+    "role": "Founding Staff AI Infrastructure Engineer",
+    "score": 50,
+    "grade": "B",
+    "factors": [
+      "Seattle",
+      "Staff stretch",
+      "Top composite",
+      "Direct ATS"
+    ],
+    "composite": 57.0,
+    "submit": "greenhouse",
+    "ats": "Greenhouse"
+  },
+  {
+    "rank": 82,
+    "company": "LaunchDarkly",
+    "role": "Senior Backend Engineer, Experimentation",
+    "score": 50,
+    "grade": "B",
+    "factors": [
+      "Remote",
+      "Senior match",
+      "Small startup",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 46.9,
+    "submit": "manual_redirect",
+    "ats": "Wellfound"
+  },
+  {
+    "rank": 13,
+    "company": "SavvyCal",
+    "role": "Senior Full-Stack Developer",
+    "score": 49,
+    "grade": "C",
+    "factors": [
+      "Remote",
+      "Senior match",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 53.3,
+    "submit": "custom_form",
+    "ats": "Dynamite Jobs"
+  },
+  {
+    "rank": 21,
+    "company": "Collaboration.Ai",
+    "role": "Senior AI Engineer - Agentic Systems & Data Pipelines",
+    "score": 49,
+    "grade": "C",
+    "factors": [
+      "Remote",
+      "Senior match",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 52.8,
+    "submit": "ashby",
+    "ats": "Ashby"
+  },
+  {
+    "rank": 38,
+    "company": "ServiceNow",
+    "role": "Staff Reliability Engineer",
+    "score": 48,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Staff stretch",
+      "High composite",
+      "Redirect"
+    ],
+    "composite": 50.0,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 73,
+    "company": "AI2",
+    "role": "Senior Software Engineer, AI Infrastructure",
+    "score": 48,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "Med composite",
+      "Direct ATS"
+    ],
+    "composite": 47.6,
+    "submit": "greenhouse",
+    "ats": "Greenhouse"
+  },
+  {
+    "rank": 75,
+    "company": "Brex",
+    "role": "Staff Software Engineer, Travel & Expense",
+    "score": 48,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Staff stretch",
+      "Small startup",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 47.5,
+    "submit": "manual_redirect",
+    "ats": "Wellfound"
+  },
+  {
+    "rank": 81,
+    "company": "Axon",
+    "role": "Senior Software Embedded Engineer",
+    "score": 48,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "Med composite",
+      "Direct ATS"
+    ],
+    "composite": 47.0,
+    "submit": "custom_form",
+    "ats": "Greenhouse (Axon known user)"
+  },
+  {
+    "rank": 91,
+    "company": "Boeing",
+    "role": "Senior AI Solutions Architect",
+    "score": 48,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "Med composite",
+      "Direct ATS"
+    ],
+    "composite": 46.8,
+    "submit": "custom_form",
+    "ats": "Workday (Boeing known user)"
+  },
+  {
+    "rank": 100,
+    "company": "AI2",
+    "role": "Senior Software Engineer, Agent Platform (AI for the Planet)",
+    "score": 48,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "Med composite",
+      "Direct ATS"
+    ],
+    "composite": 46.1,
+    "submit": "greenhouse",
+    "ats": "Greenhouse"
+  },
+  {
+    "rank": 14,
+    "company": "Ravenna Software",
+    "role": "AI Engineer",
+    "score": 47,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Small startup",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 53.2,
+    "submit": "ashby",
+    "ats": "Ashby"
+  },
+  {
+    "rank": 23,
+    "company": "Nordstrom",
+    "role": "Principal Engineer \u2013 AI Agentic Platform",
+    "score": 47,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Staff stretch",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 52.4,
+    "submit": "workday",
+    "ats": "Workday"
+  },
+  {
+    "rank": 25,
+    "company": "AZX",
+    "role": "Solutions Engagement Manager (AI/ML)",
+    "score": 47,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Small startup",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 51.9,
+    "submit": "ashby",
+    "ats": "Ashby"
+  },
+  {
+    "rank": 4,
+    "company": "Tonifo",
+    "role": "Founding Agentic Engineer",
+    "score": 45,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Small startup",
+      "Top composite",
+      "Redirect"
+    ],
+    "composite": 55.4,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 5,
+    "company": "Brex",
+    "role": "Software Engineer, Forward Deployed Agent Builder",
+    "score": 45,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Small startup",
+      "Top composite",
+      "Redirect"
+    ],
+    "composite": 55.4,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 30,
+    "company": "TaxBit",
+    "role": "Agentic AI Engineer",
+    "score": 45,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Growth-stage",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 50.9,
+    "submit": "greenhouse",
+    "ats": "Greenhouse"
+  },
+  {
+    "rank": 34,
+    "company": "Backpack",
+    "role": "Founding Backend Engineer",
+    "score": 44,
+    "grade": "C",
+    "factors": [
+      "Remote",
+      "Small startup",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 50.5,
+    "submit": "ashby",
+    "ats": "Ashby"
+  },
+  {
+    "rank": 45,
+    "company": "ServiceNow",
+    "role": "Sr Staff Product Manager \u2013 AI Monetization (Pricing & Packaging)",
+    "score": 44,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Staff stretch",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 49.5,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 22,
+    "company": "OpenAI",
+    "role": "Security Engineer, Agent Security",
+    "score": 43,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 52.5,
+    "submit": "ashby",
+    "ats": "Ashby"
+  },
+  {
+    "rank": 42,
+    "company": "LogicMonitor",
+    "role": "Sr. Customer Technical Architect",
+    "score": 43,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 49.9,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 49,
+    "company": "Terrakotta",
+    "role": "Senior Full-Stack Engineer",
+    "score": 43,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 49.3,
+    "submit": "manual_redirect",
+    "ats": "Amazon Jobs"
+  },
+  {
+    "rank": 60,
+    "company": "Atlassian",
+    "role": "Senior Principal Forward Deployed Engineer",
+    "score": 43,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 48.5,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 70,
+    "company": "Kivo Health",
+    "role": "Senior Engineer",
+    "score": 43,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 47.8,
+    "submit": "manual_redirect",
+    "ats": "Oracle HCM"
+  },
+  {
+    "rank": 88,
+    "company": "Moonset Health",
+    "role": "Product Engineer",
+    "score": 43,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Senior match",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 46.8,
+    "submit": "manual_redirect",
+    "ats": "BuiltIn"
+  },
+  {
+    "rank": 9,
+    "company": "Brex",
+    "role": "AI Engineer, Ecosystem",
+    "score": 42,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Small startup",
+      "High composite",
+      "Redirect"
+    ],
+    "composite": 54.4,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 36,
+    "company": "Feather",
+    "role": "Founding Engineer",
+    "score": 42,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Small startup",
+      "High composite",
+      "Redirect"
+    ],
+    "composite": 50.4,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 39,
+    "company": "Adronite",
+    "role": "Software Engineer",
+    "score": 42,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Small startup",
+      "High composite",
+      "Redirect"
+    ],
+    "composite": 50.0,
+    "submit": "manual_redirect",
+    "ats": "SmartRecruiters"
+  },
+  {
+    "rank": 66,
+    "company": "Xealth",
+    "role": "Software Engineer, Data Platform",
+    "score": 42,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Growth-stage",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 47.9,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 72,
+    "company": "MOLTEN Cloud",
+    "role": "Lead Software Engineer",
+    "score": 41,
+    "grade": "C",
+    "factors": [
+      "Remote",
+      "Small startup",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 47.6,
+    "submit": "manual_redirect",
+    "ats": "Wellfound"
+  },
+  {
+    "rank": 3,
+    "company": "Whatnot",
+    "role": "Software Engineer, Developer Productivity",
+    "score": 40,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Top composite",
+      "Direct ATS"
+    ],
+    "composite": 55.5,
+    "submit": "ashby",
+    "ats": "Ashby"
+  },
+  {
+    "rank": 6,
+    "company": "OpenAI",
+    "role": "Security Engineer, Application Security",
+    "score": 40,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Top composite",
+      "Direct ATS"
+    ],
+    "composite": 55.0,
+    "submit": "ashby",
+    "ats": "Ashby"
+  },
+  {
+    "rank": 61,
+    "company": "Harell Data",
+    "role": "Software Engineer, AI Infrastructure",
+    "score": 38,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Small startup",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 48.4,
+    "submit": "manual_redirect",
+    "ats": "Workday"
+  },
+  {
+    "rank": 68,
+    "company": "Microsoft",
+    "role": "Senior AI Engineer (Security AI)",
+    "score": 38,
+    "grade": "C",
+    "factors": [
+      "Hybrid",
+      "Senior match",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 47.9,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 69,
+    "company": "JPMorgan Chase",
+    "role": "Principal Security Platform Engineer (AI-Driven)",
+    "score": 38,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Staff stretch",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 47.9,
+    "submit": "manual_redirect",
+    "ats": "Microsoft Careers"
+  },
+  {
+    "rank": 83,
+    "company": "Okta",
+    "role": "Staff AI Security Engineer",
+    "score": 38,
+    "grade": "C",
+    "factors": [
+      "Hybrid",
+      "Staff stretch",
+      "Med composite",
+      "Direct ATS"
+    ],
+    "composite": 46.9,
+    "submit": "custom_form",
+    "ats": "Workday (Okta known user)"
+  },
+  {
+    "rank": 85,
+    "company": "Klutch AI",
+    "role": "Full-Stack Engineer",
+    "score": 38,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Small startup",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 46.8,
+    "submit": "manual_redirect",
+    "ats": "Wellfound"
+  },
+  {
+    "rank": 86,
+    "company": "Stripecraft",
+    "role": "Software Engineer",
+    "score": 38,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Small startup",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 46.8,
+    "submit": "manual_redirect",
+    "ats": "Wellfound"
+  },
+  {
+    "rank": 90,
+    "company": "C-Serv",
+    "role": "Adversarial Machine Learning Engineer",
+    "score": 38,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Small startup",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 46.8,
+    "submit": "manual_redirect",
+    "ats": "Indeed"
+  },
+  {
+    "rank": 92,
+    "company": "Pinterest",
+    "role": "Engineering Manager II, Ads ML Training Infrastructure",
+    "score": 38,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Small startup",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 46.5,
+    "submit": "manual_redirect",
+    "ats": "Wellfound"
+  },
+  {
+    "rank": 98,
+    "company": "MenloExchange",
+    "role": "Founding Full Stack Engineer (Equity First)",
+    "score": 38,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "Small startup",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 46.2,
+    "submit": "manual_redirect",
+    "ats": "Wellfound"
+  },
+  {
+    "rank": 1,
+    "company": "CrowdStrike",
+    "role": "Professional Services Technical Operations Engineer - Agentic AI",
+    "score": 37,
+    "grade": "C",
+    "factors": [
+      "Remote",
+      "Top composite",
+      "Direct ATS"
+    ],
+    "composite": 58.1,
+    "submit": "workday",
+    "ats": "Workday"
+  },
+  {
+    "rank": 8,
+    "company": "OpenAI",
+    "role": "Security Engineer, Infrastructure Security",
+    "score": 37,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 54.5,
+    "submit": "ashby",
+    "ats": "Ashby"
+  },
+  {
+    "rank": 11,
+    "company": "Anthropic",
+    "role": "Platform Security Engineer (OpenBMC)",
+    "score": 37,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 54.0,
+    "submit": "greenhouse",
+    "ats": "Greenhouse"
+  },
+  {
+    "rank": 27,
+    "company": "tribe.ai",
+    "role": "Forward Deployed AI Architect",
+    "score": 37,
+    "grade": "C",
+    "factors": [
+      "Remote",
+      "Growth-stage",
+      "High composite",
+      "Redirect"
+    ],
+    "composite": 51.0,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 28,
+    "company": "Whatnot",
+    "role": "Fullstack Engineer, Seller Merchandising",
+    "score": 37,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 51.0,
+    "submit": "ashby",
+    "ats": "Ashby"
+  },
+  {
+    "rank": 29,
+    "company": "Whatnot",
+    "role": "Frontend Engineer, Customer Experience",
+    "score": 37,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 51.0,
+    "submit": "ashby",
+    "ats": "Ashby"
+  },
+  {
+    "rank": 32,
+    "company": "Nordstrom",
+    "role": "Engineer 2 - AI Agentic Solutions",
+    "score": 37,
+    "grade": "C",
+    "factors": [
+      "Seattle",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 50.8,
+    "submit": "workday",
+    "ats": "Workday"
+  },
+  {
+    "rank": 51,
+    "company": "CrowdStrike",
+    "role": "Sr. Site Reliability Engineer - Core Platform & Embedded Reliability (Hybrid)",
+    "score": 36,
+    "grade": "C",
+    "factors": [
+      "Senior match",
+      "Growth-stage",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 49.1,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 20,
+    "company": "ScrapingBee",
+    "role": "Web Scraping Engineer (intermittent)",
+    "score": 35,
+    "grade": "C",
+    "factors": [
+      "Remote",
+      "High composite",
+      "Redirect"
+    ],
+    "composite": 52.8,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 12,
+    "company": "Weights & Biases",
+    "role": "ML Engineer",
+    "score": 34,
+    "grade": "D",
+    "factors": [
+      "Remote",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 53.9,
+    "submit": "ashby",
+    "ats": "Ashby"
+  },
+  {
+    "rank": 26,
+    "company": "Gray Swan AI",
+    "role": "Red Team Engineer",
+    "score": 34,
+    "grade": "D",
+    "factors": [
+      "Remote",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 51.9,
+    "submit": "ashby",
+    "ats": "Ashby"
+  },
+  {
+    "rank": 56,
+    "company": "Amazon (AWS)",
+    "role": "Security Engineer \u2013 AI/ML Security",
+    "score": 34,
+    "grade": "D",
+    "factors": [
+      "Seattle",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 48.9,
+    "submit": "manual_redirect",
+    "ats": "Workday"
+  },
+  {
+    "rank": 67,
+    "company": "MongoDB",
+    "role": "Software Engineer, Platform",
+    "score": 34,
+    "grade": "D",
+    "factors": [
+      "Seattle",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 47.9,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 41,
+    "company": "JPMorgan Chase",
+    "role": "Software Engineer III - AI/ML Platform Engineer",
+    "score": 33,
+    "grade": "D",
+    "factors": [
+      "Seattle",
+      "Med composite",
+      "Direct ATS"
+    ],
+    "composite": 49.9,
+    "submit": "workday",
+    "ats": "Workday"
+  },
+  {
+    "rank": 43,
+    "company": "Altinity",
+    "role": "Technical Sales Engineer",
+    "score": 33,
+    "grade": "D",
+    "factors": [
+      "Remote",
+      "Growth-stage",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 49.9,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 54,
+    "company": "HealthTech Co",
+    "role": "Software Engineer 2 - RCM (Remote)",
+    "score": 33,
+    "grade": "D",
+    "factors": [
+      "Seattle",
+      "Med composite",
+      "Direct ATS"
+    ],
+    "composite": 48.9,
+    "submit": "greenhouse",
+    "ats": "Greenhouse"
+  },
+  {
+    "rank": 55,
+    "company": "CrowdStrike",
+    "role": "Staff AI Security Scientist",
+    "score": 33,
+    "grade": "D",
+    "factors": [
+      "Hybrid",
+      "Staff stretch",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 48.9,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 58,
+    "company": "MenloExchange",
+    "role": "Founding Full Stack Engineer",
+    "score": 33,
+    "grade": "D",
+    "factors": [
+      "Seattle",
+      "Small startup",
+      "Med composite"
+    ],
+    "composite": 48.6,
+    "submit": "email",
+    "ats": null
+  },
+  {
+    "rank": 84,
+    "company": "Qualtrics",
+    "role": "AI Security Architect",
+    "score": 33,
+    "grade": "D",
+    "factors": [
+      "Seattle",
+      "Med composite",
+      "Direct ATS"
+    ],
+    "composite": 46.9,
+    "submit": "custom_form",
+    "ats": "Workday (Qualtrics known user)"
+  },
+  {
+    "rank": 97,
+    "company": "Disney",
+    "role": "Software Engineer II - GenAI",
+    "score": 33,
+    "grade": "D",
+    "factors": [
+      "Seattle",
+      "Med composite",
+      "Direct ATS"
+    ],
+    "composite": 46.3,
+    "submit": "custom_form",
+    "ats": "Workday (Disney known user)"
+  },
+  {
+    "rank": 37,
+    "company": "Google",
+    "role": "Senior Engineering Analyst, Content Adversarial Red Team",
+    "score": 32,
+    "grade": "D",
+    "factors": [
+      "Senior match",
+      "High composite",
+      "Redirect"
+    ],
+    "composite": 50.4,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 99,
+    "company": "GC AI",
+    "role": "Member of Technical Staff, Platform Engineering",
+    "score": 31,
+    "grade": "D",
+    "factors": [
+      "Staff stretch",
+      "Growth-stage",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 46.2,
+    "submit": "manual_redirect",
+    "ats": "BuiltIn"
+  },
+  {
+    "rank": 15,
+    "company": "Affirm",
+    "role": "AI Solutions Engineer",
+    "score": 30,
+    "grade": "D",
+    "factors": [
+      "Growth-stage",
+      "High composite",
+      "Direct ATS"
+    ],
+    "composite": 53.2,
+    "submit": "greenhouse",
+    "ats": "Greenhouse"
+  },
+  {
+    "rank": 47,
+    "company": "Capital Technology Group",
+    "role": "Lead AI/ML Engineer",
+    "score": 30,
+    "grade": "D",
+    "factors": [
+      "Remote",
+      "Med composite",
+      "Direct ATS"
+    ],
+    "composite": 49.5,
+    "submit": "ashby",
+    "ats": "Ashby"
+  },
+  {
+    "rank": 79,
+    "company": "Prophecy",
+    "role": "ML Engineer",
+    "score": 30,
+    "grade": "D",
+    "factors": [
+      "Remote",
+      "Med composite",
+      "Direct ATS"
+    ],
+    "composite": 47.1,
+    "submit": "greenhouse",
+    "ats": "Greenhouse"
+  },
+  {
+    "rank": 46,
+    "company": "Whatnot",
+    "role": "Backend Engineer, Logistics",
+    "score": 28,
+    "grade": "D",
+    "factors": [
+      "Seattle",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 49.5,
+    "submit": "manual_redirect",
+    "ats": "SmartRecruiters"
+  },
+  {
+    "rank": 53,
+    "company": "Anthropic",
+    "role": "Security Engineer, Detection & Response",
+    "score": 28,
+    "grade": "D",
+    "factors": [
+      "Seattle",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 49.0,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 57,
+    "company": "CopyCat",
+    "role": "Early Team (not yet posted)",
+    "score": 28,
+    "grade": "D",
+    "factors": [
+      "Seattle",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 48.8,
+    "submit": "manual_redirect",
+    "ats": "Amazon Jobs"
+  },
+  {
+    "rank": 59,
+    "company": "ServiceNow",
+    "role": "AI Infrastructure Engineer",
+    "score": 28,
+    "grade": "D",
+    "factors": [
+      "Seattle",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 48.6,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 63,
+    "company": "JPMorganChase",
+    "role": "AI/ML Platform Engineer",
+    "score": 28,
+    "grade": "D",
+    "factors": [
+      "Seattle",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 48.1,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 64,
+    "company": "TikTok (ByteDance)",
+    "role": "AI Security Engineer",
+    "score": 28,
+    "grade": "D",
+    "factors": [
+      "Seattle",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 48.0,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 71,
+    "company": "Hubble",
+    "role": "Engineering (General)",
+    "score": 28,
+    "grade": "D",
+    "factors": [
+      "Seattle",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 47.8,
+    "submit": "manual_redirect",
+    "ats": "YC Work at a Startup"
+  },
+  {
+    "rank": 74,
+    "company": "Sobek AI",
+    "role": "Software Engineer, Applied AI",
+    "score": 28,
+    "grade": "D",
+    "factors": [
+      "Seattle",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 47.6,
+    "submit": "manual_redirect",
+    "ats": "Wellfound"
+  },
+  {
+    "rank": 77,
+    "company": "Atlassian",
+    "role": "Product Manager, Rovo",
+    "score": 28,
+    "grade": "D",
+    "factors": [
+      "Seattle",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 47.4,
+    "submit": "manual_redirect",
+    "ats": "BuiltIn"
+  },
+  {
+    "rank": 80,
+    "company": "Lemon.io",
+    "role": "Senior AI Engineer",
+    "score": 28,
+    "grade": "D",
+    "factors": [
+      "Senior match",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 47.0,
+    "submit": "manual_redirect",
+    "ats": "WeWorkRemotely"
+  },
+  {
+    "rank": 87,
+    "company": "Kivo Health",
+    "role": "Full Stack Engineer",
+    "score": 28,
+    "grade": "D",
+    "factors": [
+      "Seattle",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 46.8,
+    "submit": "manual_redirect",
+    "ats": "Y Combinator"
+  },
+  {
+    "rank": 93,
+    "company": "Whatnot",
+    "role": "Engineering Manager, Seller Scaling",
+    "score": 28,
+    "grade": "D",
+    "factors": [
+      "Seattle",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 46.5,
+    "submit": "manual_redirect",
+    "ats": "Y Combinator"
+  },
+  {
+    "rank": 94,
+    "company": "JPMorgan Chase",
+    "role": "Software Engineer III - Machine Learning Platform",
+    "score": 28,
+    "grade": "D",
+    "factors": [
+      "Seattle",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 46.4,
+    "submit": "manual_redirect",
+    "ats": "BuiltIn"
+  },
+  {
+    "rank": 62,
+    "company": "LaunchDarkly",
+    "role": "Backend Engineer, Flag Delivery",
+    "score": 25,
+    "grade": "D",
+    "factors": [
+      "Remote",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 48.1,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 78,
+    "company": "Motive",
+    "role": "GTM AI Engineer",
+    "score": 25,
+    "grade": "D",
+    "factors": [
+      "Remote",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 47.3,
+    "submit": "manual_redirect",
+    "ats": "Wellfound"
+  },
+  {
+    "rank": 89,
+    "company": "CoreWeave",
+    "role": "Technical Deployment Manager - West",
+    "score": 21,
+    "grade": "D",
+    "factors": [
+      "Growth-stage",
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 46.8,
+    "submit": "manual_redirect",
+    "ats": "BuiltIn"
+  },
+  {
+    "rank": 48,
+    "company": "Amazon",
+    "role": "SDE - OpenSearch Vector Search",
+    "score": 18,
+    "grade": "D",
+    "factors": [
+      "Med composite",
+      "Direct ATS"
+    ],
+    "composite": 49.4,
+    "submit": "greenhouse",
+    "ats": "Greenhouse"
+  },
+  {
+    "rank": 40,
+    "company": "Zoom",
+    "role": "Information Security Engineer \u2013 AI/ML",
+    "score": 17,
+    "grade": "D",
+    "factors": [
+      "High composite",
+      "Redirect"
+    ],
+    "composite": 50.0,
+    "submit": "manual_redirect",
+    "ats": null
+  },
+  {
+    "rank": 44,
+    "company": "Meta",
+    "role": "Security Engineer \u2013 AI Security",
+    "score": 13,
+    "grade": "D",
+    "factors": [
+      "Med composite",
+      "Redirect"
+    ],
+    "composite": 49.9,
+    "submit": "manual_redirect",
+    "ats": null
+  }
+]

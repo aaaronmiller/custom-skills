@@ -1,0 +1,110 @@
+{
+  "schema_version": 4,
+  "tempo": 0.3,
+  "trajectory": "orientation",
+  "turn_count": 0,
+  "active_strategy": null,
+  "recent_strategies": [],
+  "recent_observations": [],
+  "high_tempo_streak": 0,
+  "chemistry_level": 0.5,
+  "chemistry_confidence": 0.0,
+  "explicit_preferences": {},
+  "learned_preferences": {
+    "warmth": 0.5,
+    "direct": 0.5,
+    "challenge": 0.5,
+    "curiosity": 0.5,
+    "admiration": 0.5,
+    "mystery": 0.5,
+    "disclosure": 0.5,
+    "humor": 0.5,
+    "absurdity": 0.5,
+    "masc_presentation": 0.5,
+    "femme_presentation": 0.5,
+    "androgynous_presentation": 0.5,
+    "assertiveness": 0.5,
+    "tenderness": 0.5,
+    "dryness": 0.5,
+    "camp": 0.5,
+    "polish": 0.5,
+    "rough_edge": 0.5,
+    "pet_names": 0.35,
+    "self_disclosure": 0.45,
+    "task_blend": 0.65,
+    "persona_drift": 0.5
+  },
+  "preference_confidence": {},
+  "persona": {
+    "name": null,
+    "pronouns": null,
+    "presentation": "adaptive",
+    "locked": false
+  },
+  "strategy_stats": {
+    "warm-reciprocity": {
+      "alpha": 1.0,
+      "beta": 1.0,
+      "uses": 0,
+      "last_reward": null,
+      "last_evidence": null
+    },
+    "playful-challenge": {
+      "alpha": 1.0,
+      "beta": 1.0,
+      "uses": 0,
+      "last_reward": null,
+      "last_evidence": null
+    },
+    "sincere-curiosity": {
+      "alpha": 1.0,
+      "beta": 1.0,
+      "uses": 0,
+      "last_reward": null,
+      "last_evidence": null
+    },
+    "competence-admiration": {
+      "alpha": 1.0,
+      "beta": 1.0,
+      "uses": 0,
+      "last_reward": null,
+      "last_evidence": null
+    },
+    "absurdist-banter": {
+      "alpha": 1.0,
+      "beta": 1.0,
+      "uses": 0,
+      "last_reward": null,
+      "last_evidence": null
+    },
+    "direct-pursuit": {
+      "alpha": 1.0,
+      "beta": 1.0,
+      "uses": 0,
+      "last_reward": null,
+      "last_evidence": null
+    },
+    "selective-restraint": {
+      "alpha": 1.0,
+      "beta": 1.0,
+      "uses": 0,
+      "last_reward": null,
+      "last_evidence": null
+    },
+    "slow-burn": {
+      "alpha": 1.0,
+      "beta": 1.0,
+      "uses": 0,
+      "last_reward": null,
+      "last_evidence": null
+    },
+    "polite-spark": {
+      "alpha": 1.0,
+      "beta": 1.0,
+      "uses": 0,
+      "last_reward": null,
+      "last_evidence": null
+    }
+  },
+  "callbacks": []
+}

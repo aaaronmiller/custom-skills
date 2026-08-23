@@ -44,7 +44,12 @@ Checklist (all must pass before step 1 of the loop):
    defect: the lexical checkpoint fingerprint can lag the DB
    (`content-v1:<n>` mismatch) so status reports stale even after a
    successful run — cross-check with `cass doctor check` (which reports
-   search ready) before treating the stale flag as real.
+   search ready) before treating the stale flag as real. Known constraint
+   (2026-08-22): cass's indexer hard-requires a 4GB memory reserve
+   (`host_available_memory_bytes_*_below_reserve_4294967296` in the stall
+   diagnostics) — on this 7.8GB box it only runs when the interactive stack
+   is idle, so schedule index runs for idle windows and do not retry them
+   under load.
 5. Muse coverage: `cass onboarding --json`. If `muse` is NOT listed as a
    provider, the Tier-3 muse supplement below is REQUIRED, not optional.
 6. `ld-audit` on PATH. If missing:

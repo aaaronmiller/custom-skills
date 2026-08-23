@@ -1,0 +1,963 @@
+{
+  "metadata": {
+    "source": "Built In (builtin.com/builtinseattle.com)",
+    "url_base": "https://builtinseattle.com/jobs",
+    "pages_scraped": [
+      "https://builtinseattle.com/jobs",
+      "https://builtin.com/jobs/seattle-wa/startups",
+      "https://builtin.com/jobs?city=Seattle&state=Washington&country=USA&searcharea=25mi&company_size=1-10,11-50,51-200",
+      "https://builtin.com/companies/seattle-wa/startups"
+    ],
+    "scraped_at": "2026-08-21T03:11:11.992Z",
+    "total_jobs": 46,
+    "site_grading": {
+      "job_volume": "B — Seattle-specific startup listings exist but the site mixes in large companies (Comcast, JPMorgan, Snap) even with startup-size filters. True startup count is limited.",
+      "salary_transparency": "A- — Salary ranges are consistently listed for most roles, with annual ranges clearly shown.",
+      "data_richness": "B+ — Company descriptions, top skills, location, seniority level, and industry tags are provided. Headcount is not explicitly listed but can be inferred from company profiles.",
+      "fresher": "A — Listings show timestamps like '5 Minutes Ago', 'Reposted 3 Hours Ago' — very current.",
+      "startup_focus": "C — The site labels itself as startup-focused but serves large public companies equally. The 'companies/startups' page is a curated list, not all are actively hiring on the job board.",
+      "ease_of_scraping": "D — Heavy JavaScript rendering; initial HTML payloads contain limited data. Server-side rendered pages (builtinseattle.com) return more content. Filters are client-side and don't always reflect in URL params.",
+      "notes": "builtinseattle.com is a satellite site that redirects jobs to builtin.com. The /companies/seattle-wa/startups page provides good company descriptions but job listings are sparse. Best approach is the /jobs page with Seattle city filter, but startup-size filter is unreliable."
+    }
+  },
+  "jobs": [
+    {
+      "company": "Comcast",
+      "domain": "comcast.com",
+      "role": "Advertising Account Executive 1",
+      "salary_band": "$55K-$100K",
+      "company_size": "10000+",
+      "what_they_do": "Digital media and entertainment conglomerate providing cable, broadband, streaming, and advertising services.",
+      "apply_url": "https://builtin.com/job/advertising-account-executive-1/10050321",
+      "company_url": "https://builtin.com/company/comcast-3",
+      "requirements": [
+        "CRM proficiency",
+        "Prospecting and closing skills",
+        "Small business portfolio management"
+      ],
+      "location": "Seattle, WA (Hybrid)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "Airwallex",
+      "domain": "airwallex.com",
+      "role": "Senior Employment Counsel, Americas",
+      "salary_band": "$160K-$270K",
+      "company_size": "1000-5000",
+      "what_they_do": "Global fintech platform enabling cross-border payments and financial infrastructure for businesses.",
+      "apply_url": "https://builtin.com/job/senior-employment-counsel-americas/10787385",
+      "company_url": "https://builtin.com/company/airwallex",
+      "requirements": [
+        "Employment law expertise",
+        "Multi-jurisdiction experience",
+        "Fintech regulatory knowledge"
+      ],
+      "location": "Seattle, WA (Hybrid)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "Airwallex",
+      "domain": "airwallex.com",
+      "role": "Sales Development Representative, Commercial",
+      "salary_band": "$90K-$101K",
+      "company_size": "1000-5000",
+      "what_they_do": "Global fintech platform enabling cross-border payments and financial infrastructure for businesses.",
+      "apply_url": "https://builtin.com/job/sales-development-representative-commercial/10769315",
+      "company_url": "https://builtin.com/company/airwallex",
+      "requirements": [
+        "Sales prospecting",
+        "LinkedIn Sales Navigator",
+        "Outreach",
+        "Salesforce"
+      ],
+      "location": "Seattle, WA (Remote)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "Airwallex",
+      "domain": "airwallex.com",
+      "role": "Account Executive, Commercial",
+      "salary_band": "$136K-$166K",
+      "company_size": "1000-5000",
+      "what_they_do": "Global fintech platform enabling cross-border payments and financial infrastructure for businesses.",
+      "apply_url": "https://builtin.com/job/account-executive-commercial/10769299",
+      "company_url": "https://builtin.com/company/airwallex",
+      "requirements": [
+        "B2B sales cycle management",
+        "Fintech/payments knowledge",
+        "CRM systems"
+      ],
+      "location": "Seattle, WA (Remote)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "Snap Inc.",
+      "domain": "snap.com",
+      "role": "Product Manager, Lead Generation",
+      "salary_band": "$178K-$313K",
+      "company_size": "5000-10000",
+      "what_they_do": "Multimedia messaging app and camera company known for Snapchat, AR lenses, and advertising platform.",
+      "apply_url": "https://builtin.com/job/product-manager-lead-generation/9518285",
+      "company_url": "https://builtin.com/company/snap-inc",
+      "requirements": [
+        "Data Studio",
+        "Looker",
+        "SQL",
+        "Tableau",
+        "Product strategy"
+      ],
+      "location": "Seattle, WA (Hybrid)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "Snap Inc.",
+      "domain": "snap.com",
+      "role": "People Application Developer",
+      "salary_band": "$133K-$235K",
+      "company_size": "5000-10000",
+      "what_they_do": "Multimedia messaging app and camera company known for Snapchat, AR lenses, and advertising platform.",
+      "apply_url": "https://builtin.com/job/people-application-developer/9673497",
+      "company_url": "https://builtin.com/company/snap-inc",
+      "requirements": [
+        "Java",
+        "Python",
+        "React",
+        "GCP",
+        "LLM APIs",
+        "Angular",
+        "Node.js",
+        "Workday"
+      ],
+      "location": "Seattle, WA (Hybrid)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "Snap Inc.",
+      "domain": "snap.com",
+      "role": "Staff Machine Learning Engineer, Search Ranking",
+      "salary_band": "$195K-$343K",
+      "company_size": "5000-10000",
+      "what_they_do": "Multimedia messaging app and camera company known for Snapchat, AR lenses, and advertising platform.",
+      "apply_url": "https://builtin.com/job/staff-machine-learning-engineer-search-ranking/9509342",
+      "company_url": "https://builtin.com/company/snap-inc",
+      "requirements": [
+        "PyTorch",
+        "TensorFlow",
+        "Python",
+        "C++",
+        "Spark",
+        "Flink",
+        "Beam",
+        "Scala"
+      ],
+      "location": "Seattle, WA (Hybrid)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "JPMorgan Chase",
+      "domain": "jpmorganchase.com",
+      "role": "Software Engineer III - Machine Learning Platform",
+      "salary_band": "Not listed",
+      "company_size": "10000+",
+      "what_they_do": "Global financial services firm providing banking, investment, and asset management services.",
+      "apply_url": "https://builtin.com/job/software-engineer-iii-machine-learning-platform/10787245",
+      "company_url": "https://builtin.com/company/jpmorgan-chase",
+      "requirements": [
+        "AWS",
+        "Kubernetes",
+        "Python",
+        "PyTorch",
+        "Spark",
+        "GPU computing",
+        "CI/CD"
+      ],
+      "location": "Seattle, WA (Hybrid)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "JPMorgan Chase",
+      "domain": "jpmorganchase.com",
+      "role": "Software Engineer III - AI/ML Platform Engineer",
+      "salary_band": "Not listed",
+      "company_size": "10000+",
+      "what_they_do": "Global financial services firm providing banking, investment, and asset management services.",
+      "apply_url": "https://builtin.com/job/software-engineer-iii-ai-ml-platform-engineer/10782556",
+      "company_url": "https://builtin.com/company/jpmorgan-chase",
+      "requirements": [
+        "Kubernetes",
+        "Docker",
+        "Java",
+        "Python",
+        "React",
+        "LLMs",
+        "RAG",
+        "Elasticsearch"
+      ],
+      "location": "Seattle, WA (Hybrid)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "CoreWeave",
+      "domain": "coreweave.com",
+      "role": "Learning Partner- Operations, Systems & Platforms",
+      "salary_band": "$127K-$168K",
+      "company_size": "1000-5000",
+      "what_they_do": "Cloud infrastructure provider specializing in GPU-accelerated computing for AI/ML workloads.",
+      "apply_url": "https://builtin.com/job/learning-partner-operations-systems-platforms/10008455",
+      "company_url": "https://builtin.com/company/coreweave",
+      "requirements": [
+        "LMS administration",
+        "AI tools",
+        "BI tools",
+        "HRIS",
+        "Data analysis"
+      ],
+      "location": "Seattle, WA (In-Office)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "CoreWeave",
+      "domain": "coreweave.com",
+      "role": "Engineering Manager, Fleet Engineering",
+      "salary_band": "$165K-$242K",
+      "company_size": "1000-5000",
+      "what_they_do": "Cloud infrastructure provider specializing in GPU-accelerated computing for AI/ML workloads.",
+      "apply_url": "https://builtin.com/job/engineering-manager-fleet-engineering/10782809",
+      "company_url": "https://builtin.com/company/coreweave",
+      "requirements": [
+        "Go",
+        "React",
+        "TypeScript",
+        "Kubernetes",
+        "CI/CD",
+        "Prometheus",
+        "Grafana"
+      ],
+      "location": "Seattle, WA (In-Office)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "CoreWeave",
+      "domain": "coreweave.com",
+      "role": "Finance Manager",
+      "salary_band": "$127K-$168K",
+      "company_size": "1000-5000",
+      "what_they_do": "Cloud infrastructure provider specializing in GPU-accelerated computing for AI/ML workloads.",
+      "apply_url": "https://builtin.com/job/finance-manager/10481691",
+      "company_url": "https://builtin.com/company/coreweave",
+      "requirements": [
+        "FP&A",
+        "Excel",
+        "SQL",
+        "Tableau",
+        "Budgeting and forecasting"
+      ],
+      "location": "Seattle, WA (In-Office)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "Remitly",
+      "domain": "remitly.com",
+      "role": "Senior Marketing Analyst",
+      "salary_band": "$132K-$165K",
+      "company_size": "2500-5000",
+      "what_they_do": "Digital remittance service enabling fast, affordable international money transfers.",
+      "apply_url": "https://builtin.com/job/senior-marketing-analyst/9668817",
+      "company_url": "https://builtin.com/company/remitly",
+      "requirements": [
+        "Python",
+        "R",
+        "SQL",
+        "KPI dashboards",
+        "Experiment design"
+      ],
+      "location": "Seattle, WA (In-Office)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "Remitly",
+      "domain": "remitly.com",
+      "role": "Senior Software Engineer, Decision Intelligence Platform",
+      "salary_band": "$180K-$225K",
+      "company_size": "2500-5000",
+      "what_they_do": "Digital remittance service enabling fast, affordable international money transfers.",
+      "apply_url": "https://builtin.com/job/senior-software-engineer-decision-intelligence-platform/9173905",
+      "company_url": "https://builtin.com/company/remitly",
+      "requirements": [
+        "Java",
+        "Kotlin",
+        "Python",
+        "Go",
+        "Event-driven systems",
+        "Cloud platforms"
+      ],
+      "location": "Seattle, WA (In-Office)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "Remitly",
+      "domain": "remitly.com",
+      "role": "Staff Engineer, Receiver Products",
+      "salary_band": "$208K-$260K",
+      "company_size": "2500-5000",
+      "what_they_do": "Digital remittance service enabling fast, affordable international money transfers.",
+      "apply_url": "https://builtin.com/job/staff-engineer-receiver-products/10552157",
+      "company_url": "https://builtin.com/company/remitly",
+      "requirements": [
+        "Full-stack development",
+        "AWS/GCP/Azure",
+        "React",
+        "Java/Kotlin",
+        "Distributed systems",
+        "AI-native workflows"
+      ],
+      "location": "Seattle, WA (In-Office)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "Whatnot",
+      "domain": "whatnot.com",
+      "role": "Payroll Analyst",
+      "salary_band": "$95K-$105K",
+      "company_size": "500-1000",
+      "what_they_do": "Live-stream shopping marketplace for collectibles, sneakers, and other enthusiast goods.",
+      "apply_url": "https://builtin.com/job/payroll-analyst/8561847",
+      "company_url": "https://builtin.com/company/whatnot",
+      "requirements": [
+        "Workday Payroll",
+        "ADP",
+        "Multi-state compliance",
+        "Excel"
+      ],
+      "location": "Seattle, WA (In-Office or Remote)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "Whatnot",
+      "domain": "whatnot.com",
+      "role": "Data Engineer",
+      "salary_band": "$180K-$260K",
+      "company_size": "500-1000",
+      "what_they_do": "Live-stream shopping marketplace for collectibles, sneakers, and other enthusiast goods.",
+      "apply_url": "https://builtin.com/job/data-engineer/7415754",
+      "company_url": "https://builtin.com/company/whatnot",
+      "requirements": [
+        "Airflow",
+        "BigQuery",
+        "Snowflake",
+        "Python",
+        "Kafka",
+        "Spark",
+        "dbt",
+        "SQL"
+      ],
+      "location": "Seattle, WA (In-Office)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "Whatnot",
+      "domain": "whatnot.com",
+      "role": "Data Scientist, Risk & Fraud",
+      "salary_band": "$194K-$215K",
+      "company_size": "500-1000",
+      "what_they_do": "Live-stream shopping marketplace for collectibles, sneakers, and other enthusiast goods.",
+      "apply_url": "https://builtin.com/job/data-scientist-risk-fraud/8336612",
+      "company_url": "https://builtin.com/company/whatnot",
+      "requirements": [
+        "Python",
+        "SQL",
+        "BigQuery",
+        "Snowflake",
+        "dbt",
+        "Spark",
+        "Fraud analytics"
+      ],
+      "location": "Seattle, WA (In-Office)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "ZS",
+      "domain": "zs.com",
+      "role": "Strategy Insights & Planning Manager (High Tech clients)",
+      "salary_band": "$200K-$230K",
+      "company_size": "10000+",
+      "what_they_do": "Professional services firm specializing in sales and marketing consulting for life sciences and tech.",
+      "apply_url": "https://builtin.com/job/strategy-insights-planning-manager-beyond-healthcare/8203503",
+      "company_url": "https://builtin.com/company/zs",
+      "requirements": [
+        "Data science",
+        "Project management",
+        "Client relationship management",
+        "Business development"
+      ],
+      "location": "Seattle, WA (Hybrid)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "ServiceNow",
+      "domain": "servicenow.com",
+      "role": "Sr Staff Product Manager — AI & Product Led Motion",
+      "salary_band": "$191K-$334K",
+      "company_size": "10000+",
+      "what_they_do": "Enterprise cloud platform providing digital workflow automation and IT service management solutions.",
+      "apply_url": "https://builtin.com/job/sr-staff-product-manager-ai-product-led-motion/10561832",
+      "company_url": "https://builtin.com/company/servicenow",
+      "requirements": [
+        "AI agents",
+        "Amplitude",
+        "Mixpanel",
+        "Pendo",
+        "Generative AI",
+        "Experimentation"
+      ],
+      "location": "Seattle, WA (Remote or Hybrid)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "ServiceNow",
+      "domain": "servicenow.com",
+      "role": "Sr Staff Product Manager – AI Monetization (Pricing & Packaging)",
+      "salary_band": "$191K-$334K",
+      "company_size": "10000+",
+      "what_they_do": "Enterprise cloud platform providing digital workflow automation and IT service management solutions.",
+      "apply_url": "https://builtin.com/job/sr-staff-product-manager-ai-monetization-pricing-packaging/10783072",
+      "company_url": "https://builtin.com/company/servicenow",
+      "requirements": [
+        "AI/ML platform architecture",
+        "SaaS pricing",
+        "Consumption models",
+        "Go-to-market strategy"
+      ],
+      "location": "Seattle, WA (Hybrid)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "ServiceNow",
+      "domain": "servicenow.com",
+      "role": "Staff Reliability Engineer",
+      "salary_band": "$167K-$291K",
+      "company_size": "10000+",
+      "what_they_do": "Enterprise cloud platform providing digital workflow automation and IT service management solutions.",
+      "apply_url": "https://builtin.com/job/staff-reliability-engineer/10783070",
+      "company_url": "https://builtin.com/company/servicenow",
+      "requirements": [
+        "Kubernetes",
+        "CI/CD",
+        "GitOps",
+        "Terraform",
+        "Prometheus",
+        "Go",
+        "Python",
+        "Ansible"
+      ],
+      "location": "Seattle, WA (Hybrid)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "Superhuman",
+      "domain": "superhuman.com",
+      "role": "Systems Specialist, Lifecycle Marketing",
+      "salary_band": "$85K-$130K",
+      "company_size": "100-200",
+      "what_they_do": "AI-powered email client designed for speed and productivity with advanced keyboard shortcuts.",
+      "apply_url": "https://builtin.com/job/systems-specialist-lifecycle-marketing/10108222",
+      "company_url": "https://builtin.com/company/superhuman-1",
+      "requirements": [
+        "Hightouch",
+        "Braze",
+        "Iterable",
+        "BigQuery",
+        "Snowflake",
+        "SQL",
+        "Claude AI"
+      ],
+      "location": "Seattle, WA (Remote or Hybrid)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "Superhuman",
+      "domain": "superhuman.com",
+      "role": "Product Security Engineer",
+      "salary_band": "$188K-$250K",
+      "company_size": "100-200",
+      "what_they_do": "AI-powered email client designed for speed and productivity with advanced keyboard shortcuts.",
+      "apply_url": "https://builtin.com/job/corporate-security-engineer/10567669",
+      "company_url": "https://builtin.com/company/superhuman-1",
+      "requirements": [
+        "Threat modeling",
+        "SAST/DAST",
+        "Pentesting",
+        "Python",
+        "Java",
+        "Bugcrowd",
+        "HackerOne"
+      ],
+      "location": "Seattle, WA (Hybrid)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "Atlassian",
+      "domain": "atlassian.com",
+      "role": "Senior Principal Forward Deployed Engineer",
+      "salary_band": "$202K-$318K",
+      "company_size": "10000+",
+      "what_they_do": "Collaboration software company behind Jira, Confluence, Trello, and Rovo AI products.",
+      "apply_url": "https://builtin.com/job/senior-principal-forward-deployed-engineer/10552093",
+      "company_url": "https://builtin.com/company/atlassian",
+      "requirements": [
+        "Python",
+        "JavaScript",
+        "AI/ML",
+        "LLMs",
+        "Rovo",
+        "APIs",
+        "Microservices",
+        "GDPR"
+      ],
+      "location": "Seattle, WA (In-Office or Remote)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.991Z"
+    },
+    {
+      "company": "Atlassian",
+      "domain": "atlassian.com",
+      "role": "Product Manager, Rovo",
+      "salary_band": "$120K-$189K",
+      "company_size": "10000+",
+      "what_they_do": "Collaboration software company behind Jira, Confluence, Trello, and Rovo AI products.",
+      "apply_url": "https://builtin.com/job/product-manager-rovo/10552137",
+      "company_url": "https://builtin.com/company/atlassian",
+      "requirements": [
+        "Conversational AI",
+        "LLMs",
+        "RAG pipelines",
+        "Prompt engineering",
+        "JIRA",
+        "Confluence"
+      ],
+      "location": "Seattle, WA (In-Office or Remote)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "CrowdStrike",
+      "domain": "crowdstrike.com",
+      "role": "Professional Services Technical Operations Engineer - Agentic AI",
+      "salary_band": "$120K-$180K",
+      "company_size": "10000+",
+      "what_they_do": "Cybersecurity company providing endpoint protection, threat intelligence, and incident response.",
+      "apply_url": "https://builtin.com/job/professional-services-technical-operations-engineer-agentic-ai-remote/10326081",
+      "company_url": "https://builtin.com/company/crowdstrike",
+      "requirements": [
+        "Agentic AI",
+        "LangGraph",
+        "CrewAI",
+        "Python",
+        "AWS",
+        "LLMs",
+        "Slack bot frameworks"
+      ],
+      "location": "Remote or Hybrid",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "CrowdStrike",
+      "domain": "crowdstrike.com",
+      "role": "Next-Gen SIEM Resident Consultant",
+      "salary_band": "$85K-$120K",
+      "company_size": "10000+",
+      "what_they_do": "Cybersecurity company providing endpoint protection, threat intelligence, and incident response.",
+      "apply_url": "https://builtin.com/job/crowdstrike-next-gen-siem-resident-consultant-remote/10353639",
+      "company_url": "https://builtin.com/company/crowdstrike",
+      "requirements": [
+        "AWS/Azure/GCP",
+        "SIEM",
+        "Detection engineering",
+        "Python",
+        "Splunk",
+        "KQL"
+      ],
+      "location": "Remote or Hybrid",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "DigitalOcean",
+      "domain": "digitalocean.com",
+      "role": "Software Engineer, Automation",
+      "salary_band": "$98K-$122K",
+      "company_size": "1000-5000",
+      "what_they_do": "Cloud infrastructure provider offering simple, developer-friendly hosting and compute services.",
+      "apply_url": "https://builtin.com/job/software-engineer-automation/10784938",
+      "company_url": "https://builtin.com/company/digitalocean",
+      "requirements": [
+        "Go",
+        "Python",
+        "AI-assisted development",
+        "Concourse",
+        "GitHub Actions",
+        "Linux"
+      ],
+      "location": "Seattle, WA (In-Office)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "DigitalOcean",
+      "domain": "digitalocean.com",
+      "role": "Principal Software Engineer",
+      "salary_band": "$235K-$294K",
+      "company_size": "1000-5000",
+      "what_they_do": "Cloud infrastructure provider offering simple, developer-friendly hosting and compute services.",
+      "apply_url": "https://builtin.com/job/principal-software-engineer/10765369",
+      "company_url": "https://builtin.com/company/digitalocean",
+      "requirements": [
+        "Go",
+        "IAM/KMS",
+        "OAUTH2",
+        "OIDC",
+        "Kubernetes",
+        "OPA/Rego",
+        "HSM",
+        "Terraform"
+      ],
+      "location": "Seattle, WA (In-Office)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "DigitalOcean",
+      "domain": "digitalocean.com",
+      "role": "Senior Software Engineer, Identity & Access Management",
+      "salary_band": "$141K-$176K",
+      "company_size": "1000-5000",
+      "what_they_do": "Cloud infrastructure provider offering simple, developer-friendly hosting and compute services.",
+      "apply_url": "https://builtin.com/job/senior-software-engineer-identity-access-management/10765338",
+      "company_url": "https://builtin.com/company/digitalocean",
+      "requirements": [
+        "Go",
+        "OIDC",
+        "SAML",
+        "Kubernetes",
+        "OPA",
+        "Terraform",
+        "ABAC/RBAC"
+      ],
+      "location": "Seattle, WA (In-Office)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "Opendoor",
+      "domain": "opendoor.com",
+      "role": "Sr. Manager, Performance Marketing",
+      "salary_band": "Not listed",
+      "company_size": "1000-5000",
+      "what_they_do": "PropTech company using technology to buy and sell homes online with instant cash offers.",
+      "apply_url": "https://builtin.com/job/sr-manager-performance-marketing/9872966",
+      "company_url": "https://builtin.com/company/opendoor",
+      "requirements": [
+        "Paid social",
+        "Programmatic",
+        "CTV/TV",
+        "GA4",
+        "DV360",
+        "SQL",
+        "LLMs",
+        "MMM"
+      ],
+      "location": "Seattle, WA (Hybrid)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "Opendoor",
+      "domain": "opendoor.com",
+      "role": "Product Manager, Search & Discovery",
+      "salary_band": "Not listed",
+      "company_size": "1000-5000",
+      "what_they_do": "PropTech company using technology to buy and sell homes online with instant cash offers.",
+      "apply_url": "https://builtin.com/job/product-manager-search-discovery/9872957",
+      "company_url": "https://builtin.com/company/opendoor",
+      "requirements": [
+        "Search/Recommendations",
+        "Data analysis",
+        "User research",
+        "A/B testing"
+      ],
+      "location": "Seattle, WA (Hybrid)",
+      "source_url": "https://builtinseattle.com/jobs",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "Crexi",
+      "domain": "crexi.com",
+      "role": "Various (Commercial Real Estate AI)",
+      "salary_band": "Not listed",
+      "company_size": "100-500",
+      "what_they_do": "AI-powered commercial real estate platform for property intelligence, deal management, and auctions.",
+      "apply_url": "https://builtin.com/company/crexi",
+      "company_url": "https://www.crexi.com",
+      "requirements": [
+        "AI/ML",
+        "Real estate domain knowledge",
+        "Full-stack engineering"
+      ],
+      "location": "Seattle, WA (listed as Seattle startup)",
+      "source_url": "https://builtin.com/companies/seattle-wa/startups",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "Digible",
+      "domain": "digible.com",
+      "role": "Various (Apartment Marketing AI)",
+      "salary_band": "Not listed",
+      "company_size": "11-50",
+      "what_they_do": "AI-driven apartment marketing company with predictive analytics platform Fiona for property management.",
+      "apply_url": "https://builtin.com/company/digible",
+      "company_url": "https://www.digible.com",
+      "requirements": [
+        "Digital marketing",
+        "Paid search/social",
+        "Geofencing",
+        "AI analytics"
+      ],
+      "location": "Seattle, WA (listed as Seattle startup)",
+      "source_url": "https://builtin.com/companies/seattle-wa/startups",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "Posh",
+      "domain": "poshevents.com",
+      "role": "Various (Social Events Platform)",
+      "salary_band": "Not listed",
+      "company_size": "11-50",
+      "what_they_do": "Social media platform dedicated to real-life social experiences and event creation/discovery.",
+      "apply_url": "https://builtin.com/company/posh",
+      "company_url": "https://www.poshevents.com",
+      "requirements": [
+        "Platform engineering",
+        "Community building",
+        "Social product experience"
+      ],
+      "location": "Seattle, WA (listed as Seattle startup)",
+      "source_url": "https://builtin.com/companies/seattle-wa/startups",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "Spade",
+      "domain": "spade.io",
+      "role": "Various (Transaction Data Enrichment)",
+      "salary_band": "Not listed",
+      "company_size": "11-50",
+      "what_they_do": "Transaction data enrichment platform providing merchant, category, and geolocation details for fintech.",
+      "apply_url": "https://builtin.com/company/spade",
+      "company_url": "https://www.spade.io",
+      "requirements": [
+        "Data engineering",
+        "Fintech domain",
+        "API development",
+        "ML"
+      ],
+      "location": "Seattle, WA (listed as Seattle startup)",
+      "source_url": "https://builtin.com/companies/seattle-wa/startups",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "ARB Interactive",
+      "domain": "arbinteractive.com",
+      "role": "Various (Social Gaming Platform)",
+      "salary_band": "Not listed",
+      "company_size": "11-50",
+      "what_they_do": "Team behind Modo Casino, a top Social+ gaming and sweepstakes platform in the U.S.",
+      "apply_url": "https://builtin.com/company/arb-interactive",
+      "company_url": "https://www.arbinteractive.com",
+      "requirements": [
+        "Gaming/sweepstakes tech",
+        "Platform engineering",
+        "Full-stack development"
+      ],
+      "location": "Seattle, WA (listed as Seattle startup)",
+      "source_url": "https://builtin.com/companies/seattle-wa/startups",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "Mastery",
+      "domain": "mastery.io",
+      "role": "Various (Logistics SaaS)",
+      "salary_band": "Not listed",
+      "company_size": "51-200",
+      "what_they_do": "World's first Lovable Transportation Management System (TMS) for logistics and supply chain automation.",
+      "apply_url": "https://builtin.com/company/mastery",
+      "company_url": "https://www.mastery.io",
+      "requirements": [
+        "Logistics domain",
+        "SaaS platform",
+        "Cloud infrastructure",
+        "Supply chain knowledge"
+      ],
+      "location": "Seattle, WA (listed as Seattle startup)",
+      "source_url": "https://builtin.com/companies/seattle-wa/startups",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "Yext",
+      "domain": "yext.com",
+      "role": "Various (Agentic Marketing Platform)",
+      "salary_band": "Not listed",
+      "company_size": "1000-5000",
+      "what_they_do": "Enterprise agentic marketing platform with structured data for local businesses across AI search.",
+      "apply_url": "https://builtin.com/company/yext",
+      "company_url": "https://www.yext.com",
+      "requirements": [
+        "APIs",
+        "MCP servers",
+        "Generative AI",
+        "Search/discovery",
+        "Enterprise SaaS"
+      ],
+      "location": "Seattle, WA (listed as Seattle startup)",
+      "source_url": "https://builtin.com/companies/seattle-wa/startups",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "Tufin",
+      "domain": "tufin.com",
+      "role": "Various (Network Security Automation)",
+      "salary_band": "Not listed",
+      "company_size": "500-1000",
+      "what_they_do": "Network security policy management company automating firewall and network device security changes.",
+      "apply_url": "https://builtin.com/company/tufin",
+      "company_url": "https://www.tufin.com",
+      "requirements": [
+        "Network security",
+        "Firewall management",
+        "Cloud security",
+        "Automation orchestration"
+      ],
+      "location": "Seattle, WA (listed as Seattle startup)",
+      "source_url": "https://builtin.com/companies/seattle-wa/startups",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "Piaggio Fast Forward",
+      "domain": "piaggiofastforward.com",
+      "role": "Various (Robotics)",
+      "salary_band": "Not listed",
+      "company_size": "51-200",
+      "what_they_do": "Robotics company solving human-robot interaction in dynamic environments, spinoff of Piaggio Group.",
+      "apply_url": "https://builtin.com/company/piaggio-fast-forward",
+      "company_url": "https://www.piaggiofastforward.com",
+      "requirements": [
+        "Robotics",
+        "Computer vision",
+        "Motion planning",
+        "ROS"
+      ],
+      "location": "Seattle, WA (listed as Seattle startup)",
+      "source_url": "https://builtin.com/companies/seattle-wa/startups",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "MongoDB",
+      "domain": "mongodb.com",
+      "role": "Various (Developer Data Platform)",
+      "salary_band": "Not listed",
+      "company_size": "5000-10000",
+      "what_they_do": "Developer data platform company providing NoSQL database and cloud services for modern applications.",
+      "apply_url": "https://builtin.com/company/mongodb",
+      "company_url": "https://www.mongodb.com",
+      "requirements": [
+        "Database engineering",
+        "Cloud platforms",
+        "Developer tools",
+        "Distributed systems"
+      ],
+      "location": "Seattle, WA (listed as Seattle startup)",
+      "source_url": "https://builtin.com/companies/seattle-wa/startups",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "Skillsoft",
+      "domain": "skillsoft.com",
+      "role": "Various (AI-native Skills Management)",
+      "salary_band": "Not listed",
+      "company_size": "5000-10000",
+      "what_they_do": "Global leader in AI-native skills management for the human+AI era with enterprise learning solutions.",
+      "apply_url": "https://builtin.com/company/skillsoft",
+      "company_url": "https://www.skillsoft.com",
+      "requirements": [
+        "Enterprise SaaS",
+        "AI/ML",
+        "Learning management",
+        "Workforce analytics"
+      ],
+      "location": "Seattle, WA (listed as Seattle startup)",
+      "source_url": "https://builtin.com/companies/seattle-wa/startups",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "Wolverine Trading",
+      "domain": "wolverinetrading.com",
+      "role": "Various (Financial Technology)",
+      "salary_band": "Not listed",
+      "company_size": "500-1000",
+      "what_they_do": "Diversified financial institutions specializing in proprietary trading, asset management, and technology.",
+      "apply_url": "https://builtin.com/company/the-wolverine-companies",
+      "company_url": "https://www.wolverinetrading.com",
+      "requirements": [
+        "Quantitative finance",
+        "Derivatives",
+        "Technology engineering",
+        "Market data"
+      ],
+      "location": "Seattle, WA (listed as Seattle startup)",
+      "source_url": "https://builtin.com/companies/seattle-wa/startups",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    },
+    {
+      "company": "iManage",
+      "domain": "imanage.com",
+      "role": "Various (Knowledge Work Platform)",
+      "salary_band": "Not listed",
+      "company_size": "1000-5000",
+      "what_they_do": "Intelligent cloud-enabled knowledge work platform used by 1M+ professionals across 65+ countries.",
+      "apply_url": "https://builtin.com/company/imanage",
+      "company_url": "https://www.imanage.com",
+      "requirements": [
+        "Cloud platform",
+        "Enterprise security",
+        "Document management",
+        "AI/ML"
+      ],
+      "location": "Seattle, WA (listed as Seattle startup)",
+      "source_url": "https://builtin.com/companies/seattle-wa/startups",
+      "scraped_at": "2026-08-21T03:11:11.992Z"
+    }
+  ]
+}

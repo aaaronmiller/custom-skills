@@ -1,0 +1,6 @@
+0:00 Today I want to show you three rules for making better reusable project notes.
+0:08 Rule one: write the purpose before the procedure.
+0:14 If people do not know why the process exists, they will copy the steps without judgment.
+0:22 Rule two: preserve exact commands. If I say `python build.py --check`, that command matters.
+0:31 Rule three: include validation. A process without a check is just a wish.
+0:40 The final template is: Prepare, Execute, Validate, Iterate.

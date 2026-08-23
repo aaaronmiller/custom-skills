@@ -1,0 +1,362 @@
+[
+  {
+    "name": "Commerce",
+    "slug": "commerce",
+    "builtin_url": "https://builtin.com/company/commerce",
+    "careers_url": "https://builtin.com/company/commerce/jobs",
+    "industry": "Artificial Intelligence \u2022 Cloud \u2022 Consumer Web \u2022 eCommerce \u2022 Information Technology \u2022 Software",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Rain",
+    "slug": "rain-1",
+    "builtin_url": "https://builtin.com/company/rain-1",
+    "careers_url": "https://builtin.com/company/rain-1/jobs",
+    "industry": "Blockchain \u2022 Fintech \u2022 Payments \u2022 Financial Services \u2022 Cryptocurrency \u2022 Web3 \u2022 Infrastructure as a Service (IaaS)",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Headway",
+    "slug": "headway",
+    "builtin_url": "https://builtin.com/company/headway",
+    "careers_url": "https://builtin.com/company/headway/jobs",
+    "industry": "Consumer Web \u2022 Healthtech \u2022 Professional Services \u2022 Social Impact \u2022 Software",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "BAE Systems, Inc.",
+    "slug": "bae-systems",
+    "builtin_url": "https://builtin.com/company/bae-systems",
+    "careers_url": "https://builtin.com/company/bae-systems/jobs",
+    "industry": "Aerospace \u2022 Hardware \u2022 Information Technology \u2022 Security \u2022 Software \u2022 Cybersecurity \u2022 Defense",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Kepler",
+    "slug": "kepler-ai",
+    "builtin_url": "https://builtin.com/company/kepler-ai",
+    "careers_url": "https://builtin.com/company/kepler-ai/jobs",
+    "industry": "Fintech \u2022 Software",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Kensho Technologies",
+    "slug": "kensho-technologies",
+    "builtin_url": "https://builtin.com/company/kensho-technologies",
+    "careers_url": "https://builtin.com/company/kensho-technologies/jobs",
+    "industry": "Artificial Intelligence \u2022 Fintech \u2022 Machine Learning \u2022 Natural Language Processing \u2022 Software \u2022 Generative AI",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Quillbot",
+    "slug": "quillbot",
+    "builtin_url": "https://builtin.com/company/quillbot",
+    "careers_url": "https://builtin.com/company/quillbot/jobs",
+    "industry": "Artificial Intelligence \u2022 Edtech \u2022 Mobile \u2022 Natural Language Processing \u2022 Productivity \u2022 Software",
+    "description": "Whether you're writing, designing, coding, or collaborating, Quillbot is a place where anyone can create at the speed of thought.\n\nOur AI-powered tools help you think clearly, communicate effectively, and create beautifully across every platform, in any format, at any skill level.",
+    "location": ""
+  },
+  {
+    "name": "Applied Systems",
+    "slug": "applied-systems",
+    "builtin_url": "https://builtin.com/company/applied-systems",
+    "careers_url": "https://builtin.com/company/applied-systems/jobs",
+    "industry": "Cloud \u2022 Insurance \u2022 Payments \u2022 Software \u2022 Business Intelligence \u2022 App development \u2022 Big Data Analytics",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "PartySlate",
+    "slug": "partyslate",
+    "builtin_url": "https://builtin.com/company/partyslate",
+    "careers_url": "https://builtin.com/company/partyslate/jobs",
+    "industry": "Consumer Web \u2022 Events \u2022 Marketing Tech \u2022 Productivity \u2022 Software \u2022 Hospitality",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "UL Solutions",
+    "slug": "ul-solutions",
+    "builtin_url": "https://builtin.com/company/ul-solutions",
+    "careers_url": "https://builtin.com/company/ul-solutions/jobs",
+    "industry": "Automotive \u2022 Professional Services \u2022 Software \u2022 Consulting \u2022 Energy \u2022 Chemical \u2022 Renewable Energy",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Sierra Space",
+    "slug": "sierra-space",
+    "builtin_url": "https://builtin.com/company/sierra-space",
+    "careers_url": "https://builtin.com/company/sierra-space/jobs",
+    "industry": "Aerospace \u2022 Hardware \u2022 Information Technology \u2022 Robotics \u2022 Defense \u2022 Utilities",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "KPA",
+    "slug": "kpa",
+    "builtin_url": "https://builtin.com/company/kpa",
+    "careers_url": "https://builtin.com/company/kpa/jobs",
+    "industry": "Automotive \u2022 Greentech \u2022 HR Tech \u2022 Sales \u2022 Software",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Rapid7",
+    "slug": "rapid7",
+    "builtin_url": "https://builtin.com/company/rapid7",
+    "careers_url": "https://builtin.com/company/rapid7/jobs",
+    "industry": "Artificial Intelligence \u2022 Cloud \u2022 Information Technology \u2022 Sales \u2022 Security \u2022 Software \u2022 Cybersecurity",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Agero",
+    "slug": "agero",
+    "builtin_url": "https://builtin.com/company/agero",
+    "careers_url": "https://builtin.com/company/agero/jobs",
+    "industry": "Automotive \u2022 Big Data \u2022 Insurance \u2022 Software \u2022 Transportation",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "HCSS",
+    "slug": "hcss",
+    "builtin_url": "https://builtin.com/company/hcss",
+    "careers_url": "https://builtin.com/company/hcss/jobs",
+    "industry": "Software",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Aceable",
+    "slug": "aceable",
+    "builtin_url": "https://builtin.com/company/aceable",
+    "careers_url": "https://builtin.com/company/aceable/jobs",
+    "industry": "eCommerce \u2022 Edtech \u2022 Insurance \u2022 Mobile \u2022 Real Estate \u2022 Software",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Ericsson",
+    "slug": "ericsson",
+    "builtin_url": "https://builtin.com/company/ericsson",
+    "careers_url": "https://builtin.com/company/ericsson/jobs",
+    "industry": "Cloud \u2022 Information Technology \u2022 Internet of Things \u2022 Machine Learning \u2022 Software \u2022 Cybersecurity \u2022 Infrastructure as a Service (IaaS)",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Bevi",
+    "slug": "bevi",
+    "builtin_url": "https://builtin.com/company/bevi",
+    "careers_url": "https://builtin.com/company/bevi/jobs",
+    "industry": "Greentech \u2022 Hardware \u2022 Healthtech \u2022 Internet of Things",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Dragos",
+    "slug": "dragos",
+    "builtin_url": "https://builtin.com/company/dragos",
+    "careers_url": "https://builtin.com/company/dragos/jobs",
+    "industry": "Security \u2022 Cybersecurity",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Apryse",
+    "slug": "apryse",
+    "builtin_url": "https://builtin.com/company/apryse",
+    "careers_url": "https://builtin.com/company/apryse/jobs",
+    "industry": "Productivity \u2022 Software \u2022 App development \u2022 Automation",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "New York Life Insurance Company",
+    "slug": "new-york-life-insurance-company",
+    "builtin_url": "https://builtin.com/company/new-york-life-insurance-company",
+    "careers_url": "https://builtin.com/company/new-york-life-insurance-company/jobs",
+    "industry": "Artificial Intelligence \u2022 Cloud \u2022 Fintech \u2022 Information Technology \u2022 Insurance \u2022 Financial Services \u2022 Big Data Analytics",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Ursa Major",
+    "slug": "ursa-major",
+    "builtin_url": "https://builtin.com/company/ursa-major",
+    "careers_url": "https://builtin.com/company/ursa-major/jobs",
+    "industry": "Aerospace \u2022 Defense",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Quantum Rise",
+    "slug": "quantum-rise",
+    "builtin_url": "https://builtin.com/company/quantum-rise",
+    "careers_url": "https://builtin.com/company/quantum-rise/jobs",
+    "industry": "Artificial Intelligence \u2022 Machine Learning \u2022 Natural Language Processing \u2022 Professional Services \u2022 Software \u2022 Consulting \u2022 Automation",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "EliseAI",
+    "slug": "eliseai",
+    "builtin_url": "https://builtin.com/company/eliseai",
+    "careers_url": "https://builtin.com/company/eliseai/jobs",
+    "industry": "Artificial Intelligence \u2022 Healthtech \u2022 Machine Learning \u2022 Natural Language Processing \u2022 Real Estate",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Cox Enterprises",
+    "slug": "cox-enterprises",
+    "builtin_url": "https://builtin.com/company/cox-enterprises",
+    "careers_url": "https://builtin.com/company/cox-enterprises/jobs",
+    "industry": "Artificial Intelligence \u2022 Automotive \u2022 Greentech \u2022 Information Technology \u2022 Machine Learning \u2022 Software \u2022 Cybersecurity",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Grow Therapy",
+    "slug": "grow-therapy",
+    "builtin_url": "https://builtin.com/company/grow-therapy",
+    "careers_url": "https://builtin.com/company/grow-therapy/jobs",
+    "industry": "Healthtech \u2022 Social Impact \u2022 Software",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Boeing",
+    "slug": "boeing",
+    "builtin_url": "https://builtin.com/company/boeing",
+    "careers_url": "https://builtin.com/company/boeing/jobs",
+    "industry": "Aerospace \u2022 Information Technology \u2022 Software \u2022 Cybersecurity \u2022 Design \u2022 Defense \u2022 Manufacturing",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Striveworks",
+    "slug": "striveworks",
+    "builtin_url": "https://builtin.com/company/striveworks",
+    "careers_url": "https://builtin.com/company/striveworks/jobs",
+    "industry": "Artificial Intelligence \u2022 Big Data \u2022 Computer Vision \u2022 Information Technology \u2022 Machine Learning \u2022 Analytics \u2022 Defense",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Bloom Credit",
+    "slug": "bloom-credit",
+    "builtin_url": "https://builtin.com/company/bloom-credit",
+    "careers_url": "https://builtin.com/company/bloom-credit/jobs",
+    "industry": "Fintech \u2022 Financial Services",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Riot Platforms, Inc.",
+    "slug": "riot-4",
+    "builtin_url": "https://builtin.com/company/riot-4",
+    "careers_url": "https://builtin.com/company/riot-4/jobs",
+    "industry": "Artificial Intelligence \u2022 Cloud \u2022 Information Technology \u2022 Energy \u2022 Infrastructure as a Service (IaaS)",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Quantum Metric, Inc.",
+    "slug": "quantum-metric-inc",
+    "builtin_url": "https://builtin.com/company/quantum-metric-inc",
+    "careers_url": "https://builtin.com/company/quantum-metric-inc/jobs",
+    "industry": "eCommerce \u2022 Enterprise Web \u2022 Information Technology \u2022 Software \u2022 Database \u2022 Analytics \u2022 Business Intelligence",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "VSCO",
+    "slug": "vsco",
+    "builtin_url": "https://builtin.com/company/vsco",
+    "careers_url": "https://builtin.com/company/vsco/jobs",
+    "industry": "Digital Media \u2022 Mobile \u2022 Productivity \u2022 Social Media \u2022 Software",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Globe Life",
+    "slug": "globe-life",
+    "builtin_url": "https://builtin.com/company/globe-life",
+    "careers_url": "https://builtin.com/company/globe-life/jobs",
+    "industry": "Insurance \u2022 Financial Services",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "InterSystems",
+    "slug": "intersystems",
+    "builtin_url": "https://builtin.com/company/intersystems",
+    "careers_url": "https://builtin.com/company/intersystems/jobs",
+    "industry": "Artificial Intelligence \u2022 Big Data \u2022 Healthtech \u2022 Machine Learning \u2022 Software \u2022 Database \u2022 Analytics",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Onshore",
+    "slug": "onshore",
+    "builtin_url": "https://builtin.com/company/onshore",
+    "careers_url": "https://builtin.com/company/onshore/jobs",
+    "industry": "Artificial Intelligence \u2022 Fintech \u2022 Software \u2022 Financial Services",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "General Motors",
+    "slug": "general-motors",
+    "builtin_url": "https://builtin.com/company/general-motors",
+    "careers_url": "https://builtin.com/company/general-motors/jobs",
+    "industry": "Automotive \u2022 Big Data \u2022 Information Technology \u2022 Robotics \u2022 Software \u2022 Transportation \u2022 Manufacturing",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Navan",
+    "slug": "navan",
+    "builtin_url": "https://builtin.com/company/navan",
+    "careers_url": "https://builtin.com/company/navan/jobs",
+    "industry": "Fintech \u2022 Information Technology \u2022 Payments \u2022 Productivity \u2022 Software \u2022 Travel \u2022 Automation",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "Arch Systems Inc.",
+    "slug": "arch-systems-inc",
+    "builtin_url": "https://builtin.com/company/arch-systems-inc",
+    "careers_url": "https://builtin.com/company/arch-systems-inc/jobs",
+    "industry": "Artificial Intelligence \u2022 Internet of Things \u2022 Machine Learning \u2022 Software \u2022 Analytics \u2022 Industrial \u2022 Manufacturing",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "SteelSeries",
+    "slug": "steelseries",
+    "builtin_url": "https://builtin.com/company/steelseries",
+    "careers_url": "https://builtin.com/company/steelseries/jobs",
+    "industry": "Gaming \u2022 Hardware \u2022 Software",
+    "description": "",
+    "location": ""
+  },
+  {
+    "name": "AirDNA",
+    "slug": "airdna",
+    "builtin_url": "https://builtin.com/company/airdna",
+    "careers_url": "https://builtin.com/company/airdna/jobs",
+    "industry": "Software \u2022 Travel",
+    "description": "",
+    "location": ""
+  }
+]

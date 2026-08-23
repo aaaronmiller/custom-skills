@@ -1,0 +1,642 @@
+[
+  {
+    "company": "Anduril Industries",
+    "role": "Founding Staff AI Infrastructure Engineer",
+    "location": "Seattle, WA",
+    "salary_band": "Not listed",
+    "scores": {
+      "likelihood": 10,
+      "income": 9,
+      "growth": 9,
+      "stability": 8,
+      "flexibility": 4,
+      "skillLeverage": 9
+    },
+    "composite": 57,
+    "grade": "A",
+    "best_fork": "infra",
+    "reason": "ML platform, MLOps, cloud-to-edge, LLM/CV/RL serving — Aaron core competency as AI platform engineer",
+    "apply_url": "https://job-boards.greenhouse.io/andurilindustries/jobs/5212860007",
+    "rank": 1
+  },
+  {
+    "company": "Meta",
+    "role": "Security Engineer – AI Security",
+    "location": "Bellevue, WA",
+    "salary_band": "$180,000 – $275,000",
+    "scores": {
+      "likelihood": 5,
+      "income": 10,
+      "growth": 8,
+      "stability": 10,
+      "flexibility": 7,
+      "skillLeverage": 6
+    },
+    "composite": 52,
+    "grade": "B",
+    "best_fork": "infra",
+    "reason": "AI knowledge + systems depth relevant but lacks adversarial ML & security specialization",
+    "apply_url": "https://www.metacareers.com/jobs?q=AI+security+engineer&location=Seattle",
+    "rank": 2
+  },
+  {
+    "company": "Zoom",
+    "role": "Information Security Engineer – AI/ML",
+    "location": "Bellevue, WA",
+    "salary_band": "$160,000 – $220,000",
+    "scores": {
+      "likelihood": 6,
+      "income": 10,
+      "growth": 7,
+      "stability": 8,
+      "flexibility": 7,
+      "skillLeverage": 6
+    },
+    "composite": 50,
+    "grade": "B",
+    "best_fork": "infra",
+    "reason": "Cloud + AI security overlap; privacy-preserving AI is adjacent to cost/routing work",
+    "apply_url": "https://zoom.wd5.myworkdayjobs.com/zoomcareers",
+    "rank": 3
+  },
+  {
+    "company": "TikTok (ByteDance)",
+    "role": "AI Security Engineer",
+    "location": "Seattle, WA",
+    "salary_band": "$165,000 – $240,000",
+    "scores": {
+      "likelihood": 5,
+      "income": 10,
+      "growth": 7,
+      "stability": 7,
+      "flexibility": 7,
+      "skillLeverage": 6
+    },
+    "composite": 48,
+    "grade": "B",
+    "best_fork": "infra",
+    "reason": "AI platform experience helps but recommendation system security is specialized domain",
+    "apply_url": "https://jobs.tiktok.com/en/search?keyword=AI+security+engineer&location=Seattle",
+    "rank": 4
+  },
+  {
+    "company": "Axon",
+    "role": "Senior Software Embedded Engineer",
+    "location": "Seattle, WA (hybrid — Tue-Fri onsite)",
+    "salary_band": "$141k – $237k",
+    "scores": {
+      "likelihood": 5,
+      "income": 10,
+      "growth": 7,
+      "stability": 8,
+      "flexibility": 6,
+      "skillLeverage": 5
+    },
+    "composite": 47,
+    "grade": "B",
+    "best_fork": "infra",
+    "reason": "C/C++/Python relevant; AIoT and edge computing overlap with AI deployment background",
+    "apply_url": "https://www.axon.com/careers",
+    "rank": 5
+  },
+  {
+    "company": "Blue Origin",
+    "role": "Senior Software Build & Release Engineer (Full Stack/Embedded) — TeraWave",
+    "location": "Greater Seattle Area (Kent, WA)",
+    "salary_band": "$145k – $220k (est.)",
+    "scores": {
+      "likelihood": 5,
+      "income": 10,
+      "growth": 7,
+      "stability": 8,
+      "flexibility": 4,
+      "skillLeverage": 5
+    },
+    "composite": 45,
+    "grade": "B",
+    "best_fork": "infra",
+    "reason": "CI/CD pipelines, build automation, and full-stack are strong matches; satellite comms context is a stretch",
+    "apply_url": "https://blueorigin.wd5.myworkdayjobs.com/en-US/BlueOrigin/job/Senior-Software-Build---Release-Engineer--Full-Stack-Embedded-_R69830",
+    "rank": 6
+  },
+  {
+    "company": "Axon",
+    "role": "Senior Firmware Engineer — Platform Firmware",
+    "location": "Seattle, WA (hybrid — Tue-Fri onsite)",
+    "salary_band": "$141k – $237k",
+    "scores": {
+      "likelihood": 4,
+      "income": 10,
+      "growth": 7,
+      "stability": 8,
+      "flexibility": 6,
+      "skillLeverage": 4
+    },
+    "composite": 44,
+    "grade": "C",
+    "best_fork": "infra",
+    "reason": "C++/Python relevant; Rust/Go and embedded Linux Yocto are gaps; public safety tech is interesting",
+    "apply_url": "https://www.axon.com/careers",
+    "rank": 7
+  },
+  {
+    "company": "Google",
+    "role": "Senior Hardware Engineering Manager — AI Infrastructure",
+    "location": "Kirkland, WA / Seattle, WA",
+    "salary_band": "$180k – $300k+ (est.)",
+    "scores": {
+      "likelihood": 2,
+      "income": 10,
+      "growth": 9,
+      "stability": 10,
+      "flexibility": 6,
+      "skillLeverage": 3
+    },
+    "composite": 44,
+    "grade": "D",
+    "best_fork": "infra",
+    "reason": "Custom silicon and team leadership (10+ engineers) are hard gates; AI infra interest is there but execution gap",
+    "apply_url": "https://careers.google.com/jobs/results/111703522910577350-senior-hardware-engineering-manager/",
+    "rank": 8
+  },
+  {
+    "company": "Microsoft",
+    "role": "Firmware Engineer — Silicon/Cloud Hardware",
+    "location": "Redmond, WA / Seattle, WA",
+    "salary_band": "$145k – $230k (est.)",
+    "scores": {
+      "likelihood": 3,
+      "income": 10,
+      "growth": 7,
+      "stability": 10,
+      "flexibility": 5,
+      "skillLeverage": 3
+    },
+    "composite": 43,
+    "grade": "C",
+    "best_fork": "infra",
+    "reason": "BIOS/UEFI and embedded Linux are gaps despite Linux systems background; strong stability at MS",
+    "apply_url": "https://careers.microsoft.com",
+    "rank": 9
+  },
+  {
+    "company": "Anduril Industries",
+    "role": "OIC Developer (AI/Security)",
+    "location": "In office – Seattle, WA",
+    "salary_band": "$129,000 – $171,000",
+    "scores": {
+      "likelihood": 5,
+      "income": 8,
+      "growth": 7,
+      "stability": 8,
+      "flexibility": 4,
+      "skillLeverage": 5
+    },
+    "composite": 42,
+    "grade": "B",
+    "best_fork": "infra",
+    "reason": "AI systems relevant but security clearance requirement is a hard gate; defense domain stretch",
+    "apply_url": "https://www.anduril.com/careers",
+    "rank": 10
+  },
+  {
+    "company": "Anduril Industries",
+    "role": "Staff Security Software Engineer (Embedded & Firmware)",
+    "location": "Seattle, WA",
+    "salary_band": "$180k – $280k (est.)",
+    "scores": {
+      "likelihood": 3,
+      "income": 10,
+      "growth": 8,
+      "stability": 8,
+      "flexibility": 4,
+      "skillLeverage": 4
+    },
+    "composite": 42,
+    "grade": "C",
+    "best_fork": "infra",
+    "reason": "Security knowledge relevant but embedded firmware + cryptography + clearance preference is a stretch",
+    "apply_url": "https://www.anduril.com/open-roles",
+    "rank": 11
+  },
+  {
+    "company": "Starbucks",
+    "role": "Senior IoT Engineer",
+    "location": "Seattle, WA (in-office, 4 days/week)",
+    "salary_band": "$114,500 – $191,000",
+    "scores": {
+      "likelihood": 5,
+      "income": 8,
+      "growth": 6,
+      "stability": 9,
+      "flexibility": 4,
+      "skillLeverage": 5
+    },
+    "composite": 42,
+    "grade": "B",
+    "best_fork": "infra",
+    "reason": "C++/Python and cloud/IoT scale relevant; Kafka and telemetry pipelines overlap; 4-day on-site is tight",
+    "apply_url": "https://www.starbucks.com/careers/",
+    "rank": 12
+  },
+  {
+    "company": "BRINC Drones",
+    "role": "Forward Deployed Engineer (Embedded/Firmware)",
+    "location": "Seattle, WA (hybrid, heavy travel)",
+    "salary_band": "$130k – $180k (est.)",
+    "scores": {
+      "likelihood": 6,
+      "income": 8,
+      "growth": 7,
+      "stability": 7,
+      "flexibility": 2,
+      "skillLeverage": 6
+    },
+    "composite": 41,
+    "grade": "B",
+    "best_fork": "solutions",
+    "reason": "Hardware repair + field troubleshooting maps to CH341A/firmware background; 90% travel is dealbreaker",
+    "apply_url": "https://jobs.ashbyhq.com/brinc/d4beac4b-fafd-49bc-91f2-8bae09634afb",
+    "rank": 13
+  },
+  {
+    "company": "Blue Origin",
+    "role": "Senior Embedded Firmware Engineer — Space-Grade Systems",
+    "location": "Greater Seattle Area (Kent, WA)",
+    "salary_band": "$160k – $250k (est.)",
+    "scores": {
+      "likelihood": 3,
+      "income": 10,
+      "growth": 7,
+      "stability": 8,
+      "flexibility": 4,
+      "skillLeverage": 3
+    },
+    "composite": 40,
+    "grade": "C",
+    "best_fork": "infra",
+    "reason": "Hardware repair & firmware flashing is adjacent; space-grade C/C++ and aerospace domain required",
+    "apply_url": "https://www.blueorigin.com/careers",
+    "rank": 14
+  },
+  {
+    "company": "Anduril Industries",
+    "role": "Embedded Linux Engineer",
+    "location": "Seattle, WA",
+    "salary_band": "$150k – $240k (est.)",
+    "scores": {
+      "likelihood": 3,
+      "income": 10,
+      "growth": 7,
+      "stability": 8,
+      "flexibility": 4,
+      "skillLeverage": 3
+    },
+    "composite": 40,
+    "grade": "C",
+    "best_fork": "infra",
+    "reason": "Linux systems knowledge (WSL2) is adjacent but embedded Linux (Yocto/buildroot/board bring-up) is specialized",
+    "apply_url": "https://www.anduril.com/open-roles",
+    "rank": 15
+  },
+  {
+    "company": "SpaceX",
+    "role": "Embedded Software Engineer — Starlink",
+    "location": "Redmond, WA (near Seattle)",
+    "salary_band": "$140k – $220k (est.)",
+    "scores": {
+      "likelihood": 3,
+      "income": 10,
+      "growth": 8,
+      "stability": 8,
+      "flexibility": 3,
+      "skillLeverage": 3
+    },
+    "composite": 40,
+    "grade": "C",
+    "best_fork": "infra",
+    "reason": "Linux kernel/bare-metal and satellite systems are gaps; real-time embedded systems are specialized",
+    "apply_url": "https://www.spacex.com/careers/",
+    "rank": 16
+  },
+  {
+    "company": "Zoox",
+    "role": "Firmware Engineer — Autonomous Vehicle Platform",
+    "location": "Seattle, WA",
+    "salary_band": "$150k – $250k (est.)",
+    "scores": {
+      "likelihood": 2,
+      "income": 10,
+      "growth": 8,
+      "stability": 9,
+      "flexibility": 4,
+      "skillLeverage": 3
+    },
+    "composite": 40,
+    "grade": "D",
+    "best_fork": "infra",
+    "reason": "Automotive/safety-critical systems and LiDAR/camera sensor integration are gaps; Amazon subsidiary stable",
+    "apply_url": "https://www.zoox.com/careers/",
+    "rank": 17
+  },
+  {
+    "company": "Carbon Robotics",
+    "role": "Sr. Software Engineer, Embedded Systems/Controls",
+    "location": "Seattle, WA",
+    "salary_band": "$150k – $210k (est.)",
+    "scores": {
+      "likelihood": 3,
+      "income": 10,
+      "growth": 7,
+      "stability": 7,
+      "flexibility": 4,
+      "skillLeverage": 3
+    },
+    "composite": 39,
+    "grade": "C",
+    "best_fork": "startup",
+    "reason": "AI-powered robotics interesting but embedded controls and mechatronics are a gap",
+    "apply_url": "https://carbonrobotics.com/careers",
+    "rank": 18
+  },
+  {
+    "company": "Carbon Robotics",
+    "role": "Sr. Software Engineer, Robot Systems",
+    "location": "Seattle, WA",
+    "salary_band": "$150k – $210k (est.)",
+    "scores": {
+      "likelihood": 3,
+      "income": 10,
+      "growth": 7,
+      "stability": 7,
+      "flexibility": 4,
+      "skillLeverage": 3
+    },
+    "composite": 39,
+    "grade": "C",
+    "best_fork": "startup",
+    "reason": "Computer vision and mechatronics are gaps; startup upside offset by embedded systems requirement",
+    "apply_url": "https://carbonrobotics.com/careers",
+    "rank": 19
+  },
+  {
+    "company": "Blue Origin",
+    "role": "Sr. Embedded Software Engineer — New Glenn Avionics",
+    "location": "Greater Seattle Area (Kent, WA)",
+    "salary_band": "$160k – $260k+ (est.)",
+    "scores": {
+      "likelihood": 2,
+      "income": 10,
+      "growth": 7,
+      "stability": 8,
+      "flexibility": 4,
+      "skillLeverage": 2
+    },
+    "composite": 37,
+    "grade": "D",
+    "best_fork": "infra",
+    "reason": "No embedded C/C++ RTOS experience; aerospace domain is a credential gate",
+    "apply_url": "https://blueorigin.wd5.myworkdayjobs.com/BlueOrigin/job/Greater-Seattle-Area/Sr-Embedded-Software-Engineer---New-Glenn-Avionics_R69781",
+    "rank": 20
+  },
+  {
+    "company": "Blue Origin",
+    "role": "Avionics FPGA Firmware Engineer",
+    "location": "Greater Seattle Area (Kent, WA)",
+    "salary_band": "$150k – $240k (est.)",
+    "scores": {
+      "likelihood": 2,
+      "income": 10,
+      "growth": 6,
+      "stability": 8,
+      "flexibility": 4,
+      "skillLeverage": 2
+    },
+    "composite": 36,
+    "grade": "D",
+    "best_fork": "infra",
+    "reason": "No FPGA/hardware description language experience — hard credential gate",
+    "apply_url": "https://www.blueorigin.com/careers",
+    "rank": 21
+  },
+  {
+    "company": "Starfish Space",
+    "role": "Embedded Software Engineer",
+    "location": "Tukwila, WA (near Seattle)",
+    "salary_band": "$130k – $190k (est.)",
+    "scores": {
+      "likelihood": 3,
+      "income": 8,
+      "growth": 7,
+      "stability": 7,
+      "flexibility": 4,
+      "skillLeverage": 3
+    },
+    "composite": 36,
+    "grade": "C",
+    "best_fork": "startup",
+    "reason": "C++/Python relevant but HIL/PIL test systems and space domain are gaps; small company upside",
+    "apply_url": "https://www.starfishspace.com/careers/",
+    "rank": 22
+  },
+  {
+    "company": "K2 Space",
+    "role": "Senior Embedded Firmware Engineer — Satellite Systems",
+    "location": "Seattle, WA",
+    "salary_band": "$140k – $220k (est.)",
+    "scores": {
+      "likelihood": 2,
+      "income": 10,
+      "growth": 7,
+      "stability": 7,
+      "flexibility": 4,
+      "skillLeverage": 2
+    },
+    "composite": 36,
+    "grade": "D",
+    "best_fork": "startup",
+    "reason": "Rust is a hard requirement Aaron lacks; space firmware is specialized domain",
+    "apply_url": "https://jobs.greenhouse.io/k2spacecorporation/jobs/5373556008",
+    "rank": 23
+  },
+  {
+    "company": "BRINC Drones",
+    "role": "Senior Software Engineer, Embedded",
+    "location": "Seattle, WA (on-site)",
+    "salary_band": "$140k – $200k (est.)",
+    "scores": {
+      "likelihood": 3,
+      "income": 8,
+      "growth": 7,
+      "stability": 7,
+      "flexibility": 3,
+      "skillLeverage": 3
+    },
+    "composite": 35,
+    "grade": "C",
+    "best_fork": "startup",
+    "reason": "Python relevant but flight-critical embedded firmware is specialized; small company upside",
+    "apply_url": "https://jobs.ashbyhq.com/brinc",
+    "rank": 24
+  },
+  {
+    "company": "Overland AI",
+    "role": "Embedded/Robotics Engineer",
+    "location": "Seattle, WA",
+    "salary_band": "$140k – $200k (est.)",
+    "scores": {
+      "likelihood": 2,
+      "income": 8,
+      "growth": 8,
+      "stability": 7,
+      "flexibility": 4,
+      "skillLeverage": 3
+    },
+    "composite": 35,
+    "grade": "D",
+    "best_fork": "startup",
+    "reason": "Autonomy stacks for ground vehicles are specialized; C++ and hardware integration are gaps",
+    "apply_url": "https://www.overland.ai/careers",
+    "rank": 25
+  },
+  {
+    "company": "Hubble Network",
+    "role": "Embedded Software Engineer — Space Systems",
+    "location": "Seattle, WA",
+    "salary_band": "$130k – $190k (est.)",
+    "scores": {
+      "likelihood": 3,
+      "income": 8,
+      "growth": 7,
+      "stability": 6,
+      "flexibility": 4,
+      "skillLeverage": 3
+    },
+    "composite": 35,
+    "grade": "C",
+    "best_fork": "startup",
+    "reason": "Linux relevant but FPGA/HDL and satellite C&C are gaps; very small company risk",
+    "apply_url": "https://hubble.network/careers",
+    "rank": 26
+  },
+  {
+    "company": "Reliable Robotics",
+    "role": "Embedded Software Engineer — Flight Systems",
+    "location": "Seattle, WA area",
+    "salary_band": "$140k – $200k (est.)",
+    "scores": {
+      "likelihood": 2,
+      "income": 8,
+      "growth": 8,
+      "stability": 7,
+      "flexibility": 4,
+      "skillLeverage": 2
+    },
+    "composite": 34,
+    "grade": "D",
+    "best_fork": "startup",
+    "reason": "DO-178C aviation software standards and avionics are specialized aerospace credentials",
+    "apply_url": "https://www.reliablerobotics.com/careers",
+    "rank": 27
+  },
+  {
+    "company": "Hubble Network",
+    "role": "Embedded Software Engineer — Developer Experience / SDK",
+    "location": "Seattle, WA",
+    "salary_band": "$125k – $180k (est.)",
+    "scores": {
+      "likelihood": 2,
+      "income": 8,
+      "growth": 7,
+      "stability": 6,
+      "flexibility": 4,
+      "skillLeverage": 3
+    },
+    "composite": 33,
+    "grade": "D",
+    "best_fork": "startup",
+    "reason": "Zephyr RTOS, Nordic BLE, firmware SDK — all specialized embedded skills Aaron lacks",
+    "apply_url": "https://hubble.network/careers",
+    "rank": 28
+  },
+  {
+    "company": "Blue Origin",
+    "role": "Avionics Embedded Software Engineer (Early Career — 2026 Start)",
+    "location": "Greater Seattle Area (Kent, WA)",
+    "salary_band": "$120k – $160k (est.)",
+    "scores": {
+      "likelihood": 2,
+      "income": 8,
+      "growth": 5,
+      "stability": 8,
+      "flexibility": 4,
+      "skillLeverage": 2
+    },
+    "composite": 32,
+    "grade": "D",
+    "best_fork": "infra",
+    "reason": "Entry-level role undersells 17+ years; still requires C/C++ embedded and aerospace domain",
+    "apply_url": "https://www.blueorigin.com/careers",
+    "rank": 29
+  },
+  {
+    "company": "Ixana",
+    "role": "Senior Embedded Software Engineer — Wearables/IoT",
+    "location": "Seattle, WA",
+    "salary_band": "$125k – $200k (est.)",
+    "scores": {
+      "likelihood": 2,
+      "income": 8,
+      "growth": 7,
+      "stability": 6,
+      "flexibility": 4,
+      "skillLeverage": 2
+    },
+    "composite": 32,
+    "grade": "D",
+    "best_fork": "startup",
+    "reason": "Bare-metal bring-up, Wi-R SoCs, Cortex-M/RISC-V — specialized embedded hardware skills",
+    "apply_url": "https://wellfound.com/jobs/4348216-senior-embedded-software-engineer-wearables-iot",
+    "rank": 30
+  },
+  {
+    "company": "Philips",
+    "role": "Electrical/Hardware Design Engineer — Medical Devices",
+    "location": "Bothell, WA (near Seattle)",
+    "salary_band": "$110k – $160k (est.)",
+    "scores": {
+      "likelihood": 3,
+      "income": 6,
+      "growth": 5,
+      "stability": 8,
+      "flexibility": 5,
+      "skillLeverage": 2
+    },
+    "composite": 32,
+    "grade": "C",
+    "best_fork": "infra",
+    "reason": "Hardware repair is adjacent but IEC 60601, PCB design, and analog/digital circuit design are specialized",
+    "apply_url": "https://www.philips.com/careers",
+    "rank": 31
+  },
+  {
+    "company": "Boeing",
+    "role": "Senior Airborne Electronic Hardware Engineer",
+    "location": "Everett / Tukwila, WA (near Seattle)",
+    "salary_band": "$120k – $175k (est.)",
+    "scores": {
+      "likelihood": 1,
+      "income": 8,
+      "growth": 5,
+      "stability": 8,
+      "flexibility": 3,
+      "skillLeverage": 1
+    },
+    "composite": 29,
+    "grade": "D",
+    "best_fork": "infra",
+    "reason": "DO-254/DO-160 compliance, PCB layout, FPGA/ASIC — pure aerospace hardware engineering credential gate",
+    "apply_url": "https://jobs.boeing.com",
+    "rank": 32
+  }
+]

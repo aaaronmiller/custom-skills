@@ -1,0 +1,474 @@
+{
+  "source": "GeekWire 200 - Q2 2026 (June 2026 update)",
+  "extractedAt": "2026-08-22T01:39:43.159Z",
+  "method": "Web search + article extraction (Cloudflare blocked direct scrape; gstack browse binary not found)",
+  "cloudflareStatus": "BLOCKED - direct fetch returned 403; browse binary unavailable; data sourced from article summaries and search results",
+  "notes": "Full 200 list not publicly extractable without live browser session. Only companies with confirmed ranks from articles/search included. GeekWire Jobs page loads dynamically (JS-rendered) - no individual listings extractable without browser automation.",
+  "companies": [
+    {
+      "rank": 1,
+      "name": "Helion",
+      "domain": "helionenergy.com",
+      "url": "http://www.helionenergy.com/",
+      "sector": "Renewable Energy Power Generation",
+      "location": "Everett, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Fusion-power leader backed by Sam Altman and SoftBank; $15.5B valuation; building plant to deliver fusion to Microsoft by 2028"
+    },
+    {
+      "rank": 2,
+      "name": "Temporal",
+      "domain": "temporal.io",
+      "url": "https://temporal.io/",
+      "sector": "Software Development",
+      "location": "Bellevue, Washington",
+      "employees": 433,
+      "yoyGrowth": "59%",
+      "notes": "$5B valuation after $300M Series D; revenue grew 380% YoY; helps companies move AI agents into production"
+    },
+    {
+      "rank": 3,
+      "name": "Truveta",
+      "domain": "truveta.com",
+      "url": "http://www.truveta.com",
+      "sector": "Hospitals and Health Care",
+      "location": "Issaquah, Washington",
+      "employees": 418,
+      "yoyGrowth": "16%",
+      "notes": "Clinical-data company; launched AI research tool for U.S. patient records database"
+    },
+    {
+      "rank": 4,
+      "name": "Chainguard",
+      "domain": "chainguard.com",
+      "url": "https://www.chainguard.dev/",
+      "sector": "Computer and Network Security",
+      "location": "Kirkland, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Cybersecurity/container security company"
+    },
+    {
+      "rank": 5,
+      "name": "Agility Robotics",
+      "domain": "agilityrobotics.com",
+      "url": "http://agilityrobotics.com/",
+      "sector": "Robotics Engineering",
+      "location": "Corvallis, Oregon",
+      "employees": 359,
+      "yoyGrowth": "41%",
+      "notes": "Building humanoid robots; was previously in process of $2.5B deal"
+    },
+    {
+      "rank": 6,
+      "name": "Stoke Space",
+      "domain": "stokespace.com",
+      "url": "https://www.stokespace.com/",
+      "sector": "Defense and Space Manufacturing",
+      "location": "Kent, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Reusable-rocket maker; rose to No. 6 from lower position; raised $350M"
+    },
+    {
+      "rank": 7,
+      "name": "Brinc",
+      "domain": "brinc.io",
+      "url": "https://brinc.io/",
+      "sector": "Aviation and Aerospace Component Manufacturing",
+      "location": "Seattle, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Drone maker serving public safety; raised $125M led by Motorola Solutions"
+    },
+    {
+      "rank": 8,
+      "name": "Carbon Robotics",
+      "domain": "carbonrobotics.com",
+      "url": "https://carbonrobotics.com/",
+      "sector": "Automation Machinery Manufacturing",
+      "location": "Seattle, Washington",
+      "employees": 278,
+      "yoyGrowth": "33%",
+      "notes": "Laser-weeding agtech; crossed $100M revenue; launched Large Plant Model"
+    },
+    {
+      "rank": 9,
+      "name": "Overland AI",
+      "domain": "overland-ai.com",
+      "url": "https://overland.ai/",
+      "sector": "Defense and Space Manufacturing",
+      "location": "Seattle, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Military autonomy; cracked top 10 for first time; raised $100M"
+    },
+    {
+      "rank": 10,
+      "name": "Customer.io",
+      "domain": "customer.io",
+      "url": "https://customer.io",
+      "sector": "Software Development",
+      "location": "Portland, Oregon",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Messaging-automation platform; topped $100M ARR; biggest-ever AI release"
+    },
+    {
+      "rank": 11,
+      "name": "Zap Energy",
+      "domain": "zapenergy.com",
+      "url": "https://zapenergy.com/",
+      "sector": "Renewable Energy / Fusion",
+      "location": "Everett, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Fusion company; up 2 spots; added fission line to roadmap (industry first)"
+    },
+    {
+      "rank": 14,
+      "name": "iSpot.tv",
+      "domain": "ispot.tv",
+      "url": "https://www.ispot.tv/",
+      "sector": "Software / Advertising Technology",
+      "location": "Bellevue, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Ad measurement platform; dropped from top 10 in Q1"
+    },
+    {
+      "rank": 15,
+      "name": "Read.AI",
+      "domain": "read.ai",
+      "url": "https://www.read.ai/",
+      "sector": "Software / AI Productivity",
+      "location": "Seattle, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "AI meeting analytics"
+    },
+    {
+      "rank": 17,
+      "name": "Yoodli",
+      "domain": "yoodli.ai",
+      "url": "https://yoodli.ai/",
+      "sector": "Software / AI Communication",
+      "location": "Seattle, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "AI speech coaching; climbed 5 spots from No. 22"
+    },
+    {
+      "rank": 19,
+      "name": "Dropzone AI",
+      "domain": "dropzone.ai",
+      "url": "https://www.dropzone.ai/",
+      "sector": "Cybersecurity / AI SOC",
+      "location": "Seattle, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "AI-powered SOC analyst"
+    },
+    {
+      "rank": 20,
+      "name": "Wyze Labs",
+      "domain": "wyze.com",
+      "url": "https://www.wyze.com/",
+      "sector": "Consumer IoT / Smart Home",
+      "location": "Seattle, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Smart home devices"
+    },
+    {
+      "rank": 32,
+      "name": "Amperity",
+      "domain": "amperity.com",
+      "url": "https://www.amperity.com/",
+      "sector": "Software / Customer Data",
+      "location": "Seattle, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Up 5 spots; co-founders returned as co-CEOs"
+    },
+    {
+      "rank": 33,
+      "name": "Armoire",
+      "domain": "armoire.style",
+      "url": "https://armoire.style/",
+      "sector": "E-commerce / Fashion Tech",
+      "location": "Seattle, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Up 7 spots; clothing-rental startup; rolled out AI features"
+    },
+    {
+      "rank": 35,
+      "name": "XBOW",
+      "domain": "xbow.com",
+      "url": "https://www.xbow.com/",
+      "sector": "Cybersecurity",
+      "location": "Seattle, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Debut on list"
+    },
+    {
+      "rank": 41,
+      "name": "Auger",
+      "domain": "auger.com",
+      "url": "https://www.auger.com/",
+      "sector": "Supply Chain Software",
+      "location": "Seattle, Washington",
+      "employees": null,
+      "yoyGrowth": "200%+",
+      "notes": "Raised $100M seed in 2024; partnership with Microsoft"
+    },
+    {
+      "rank": 54,
+      "name": "Echodyne",
+      "domain": "echodyne.com",
+      "url": "https://echodyne.com/",
+      "sector": "Radar / Defense Technology",
+      "location": "Kirkland, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Radar platform; building new manufacturing facility in WA"
+    },
+    {
+      "rank": 64,
+      "name": "Starfish Space",
+      "domain": "starfish.space",
+      "url": "https://starfish.space/",
+      "sector": "Space / Satellite Servicing",
+      "location": "Kent, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Landed $54.5M Space Force contract for satellite servicing"
+    },
+    {
+      "rank": 69,
+      "name": "Alitheon",
+      "domain": "alitheon.com",
+      "url": "https://www.alitheon.com/",
+      "sector": "AI / Optical Technology",
+      "location": "Seattle, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Up 8 spots; raised $8M; optical-AI tech gives physical objects biometric ID"
+    },
+    {
+      "rank": 75,
+      "name": "Starcloud",
+      "domain": "starcloud.com",
+      "url": "https://www.starcloud.com/",
+      "sector": "Space / Cloud Infrastructure",
+      "location": "Redmond, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Biggest mover; vaulted 96 spots; $1.1B valuation (fastest YC to unicorn); space-based data centers"
+    },
+    {
+      "rank": 79,
+      "name": "Panthalassa",
+      "domain": "panthalassa.com",
+      "url": null,
+      "sector": "Energy / Data Centers",
+      "location": "Oregon",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Debut; wave-powered floating AI data center; raised $140M led by Peter Thiel"
+    },
+    {
+      "rank": 82,
+      "name": "Possible Finance",
+      "domain": "possiblefinance.com",
+      "url": "https://www.possiblefinance.com/",
+      "sector": "Fintech / Consumer Finance",
+      "location": "Seattle, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Up 11 spots"
+    },
+    {
+      "rank": 87,
+      "name": "Aspect Biosystems",
+      "domain": "aspectbiosystems.com",
+      "url": "https://aspectbiosystems.com/",
+      "sector": "Biotech / Bioprinting",
+      "location": "Vancouver, B.C.",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Up 22 spots; landed $280M partnership with Government of Canada"
+    },
+    {
+      "rank": 114,
+      "name": "Portal Space Systems",
+      "domain": "portalspace.systems",
+      "url": "https://portalspace.systems/",
+      "sector": "Space / Orbital Maneuvering",
+      "location": "Bothell, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Debut; raised $50M via Starburst; preps first orbital maneuvering vehicle launch"
+    },
+    {
+      "rank": 127,
+      "name": "Gradial",
+      "domain": "gradial.com",
+      "url": "https://www.gradial.com/",
+      "sector": "Software / Agentic Marketing",
+      "location": "Seattle, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Up 24 spots (biggest rank jump Q2); raised $65M; agentic enterprise-marketing"
+    },
+    {
+      "rank": 140,
+      "name": "Tune Therapeutics",
+      "domain": "tunetherapeutics.com",
+      "url": "https://www.tunetherapeutics.com/",
+      "sector": "Biotech / Epigenome Editing",
+      "location": "Seattle, Washington (co-HQ)",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Debut; developing epigenome editing programs"
+    },
+    {
+      "rank": 144,
+      "name": "Humanly",
+      "domain": "humanly.io",
+      "url": "https://www.humanly.io/",
+      "sector": "HR Tech / Hiring AI",
+      "location": "Seattle, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Up 8 spots; raised $25M"
+    },
+    {
+      "rank": 153,
+      "name": "Tin Can",
+      "domain": "tinycan.com",
+      "url": "https://tinycan.com/",
+      "sector": "Consumer Electronics / Kids Tech",
+      "location": "Seattle, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Up 14 spots; landline-style phone for kids; late-night TV moment"
+    },
+    {
+      "rank": 172,
+      "name": "Inflection",
+      "domain": "inflection.io",
+      "url": "https://inflection.io/",
+      "sector": "B2B Marketing Software",
+      "location": "Seattle, Washington",
+      "employees": null,
+      "yoyGrowth": null,
+      "notes": "Up 20 spots; acquired Keyplay; CEO Aaron Bird"
+    }
+  ],
+  "jobs": {
+    "note": "GeekWire Jobs page (geekwire.com/jobs/) loads dynamically via JavaScript. The page HTML contains only a search form template with no actual job listings rendered server-side. Individual job listings require browser automation with JS execution to extract. Cloudflare protection blocks curl/direct fetch.",
+    "status": "NOT_EXTRACTABLE",
+    "recommendation": "Use Built In Seattle (builtinaustin.com/seattle/jobs) or direct company career pages for job listings"
+  },
+  "careersPages": [
+    {
+      "company": "Helion",
+      "careersUrl": "https://www.helionenergy.com/careers",
+      "domain": "helionenergy.com"
+    },
+    {
+      "company": "Temporal",
+      "careersUrl": "https://temporal.io/careers",
+      "domain": "temporal.io"
+    },
+    {
+      "company": "Truveta",
+      "careersUrl": "https://www.truveta.com/careers",
+      "domain": "truveta.com"
+    },
+    {
+      "company": "Chainguard",
+      "careersUrl": "https://www.chainguard.dev/careers",
+      "domain": "chainguard.com"
+    },
+    {
+      "company": "Agility Robotics",
+      "careersUrl": "https://agilityrobotics.com/careers",
+      "domain": "agilityrobotics.com"
+    },
+    {
+      "company": "Stoke Space",
+      "careersUrl": "https://www.stokespace.com/careers",
+      "domain": "stokespace.com"
+    },
+    {
+      "company": "Brinc",
+      "careersUrl": "https://brinc.io/careers",
+      "domain": "brinc.io"
+    },
+    {
+      "company": "Carbon Robotics",
+      "careersUrl": "https://carbonrobotics.com/careers",
+      "domain": "carbonrobotics.com"
+    },
+    {
+      "company": "Overland AI",
+      "careersUrl": "https://overland.ai/careers",
+      "domain": "overland-ai.com"
+    },
+    {
+      "company": "Customer.io",
+      "careersUrl": "https://customer.io/careers",
+      "domain": "customer.io"
+    },
+    {
+      "company": "Zap Energy",
+      "careersUrl": "https://zapenergy.com/careers",
+      "domain": "zapenergy.com"
+    },
+    {
+      "company": "Yoodli",
+      "careersUrl": "https://yoodli.ai/careers",
+      "domain": "yoodli.ai"
+    },
+    {
+      "company": "Dropzone AI",
+      "careersUrl": "https://www.dropzone.ai/careers",
+      "domain": "dropzone.ai"
+    },
+    {
+      "company": "Amperity",
+      "careersUrl": "https://www.amperity.com/careers",
+      "domain": "amperity.com"
+    },
+    {
+      "company": "Auger",
+      "careersUrl": "https://www.auger.com/careers",
+      "domain": "auger.com"
+    },
+    {
+      "company": "Echodyne",
+      "careersUrl": "https://echodyne.com/careers",
+      "domain": "echodyne.com"
+    },
+    {
+      "company": "Alitheon",
+      "careersUrl": "https://www.alitheon.com/careers",
+      "domain": "alitheon.com"
+    },
+    {
+      "company": "Gradial",
+      "careersUrl": "https://www.gradial.com/careers",
+      "domain": "gradial.com"
+    },
+    {
+      "company": "Humanly",
+      "careersUrl": "https://www.humanly.io/careers",
+      "domain": "humanly.io"
+    }
+  ]
+}

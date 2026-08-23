@@ -1,0 +1,1 @@
+[00:00] Today I’m giving you three rules for better backups. Rule one: keep three copies. Rule two: store one copy offsite. Rule three: test restores monthly. The command I use is "restic snapshots". If a restore fails, don’t panic; check credentials first.

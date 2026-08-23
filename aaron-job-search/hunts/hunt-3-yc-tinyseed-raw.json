@@ -1,0 +1,800 @@
+{
+  "hunt": "hunt-3-yc-tinyseed",
+  "scraped_at": "2026-08-22T04:20:00Z",
+  "total_entries": 34,
+  "active_listings": 32,
+  "companies_with_no_listings": 2,
+  "jobs": [
+    {
+      "company": "Boundary",
+      "domain": "usebaml.com",
+      "role": "Engineer (Compilers)",
+      "salary_band": "$100K-$180K + 0.15%-0.75% equity",
+      "company_size": "2-10",
+      "what_they_do": "Building BAML (Boundary AI Markup Language), a programming language for AI agents that manages structured LLM outputs. Rust-based compiler/runtime with React/TS frontend.",
+      "apply_url": "https://www.ycombinator.com/companies/boundary/jobs/f31pAPu-engineers-that-enjoy-hard-things-like-compilers",
+      "company_url": "https://www.usebaml.com",
+      "requirements": [
+        "Compiler/language design experience",
+        "Rust or systems programming",
+        "AI/LLM tooling interest",
+        "US work authorization",
+        "New grads welcome"
+      ],
+      "location": "Seattle, WA",
+      "source_url": "https://www.ycombinator.com/companies/boundary/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W23",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Clearly AI",
+      "domain": "clearly.security",
+      "role": "Forward Deployed Security Engineer",
+      "salary_band": "$125K-$175K + 0.10%-0.50% equity",
+      "company_size": "2-10",
+      "what_they_do": "AI-powered platform automating security and privacy reviews (threat modeling, privacy impact assessments, vendor risk evaluations). Customers include Rivian, Ericsson, Okta, Affirm.",
+      "apply_url": "https://www.ycombinator.com/companies/clearly-ai/jobs/zdixMrj-forward-deployed-security-engineer",
+      "company_url": "https://clearly.security",
+      "requirements": [
+        "3+ years security engineering experience",
+        "Enterprise security domain knowledge",
+        "Python/software engineering skills",
+        "AI/LLM familiarity a plus"
+      ],
+      "location": "Seattle, WA / Remote (US/CA)",
+      "source_url": "https://www.ycombinator.com/companies/clearly-ai/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "S24",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Terrakotta",
+      "domain": "terrakotta.com",
+      "role": "Senior Full-Stack Engineer",
+      "salary_band": "Not listed",
+      "company_size": "~5",
+      "what_they_do": "AI-powered sales platform for phone-first sellers, particularly commercial real estate. Power-dialer with AI-generated voicemails and A/B testing.",
+      "apply_url": "https://www.ycombinator.com/companies/terrakotta/jobs",
+      "company_url": "https://terrakotta.com",
+      "requirements": [
+        "Full-stack engineering experience",
+        "AI/voice technology interest",
+        "Startup scrappiness"
+      ],
+      "location": "Seattle, WA",
+      "source_url": "https://www.ycombinator.com/companies/terrakotta/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W24",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Terrakotta",
+      "domain": "terrakotta.com",
+      "role": "Software Engineer (Product, New Grad)",
+      "salary_band": "Not listed",
+      "company_size": "~5",
+      "what_they_do": "AI-powered sales platform for phone-first sellers, particularly commercial real estate.",
+      "apply_url": "https://www.ycombinator.com/companies/terrakotta/jobs",
+      "company_url": "https://terrakotta.com",
+      "requirements": [
+        "New grad or early career",
+        "Product engineering interest",
+        "AI/voice technology interest"
+      ],
+      "location": "Seattle, WA",
+      "source_url": "https://www.ycombinator.com/companies/terrakotta/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W24",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Terrakotta",
+      "domain": "terrakotta.com",
+      "role": "Founding Sales Development Representative",
+      "salary_band": "Not listed",
+      "company_size": "~5",
+      "what_they_do": "AI-powered sales platform for phone-first sellers, particularly commercial real estate.",
+      "apply_url": "https://www.ycombinator.com/companies/terrakotta/jobs",
+      "company_url": "https://terrakotta.com",
+      "requirements": [
+        "Sales/SDR experience or raw ambition",
+        "B2B SaaS interest",
+        "Scrappiness and autonomy"
+      ],
+      "location": "Seattle, WA / Los Angeles, CA",
+      "source_url": "https://www.ycombinator.com/companies/terrakotta/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W24",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Silurian",
+      "domain": "silurian.ai",
+      "role": "Machine Learning Research Engineer/Scientist",
+      "salary_band": "Not listed",
+      "company_size": "2-10",
+      "what_they_do": "Building foundation models for simulating Earth's systems (weather forecasting, wildfire risk, energy grid load). Generative Forecasting Transformer (GFT) model predicts global weather 14 days ahead.",
+      "apply_url": "https://www.ycombinator.com/companies/silurian/jobs",
+      "company_url": "https://silurian.ai",
+      "requirements": [
+        "ML/deep learning experience",
+        "Climate science or physical modeling interest",
+        "New grads considered",
+        "Python, PyTorch"
+      ],
+      "location": "Seattle, WA",
+      "source_url": "https://www.ycombinator.com/companies/silurian/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "S24",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Quindar",
+      "domain": "quindar.space",
+      "role": "Backend Engineer",
+      "salary_band": "$120K-$180K",
+      "company_size": "10-50",
+      "what_they_do": "Cloud-native software for satellite mission operations ('DataDog for space'). Mission planning, telemetry handling, automation, and command-and-control systems.",
+      "apply_url": "https://jobs.ashbyhq.com/quindar",
+      "company_url": "https://quindar.space",
+      "requirements": [
+        "Python, AWS",
+        "Cloud-native software development",
+        "Aerospace experience a plus",
+        "Strong general SWE background"
+      ],
+      "location": "Seattle, WA (hybrid)",
+      "source_url": "https://www.ycombinator.com/companies/quindar/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "S22",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Kivo Health",
+      "domain": "kivohealth.com",
+      "role": "Product Manager",
+      "salary_band": "$180K-$250K + 0.15%-0.25% equity",
+      "company_size": "10-50",
+      "what_they_do": "AI-powered virtual pulmonary rehabilitation for chronic lung disease (COPD). 9-week insurance-billed telehealth program with guided exercise and live education.",
+      "apply_url": "https://www.ycombinator.com/companies/kivo-health/jobs/h08SWMI-product-manager",
+      "company_url": "https://kivohealth.com",
+      "requirements": [
+        "6+ years PM experience at tech company",
+        "Strong SQL skills",
+        "Experience shipping AI-driven features",
+        "Healthcare domain knowledge a plus"
+      ],
+      "location": "Seattle, WA (in-office)",
+      "source_url": "https://www.ycombinator.com/companies/kivo-health/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W23",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Kivo Health",
+      "domain": "kivohealth.com",
+      "role": "Full Stack Engineer",
+      "salary_band": "Not listed",
+      "company_size": "10-50",
+      "what_they_do": "AI-powered virtual pulmonary rehabilitation for chronic lung disease (COPD).",
+      "apply_url": "https://www.ycombinator.com/companies/kivo-health/jobs/L6oQv63-full-stack-engineer",
+      "company_url": "https://kivohealth.com",
+      "requirements": [
+        "Full-stack web development",
+        "Healthcare tech interest",
+        "Fast-paced startup culture fit"
+      ],
+      "location": "Seattle, WA",
+      "source_url": "https://www.ycombinator.com/companies/kivo-health/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W23",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Kivo Health",
+      "domain": "kivohealth.com",
+      "role": "Senior Engineer",
+      "salary_band": "Not listed",
+      "company_size": "10-50",
+      "what_they_do": "AI-powered virtual pulmonary rehabilitation for chronic lung disease (COPD).",
+      "apply_url": "https://kivo-inc.breezy.hr/",
+      "company_url": "https://kivohealth.com",
+      "requirements": [
+        "Senior engineering experience",
+        "Healthcare tech a plus",
+        "Startup culture fit"
+      ],
+      "location": "Seattle, WA",
+      "source_url": "https://www.ycombinator.com/companies/kivo-health/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W23",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Moonset Health",
+      "domain": "moonsethealth.com",
+      "role": "Product Engineer",
+      "salary_band": "Not listed",
+      "company_size": "2-10",
+      "what_they_do": "AI clinical co-pilot for post-acute senior care. Automates documentation and compliance for hospice, home health, and skilled nursing. Formerly Summed AI.",
+      "apply_url": "https://builtinseattle.com/job/product-engineer/9299500",
+      "company_url": "https://moonsethealth.com",
+      "requirements": [
+        "Engineering + product sense",
+        "Healthcare domain interest",
+        "AI/automation experience"
+      ],
+      "location": "Seattle, WA",
+      "source_url": "https://www.ycombinator.com/companies/moonset-health/jobs/",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "F24",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Moonset Health",
+      "domain": "moonsethealth.com",
+      "role": "Founding Customer Experience Lead",
+      "salary_band": "Not listed",
+      "company_size": "2-10",
+      "what_they_do": "AI clinical co-pilot for post-acute senior care.",
+      "apply_url": "https://builtin.com/job/founding-customer-experience-lead/9273395",
+      "company_url": "https://moonsethealth.com",
+      "requirements": [
+        "Customer success/support experience",
+        "Healthcare industry knowledge",
+        "Startup founding team mindset"
+      ],
+      "location": "Seattle, WA",
+      "source_url": "https://www.ycombinator.com/companies/moonset-health/jobs/",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "F24",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Hubble",
+      "domain": "hubble.ai",
+      "role": "Engineering (General)",
+      "salary_band": "Not listed",
+      "company_size": "2-5",
+      "what_they_do": "Medical record retrieval intelligence layer. Aggregates patient medical history from providers into structured data for AI agents. Founded by ex-Grow Therapy/Meta and ex-Amazon One Medical.",
+      "apply_url": "https://www.workatastartup.com/companies/hubble-ai",
+      "company_url": "https://hubble.ai",
+      "requirements": [
+        "Engineering experience",
+        "Healthcare tech interest",
+        "AI/data engineering skills"
+      ],
+      "location": "Seattle, WA",
+      "source_url": "https://www.ycombinator.com/companies/hubble-ai",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "S26",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Red Barn Robotics",
+      "domain": "redbarnrobotics.com",
+      "role": "Field Application Engineer",
+      "salary_band": "Not listed",
+      "company_size": "2-10",
+      "what_they_do": "Autonomous robots for precision intra-row weeding in agriculture. Robot nicknamed 'Field Hand'. USDA grant funded.",
+      "apply_url": "https://www.workatastartup.com/companies/red-barn-robotics",
+      "company_url": "https://redbarnrobotics.com",
+      "requirements": [
+        "Robotics/controls engineering",
+        "Agricultural domain interest",
+        "Field deployment experience a plus"
+      ],
+      "location": "Seattle, WA",
+      "source_url": "https://www.ycombinator.com/companies/red-barn-robotics",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W25",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "ClaimGlide",
+      "domain": "claimglide.com",
+      "role": "Early Team (not yet posted)",
+      "salary_band": "Not listed",
+      "company_size": "1-2",
+      "what_they_do": "AI-automated prior-authorization for private medical practices. End-to-end submission, tracking, and appeal generation.",
+      "apply_url": "https://claimglide.com",
+      "company_url": "https://claimglide.com",
+      "requirements": [
+        "Healthcare automation interest",
+        "AI/ML experience",
+        "Early-stage founding team mindset"
+      ],
+      "location": "Seattle, WA",
+      "source_url": "https://www.ycombinator.com/companies/claimglide",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W26",
+      "source_site": "YC Work at a Startup",
+      "note": "No public job postings yet - pre-hiring stage"
+    },
+    {
+      "company": "CopyCat",
+      "domain": "runcopycat.com",
+      "role": "Early Team (not yet posted)",
+      "salary_band": "Not listed",
+      "company_size": "2-4",
+      "what_they_do": "AI agents for commercial insurance CSR and sales workflows. Browser-based RPA replacing legacy automation tools.",
+      "apply_url": "https://runcopycat.com",
+      "company_url": "https://runcopycat.com",
+      "requirements": [
+        "AI/agent development experience",
+        "Insurance domain knowledge a plus",
+        "Browser automation"
+      ],
+      "location": "Seattle, WA",
+      "source_url": "https://www.ycombinator.com/companies/copycat",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W25",
+      "source_site": "YC Work at a Startup",
+      "note": "No public job postings yet - pre-hiring stage"
+    },
+    {
+      "company": "HERA",
+      "domain": "manufacturingintelligence (YC slug)",
+      "role": "Engineering (not yet posted)",
+      "salary_band": "Not listed",
+      "company_size": "2-5",
+      "what_they_do": "Automates design reviews for heavy manufacturing. Reviews engineering drawings against ASME/ISO standards for aerospace, medical devices, pressure vessels.",
+      "apply_url": "https://www.workatastartup.com/companies/manufacturingintelligence",
+      "company_url": "https://www.ycombinator.com/companies/manufacturingintelligence",
+      "requirements": [
+        "Manufacturing engineering knowledge",
+        "Computer vision/CAD parsing",
+        "GD&T understanding"
+      ],
+      "location": "Remote (US)",
+      "source_url": "https://www.ycombinator.com/companies/manufacturingintelligence",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "S26",
+      "source_site": "YC Work at a Startup",
+      "note": "Listed as active but no specific job postings found"
+    },
+    {
+      "company": "Whatnot",
+      "domain": "whatnot.com",
+      "role": "Fullstack Engineer, Seller Merchandising",
+      "salary_band": "$190K-$215K",
+      "company_size": "500+",
+      "what_they_do": "Live shopping marketplace. $20B valuation. Seattle hub for product and engineering. Focus on ML, marketplace integrity, trust & safety.",
+      "apply_url": "https://www.ycombinator.com/companies/whatnot/jobs/62xsZbo-fullstack-engineer-seller-merchandising",
+      "company_url": "https://whatnot.com",
+      "requirements": [
+        "6+ years engineering experience",
+        "JavaScript/React proficiency",
+        "Product instincts",
+        "Ship-fast mentality"
+      ],
+      "location": "Seattle, WA / Remote (US)",
+      "source_url": "https://www.ycombinator.com/companies/whatnot/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W20",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Whatnot",
+      "domain": "whatnot.com",
+      "role": "Engineering Manager, Seller Scaling",
+      "salary_band": "$230K-$260K",
+      "company_size": "500+",
+      "what_they_do": "Live shopping marketplace. $20B valuation.",
+      "apply_url": "https://www.ycombinator.com/companies/whatnot/jobs/wi8QJXI-engineering-manager-seller-scaling",
+      "company_url": "https://whatnot.com",
+      "requirements": [
+        "6+ years engineering + management",
+        "Team leadership experience",
+        "Marketplace/platform systems"
+      ],
+      "location": "Seattle, WA / Remote (US)",
+      "source_url": "https://www.ycombinator.com/companies/whatnot/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W20",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Whatnot",
+      "domain": "whatnot.com",
+      "role": "Backend Engineer, Logistics",
+      "salary_band": "$190K-$245K",
+      "company_size": "500+",
+      "what_they_do": "Live shopping marketplace. $20B valuation.",
+      "apply_url": "https://www.ycombinator.com/companies/whatnot/jobs/eSYBHk3-backend-engineer-logistics",
+      "company_url": "https://whatnot.com",
+      "requirements": [
+        "6+ years backend engineering",
+        "Logistics/supply chain systems",
+        "Distributed systems"
+      ],
+      "location": "Seattle, WA / Remote (US)",
+      "source_url": "https://www.ycombinator.com/companies/whatnot/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W20",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Whatnot",
+      "domain": "whatnot.com",
+      "role": "Frontend Engineer, Customer Experience",
+      "salary_band": "$185K-$245K",
+      "company_size": "500+",
+      "what_they_do": "Live shopping marketplace. $20B valuation.",
+      "apply_url": "https://www.ycombinator.com/companies/whatnot/jobs/ahUpZwM-frontend-engineer-customer-experience",
+      "company_url": "https://whatnot.com",
+      "requirements": [
+        "6+ years frontend engineering",
+        "JavaScript/React deep proficiency",
+        "Product instincts"
+      ],
+      "location": "Seattle, WA / Remote (US)",
+      "source_url": "https://www.ycombinator.com/companies/whatnot/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W20",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Whatnot",
+      "domain": "whatnot.com",
+      "role": "Software Engineer, Developer Productivity",
+      "salary_band": "$190K-$245K",
+      "company_size": "500+",
+      "what_they_do": "Live shopping marketplace. $20B valuation.",
+      "apply_url": "https://www.ycombinator.com/companies/whatnot/jobs/SeFlBBK-software-engineer-developer-productivity",
+      "company_url": "https://whatnot.com",
+      "requirements": [
+        "DevEx/Platform engineering",
+        "CI/CD and build tooling",
+        "Developer experience focus"
+      ],
+      "location": "Seattle, WA / Remote (US)",
+      "source_url": "https://www.ycombinator.com/companies/whatnot/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W20",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Whatnot",
+      "domain": "whatnot.com",
+      "role": "Software Engineer, Video",
+      "salary_band": "$190K-$260K",
+      "company_size": "500+",
+      "what_they_do": "Live shopping marketplace. $20B valuation.",
+      "apply_url": "https://www.builtinseattle.com/job/software-engineer-video/9452947",
+      "company_url": "https://whatnot.com",
+      "requirements": [
+        "Video engineering (WebRTC)",
+        "AWS/DevOps",
+        "Streaming infrastructure"
+      ],
+      "location": "Seattle, WA / Remote",
+      "source_url": "https://www.builtinseattle.com/job/software-engineer-video/9452947",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W20",
+      "source_site": "Built In Seattle"
+    },
+    {
+      "company": "Whatnot",
+      "domain": "whatnot.com",
+      "role": "Software Engineer, 2026 New Grad",
+      "salary_band": "Not listed (est. $120K-$160K)",
+      "company_size": "500+",
+      "what_they_do": "Live shopping marketplace. $20B valuation.",
+      "apply_url": "https://builtinseattle.com/job/2026-software-engineer-new-grad/6891728",
+      "company_url": "https://whatnot.com",
+      "requirements": [
+        "CS degree or equivalent",
+        "Strong fundamentals",
+        "New grad 2026"
+      ],
+      "location": "Seattle, WA",
+      "source_url": "https://builtinseattle.com/job/2026-software-engineer-new-grad/6891728",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W20",
+      "source_site": "Built In Seattle"
+    },
+    {
+      "company": "Mason",
+      "domain": "bymason.com",
+      "role": "Technical Product Manager, Software",
+      "salary_band": "Not listed",
+      "company_size": "50-200",
+      "what_they_do": "Smart device infrastructure platform (IoT). Enables companies to build, deploy, and manage purpose-built smart devices.",
+      "apply_url": "https://www.ycombinator.com/companies/mason/jobs/qQ3AgTS-technical-product-manager-software",
+      "company_url": "https://bymason.com",
+      "requirements": [
+        "TPM experience",
+        "IoT/embedded systems knowledge",
+        "Product management skills"
+      ],
+      "location": "Seattle, WA / Remote (US)",
+      "source_url": "https://www.ycombinator.com/companies/mason/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W16",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Mason",
+      "domain": "bymason.com",
+      "role": "Full Stack Software Engineer",
+      "salary_band": "Not listed",
+      "company_size": "50-200",
+      "what_they_do": "Smart device infrastructure platform (IoT).",
+      "apply_url": "https://www.ycombinator.com/companies/mason/jobs/eO4bkD3xo-full-stack-software-engineer",
+      "company_url": "https://bymason.com",
+      "requirements": [
+        "6+ years engineering experience",
+        "Full-stack web development",
+        "IoT experience a plus"
+      ],
+      "location": "Seattle, WA",
+      "source_url": "https://www.ycombinator.com/companies/mason/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W16",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Mason",
+      "domain": "bymason.com",
+      "role": "Software Engineer - Backend",
+      "salary_band": "$80K-$140K + 0.05%-0.15% equity",
+      "company_size": "50-200",
+      "what_they_do": "Smart device infrastructure platform (IoT).",
+      "apply_url": "https://www.ycombinator.com/companies/mason/jobs/cQEF4lG86-software-engineer-backend",
+      "company_url": "https://bymason.com",
+      "requirements": [
+        "3+ years backend engineering",
+        "API design",
+        "Cloud infrastructure"
+      ],
+      "location": "Seattle, WA",
+      "source_url": "https://www.ycombinator.com/companies/mason/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W16",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Mason",
+      "domain": "bymason.com",
+      "role": "Technical Program Manager",
+      "salary_band": "Not listed",
+      "company_size": "50-200",
+      "what_they_do": "Smart device infrastructure platform (IoT).",
+      "apply_url": "https://www.ycombinator.com/companies/mason/jobs/gSh1SDw-technical-program-manager",
+      "company_url": "https://bymason.com",
+      "requirements": [
+        "TPM experience",
+        "Program management",
+        "Technical background"
+      ],
+      "location": "Seattle, WA / Remote (US)",
+      "source_url": "https://www.ycombinator.com/companies/mason/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W16",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "Craniometrix",
+      "domain": "craniometrix.com",
+      "role": "Partnerships Manager | West (Mountain + Pacific NW)",
+      "salary_band": "$140K-$200K",
+      "company_size": "10-50",
+      "what_they_do": "Care infrastructure for dementia patients using Medicare's GUIDE model. Non-clinical coaching and support. $8M ARR in first year, $15M Series A.",
+      "apply_url": "https://www.ycombinator.com/companies/craniometrix/jobs/JBGItXQ-partnerships-manager-west-mountain-pacific-nw",
+      "company_url": "https://craniometrix.com",
+      "requirements": [
+        "1+ years sales/partnerships",
+        "Healthcare sales experience",
+        "Travel within region (70% virtual, 30% in-person)"
+      ],
+      "location": "Seattle, WA / Remote (regional)",
+      "source_url": "https://www.ycombinator.com/companies/craniometrix/jobs",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": "W22",
+      "source_site": "YC Work at a Startup"
+    },
+    {
+      "company": "SavvyCal",
+      "domain": "savvycal.com",
+      "role": "Senior Full-Stack Developer",
+      "salary_band": "Not listed",
+      "company_size": "~5",
+      "what_they_do": "Scheduling software focused on making scheduling more human. Indie/remote-first SaaS backed by TinySeed.",
+      "apply_url": "https://savvycal.com/jobs/full-stack-developer",
+      "company_url": "https://savvycal.com",
+      "requirements": [
+        "5+ years professional experience",
+        "Full-stack development",
+        "American time zones (UTC-3 to UTC-8)",
+        "Small team autonomy"
+      ],
+      "location": "Remote (US/Americas)",
+      "source_url": "https://savvycal.com/jobs/full-stack-developer",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": null,
+      "source_site": "TinySeed Portfolio",
+      "accelerator": "TinySeed"
+    },
+    {
+      "company": "Userlist",
+      "domain": "userlist.com",
+      "role": "Customer Support Manager",
+      "salary_band": "Not listed",
+      "company_size": "5-10",
+      "what_they_do": "Email automation platform for SaaS companies. Behavioral messaging, user onboarding, lifecycle campaigns.",
+      "apply_url": "https://userlist.com/careers/customer-support/",
+      "company_url": "https://userlist.com",
+      "requirements": [
+        "Technical support experience",
+        "SaaS customer communication",
+        "Troubleshooting skills"
+      ],
+      "location": "Remote",
+      "source_url": "https://userlist.com/careers",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": null,
+      "source_site": "TinySeed Portfolio",
+      "accelerator": "TinySeed"
+    },
+    {
+      "company": "ScrapingBee",
+      "domain": "scrapingbee.com",
+      "role": "Web Scraping Engineer (intermittent)",
+      "salary_band": "Not listed",
+      "company_size": "10-20",
+      "what_they_do": "Web scraping API and headless browser service. Proxy management, anti-bot bypass, structured data extraction. Remote-first.",
+      "apply_url": "https://weworkremotely.com/company/scrapingbee",
+      "company_url": "https://scrapingbee.com",
+      "requirements": [
+        "Python/Node.js",
+        "Puppeteer/Playwright",
+        "Browser automation",
+        "Anti-bot systems experience"
+      ],
+      "location": "Remote (Global)",
+      "source_url": "https://weworkremotely.com/company/scrapingbee",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": null,
+      "source_site": "TinySeed Portfolio",
+      "accelerator": "TinySeed",
+      "note": "Intermittent hiring - check WWR periodically"
+    },
+    {
+      "company": "OutboundSync",
+      "domain": "outboundsync.com",
+      "role": "No open roles",
+      "salary_band": "N/A",
+      "company_size": "2-5",
+      "what_they_do": "HubSpot outbound sales automation. Syncs HubSpot data for outbound workflows. TinySeed Spring 2024 batch.",
+      "apply_url": "https://outboundsync.com/jobs/",
+      "company_url": "https://outboundsync.com",
+      "requirements": [],
+      "location": "Remote (US/Americas)",
+      "source_url": "https://outboundsync.com/jobs/",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": null,
+      "source_site": "TinySeed Portfolio",
+      "accelerator": "TinySeed",
+      "note": "Explicitly no open positions as of Aug 2026"
+    },
+    {
+      "company": "Senior Place",
+      "domain": "seniorplace.com",
+      "role": "No open roles",
+      "salary_band": "N/A",
+      "company_size": "2-10",
+      "what_they_do": "CRM platform for senior placement and referral agencies. Seattle-based, TinySeed Spring 2021 batch. Founded by ex-Microsoft engineers.",
+      "apply_url": "https://seniorplace.com",
+      "company_url": "https://seniorplace.com",
+      "requirements": [],
+      "location": "Seattle, WA",
+      "source_url": "https://tinyseed.com/portfolio",
+      "scraped_at": "2026-08-22T04:20:00Z",
+      "yc_batch": null,
+      "source_site": "TinySeed Portfolio",
+      "accelerator": "TinySeed",
+      "note": "No public hiring found - Seattle-based but bootstrapped"
+    }
+  ],
+  "site_log": [
+    {
+      "site": "ycombinator.com/jobs/location/seattle",
+      "grade": "A",
+      "rationale": "Primary YC job board, lists all Seattle-based YC companies with jobs. JavaScript-rendered but search results extracted structured data."
+    },
+    {
+      "site": "ycombinator.com/companies/location/seattle/hiring",
+      "grade": "A",
+      "rationale": "Directory of 13 YC companies in Seattle actively hiring. Most comprehensive single source."
+    },
+    {
+      "site": "workatastartup.com/jobs?search=Seattle",
+      "grade": "F",
+      "rationale": "HTTP 406 - blocked scraping entirely. JS-rendered SPA, no data extractable via fetch."
+    },
+    {
+      "site": "workatastartup.com/companies/* (individual pages)",
+      "grade": "F",
+      "rationale": "All returned minimal JS-rendered shell with no job data. SPA architecture prevents extraction."
+    },
+    {
+      "site": "ycombinator.com/companies/[company]/jobs (individual)",
+      "grade": "A",
+      "rationale": "Individual company job pages rendered server-side with structured job listings, salaries, locations."
+    },
+    {
+      "site": "tinyseed.com/portfolio",
+      "grade": "B",
+      "rationale": "Full portfolio listed but no hiring status. Requires visiting each company individually. 180+ companies."
+    },
+    {
+      "site": "tinyseed.com/latest/job-board",
+      "grade": "B",
+      "rationale": "Job board article from Aug 2026 lists some positions but not comprehensive. Community-sourced."
+    },
+    {
+      "site": "savvycal.com/jobs/full-stack-developer",
+      "grade": "A",
+      "rationale": "Direct company career page with active job listing. Clean, readable content."
+    },
+    {
+      "site": "userlist.com/careers",
+      "grade": "A",
+      "rationale": "Direct career page with active Customer Support Manager role listed."
+    },
+    {
+      "site": "weworkremotely.com/company/scrapingbee",
+      "grade": "B",
+      "rationale": "Remote job board listing for ScrapingBee but intermittent - not always active."
+    },
+    {
+      "site": "outboundsync.com/jobs/",
+      "grade": "A",
+      "rationale": "Clear 'no open positions' message - good for filtering out non-hiring companies."
+    },
+    {
+      "site": "startup.jobs/job-boards/y-combinator-jobs?location=Seattle",
+      "grade": "C",
+      "rationale": "Aggregator with YC filter but limited detail. Redirects to WAS for applications."
+    },
+    {
+      "site": "builtinseattle.com/jobs",
+      "grade": "B",
+      "rationale": "Good aggregator for Seattle tech jobs but not YC-specific. Catches Whatnot, Mason roles."
+    },
+    {
+      "site": "jobs.ashbyhq.com/quindar",
+      "grade": "A",
+      "rationale": "Direct ATS for Quindar. Clean job listings with salary ranges."
+    },
+    {
+      "site": "kivo-inc.breezy.hr/",
+      "grade": "B",
+      "rationale": "ATS for Kivo Health. Some roles listed but page structure less clean."
+    },
+    {
+      "site": "web_search results (5 queries)",
+      "grade": "A",
+      "rationale": "Web search was the most productive data source, returning structured company/role/salary info from multiple sources."
+    }
+  ],
+  "notes": {
+    "key_findings": [
+      "YC WAS (workatastartup.com) is fully JS-rendered and blocks scraping (HTTP 406). The ycombinator.com domain is the better extraction target.",
+      "13 YC companies listed as Seattle+Hiring on the YC directory. Most are early-stage (2-20 employees).",
+      "Whatnot is by far the largest employer (500+, $20B valuation) with 6+ active Seattle roles.",
+      "TinySeed companies are mostly bootstrapped and hire infrequently. Only SavvyCal and Userlist had active listings.",
+      "TinySeed is remote-first and doesn't categorize by geography - Senior Place and OutboundSync are the only Seattle-area companies found.",
+      "Several YC companies (ClaimGlide, CopyCat, HERA) are too early-stage to have public job postings.",
+      "Salary data is most transparent on YC's own job board. Whatnot leads with $185K-$260K ranges."
+    ],
+    "gaps": [
+      "Could not access WAS directly (HTTP 406) - missing potentially more listings from the platform.",
+      "TinySeed job board (jobs.tinyseed.com) may have additional listings not captured.",
+      "Some companies (Kivo Health, Moonset Health) may have roles listed on their own sites not found via search.",
+      "GeekWire was blocked (WAF) in prior hunts - not reattempted here."
+    ]
+  }
+}

@@ -1,0 +1,539 @@
+[
+  {
+    "company": "Blue Origin",
+    "domain": "blueorigin.com",
+    "role": "Sr. Embedded Software Engineer — New Glenn Avionics",
+    "salary_band": "$160k – $260k+ (est.)",
+    "company_size": "5000+",
+    "what_they_do": "Space launch vehicle company (Jeff Bezos) building New Glenn rocket, Blue Moon lunar lander, and TeraWave satellite comms. HQ in Kent, WA.",
+    "apply_url": "https://blueorigin.wd5.myworkdayjobs.com/BlueOrigin/job/Greater-Seattle-Area/Sr-Embedded-Software-Engineer---New-Glenn-Avionics_R69781",
+    "company_url": "https://www.blueorigin.com/careers",
+    "requirements": [
+      "Embedded software for flight-critical real-time systems",
+      "C/C++ proficiency",
+      "RTOS / embedded Linux experience",
+      "US citizenship or permanent residency required",
+      "Aerospace or defense background preferred"
+    ],
+    "location": "Greater Seattle Area (Kent, WA)",
+    "source_url": "https://myworkdayjobs.com/BlueOrigin",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Blue Origin",
+    "domain": "blueorigin.com",
+    "role": "Senior Embedded Firmware Engineer — Space-Grade Systems",
+    "salary_band": "$160k – $250k (est.)",
+    "company_size": "5000+",
+    "what_they_do": "Space launch vehicle company building New Glenn, Blue Moon, and TeraWave satellite communications.",
+    "apply_url": "https://www.blueorigin.com/careers",
+    "company_url": "https://www.blueorigin.com/careers",
+    "requirements": [
+      "Firmware for space-grade hardware",
+      "C/C++ expertise",
+      "Secure boot, OTA firmware updates",
+      "Hardware debugging (oscilloscopes, logic analyzers)",
+      "US citizenship required"
+    ],
+    "location": "Greater Seattle Area (Kent, WA)",
+    "source_url": "https://jobs.hardwarefyi.com",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Blue Origin",
+    "domain": "blueorigin.com",
+    "role": "Avionics FPGA Firmware Engineer",
+    "salary_band": "$150k – $240k (est.)",
+    "company_size": "5000+",
+    "what_they_do": "Space launch vehicle company. FPGA firmware development for avionics systems on New Glenn launch vehicle.",
+    "apply_url": "https://www.blueorigin.com/careers",
+    "company_url": "https://www.blueorigin.com/careers",
+    "requirements": [
+      "FPGA firmware development (VHDL/Verilog)",
+      "Embedded systems experience",
+      "Familiarity with space-grade hardware",
+      "US citizenship required"
+    ],
+    "location": "Greater Seattle Area (Kent, WA)",
+    "source_url": "https://spacecrew.com/space-jobs/mhojpdoj-blue-origin-avionics-fpga-firmware-engineer",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Blue Origin",
+    "domain": "blueorigin.com",
+    "role": "Avionics Embedded Software Engineer (Early Career — 2026 Start)",
+    "salary_band": "$120k – $160k (est.)",
+    "company_size": "5000+",
+    "what_they_do": "Space launch vehicle company. Entry-level embedded software for avionics systems.",
+    "apply_url": "https://www.blueorigin.com/careers",
+    "company_url": "https://www.blueorigin.com/careers",
+    "requirements": [
+      "EE/CE/CS degree",
+      "C/C++ experience",
+      "Interest in real-time embedded systems",
+      "US citizenship required"
+    ],
+    "location": "Greater Seattle Area (Kent, WA)",
+    "source_url": "https://ziprecruiter.com/c/Blue-Origin",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "BRINC Drones",
+    "domain": "brincdrones.com",
+    "role": "Senior Software Engineer, Embedded",
+    "salary_band": "$140k – $200k (est.)",
+    "company_size": "51-200",
+    "what_they_do": "Public safety drone technology — building drones, remote controllers, and robotic nests for law enforcement and first responders. HQ in Seattle.",
+    "apply_url": "https://jobs.ashbyhq.com/brinc",
+    "company_url": "https://brincdrones.com/careers",
+    "requirements": [
+      "5+ years embedded software experience",
+      "C/C++ and Python proficiency",
+      "Flight-critical firmware development",
+      "On-device software for hardware products",
+      "Drone or robotics experience preferred"
+    ],
+    "location": "Seattle, WA (on-site)",
+    "source_url": "https://jobs.ashbyhq.com/brinc",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "BRINC Drones",
+    "domain": "brincdrones.com",
+    "role": "Forward Deployed Engineer (Embedded/Firmware)",
+    "salary_band": "$130k – $180k (est.)",
+    "company_size": "51-200",
+    "what_they_do": "Public safety drone technology. Field-based role troubleshooting hardware, firmware, and software in real-world operations.",
+    "apply_url": "https://jobs.ashbyhq.com/brinc/d4beac4b-fafd-49bc-91f2-8bae09634afb",
+    "company_url": "https://brincdrones.com/careers",
+    "requirements": [
+      "4+ years software/field/systems engineering",
+      "Troubleshoot firmware/software/hardware systems",
+      "Up to 90% travel",
+      "Deep technical hardware expertise"
+    ],
+    "location": "Seattle, WA (hybrid, heavy travel)",
+    "source_url": "https://jobs.ashbyhq.com/brinc",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Carbon Robotics",
+    "domain": "carbonrobotics.com",
+    "role": "Sr. Software Engineer, Embedded Systems/Controls",
+    "salary_band": "$150k – $210k (est.)",
+    "company_size": "51-200",
+    "what_they_do": "AI-powered agricultural robotics — building LaserWeeder™ for precision weed elimination. HQ in Seattle.",
+    "apply_url": "https://carbonrobotics.com/careers",
+    "company_url": "https://carbonrobotics.com/careers",
+    "requirements": [
+      "Embedded systems and controls experience",
+      "C/C++ for firmware development",
+      "Robotics or mechatronics background",
+      "Hardware-software integration",
+      "Comfort with field testing at farms"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://carbonrobotics.com/careers",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Carbon Robotics",
+    "domain": "carbonrobotics.com",
+    "role": "Sr. Software Engineer, Robot Systems",
+    "salary_band": "$150k – $210k (est.)",
+    "company_size": "51-200",
+    "what_they_do": "AI-powered agricultural robotics. Robot systems engineering for autonomous farming platforms.",
+    "apply_url": "https://carbonrobotics.com/careers",
+    "company_url": "https://carbonrobotics.com/careers",
+    "requirements": [
+      "Robot systems integration",
+      "Computer vision and AI/ML",
+      "C++/Python proficiency",
+      "High-precision automation experience",
+      "Mechatronics or robotics engineering"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://builtinseattle.com/company/carbon-robotics/jobs",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Anduril Industries",
+    "domain": "anduril.com",
+    "role": "Staff Security Software Engineer (Embedded & Firmware)",
+    "salary_band": "$180k – $280k (est.)",
+    "company_size": "1000+",
+    "what_they_do": "Defense technology company building autonomous systems (drones, sentry towers, Lattice AI platform) for military applications.",
+    "apply_url": "https://www.anduril.com/open-roles",
+    "company_url": "https://www.anduril.com/careers",
+    "requirements": [
+      "Security assessments for embedded systems",
+      "C/C++ and/or Rust proficiency",
+      "Cryptography and secure boot design",
+      "Anti-tamper architecture",
+      "US Secret or Top Secret clearance preferred"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://greenhouse.io/andurilindustries",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Anduril Industries",
+    "domain": "anduril.com",
+    "role": "Embedded Linux Engineer",
+    "salary_band": "$150k – $240k (est.)",
+    "company_size": "1000+",
+    "what_they_do": "Defense technology company. Embedded Linux for mission-critical defense systems.",
+    "apply_url": "https://www.anduril.com/open-roles",
+    "company_url": "https://www.anduril.com/careers",
+    "requirements": [
+      "Embedded Linux (Yocto, buildroot)",
+      "Security-critical systems experience",
+      "C/C++ proficiency",
+      "Board bring-up and driver development",
+      "US citizenship required"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://www.anduril.com/open-roles",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Axon",
+    "domain": "axon.com",
+    "role": "Senior Firmware Engineer — Platform Firmware",
+    "salary_band": "$141k – $237k",
+    "company_size": "1000+",
+    "what_they_do": "Public safety technology — body cameras, TASERs, drones, and AI-powered evidence management. Tech Hub in Seattle.",
+    "apply_url": "https://www.axon.com/careers",
+    "company_url": "https://www.axon.com/careers",
+    "requirements": [
+      "C, C++, Rust, Golang, Python",
+      "Embedded Linux (Yocto, OpenWRT)",
+      "RTOS experience",
+      "Wireless tech (5G, LTE, BLE, Wi-Fi)",
+      "AIoT infrastructure (cameras, robotics)"
+    ],
+    "location": "Seattle, WA (hybrid — Tue-Fri onsite)",
+    "source_url": "https://www.axon.com/careers",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Axon",
+    "domain": "axon.com",
+    "role": "Senior Software Embedded Engineer",
+    "salary_band": "$141k – $237k",
+    "company_size": "1000+",
+    "what_they_do": "Public safety technology. Embedded software for body cameras, drones, and real-time operations (Fusus integration).",
+    "apply_url": "https://www.axon.com/careers",
+    "company_url": "https://www.axon.com/careers",
+    "requirements": [
+      "Embedded software for AIoT devices",
+      "C/C++ and Python",
+      "Real-time operations and edge computing",
+      "Camera and sensor integration",
+      "Live-streaming technology"
+    ],
+    "location": "Seattle, WA (hybrid — Tue-Fri onsite)",
+    "source_url": "https://careercenter.shpe.org/job/senior-software-embedded-engineer/85482915/",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Starfish Space",
+    "domain": "starfishspace.com",
+    "role": "Embedded Software Engineer",
+    "salary_band": "$130k – $190k (est.)",
+    "company_size": "11-50",
+    "what_they_do": "Satellite servicing company building the Otter spacecraft for autonomous rendezvous, proximity operations, and docking (RPOD). HQ in Tukwila, WA.",
+    "apply_url": "https://www.starfishspace.com/careers/",
+    "company_url": "https://www.starfishspace.com/careers/",
+    "requirements": [
+      "C++ and Python proficiency",
+      "HIL/PIL test systems experience",
+      "Robotics and relative navigation",
+      "Space or defense background",
+      "US person (ITAR compliance)"
+    ],
+    "location": "Tukwila, WA (near Seattle)",
+    "source_url": "https://hardwarefyi.com/jobs/starfish-space-embedded-software-engineer",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "K2 Space",
+    "domain": "k2space.com",
+    "role": "Senior Embedded Firmware Engineer — Satellite Systems",
+    "salary_band": "$140k – $220k (est.)",
+    "company_size": "51-200",
+    "what_they_do": "Building high-power, large-scale satellite platforms leveraging heavy-lift launch vehicles for commercial and government missions. Significant Seattle presence.",
+    "apply_url": "https://jobs.greenhouse.io/k2spacecorporation/jobs/5373556008",
+    "company_url": "https://www.k2space.com/careers",
+    "requirements": [
+      "Rust for embedded systems (primary stack)",
+      "Microcontroller and RTOS experience",
+      "Real-time control systems",
+      "Space or aerospace background",
+      "Low-level firmware development"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://greenhouse.io/k2spacecorporation",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Overland AI",
+    "domain": "overland.ai",
+    "role": "Embedded/Robotics Engineer",
+    "salary_band": "$140k – $200k (est.)",
+    "company_size": "11-50",
+    "what_they_do": "Ground autonomy for U.S. military — software enabling robotic ground vehicles to navigate off-road terrain without GPS. Spun out of University of Washington.",
+    "apply_url": "https://www.overland.ai/careers",
+    "company_url": "https://www.overland.ai/careers",
+    "requirements": [
+      "Autonomy stacks for ground vehicles",
+      "Hardware-software integration",
+      "Robotics and perception",
+      "C++ proficiency",
+      "US person (ITAR compliance)"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://overland.ai/careers",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Hubble Network",
+    "domain": "hubble.network",
+    "role": "Embedded Software Engineer — Space Systems",
+    "salary_band": "$130k – $190k (est.)",
+    "company_size": "11-50",
+    "what_they_do": "Direct-to-satellite IoT network using BLE chips for global connectivity. Building LEO satellite constellation for IoT devices. Based in Seattle.",
+    "apply_url": "https://hubble.network/careers",
+    "company_url": "https://hubble.network",
+    "requirements": [
+      "Embedded Linux and FPGA/HDL",
+      "C/Python for satellite command and control",
+      "Space-grade embedded software",
+      "High-reliability systems",
+      "Zephyr RTOS or nRF Connect SDK a plus"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://hubble.network",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Hubble Network",
+    "domain": "hubble.network",
+    "role": "Embedded Software Engineer — Developer Experience / SDK",
+    "salary_band": "$125k – $180k (est.)",
+    "company_size": "11-50",
+    "what_they_do": "Direct-to-satellite IoT network. Building SDK and firmware for third-party developers to integrate Hubble connectivity into their hardware.",
+    "apply_url": "https://hubble.network/careers",
+    "company_url": "https://hubble.network",
+    "requirements": [
+      "Zephyr RTOS, nRF Connect SDK, ESP-IDF",
+      "BLE-capable silicon (Nordic, TI)",
+      "Firmware updates (FOTA) and diagnostics",
+      "Hardware-in-the-loop test infrastructure",
+      "Developer tooling experience"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://hubble.network",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Ixana",
+    "domain": "ixana.io",
+    "role": "Senior Embedded Software Engineer — Wearables/IoT",
+    "salary_band": "$125k – $200k (est.)",
+    "company_size": "11-50",
+    "what_they_do": "Deep-tech startup building a 'Body-internet' platform for charging-free wearables. Hardware + AI + AR. Seattle-based.",
+    "apply_url": "https://wellfound.com/jobs/4348216-senior-embedded-software-engineer-wearables-iot",
+    "company_url": "https://wellfound.com/company/ixana",
+    "requirements": [
+      "Bare-metal bring-up (Wi-R SoCs, Cortex-M/RISC-V)",
+      "Low-power firmware stacks (I²C, SPI, BLE, DMA)",
+      "Firmware SDK architecture",
+      "Wearable or IoT device experience",
+      "RTOS and power optimization"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://wellfound.com/jobs/4348216",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Starbucks",
+    "domain": "starbucks.com",
+    "role": "Senior IoT Engineer",
+    "salary_band": "$114,500 – $191,000",
+    "company_size": "5000+",
+    "what_they_do": "Global coffee retailer with Deep Brew AI-driven IoT ecosystem — smart coffee machines, predictive maintenance, connected store operations across thousands of retail locations.",
+    "apply_url": "https://www.starbucks.com/careers/",
+    "company_url": "https://www.starbucks.com/careers/",
+    "requirements": [
+      "C++ for edge/embedded device software",
+      "Python for microservices and APIs",
+      "Event-streaming architectures (Kafka)",
+      "Telemetry data pipelines",
+      "Cloud platforms and IoT at scale"
+    ],
+    "location": "Seattle, WA (in-office, 4 days/week)",
+    "source_url": "https://starbucks.com/careers",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Microsoft",
+    "domain": "microsoft.com",
+    "role": "Firmware Engineer — Silicon/Cloud Hardware",
+    "salary_band": "$145k – $230k (est.)",
+    "company_size": "10000+",
+    "what_they_do": "Silicon, Cloud Hardware, and Infrastructure Engineering teams building firmware for Azure datacenter hardware, Xbox, Surface, and HoloLens.",
+    "apply_url": "https://careers.microsoft.com",
+    "company_url": "https://careers.microsoft.com",
+    "requirements": [
+      "C/C++ firmware development",
+      "BIOS/UEFI development",
+      "Embedded Linux or RTOS",
+      "Hardware debugging and validation",
+      "Secure boot and firmware update flows"
+    ],
+    "location": "Redmond, WA / Seattle, WA",
+    "source_url": "https://careers.microsoft.com",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Google",
+    "domain": "google.com",
+    "role": "Senior Hardware Engineering Manager — AI Infrastructure",
+    "salary_band": "$180k – $300k+ (est.)",
+    "company_size": "10000+",
+    "what_they_do": "Custom silicon and AI infrastructure hardware for Google Cloud and AI platforms. Kirkland/Seattle site for hardware engineering.",
+    "apply_url": "https://careers.google.com/jobs/results/111703522910577350-senior-hardware-engineering-manager/",
+    "company_url": "https://careers.google.com",
+    "requirements": [
+      "Hardware engineering management",
+      "Custom silicon or AI accelerator experience",
+      "Systems architecture for datacenter hardware",
+      "Team leadership (10+ engineers)",
+      "Cloud infrastructure hardware background"
+    ],
+    "location": "Kirkland, WA / Seattle, WA",
+    "source_url": "https://careers.google.com",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Boeing",
+    "domain": "boeing.com",
+    "role": "Senior Airborne Electronic Hardware Engineer",
+    "salary_band": "$120k – $175k (est.)",
+    "company_size": "10000+",
+    "what_they_do": "Aerospace manufacturer building commercial and defense aircraft. Major employer in the Puget Sound region (Everett, Tukwila, Renton).",
+    "apply_url": "https://jobs.boeing.com",
+    "company_url": "https://jobs.boeing.com",
+    "requirements": [
+      "Airborne electronic hardware design",
+      "DO-254 / DO-160 compliance",
+      "PCB layout and schematic capture",
+      "FPGA/ASIC design experience",
+      "Aerospace hardware qualification"
+    ],
+    "location": "Everett / Tukwila, WA (near Seattle)",
+    "source_url": "https://builtin.com/job/senior-airborne-electronic-hardware-engineer/9956051",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "SpaceX",
+    "domain": "spacex.com",
+    "role": "Embedded Software Engineer — Starlink",
+    "salary_band": "$140k – $220k (est.)",
+    "company_size": "5000+",
+    "what_they_do": "Space launch and satellite company. Starlink satellite internet constellation manufacturing and operations in Redmond, WA.",
+    "apply_url": "https://www.spacex.com/careers/",
+    "company_url": "https://www.spacex.com/careers/",
+    "requirements": [
+      "Embedded software for satellite systems",
+      "C/C++ proficiency",
+      "Real-time systems",
+      "Linux kernel or bare-metal development",
+      "Hardware-software co-design"
+    ],
+    "location": "Redmond, WA (near Seattle)",
+    "source_url": "https://spacex.com/careers",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Zoox",
+    "domain": "zoox.com",
+    "role": "Firmware Engineer — Autonomous Vehicle Platform",
+    "salary_band": "$150k – $250k (est.)",
+    "company_size": "500-1000",
+    "what_they_do": "Autonomous vehicle company (Amazon subsidiary) building purpose-built robotaxis. Seattle office for firmware and platform engineering.",
+    "apply_url": "https://www.zoox.com/careers/",
+    "company_url": "https://www.zoox.com/careers/",
+    "requirements": [
+      "Firmware for autonomous vehicle systems",
+      "C/C++ proficiency",
+      "Automotive or safety-critical systems",
+      "Embedded Linux",
+      "Sensor integration (LiDAR, cameras)"
+    ],
+    "location": "Seattle, WA",
+    "source_url": "https://zoox.com/careers",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Reliable Robotics",
+    "domain": "reliablerobotics.com",
+    "role": "Embedded Software Engineer — Flight Systems",
+    "salary_band": "$140k – $200k (est.)",
+    "company_size": "51-200",
+    "what_they_do": "Autonomous aircraft technology for cargo aviation. Remote-piloted and autonomous flight systems. Seattle-area operations.",
+    "apply_url": "https://www.reliablerobotics.com/careers",
+    "company_url": "https://www.reliablerobotics.com/careers",
+    "requirements": [
+      "Embedded software for flight systems",
+      "DO-178C or aviation software standards",
+      "C/C++ for real-time systems",
+      "Avionics or aerospace background",
+      "Hardware-in-the-loop testing"
+    ],
+    "location": "Seattle, WA area",
+    "source_url": "https://reliablerobotics.com/careers",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Philips",
+    "domain": "philips.com",
+    "role": "Electrical/Hardware Design Engineer — Medical Devices",
+    "salary_band": "$110k – $160k (est.)",
+    "company_size": "10000+",
+    "what_they_do": "Health technology company building battery-powered consumer-facing medical devices. Bothell, WA facility for hardware design.",
+    "apply_url": "https://www.philips.com/careers",
+    "company_url": "https://www.philips.com/careers",
+    "requirements": [
+      "Electrical/hardware design for medical devices",
+      "Battery-powered device design",
+      "PCB layout and schematic",
+      "IEC 60601 / medical device compliance",
+      "Analog and digital circuit design"
+    ],
+    "location": "Bothell, WA (near Seattle)",
+    "source_url": "https://dice.com",
+    "scraped_at": "2026-08-21"
+  },
+  {
+    "company": "Blue Origin",
+    "domain": "blueorigin.com",
+    "role": "Senior Software Build & Release Engineer (Full Stack/Embedded) — TeraWave",
+    "salary_band": "$145k – $220k (est.)",
+    "company_size": "5000+",
+    "what_they_do": "TeraWave satellite communications project. Build and maintain source-to-production pipelines for satellite firmware, user terminals, and cloud microservices.",
+    "apply_url": "https://blueorigin.wd5.myworkdayjobs.com/en-US/BlueOrigin/job/Senior-Software-Build---Release-Engineer--Full-Stack-Embedded-_R69830",
+    "company_url": "https://www.blueorigin.com/careers",
+    "requirements": [
+      "CI/CD pipelines for firmware",
+      "Embedded and full-stack systems",
+      "Satellite or communications systems",
+      "Build automation and release management",
+      "US citizenship required"
+    ],
+    "location": "Greater Seattle Area (Kent, WA)",
+    "source_url": "https://hardwarefyi.com/jobs/blue-origin-senior-software-build-release-engineer-full-stack-embedded",
+    "scraped_at": "2026-08-21"
+  }
+]
