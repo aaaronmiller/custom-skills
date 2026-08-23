@@ -5,7 +5,12 @@ description: >
   investigation, decomposition, and synthesis of complex topics. Mimics the
   "deliberative refinement" process applied to information gathering, supporting
   variable levels of depth from quick probes to omniscient deep dives.
-  Triggers: "deep research", "investigate thoroughly", "comprehensive analysis".
+  Use when the source material is already in hand — a folder of documents, a corpus, a
+  set of files, a report to decompose. For research that goes out to the web, prior art,
+  or competitors, use deep-research instead.
+  Triggers: "examine these documents", "analyse this corpus", "synthesise these files",
+  "decompose this report", "what do these documents say", "read through these",
+  "cross-reference these documents", "deep dive on this material".
 tags:
 - research
 - ai/llm
