@@ -1,30 +1,19 @@
 ---
-name: strata-authoring
-description: ALWAYS invoke when the user wants to start a new project, define a feature,
-  turn a brain dump or transcript into build-ready specifications, or set up a spec-driven
-  or intent-driven workflow. Triggers on "new project", "new idea", "build this",
-  "spec this out", "turn this into a spec", "process these transcripts", "idea to
-  spec", "kickoff", "greenfield", "from scratch", "define requirements", "write a PRD",
-  "feature spec", "spec-driven", "intent-driven", "speckit", "openspec", "kiro",
-  "spec is collapsing", "vibe vs spec", or whenever transcripts or notes describing
-  something to build are provided. Separates intent, specification, and implementation
-  into distinct authored layers plus a continuity ledger, and gives every artifact a
-  permanent home in the project's Living Documents project folder so work survives
-  upstream pivots and long dormancy without rework. Authors specifications only; hand
-  off to strata-implementing to execute them. Do NOT use for modifying an
-  already-authored STRATA tree, code review, debugging, or ongoing implementation.
+name: strata
+description: |-
+  Spec-driven development with recovered intent woven through it. Same three gates as spec-workflow - author, implement, audit - but a STRATA project derives its context and intent layer first, and every downstream artifact is traceable back to it. Use when the source material is a brain dump, transcript, or an existing project whose original intent has been lost, and when traceability from intent to task matters more than speed.
+  Triggers: "strata", "intent-driven", "weave intent", "intent-driven workflow", "vibe vs spec", "spec is collapsing", "recover the intent", "what was this supposed to be", "traceable spec", "intent layer", "brain dump to spec".
 license: MIT
 metadata:
-  author: ice-ninja
-  version: 2.0.0
-  supersedes: [strata, create-new-project]
+  version: "2.0.0"
+  supersedes: "strata-authoring, strata-implementing, deprecated/strata"
 tags:
+- spec-driven
+- intent
 - planning
-- automation
 - coding
-grade: A
-source: custom
 ---
+
 
 # STRATA Authoring
 

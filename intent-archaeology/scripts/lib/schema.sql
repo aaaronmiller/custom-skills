@@ -1,173 +1,131 @@
--- Intent Archaeology schema. Derived tables only.
--- Human judgment lives in files under human/, never here.
+-- intent-archaeology SQLite schema (v1.1.0)
+-- Idempotent: safe to re-run.
 
-PRAGMA journal_mode=WAL;
-PRAGMA foreign_keys=ON;
-
-CREATE TABLE IF NOT EXISTS meta (
-    key         TEXT PRIMARY KEY,
-    value       TEXT NOT NULL
+CREATE TABLE IF NOT EXISTS schema_version (
+  version TEXT PRIMARY KEY,
+  applied_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE TABLE IF NOT EXISTS project (
-    id                  TEXT PRIMARY KEY,      -- stable slug
-    path                TEXT NOT NULL,
-    root                TEXT NOT NULL,         -- which scan root it came from
-    kind                TEXT NOT NULL,         -- project | container | monorepo | unclassified
-    parent_id           TEXT REFERENCES project(id),
-    git_remote          TEXT,
-    git_initial_sha     TEXT,
-    manifest            TEXT,                  -- package.json, Cargo.toml, ...
-    has_git             INTEGER NOT NULL DEFAULT 0,
-    source_files        INTEGER NOT NULL DEFAULT 0,
-    last_commit_ts      TEXT,
-    last_mtime          TEXT,
-    description         TEXT,
-    description_sources TEXT,                  -- JSON: each candidate + its mtime
-    description_stale   INTEGER,
-    thesis              TEXT,
-    lifecycle           TEXT,                  -- not-started|in-progress|complete|revision|archive-candidate
-    lifecycle_evidence  TEXT,                  -- JSON of the signals used
-    lifecycle_confirmed INTEGER NOT NULL DEFAULT 0,
-    doc_era             INTEGER,               -- 1..5, see references/spec-archaeology.md
-    pipeline_version    TEXT NOT NULL,
-    created_at          TEXT NOT NULL
+INSERT OR IGNORE INTO schema_version (version) VALUES ('1.1.0');
+
+CREATE TABLE IF NOT EXISTS projects (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE,
+  path TEXT NOT NULL,
+  description TEXT,
+  github_url TEXT,
+  era INTEGER,                       -- 0..5, see references/era_typology.md
+  era_overlap TEXT,                  -- JSON list of other eras' markers found
+  derived_lifecycle TEXT,            -- proposed state, see references/lifecycle_states.md
+  lifecycle_confidence REAL,         -- 0.0..1.0
+  lifecycle_evidence TEXT,           -- JSON list
+  lifecycle TEXT,                    -- confirmed state ('proposed' if not yet confirmed)
+  canonical_prd_path TEXT,
+  spec_lineage TEXT,                 -- JSON list of {path, role, attached_at}
+  last_audited TEXT,
+  metadata TEXT,                     -- JSON for extensible fields
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE INDEX IF NOT EXISTS idx_project_kind ON project(kind);
+CREATE INDEX IF NOT EXISTS idx_projects_lifecycle ON projects(lifecycle);
+CREATE INDEX IF NOT EXISTS idx_projects_era ON projects(era);
 
-CREATE TABLE IF NOT EXISTS session (
-    id                     TEXT PRIMARY KEY,   -- harness:session_id
-    harness                TEXT NOT NULL,
-    harness_session_id     TEXT,
-    source_path            TEXT NOT NULL,
-    workspace              TEXT,
-    first_ts               TEXT,
-    last_ts                TEXT,
-    message_count          INTEGER,
-    project_id             TEXT REFERENCES project(id),
-    attribution_method     TEXT,               -- rung name
-    attribution_rung       INTEGER,            -- 1..6
-    attribution_confidence REAL,
-    enriched               INTEGER NOT NULL DEFAULT 0,
-    crashed                INTEGER,            -- ended mid tool call
-    pipeline_version       TEXT NOT NULL
+CREATE TABLE IF NOT EXISTS tranches (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  scope_hash TEXT NOT NULL,
+  scope_json TEXT NOT NULL,          -- serialized ScopeSpec
+  started_at TEXT NOT NULL DEFAULT (datetime('now')),
+  completed_at TEXT,
+  status TEXT NOT NULL DEFAULT 'in-progress',  -- in-progress|completed|failed
+  notes TEXT,
+  UNIQUE(scope_hash, started_at)
 );
 
-CREATE INDEX IF NOT EXISTS idx_session_project ON session(project_id);
-CREATE INDEX IF NOT EXISTS idx_session_enriched ON session(enriched);
-
-CREATE TABLE IF NOT EXISTS event (
-    id                TEXT PRIMARY KEY,        -- evt_<hash>
-    session_id        TEXT NOT NULL REFERENCES session(id),
-    project_id        TEXT REFERENCES project(id),
-    parent_event_id   TEXT,
-    seq               INTEGER NOT NULL,
-    ts                TEXT,
-    role              TEXT,                    -- user|assistant|tool|system
-    is_human          INTEGER NOT NULL,        -- computed, never inferred at query time
-    is_sidechain      INTEGER,
-    is_meta           INTEGER,
-    text              TEXT,
-    text_hash         TEXT,
-    char_len          INTEGER,
-    cwd               TEXT,
-    git_branch        TEXT,
-    tool_name         TEXT,
-    paths_touched     TEXT,                    -- JSON array
-    slash_command     TEXT,
-    slash_args        TEXT,
-    redactions        TEXT,                    -- JSON array of pattern ids
-    pipeline_version  TEXT NOT NULL
+CREATE TABLE IF NOT EXISTS prompts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tranche_id INTEGER NOT NULL REFERENCES tranches(id),
+  project_id INTEGER REFERENCES projects(id),
+  source_path TEXT NOT NULL,         -- raw JSONL path
+  line_number INTEGER NOT NULL,
+  agent TEXT NOT NULL,               -- claude|codex|cursor|gemini|aider|chatgpt
+  workspace TEXT,
+  created_at TEXT NOT NULL,          -- session timestamp
+  prompt_text TEXT NOT NULL,
+  is_human BOOLEAN NOT NULL,
+  source TEXT NOT NULL DEFAULT 'cass+jsonl',  -- 'cass+jsonl' or 'cass-only'
+  parent_uuid TEXT,                  -- for rewind/edited turn detection
+  UNIQUE(source_path, line_number)
 );
 
-CREATE INDEX IF NOT EXISTS idx_event_session ON event(session_id);
-CREATE INDEX IF NOT EXISTS idx_event_project_human ON event(project_id, is_human);
-CREATE INDEX IF NOT EXISTS idx_event_hash ON event(text_hash);
-CREATE INDEX IF NOT EXISTS idx_event_slash ON event(slash_command);
+CREATE INDEX IF NOT EXISTS idx_prompts_tranche ON prompts(tranche_id);
+CREATE INDEX IF NOT EXISTS idx_prompts_project ON prompts(project_id);
+CREATE INDEX IF NOT EXISTS idx_prompts_agent ON prompts(agent);
+CREATE INDEX IF NOT EXISTS idx_prompts_created ON prompts(created_at);
 
-CREATE TABLE IF NOT EXISTS intent (
-    id                TEXT PRIMARY KEY,
-    project_id        TEXT NOT NULL REFERENCES project(id),
-    type              TEXT NOT NULL,
-    statement         TEXT NOT NULL,
-    verbatim          TEXT NOT NULL,           -- immutable. never updated.
-    scope             TEXT,
-    status            TEXT,                    -- see references/lifecycle.md
-    drift_type        TEXT,                    -- orthogonal to status
-    superseded_by     TEXT REFERENCES intent(id),
-    first_ts          TEXT,
-    last_ts           TEXT,
-    occurrences       INTEGER NOT NULL DEFAULT 1,
-    confidence        REAL,
-    spec_context_id   TEXT,
-    provisional       INTEGER NOT NULL DEFAULT 0,
-    tranche           INTEGER,
-    pipeline_version  TEXT NOT NULL,
-    created_at        TEXT NOT NULL
+CREATE TABLE IF NOT EXISTS prompt_audit_fields (
+  prompt_id INTEGER PRIMARY KEY REFERENCES prompts(id),
+  source_path TEXT NOT NULL,
+  line_number INTEGER NOT NULL,
+  is_sidechain BOOLEAN NOT NULL,
+  git_branch TEXT,
+  parent_uuid TEXT,
+  tool_use_result_json TEXT,
+  FOREIGN KEY (source_path, line_number) REFERENCES prompts(source_path, line_number)
 );
 
-CREATE INDEX IF NOT EXISTS idx_intent_project ON intent(project_id);
-CREATE INDEX IF NOT EXISTS idx_intent_type ON intent(type);
-CREATE INDEX IF NOT EXISTS idx_intent_status ON intent(status);
-
-CREATE TABLE IF NOT EXISTS intent_event (
-    intent_id  TEXT NOT NULL REFERENCES intent(id),
-    event_id   TEXT NOT NULL REFERENCES event(id),
-    PRIMARY KEY (intent_id, event_id)
+CREATE TABLE IF NOT EXISTS intents (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  prompt_id INTEGER NOT NULL REFERENCES prompts(id),
+  tranche_id INTEGER NOT NULL REFERENCES tranches(id),
+  project_id INTEGER REFERENCES projects(id),
+  type TEXT NOT NULL,                -- closed vocab, see references/intent_taxonomy.md
+  summary TEXT NOT NULL,
+  superseded_by INTEGER REFERENCES intents(id),
+  taxonomy_version TEXT NOT NULL DEFAULT '1.0',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE TABLE IF NOT EXISTS spec_doc (
-    id                TEXT PRIMARY KEY,
-    project_id        TEXT NOT NULL REFERENCES project(id),
-    path              TEXT NOT NULL,
-    kind              TEXT,                    -- prd|requirements|design|plan|tasks|constitution|livingdoc
-    era               INTEGER,
-    content_hash      TEXT NOT NULL,
-    mtime             TEXT,
-    git_sha           TEXT,
-    used_at_spec_time INTEGER NOT NULL DEFAULT 0,
-    evidence          TEXT,                    -- JSON: how we know
-    pipeline_version  TEXT NOT NULL
+CREATE INDEX IF NOT EXISTS idx_intents_prompt ON intents(prompt_id);
+CREATE INDEX IF NOT EXISTS idx_intents_type ON intents(type);
+CREATE INDEX IF NOT EXISTS idx_intents_project ON intents(project_id);
+CREATE INDEX IF NOT EXISTS idx_intents_superseded ON intents(superseded_by);
+
+CREATE TABLE IF NOT EXISTS status_vectors (
+  project_id INTEGER PRIMARY KEY REFERENCES projects(id),
+  tranche_id INTEGER NOT NULL REFERENCES tranches(id),
+  completed REAL NOT NULL,
+  in_progress REAL NOT NULL,
+  drifted REAL NOT NULL,
+  superseded REAL NOT NULL,
+  abandoned REAL NOT NULL,
+  not_begun REAL NOT NULL,
+  -- CHECK constraint: components sum to ~1.0 (allow float epsilon)
+  CHECK (ABS(completed + in_progress + drifted + superseded + abandoned + not_begun - 1.0) < 0.001),
+  computed_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(project_id, tranche_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_specdoc_project ON spec_doc(project_id);
-
-CREATE TABLE IF NOT EXISTS batch (
-    id                TEXT PRIMARY KEY,
-    project_id        TEXT REFERENCES project(id),
-    tranche           INTEGER,
-    item_count        INTEGER NOT NULL,
-    emitted_at        TEXT NOT NULL,
-    merged_at         TEXT,
-    ids_submitted     INTEGER,
-    ids_returned      INTEGER,
-    pipeline_version  TEXT NOT NULL
+CREATE TABLE IF NOT EXISTS observations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tranche_id INTEGER NOT NULL REFERENCES tranches(id),
+  question_id TEXT NOT NULL,         -- e.g. 'Q1', 'Q2' from retrospective.md
+  observation TEXT NOT NULL,
+  severity TEXT,                     -- info|warning|critical
+  proposed_edit TEXT,                -- path to diff file in proposed_edits/
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE TABLE IF NOT EXISTS batch_item (
-    batch_id  TEXT NOT NULL REFERENCES batch(id),
-    event_id  TEXT NOT NULL REFERENCES event(id),
-    verdict   TEXT,                            -- JSON, null until merged
-    PRIMARY KEY (batch_id, event_id)
+CREATE TABLE IF NOT EXISTS proposed_edits (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tranche_id INTEGER NOT NULL REFERENCES tranches(id),
+  diff_path TEXT NOT NULL,
+  held_out_score_before REAL,
+  held_out_score_after REAL,
+  accepted BOOLEAN NOT NULL DEFAULT 0,
+  accepted_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE TABLE IF NOT EXISTS observation (
-    id                INTEGER PRIMARY KEY AUTOINCREMENT,
-    ts                TEXT NOT NULL,
-    kind              TEXT NOT NULL,
-    detail            TEXT,
-    event_ids         TEXT,
-    tranche           INTEGER,
-    pipeline_version  TEXT NOT NULL
-);
-
-CREATE INDEX IF NOT EXISTS idx_obs_kind ON observation(kind);
-
-CREATE TABLE IF NOT EXISTS run_log (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    ts         TEXT NOT NULL,
-    phase      TEXT NOT NULL,
-    status     TEXT NOT NULL,
-    detail     TEXT
-);
+-- scope_hash is sha256 of the JSON-serialized ScopeSpec
+-- (see scripts/lib/scope.py)
