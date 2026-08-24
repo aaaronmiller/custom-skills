@@ -3,13 +3,9 @@ name: git-audit-sync
 description: Audit every git repo in a directory tree and make each one current with its cloud remote. The script performs only operations that cannot break a repo or lose work (fast-forward pull, push to a remote you own); everything needing judgment — commits, merges, rebases, conflicts, missing or foreign push destinations — is flagged for the agent to resolve. Use when asked to sync git repos, audit code folders, push all projects to the cloud, check for uncommitted work, or prepare a machine's git state.
 ---
 
-## Purpose: Back Up YOUR Work Off This Machine
-
-The point of this skill is to make **your own** GitHub account current with every committed change on this laptop, so the laptop itself stops being a single point of failure. If the machine is lost, stolen, crashes, or the drive dies, everything that was pushed is recoverable from the cloud. That is why the scope is exact:
-
-> Only repos whose `origin` is owned by you (verified against your `gh` / `git config` GitHub username) are eligible to be pushed. The script enforces this; the agent must also never push to a repo you do not own. A flag `NEEDS INPUT: origin not owned by you` is **not** a task — it means "leave this repo as-is." Do not fork, re-point, or push it unless the user explicitly says to.
-
 # Git Audit & Sync
+
+Goal: make every repo **current with the cloud** — your local commits pushed up,
 clean fast-forwards pulled down, end state nothing pending. The work is split:
 
 - **The script** does only what is provably safe: `git pull --ff-only` and
