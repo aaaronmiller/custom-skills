@@ -244,18 +244,35 @@ Dark themes: colored glows, off-white text `oklch(0.92 0.005 285)`, subtle surfa
 NEVER use pure purple (H: 270-280) as primary. Shift to indigo, teal, coral, or emerald.
 
 ### Verify against the Front-End Checklist
-483 rules across 11 categories, exposed as an MCP server — use it rather than reasoning from
-memory about accessibility, SEO, Core Web Vitals or semantic markup.
 
-    claude mcp add --transport http frontend-checklist https://mcp.frontendchecklist.io
+483 rules across accessibility, SEO, performance, HTML, CSS, JavaScript, images, security,
+testing, privacy and i18n. Use it rather than recalling best practice from memory, which is
+where stale advice comes from.
 
-Then, without being asked:
+**Call it on demand — do not register it globally.** It is a remote HTTP endpoint, so there
+is no local process and nothing to keep resident. Invoking it directly costs nothing when
+unused, whereas a global MCP registration puts 11 tool schemas in the context of every
+session, frontend or not.
 
-- `review_code` on any HTML/CSS/JS/React you just wrote — this is the default entry point
-- `audit_url` once a page is running, to check the rendered result rather than the source
-- `get_workflow <slug>` when you need the ordered checklist for a phase
+```bash
+curl -sX POST https://mcp.frontendchecklist.io \
+  -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call",
+       "params":{"name":"review_code","arguments":{"code":"<paste>","language":"css"}}}'
+```
 
-Pick the workflow from what is actually being built:
+Swap `review_code` for any of: `audit_url` (a running page), `get_workflow` (ordered
+checklist for a phase), `search_rules`, `get_rule`, `check_rule`, `fix_rule`, `explain_rule`,
+`list_categories`, `get_checklist_rules`, `get_quick_reference`.
+
+If you would rather have it as tools, register it **project-scoped** in the frontend repo
+only, so it is absent from every other session:
+
+```bash
+claude mcp add --scope project --transport http frontend-checklist https://mcp.frontendchecklist.io
+```
+
+Pick the workflow from the work in hand:
 
 | situation | workflow slug |
 | --- | --- |
@@ -265,15 +282,17 @@ Pick the workflow from what is actually being built:
 | any public-facing UI | `accessibility-essentials` |
 | markup review | `html-foundations` |
 | heavy imagery | `image-optimization` |
-| forms, auth, anything with user data | `security-audit`, `privacy-and-consent` |
+| forms, auth, user data | `security-audit`, `privacy-and-consent` |
 | full pre-release sweep | `comprehensive-audit` |
 
-`search_rules` finds a rule by concern; `check_rule` / `fix_rule` / `explain_rule` operate on
-one rule slug. Rules also render on the site, e.g.
-<https://frontendchecklist.io/rules/css/color-oklch>.
+Rules also render on the site, e.g. <https://frontendchecklist.io/rules/css/color-oklch>.
 
-The checklist is a verifier, not a design system. It will not tell you a layout is generic or
-a palette is dull — that is this skill's job. Run it after the design decisions are made.
+Colour tokens belong in `oklch()`, not hex or hsl: sRGB is not perceptually uniform, so an
+hsl ramp is visually uneven across hues while OKLCH's L channel is not. Chrome 111+,
+Firefox 113+, Safari 15.4+; emit an `hsl()` fallback first if older browsers are in scope.
+
+This is a verifier, not a design system — it will not tell you a layout is generic. Run it
+after the design decisions are made.
 
 ### Imagery and Texture
 Never use flat, solid-color backgrounds for hero sections.
