@@ -21,14 +21,74 @@ accent themes that are mathematically harmonious and visually distinctive.
 
 ## 1. Color Theory Foundations
 
-### The Color Wheel and HSL
+### The Color Wheel, and why OKLCH is the default
 
-All palette work should be done in HSL (Hue, Saturation, Lightness) or OKLCH (perceptually
-uniform). HSL is more intuitive for generation; OKLCH produces more visually consistent results.
+**Author every palette in `oklch()`.** HSL and hex are defined in sRGB, which is not
+perceptually uniform: the same numeric lightness step looks dramatically different depending
+on hue, so a ramp built by hand comes out inconsistent — yellow at 80% L reads far brighter
+than blue at 80% L. OKLCH (OK Lightness Chroma Hue, built on Björn Ottosson's Oklab model,
+CSS Color Level 4) fixes exactly that: a change in L produces the same *perceived* brightness
+change at any hue. That is what makes accessible ramps, dark mode, and consistent
+hover/active states tractable rather than fiddly.
 
-- **Hue**: Position on the color wheel (0-360 degrees). 0=red, 120=green, 240=blue.
-- **Saturation**: Color intensity (0%=gray, 100%=pure color).
-- **Lightness**: Brightness (0%=black, 50%=pure color, 100%=white).
+| Channel | Range | Meaning |
+| --- | --- | --- |
+| L — Lightness | 0–1 (0 black, 1 white) | perceived brightness, uniform across hues |
+| C — Chroma | 0–0.4+ (0 = grey) | saturation / vividness |
+| H — Hue | 0–360 | colour wheel angle, same as HSL's hue |
+
+```css
+color: oklch(0.7 0.15 240);   /* blue,   70% lightness, medium chroma */
+color: oklch(0.5 0.20 30);    /* orange, 50% lightness, vivid  */
+color: oklch(0.9 0.00 0);     /* near-white grey (zero chroma = achromatic) */
+```
+
+HSL remains useful for *reasoning* about hue relationships — the harmony models below are
+stated in degrees and the H channel is the same number in both spaces. Pick the hue in HSL
+terms if that is more intuitive, then author the tokens in OKLCH.
+
+**Ramps.** Hold H roughly constant, step L evenly, and let C peak in the middle of the
+range. The steps are perceptually even because L is:
+
+```css
+:root {
+  --color-primary-50:  oklch(0.97 0.03 255);
+  --color-primary-200: oklch(0.86 0.10 255);
+  --color-primary-500: oklch(0.55 0.20 255);  /* base */
+  --color-primary-700: oklch(0.38 0.17 255);
+  --color-primary-950: oklch(0.15 0.07 255);
+}
+```
+
+**Dark mode becomes one axis.** With semantic tokens pointing at ramp steps, a dark theme is
+mostly a re-point along L — not a second hand-tuned palette.
+
+**Contrast is still not free.** WCAG contrast uses sRGB relative luminance, which is not the
+same as OKLCH L. Predictable L makes accessible pairs *easier to reach*, but the ratio must
+still be checked (4.5:1 body text, 3:1 large text). Use <https://oklch.com/> to see APCA/WCAG
+ratios while adjusting.
+
+**Support and fallback.** Chrome 111+, Firefox 113+, Safari 15.4+. If older browsers are in
+scope, emit an `hsl()` declaration immediately before the `oklch()` one, or let
+`postcss-oklab-function` generate sRGB fallbacks at build time.
+
+**Wide gamut.** OKLCH can express colours outside sRGB. Keep the base token sRGB-safe and
+enhance progressively:
+
+```css
+:root { --color-brand: oklch(0.55 0.20 255); }
+@media (color-gamut: p3) {
+  :root { --color-brand: oklch(0.55 0.28 255); }   /* more vivid on P3 displays */
+}
+```
+
+Tailwind v4 ships an OKLCH default palette; declare custom colours in `@theme` directly in
+`oklch()`.
+
+Full rule, with worked examples: <https://frontendchecklist.io/rules/css/color-oklch>
+
+The HSL examples further down this document predate this section. They remain correct as
+*relationships*; convert the literal values to OKLCH when authoring.
 
 ### Harmony Models (How to Pick Colors That Work Together)
 
