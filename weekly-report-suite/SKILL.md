@@ -203,7 +203,22 @@ The dashboard should include sections for:
 - Project activity table.
 - Agent/session activity if CASS data is available.
 - Git commit/file-change activity.
-- Momentum score and week-over-week trend placeholders.
+- Momentum score and a computed **Trends vs Last Week** table — not placeholders.
+  Prior bundles are already on disk under
+  `/home/cheta/code/weekly-report-dashboard/YYYY-MM-DD/`, so the deltas are a
+  lookup, not an estimate. Three columns, Last / Now / Delta, one row per metric
+  that has a prior value:
+
+  | metric | last | now | delta |
+  | --- | --- | --- | --- |
+  | test ratio | 22% | 41% | ↑19pp |
+
+  Omit a row when there is no prior bundle rather than showing a zero delta —
+  "no comparison available" and "no change" are different claims.
+- A closing classification pass over the week's commits: **likely bug fixes /
+  likely tech debt / likely net-new functionality**. Hedged deliberately — the
+  split is inferred from diffs and messages, not declared by the author — and it
+  feeds both the personal report and the dashboard categories.
 - Evidence/caveat panel to show which metrics are verified vs estimated.
 - Self-improvement backlog.
 

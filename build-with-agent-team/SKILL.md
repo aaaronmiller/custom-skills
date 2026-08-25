@@ -108,6 +108,26 @@ With contracts defined, spawn all agents simultaneously. Each agent receives the
 
 Enter **Delegate Mode** (Shift+Tab) before spawning. You should not implement code yourself — your role is coordination.
 
+### Optional: enforced isolation for git-backed builds
+
+Contracts stop agents disagreeing about interfaces. They do not stop two agents
+editing the same file. When the build is in a git repository and the slices
+overlap on disk, give each agent its own branch instead of trusting them to stay
+in their lane:
+
+- one worktree branch per agent, named `team/{team}/{agent}`
+- each agent commits only to its own branch
+- merge every worker's branch back to main as an explicit final phase, in
+  contract-dependency order so the interface owner lands first
+
+The cost is a merge step you would not otherwise have. The benefit is that a
+collision becomes a merge conflict you can see, rather than one agent silently
+overwriting another's file and the loss surfacing later as a bug nobody can
+place.
+
+Skip this when the slices are genuinely disjoint — separate packages, separate
+services — where the merge overhead buys nothing.
+
 ### Spawn Prompt Structure
 
 ```

@@ -278,6 +278,30 @@ is supposed to name technologies.
 Then run `ld sync` and `ld-audit`. Zero orphans, zero ghosts, zero bad links, or
 the artifacts are not actually in the reader.
 
+**When validation reports a divergence, adjudicate it — do not just report it.**
+The validator says two artifacts disagree; it cannot say which is wrong, and a
+divergence left unresolved silently becomes the spec.
+
+*Preserve the blind baseline.* Whatever the first cold reading produced stays
+immutable. Do not rewrite it once you know the answer — the value of a blind
+result is that it was blind, and an edited baseline can no longer disconfirm
+anything.
+
+*Disclose the smallest missing constraint, then re-evaluate.* If the divergence
+looks like missing context rather than genuine disagreement, add one constraint —
+the least that could account for it — and run the comparison again. Adding
+everything at once tells you the artifacts agree without telling you why.
+
+*Stop on any of three conditions*, whichever comes first: the divergence
+resolves; no undisclosed material constraint remains; or two clarification
+rounds pass with no material change. The third exists because an unbounded
+clarification loop converges on the answer you were hoping for rather than the
+one the evidence supports.
+
+Record which condition ended it. A divergence closed by exhaustion is a
+different fact from one closed by resolution, and the ledger should not blur
+them.
+
 Present the artifacts with a delivery summary: confidence score and any
 sub-threshold dimensions, declared substrate level, key derived decisions and
 their rationale, remaining `[NEEDS CLARIFICATION]` markers, prior-art findings,

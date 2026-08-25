@@ -67,6 +67,22 @@ so an agent can find the right tool quickly: `github_create_issue`,
 **Context management.** Concise tool descriptions, and filter/pagination
 support so results stay focused.
 
+**Large API surfaces: search + execute instead of one tool per endpoint.** Past
+roughly 50 endpoints, exhaustive coverage stops helping — every tool definition
+sits in the context of every request, and the agent spends its attention reading
+a catalogue instead of using it. Expose two tools over an internal catalogue:
+
+- `search_actions(query)` — returns the handful of matching operations with
+  their schemas
+- `execute_action(action, params)` — runs one by name
+
+Then promote the three to five actions that dominate real usage to dedicated
+tools anyway. Those are reached without a search round-trip, and the long tail
+stays discoverable without being resident.
+
+The trade is one extra call on the rare path to remove hundreds of definitions
+from the common one. Below ~50 endpoints it is not worth the indirection.
+
 **Actionable errors.** An error message should tell the agent what to do next,
 not only what failed.
 
