@@ -1,8 +1,9 @@
 ---
 name: strata
 description: |-
-  Spec-driven development with recovered intent woven through it. Same three gates as spec-workflow - author, implement, audit - but a STRATA project derives its context and intent layer first, and every downstream artifact is traceable back to it. Use when the source material is a brain dump, transcript, or an existing project whose original intent has been lost, and when traceability from intent to task matters more than speed.
-  Triggers: "strata", "intent-driven", "weave intent", "intent-driven workflow", "vibe vs spec", "spec is collapsing", "recover the intent", "what was this supposed to be", "traceable spec", "intent layer", "brain dump to spec".
+  Spec-driven development for work whose original intent has been LOST and must be recovered before anything downstream can be trusted. Derives a context and intent layer first, then runs the same author/implement/audit gates with every artifact traceable back to it. Use when the project already exists and nobody can say what it was for, when two specs disagree about it, or when traceability from intent to task matters more than speed.
+  NOT for authoring a spec from material you already understand - that is spec-workflow. If the intent is known, use spec-workflow even when the input is a brain dump or transcript.
+  Triggers: "strata", "recover the intent", "what was this supposed to be", "intent-driven", "weave intent", "intent layer", "traceable spec", "vibe vs spec", "spec is collapsing", "why does this project exist", "reconstruct the requirements", "the specs disagree".
 license: MIT
 metadata:
   version: "2.0.0"
