@@ -607,8 +607,11 @@ def _find_git_repos_windows(root: Path) -> list[Path]:
             "target", "build", "dist", ".git"}
     try:
         for p in root.rglob(".git"):
-            if p.is_dir() and p.parent.name not in SKIP:
-                repos.append(p.parent)
+            if not p.is_dir() or p.parent.name in SKIP:
+                continue
+            if p.parent.name.startswith("."):
+                continue
+            repos.append(p.parent)
     except PermissionError:
         pass
     return sorted(set(repos))
@@ -628,6 +631,7 @@ def find_git_repos(root: Path, maxdepth: int = 3) -> list[Path]:
             "-not", "-path", "*/.venv/*",
             "-not", "-path", "*/__pycache__/*",
             "-not", "-path", "*/target/*",
+            "-not", "-path", "*/.*/*",
             "-maxdepth", str(maxdepth),
         ], capture_output=True, text=True, timeout=30)
         if r.returncode != 0:
