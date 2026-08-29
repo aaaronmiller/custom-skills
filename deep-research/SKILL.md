@@ -1,294 +1,230 @@
 ---
 name: deep-research
-description: 'AUTOMATIC ACTIVATION: Use this skill whenever the user requests "deep
-  research", "comprehensive analysis", "investigation", "due diligence", "technical
-  audit", "prior art search", "state of the art", "landscape analysis", "competitor
-  breakdown", "find everything about". Also triggers on: "research this thoroughly",
-  "I need to understand", "what''s the truth about", "verify this claim", "is this
-  legit".
-
+description: 'Multi-source investigation, synthesis, comprehensive topic exploration.
+  Use for research requiring 3+ sources, competitive intel, market analysis, due diligence,
+  or any structured investigation with >6 expected searches. Provides parameterized scope
+  control via R(W,D,S,V,F) — Width, Depth, Saturation, Verification, Fidelity — with four
+  preset profiles (Survey, Standard, Thorough, Exhaustive) plus working-state management
+  (scratchpad, pointer notes, memory rotation) for long sessions.
+  Do NOT use for simple factual lookups, single-source summaries, or creative writing.
   '
-tags:
-  - research
-  - ai/llm
-  - academic
-grade: A
-source: community
 license: MIT
 metadata:
   author: ice-ninja
-  version: '3.0'
+  version: 4.0.0
+tags:
+- research
+- academic
+- ai/llm
+grade: A
+source: custom-skills
 ---
 
+# Deep Research
 
-> ⚠️ **BEFORE USING THIS SKILL:** Review all files in `references/`. These contain the 100-Dork query operators, source evaluation rubrics, verification strategies, and report templates required for execution.
-# Deep Research Skill
+> Parameterized multi-source investigation with quantified scope, recursive discovery,
+> iterative refinement, and durable working state across long sessions.
 
-The skill operates on a strict mathematical model of **Decomposition (X)**, **Breadth (Y)**, and **Depth (Z)**.
+Unified from deep-research v1.2.0 (parameter model) + v3.0 (working-state mechanics).
 
-| Level | Name | X: Search Items | Y: Multiweb Searches | Z: Targeted Retrievals | Grounding (GitHub/Social) |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **1** | **Quick Probe** | 3 Items | 1 Search | 0 Retrievals | Optional |
-| **2** | **Standard** (Default) | 6 Items | 3 Searches | 2 Retrievals | Min 10 Sources |
-| **3** | **Deep Dive** | 12 Items | 6 Searches | 4 Retrievals | Min 20 Sources |
-| **4** | **Omniscient** | 20+ Items | 10+ Searches | 8+ Retrievals | Max Coverage |
+## Core Concept
 
----
+Deep Research transforms a user query into a structured, multi-phase investigation
+controlled by five tunable parameters. The agent decomposes the query, searches
+iteratively, validates findings across sources, and synthesizes a grounded report —
+while keeping its working state on disk so context exhaustion never loses findings.
+The user can refine scope at any point.
 
-## Workflow
+## The Five Parameters
 
-### Phase 1: Assessment & Decomposition
+Research scope is governed by the vector `R(W, D, S, V, F)`:
 
-**Goal**: Define *what* to investigate and *how*.
+| Param | Name | Controls | Range | Default |
+|-------|------|----------|-------|---------|
+| **W** | **Width** | Sub-questions in initial decomposition | 2-20 | 6 |
+| **D** | **Depth** | Recursive search layers from follow-up discoveries | 1-5 | 2 |
+| **S** | **Saturation** | Sources examined per branch before moving on | 2-15 | 4 |
+| **V** | **Verification** | Cross-reference validators per claim | 0-3 | 1 |
+| **F** | **Fidelity** | Synthesis refinement passes on final report | 1-3 | 1 |
 
-1.  **Context Assessment**: Immediately assess any provided source files (e.g., active documents, PDFs).
-2.  **Decomposition**: Break the user's request into **X** distinct, atomic search items based on the complexity level.
+**Expected search operations ≈ W × D × S.** Hard caps: if a user requests values
+beyond the stated ranges, warn that values will be capped and explain why.
 
-**Pattern: The Decomposition Template**
+### Temporal Focus Modifier
+
+Optional `@T` controls temporal filtering without adding a sixth parameter:
+`@T=0` (default, none) · `@T=6mo` · `@T=24mo` · `@T=-10y` (historical).
+Usage: `R(6,2,4,1,1) @T=12mo`.
+
+### Parameter Descriptions
+
+- **Width (W)**: how many angles the query splits into. "AI safety" at W=3 might
+  decompose into [technical alignment, governance, societal impact].
+- **Depth (D)**: when searching angle X reveals concept Y absent from the original
+  decomposition, D controls whether Y gets its own branch. D=1 is flat; D=3 means
+  three layers of "I found something new, let me chase it." A **novel concept** is a
+  named entity, term, methodology, or causal relationship appearing in findings but
+  not in the original query or existing sub-questions.
+- **Saturation (S)**: sources examined per branch per depth layer before moving on.
+- **Verification (V)**: cross-checking aggressiveness. V=0 trusts sources; V=1
+  spot-checks ~30% of claims against one independent source; V=3 triangulates all
+  substantive claims across three independent sources.
+- **Fidelity (F)**: refinement passes on the final synthesis. F=1 single draft;
+  F=2 adds coherence review; F=3 adds citation validation and gap analysis.
+
+## Preset Profiles
+
+| Profile | R(W,D,S,V,F) | Use Case | Est. Searches |
+|---------|--------------|----------|---------------|
+| **Survey** | R(3,1,2,0,1) | Quick orientation, scoping | ~6 |
+| **Standard** | R(6,2,4,1,1) | Solid research, most questions | ~48 |
+| **Thorough** | R(10,3,6,2,2) | Competitive analysis, lit reviews | ~180 |
+| **Exhaustive** | R(15,4,10,3,3) | Due diligence, critical decisions | ~600 |
+| **Custom** | User-specified | Full control | Computed |
+
+## Execution Protocol
+
+### Phase 0: Parameter Resolution
+
+Resolve via three paths (priority order):
+1. **Explicit**: user states values ("research X at W=8, D=3")
+2. **Profile**: user names a profile ("do a thorough research on X")
+3. **Inferred**: assess query complexity. Simple/bounded → Survey; multi-faceted →
+   Standard; contested topic or professional stakes → Thorough; high-stakes
+   legal/financial/safety decisions → Exhaustive.
+
+After resolving, declare parameters in both forms:
+
 ```
-Topic: [User's Request]
-├── Facet 1: [Core Definition / What is it?]
-├── Facet 2: [Technical Mechanics / How does it work?]
-├── Facet 3: [Comparison / How does it compare to alternatives?]
-├── Facet 4: [Failure Modes / What are the known problems?]
-├── Facet 5: [Adoption / Who is using it in production?]
-└── Facet 6: [Future / What is the roadmap?]
-```
-
-3.  **Plan Generation**: Create a `research_plan.md` in a temp directory outlining the X items and the intended search strategies (referencing specific operators).
-4.  **Plan Critique (Self-Correction)**: Pause and ask: *"Does this plan cover all angles? Are there blind spots?"*
-    *   *Action*: If gaps are found, add 1-2 "Wildcard" search items to the plan to ensure robust coverage.
-
----
-
-### Phase 2: Breadth (Multiweb Search)
-
-**Consult**: `references/inference-guide.md` for query construction.
-**Use Case**: Building "Impossible Strings" that pierce SEO spam.
-
-1.  **Tool Selection**: Consult `references/inference-guide.md`.
-    *   Construct specific queries using "Dorks" (`site:`, `filetype:`) and Technical Modifiers.
-    *   Use the "Kill Chains" (Crypto, SaaS, BioTech) for industry-specific pivots.
-    *   **Rule**: Do NOT use generic natural language queries. Use the operators.
-
-**Pattern: The Query Template**
-```
-[Core Term] "[Technical Modifier]" filetype:pdf -site:medium.com -site:linkedin.com
-```
-Example: `mamba architecture "latency benchmarks" filetype:pdf -site:medium.com`
-
-2.  **Execution**: Perform **Y** multi-query web searches (`search_web`).
-    *   *Rule*: Each "Multiweb Search" should target a cluster of the X items.
-3.  **Grounding (Mandatory)**:
-    *   **GitHub**: Specifically search GitHub for code, repositories, and prior art.
-        *   *Target*: Find at least **10 sources** (Level 2). If successful, expand to 20 or 30 (Level 3/4).
-    *   **Social**: Search Reddit, X (Twitter), and Hacker News for specific discussions, "prior art," and community sentiment.
-    *   *Adaptive Note*: If the topic is strictly non-technical (e.g., History), shift the "GitHub" mandate to "Primary/Academic Sources" (e.g., Google Scholar, JSTOR).
-4.  **Logging**: Append all findings to `scratch_findings.md`. 
-    *   **MANDATORY**: Score every source using `references/verification-strategies.md` (Trust Tiers, AI-Tell Blacklist).
-    *   Tag: `[Bias: Neutral/Commercial/Political]` and `[Credibility: High/Med/Low]`.
-    *   *Rule*: If a source matches the "SEO Visual Catalog" patterns, DISCARD IT.
-5.  **Null Result Gate**: If the Y searches yield *zero* high-quality results:
-    *   **STOP**. Do not proceed to Phase 3.
-    *   Refine the **X** search items or the Complexity Level and restart Phase 2.
-
----
-
-### Phase 3: Depth (Targeted Retrieval)
-
-**Consult**: `references/refinement-patterns.md` for SOPs.
-**Use Case**: Executing structured audits (GitHub Repo Audit, SaaS Due Diligence).
-
-1.  **Selection**: Identify the top **Z** most promising, high-density sources from Phase 2.
-2.  **Retrieval**: Use `read_url_content` (or `browser_snapshot` if highly visual/dynamic) to ingest the **full content** of these Z sources.
-3.  **Credibility Check**: Apply the `source-forensics.md` "Triangulation Mandate". Verify extraordinary claims with a second source.
-
-**Pattern: The Triangulation Check**
-```
-Claim: "[Source A says X is 100x faster]"
-├── Verify: Search for independent benchmark confirming this.
-├── If Found: Claim is VERIFIED.
-└── If Not Found: Mark as "Unverified claim by [Source A]".
+Research Parameters: R(W=6, D=2, S=4, V=1, F=1) [Standard]
+Translation: 6 angles, 2 layers deep, 4 sources per angle,
+basic fact-checking, single synthesis pass.
+Estimated scope: ~48 search operations across 6 angles
 ```
 
-4.  **Analysis**: Deeply analyze this content for specific details, implementation logic, or data points that were missing in the summaries.
-    *   *Visual Trigger*: If the content implies data-rich visuals (Charts, Diagrams, Schematics) unavailable in text, use `browser_snapshot` to capture them.
-5.  **Logging**: Detailed notes to `scratch_findings.md` (include credibility flags).
+### Phase 0.5: Working State Setup (from v3)
 
----
+Before searching, create a scratchpad directory:
 
-### Phase 4: Unification & Reporting
+```
+<tmp>/deep-research-<slug>/      # /tmp or project ./research-<slug>/
+  scratchpad.md     # pointer notes: concept → source:lines → 1-line note
+  findings.md       # compressed extracts, one block per branch
+  report.md         # the deliverable, written incrementally
+```
 
-**Consult**: `references/refinement-patterns.md` for synthesis logic.
-**Consult**: `references/report-template.md` for output templates.
+Rules (map-reduce for the context window):
+- A **pointer note** is `concept — file/URL:locator — one line`. Never paste raw
+  source text; store the pointer and read back on demand.
+- After each branch, compress its findings into `findings.md` (key claims +
+  sources). Never accumulate raw search results in context.
+- **Memory rotation**: if the scratchpad exceeds ~500 lines / 10KB, consolidate:
+  merge redundant notes, promote stable findings to `findings.md`, drop dead ends
+  into a one-line "rejected" list. This keeps a Thorough+ run bounded.
+- On interruption or compaction, the scratchpad is the resume point: read it,
+  find the first incomplete branch, continue.
 
-1.  **Synthesize**: Read `scratch_findings.md` and all assessed local sources.
-    *   **Rule**: Use the dialectical synthesis loop described above AND `references/refinement-patterns.md`.
-    *   Apply **Dialectical Synthesis** (Thesis + Antithesis -> Synthesis). Do not just list facts.
-    *   Apply the "No Orphan Facts" rule (Fact + Context + Constraint).
-2.  **Unify**: Merge conflicting data using the "Conflict of Laws" protocol (Recency > Legacy, Code > Docs).
-3.  **Output**: Generate the final artifact (e.g., `Deep_Research_Report.md`).
-    *   **Select Archetype** from `references/report-template.md`:
-        *   *Executive Brief*: BLUF + Decision Matrix.
-        *   *Engineering Deep Dive*: RFC style with code.
-        *   *Red Team Assessment*: Vulnerability focus.
-    *   *Schema Inheritance*: If the user provided a reference file (like `Project Keychain`) or a specific template, **ADOPT THAT SCHEMA EXACTLY**.
-    *   *Output Adapters (Optional)*: If requested, generate secondary artifacts:
-        *   `social_thread.md`: A 5-10 tweet thread summarizing the findings for X/Twitter.
-        *   `executive_brief.txt`: A 1-page high-level summary for leadership.
-    *   Otherwise, follow this structure:
-    *   **Executive Summary**: High-level findings.
-    *   **Deconstructed Analysis**: Detailed breakdown of the X items.
-    *   **Prior Art/Grounding**: Specific section on GitHub/Social findings.
-    *   **Source Assessment**: Review of the Z deep-dived sources.
-    *   **Conclusion/Roadmap**: Actionable next steps.
+### Phase 1: Query Decomposition (Width)
 
----
+Split the query into W sub-questions. Each must be independently searchable,
+non-overlapping where possible, ordered by expected information density (richest
+first). Present the decomposition for approval before proceeding. **Non-blocking
+fallback**: in headless/batch contexts, proceed and note auto-approval in the report.
 
-### Phase 5: Recursive Validation
+### Phase 2: Iterative Search (Depth × Saturation)
 
-1.  **Validation**: Present the summary to the user.
-2.  **Loop**: Ask: *"Is this depth acceptable, or should I refine?"*
-    *   **If Refine**: Increase complexity level (e.g., Level 2 -> Level 3), KEEP the temp files/scratchpad, and run the process again focusing on gaps.
-    *   **If Accept**: Finalize documents and offer to clean up temp files.
+```
+for sub_question in decomposition:              # W iterations
+    known_concepts = set()
+    for depth_layer in range(D):                # D layers
+        results = search(sub_question, layer)
+        for source in results[:S]:              # S sources/layer
+            extract = analyze(source)
+            append_pointer_note(extract)        # scratchpad, not context
+            new_concepts = detect_novel(extract, known_concepts)
+            if new_concepts and depth_layer < D-1:
+                queue_for_next_layer(new_concepts)
+        known_concepts.update(extracted_concepts)
+    compress_branch_to_findings()               # before next branch
+```
 
----
+**Search query construction**: sub-questions are not search queries. Transform each
+into 1-3 short specific queries (1-6 words), broad first, narrowing on results.
 
-## Anti-Patterns (The "Lazy AI" Bans)
+**Under-saturation**: if fewer than S sources are found, note the gap in the report
+rather than silently accepting incomplete coverage; try alternate formulations first.
 
-**Kill these on sight:**
+**Progress reporting**: after each sub-question, give a findings summary and
+remaining scope. Accommodate steering immediately.
 
-### ❌ The "First Page" Syndrome
-- **Behavior**: Only browsing the first 3 Google results.
-- ✅ **Fix**: You MUST dig. Use the `advanced-query-logic.md` to find pages that aren't SEO optimized. Page 2-3 often holds the real engineering data.
+### Phase 3: Verification (V passes)
 
-### ❌ The "Wikipedia Summarizer"
-- **Behavior**: Reading a Wikipedia intro or a generic definition and calling it "research".
-- ✅ **Fix**: Wikipedia is a *portal*, not a *destination*. Use the bottom references to find the *primary source* and read THAT.
+- V=1: spot-check ~30% of claims against one independent source each
+- V=2: verify ~60% of claims against two independent sources
+- V=3: triangulate all substantive claims across three independent sources
 
-### ❌ The "Both Sides" Cop-out
-- **Behavior**: "Some say X, others say Y, it depends." (The coward's answer).
-- ✅ **Fix**: **Take a stance based on weight of evidence.** "While some claim Y, the technical evidence heavily favors X because of [Specific Reason]."
+Flag contradictions, disputed claims, and uncorroborated assertions in the report.
 
-### ❌ Hallucinated Citations
-- **Behavior**: "According to a 2024 study..." (that doesn't exist).
-- ✅ **Fix**: If you didn't `read_url_content` it, it doesn't exist. Link to the specific URL in the scratchpad.
+### Phase 4: Synthesis (F passes)
 
-### ❌ "SEO Voice" Contamination
-- **Behavior**: Using phrases like "In understanding the landscape of..." or "Unlock the power of...".
-- ✅ **Fix**: Use the `source-forensics.md` rubric. If you sound like a marketing blog, you failed. Be dry, be dense, be accurate.
+**Pass 1 (always)**: compile into a structured report (template below), inline
+citations throughout.
+**Pass 2 (F≥2)**: review for coherence — logical gaps, redundancy, unsupported
+conclusions, missing counter-arguments. Revise.
+**Pass 3 (F≥3)**: validate citations, run gap analysis, append "Limitations and
+Open Questions".
 
-### ❌ Context Amnesia
-- **Behavior**: Forgetting the user's constraints (e.g., "Cost is a major factor") half-way through.
-- ✅ **Fix**: Re-read the `research_plan.md` constraints before *every* synthesis step.
+## Parameter Interaction Model
 
-### ❌ The "Data Dump"
-- **Behavior**: Pasting 50 bullet points of unconnected facts.
-- ✅ **Fix**: Use `synthesis-protocols.md`. Group facts into themes. Build a narrative.
+- **W × D** = conceptual surface area. High W + high D = exhaustive but expensive.
+- **S as density**: diminishing returns past S=8.
+- **V as insurance**: most valuable when S is low.
+- **F as polish**: only matters when W×D×S produced enough raw material.
 
----
+**Budget-aware scaling**: limited time → raise W over D (breadth). Single-topic
+deep-dive → raise D over W.
 
-## Context-Specific Guidance
+**Cost awareness**: each web_search call costs ~$0.01 on metered APIs. Approximate
+search-fee costs: Survey ~$0.06, Standard ~$0.48, Thorough ~$1.80, Exhaustive ~$6.00.
+Make users aware when selecting Thorough+ profiles.
 
-### Technical/Engineering Research
-Target: Primary sources (RFCs, Post-Mortems, GitHub Issues), Code over Docs.
+## Tool Compatibility
 
-Focus:
-- Search GitHub Issues for the *actual* bugs, not the marketing claims.
-- Find the `CHANGELOG.md` — it tells the truth.
-- Prioritize sources with code snippets over prose descriptions.
+Tool-agnostic. Backends: `web_search`, `web_fetch` (deep-read high-value sources —
+important at S≥4), MCP search servers (Tavily, Brave), internal connectors.
 
-### Market/Business Research
-Target: Regulatory filings (10-K), Investor decks, Job postings (hiring proxy).
+## Grounding Requirements
 
-Focus:
-- Use the "Pricing Leak" and "Hiring Proxy" chains from `advanced-query-logic.md`.
-- Cross-reference marketing claims with Glassdoor/Blind reviews.
-- Prioritize sources with numbers (revenue, headcount) over adjectives ("fast-growing").
+Every execution MUST include:
+1. **Repository search**: GitHub/GitLab for code, tools, implementations (min 3
+   searches for technical topics)
+2. **Community search**: Reddit, HN, Stack Overflow for practitioner views (min 2)
+3. **Primary sources**: papers, official docs, company blogs (min 3)
+4. **Provenance tracking**: every finding links to its source. No unattributed claims.
 
-### Academic/Scientific Research
-Target: Peer-reviewed papers (arXiv, PubMed), Replication studies, Meta-analyses.
+## Output Format
 
-Focus:
-- Check the `n=` (sample size). If N < 20, discard.
-- Find the "Conflict of Interest" disclosures.
-- Prefer Meta-Analyses over individual studies.
+- Research parameters and scope declaration
+- Executive summary
+- Findings by sub-question
+- Cross-cutting themes
+- Contradictions and disputed claims
+- Confidence assessment per finding (High/Med/Low, tied to evidence strength)
+- Source bibliography with quality annotations
+- Limitations and open questions
 
----
+## Anti-Patterns
 
-## Example Transformation
-
-### Bad Research (Lazy)
-
-> "Mamba is a new architecture that is faster than Transformers. It uses SSMs. Some users say it is good."
->
-> *Critique*: Vague, no numbers, no failure modes, "Some users" is weasel language.
-
-### Good Research (Deep)
-
-> **Thesis**: Mamba achieves **3-4x higher inference throughput** than Transformers due to linear scaling (Source A: Gu et al., 2024).
->
-> **Antithesis**: However, it fails on **"Needle in a Haystack" retrieval** for contexts >128k, where Attention remains superior (Source B: GitHub Issue #402, retrieved 2024-12-20).
->
-> **Synthesis**: It is production-ready for **streaming/chat workloads**, but widely considered unsafe for **RAG pipelines** requiring high-precision recall (Source C: Hacker News discussion, 150+ upvotes).
->
-> **Confidence**: High (3 independent sources, 2 primary, 1 community).
-
----
-
-## Quantitative Thresholds
-
-Numbers to hit:
-
-- **Source Diversity**: Minimum 3 independent sources per major claim (Triangulation).
-- **Recency**: For AI/Tech, discard any source >12 months old unless it's a foundational paper.
-- **SEO Filter**: Discard any source matching >2 patterns from the "SEO Visual Catalog".
-- **Credibility Score**: Target average score of 7+ across all cited sources.
-- **Confidence Marking**: Every claim must have a confidence tag (High/Med/Low).
-
----
-
-## When NOT to Use Deep Research
-
-Not everything needs a 20-source deep dive:
-
-- **Simple Fact Checks**: "What is the capital of France?" — Just answer.
-- **Code Syntax Questions**: "How do I use `map` in Python?" — Just show the code.
-- **User Preference Questions**: "Should I use React or Vue?" — Ask clarifying questions, don't research.
-- **Time-Sensitive Requests**: "Fix this bug NOW" — Act, don't research.
-
-For these, skip the formal phases. Just answer directly.
-
----
-
-## Humanization Integration
-
-When the research is complete, you may need to polish the prose.
-**Call `humanize-writing`** on the *Synthesis* sections to ensure the voice is "Professional but not Corporate".
-*   *Constraint*: Do NOT humanize the data tables or citations. Keep them raw.
-
----
-
-## Guidelines
-
-- **Temp Directories**: Use a dedicated subdirectory (e.g., `deep-research/temp/SESSION_ID`) to store all scratch files. **NEVER** delete this directory during the research loop, only after explicit user confirmation.
-- **Memory Rotation**: If `scratch_findings.md` exceeds 500 lines or 10KB, rename it to `scratch_findings_archive_N.md` and start a clean `scratch_findings.md` with a summary of the archive. This ensures infinite context scaling.
-- **Scratch Files**: Maintain a running log. Do not rely on context window alone.
-- **Tools**:
-    - Use `search_web` for Breadth.
-    - Use `read_url_content` for Depth.
-    - Use `find_by_name` / `grep_search` to check local project context for "Grounding" as well.
-
----
-
-## Reference Files
-
-- `references/inference-guide.md`: R(W,D,S,V,F) parameter inference, search operator guide, signal detection
-- `references/verification-strategies.md`: Source quality hierarchy, claim verification, confidence scoring
-- `references/refinement-patterns.md`: Iterative refinement loop — widen, deepen, saturate operations
-- `references/report-template.md`: Standardized research report output template
-- `references/templates/scratchpad_template.md`: Scratchpad format for tracking research sessions
-
----
-
-**System Version**: 3.0 (FORGE Refined)
+- **Never** present a single-pass search as deep research (Survey is scoping, say so)
+- **Never** skip decomposition, even for simple queries
+- **Never** report findings without source attribution
+- **Never** suppress contradictory evidence
+- **Never** claim higher scope than achieved, or run a lower profile than stated
+- **Both Sides Cop-out**: do not end a contested section with "both sides have
+  merit" — take a stance on the weight of evidence and say why the counter is weaker
+- **Wikipedia is a portal, not a destination**: use it to find primary sources only
+- **Recency cap**: prefer sources <12 months old unless foundational or `@T=-10y`
+- **Sample-size floor**: report `n=...`; if N<20 discard the sampled claim (does not
+  apply to qualitative case studies)
+- **Context hoarding**: never hold raw source text across branches — compress to the
+  scratchpad or you will exhaust the window mid-run
