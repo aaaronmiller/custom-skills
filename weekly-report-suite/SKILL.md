@@ -86,6 +86,51 @@ Characteristics:
 - If no mentor meeting happened, say so briefly.
 - End with `-A`.
 
+### Voice calibration (2026-08-30, mandatory before drafting)
+
+The 2026-08-29 report took seven drafts. Five operator corrections produced the
+calibration; do not repeat them. Full record:
+`~/LIVING_DOCUMENTS/projects/weekly-reports/version-analysis-2026-08-29.md`.
+
+Canonical voice exemplar (memorize before drafting — pattern-match against it,
+do not imitate abstractly):
+
+> You instructed me to move faster on the job search, so this week I began the
+> pivot. I'll be shifting most of my time towards applying and meeting people
+> next week. I sent 45 applications on Friday, the most in several months. The
+> rest of the tooling gets finished in the coming weeks alongside the job
+> search.
+
+Drafting rules that follow from it:
+
+1. **Tense honesty.** Past tense for finished acts, future for shifts that
+   start later. Never present-perfect for planned work.
+2. **Zero unsolicited justifications.** State the decision; if the reader
+   wants the reason, they ask. A sentence explaining why a choice was
+   reasonable gets cut unless the reader asked.
+3. **Self-measured superlatives.** Every quantitative claim carries its
+   comparison where a baseline exists ("the most in several months", "up from
+   last week").
+4. **Instructor-to-executor register.** The reader gave direction; report
+   execution. "You instructed me", not "you told me".
+5. **Next-week items are goals, not commitments.** Open the section with the
+   goals-not-commitments framing; a goal that produces no data still taught
+   something.
+6. **Every next-week goal carries method and analysis**, not a list line. The
+   reader is a teacher: paragraphs, not bullets.
+7. **Prose over bullets** for the whole document.
+
+### Pre-send checklist (executes the rules; run before showing the report)
+
+- [ ] Every claim is past (done) or future (planned) — no present-perfect for planned work
+- [ ] Zero unsolicited justification sentences
+- [ ] Every number carries its self-comparison where a baseline exists
+- [ ] Next-week section opens with the goals-not-commitments framing
+- [ ] Every next-week goal has method and analysis in prose
+- [ ] Word count inside the target; no em dashes in the body
+- [ ] Register check: read paragraph one aloud — does it sound like an
+      executor reporting to an instructor?
+
 ### 4. Generate the personal report
 
 Use `references/templates/personal-report.md` and `references/personal-report-template.md`.
