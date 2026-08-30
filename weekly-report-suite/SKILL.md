@@ -36,10 +36,15 @@ Unless the user says otherwise, produce these outputs:
 If the user provides exact paths, write to those paths. If not, use:
 
 ```text
-/home/cheta/code/weekly-report-YYYY-MM-DD.md
-/home/cheta/code/weekly-report-YYYY-MM-DD-personal.md
+/home/cheta/code/weekly-report-dashboard/data/reports/YYYY-MM-DD-dad-report.md
+/home/cheta/code/weekly-report-dashboard/data/reports/YYYY-MM-DD-personal-report.md
 /home/cheta/code/weekly-report-dashboard/YYYY-MM-DD/
 ```
+
+Both report versions land in `data/reports/` the day they are written (draft
+versions included, suffixed `-v2` etc.), and the dashboard metrics JSON goes
+to the dated bundle. The flat `data/` tree is the consolidated record; the
+dated bundles remain the canonical rendered artifacts.
 
 ## Core workflow
 
