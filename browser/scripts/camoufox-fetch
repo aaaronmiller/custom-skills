@@ -1,0 +1,60 @@
+#!/home/cheta/.venvs/camoufox/bin/python -I
+"""camoufox-fetch: render one URL in Camoufox (anti-detect Firefox) and print it.
+
+Usage:
+  camoufox-fetch <url> [--html] [--selector CSS] [--wait MS] [--headful]
+
+Prints visible text by default; --html prints the rendered DOM. With
+--selector, prints only matching elements (text, or outerHTML with --html).
+Exit codes: 0 ok, 2 bad args, 3 navigation failed, 4 bot block detected.
+"""
+import argparse
+import sys
+
+BLOCK_MARKERS = (
+    "blocked by network security",
+    "verify you are human",
+    "checking your browser",
+    "access denied",
+)
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(prog="camoufox-fetch")
+    ap.add_argument("url")
+    ap.add_argument("--html", action="store_true", help="print rendered HTML instead of text")
+    ap.add_argument("--selector", help="CSS selector to extract")
+    ap.add_argument("--wait", type=int, default=5000, help="ms to wait after DOM load (default 5000)")
+    ap.add_argument("--headful", action="store_true", help="show the window (WSLg)")
+    args = ap.parse_args()
+
+    from camoufox.sync_api import Camoufox
+
+    with Camoufox(headless=not args.headful, geoip=True) as browser:
+        page = browser.new_page()
+        try:
+            page.goto(args.url, wait_until="domcontentloaded", timeout=60000)
+        except Exception as exc:  # navigation errors are reported, not raised
+            print(f"camoufox-fetch: navigation failed: {exc}", file=sys.stderr)
+            return 3
+        page.wait_for_timeout(args.wait)
+
+        if args.selector:
+            loc = page.locator(args.selector)
+            items = loc.evaluate_all(
+                "(els, html) => els.map(e => html ? e.outerHTML : e.innerText)", args.html
+            )
+            out = "\n\n".join(items)
+        else:
+            out = page.content() if args.html else page.inner_text("body")
+
+        print(out)
+        body = page.inner_text("body").lower()
+        if any(m in body for m in BLOCK_MARKERS) and len(body) < 2000:
+            print("camoufox-fetch: bot wall detected; escalate to interceptor", file=sys.stderr)
+            return 4
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
