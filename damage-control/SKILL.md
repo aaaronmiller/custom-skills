@@ -1,6 +1,20 @@
 ---
 name: damage-control
 description: Install, configure, and manage the Claude Code Damage Control security hooks system. Use when user mentions damage control, security hooks, protected paths, blocked commands, install security, or modify protection settings.
+inputs:
+- name: project_path
+  description: Project directory to protect with security hooks
+  pointer_type: directory
+outputs:
+- name: hook_config
+  description: Installed security hook configuration files
+  pointer_type: output_file
+tags:
+- security
+- cli
+- infrastructure
+grade: A
+source: custom
 ---
 
 # Damage Control Skill

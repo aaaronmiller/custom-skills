@@ -57,6 +57,30 @@ Execution: [Probe]→R₁→[Probe]→R₂→[Probe]→R₃→[Probe]
 
 ## Execution
 
+> ⚠️ **EXECUTION CONSTRAINT: NO DELEGATION TO SUBAGENTS.**
+> The deliberative refinement process described in this skill MUST be executed by the
+> same model that received the user's request. It MUST NOT be delegated to subagents,
+> separate instances, or any other execution context. The instruction-holding model
+> performs every phase -- council selection, decomposition, multi-round deliberation,
+> synthesis -- itself, in its own context window, and outputs the complete result
+> directly to the terminal.
+>
+> Delegation defeats the purpose: the value comes from the model actually switching
+> perspectives and iterating, not from describing what other agents would do.
+> If the task is too large for one context window, report that limitation honestly
+> rather than farming the work out.
+
+## Core Constraint
+
+--- EXECUTION RULE ---
+
+The full deliberative process (all phases, all rounds, all council members)
+runs in a single execution context. No subagents. No task delegation. No
+"hand off to a planning agent." The model that activates this skill does the
+work and prints the result to the terminal.
+
+--- END EXECUTION RULE ---
+
 ### Phase 0: Intent Detection
 Read the request. Pick the right profile. Don't ask for raw numbers.
 

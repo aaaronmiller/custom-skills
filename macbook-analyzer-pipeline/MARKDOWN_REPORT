@@ -1,0 +1,78 @@
+---
+name: macbook-analyzer-pipeline
+description: Daily eBay search for Apple Silicon MacBook logic boards with MDM lock, fee-aware profit analysis, and markdown reporting
+category: e-commerce-analysis
+trigger_conditions: |
+  - User requests Apple Silicon MacBook logic board search with MDM lock only
+  - Specific model IDs: A3114, A3113, A2681, A2338, A2442, A2337
+  - Price filtering for A2337 (16GB/512GB+ or 8/512 under $90)
+  - Daily 6am PST execution requirement
+
+execution_notes: |
+  **CRITICAL: Cron Job Execution**
+  The `macbook_analyzer.py` script imports `hermes_tools` which is **NOT available** in cron job contexts (Python path doesn't include the Hermes agent venv). **Always use `run_standalone.py`** from the `~/code/ebay-tracker/` directory instead.
+
+  The standalone version shims out `web_search`/`web_extract` to return empty results — it's a placeholder. The **real execution** relies on the fallback chain below (DuckDuckGo, browser navigation, browser console), not the script's internal search function.
+
+  **Working approach discovered during execution:**
+  - Use DuckDuckGo with site: operator to find eBay listings (avoids eBay bot detection)
+  - Extract eBay URLs from DuckDuckGo results using browser_console: `Array.from(document.querySelectorAll('a[href*="ebay.com/itm/"]')).map(a => a.href)`
+  - Navigate to each eBay listing with browser_navigate
+  - Extract listing details using browser_console (document.title and document.body.innerText)
+  - Check for CAPTCHA by examining document.title for "Pardon Our Interruption"
+  - If CAPTCHA detected, wait 30+ seconds before proceeding
+
+  **Task/Results API Status:**
+  - `GET http://localhost:3000/api/tasks` → returns `[]` (no data, ClawCode Dashboard doesn't serve task data)
+  - `POST http://localhost:3000/api/results` → **404** (endpoint does not exist)
+  - These endpoints need to be implemented in the ClawCode Dashboard Next.js app before the cron pipeline can save/report results via API.
+
+  **Report File Location:**
+  Reports are written to `~/Documents/hermes/ebay-search-results-{YYYY-MM-DD}.md`. Historical reports exist dating back to 2026-03-18. The `generate_report()` function in the script reads from the SQLite DB (`~/Documents/hermes/macbook_data.db`), so results persist across runs even if today's web search returns nothing.
+
+search_fallback_chain: |
+  **Priority 1: DuckDuckGo with site: operator** (most reliable)
+  ```
+  Navigate to: https://duckduckgo.com/?q=site%3Aebay.com+A2337+OR+A2681+OR+A2338+OR+A2442+OR+A3114+OR+A3113+logic+board+MDM+for+parts
+  Extract results via browser_console:
+    Array.from(document.querySelectorAll('a[href*="ebay.com/itm/"]')).map(a => a.href)
+    Deduplicate and filter for valid eBay listing URLs
+  NOTE: Remove quotes around "for parts" - they prevent DuckDuckGo from finding results
+  Check for CAPTCHA pages by looking for "Pardon Our Interruption" in document.title
+  If CAPTCHA detected, wait 30+ seconds and try a different listing or search query
+  ```
+
+  **Priority 2: eBay direct via browser** (works for individual listings, CAPTCHA on search pages)
+  ```
+  Navigate directly to: https://www.ebay.com/itm/{listing_id}
+  Use browser_vision to extract: price, shipping, RAM, SSD, MDM status, seller info
+  NOTE: eBay triggers CAPTCHA after ~3 rapid visits — wait 30s between requests
+  ```
+
+  **Priority 3: web_search / web_extract** (unreliable — requires Firecrawl credits)
+  ```
+  If web_search returns "Payment Required", immediately switch to Priority 1
+  Do NOT retry web_search — credits do not auto-refresh
+  ```
+
+known_limitations: |
+  - **Firecrawl API exhaustion**: web_search/web_extract regularly hit "Payment Required"
+  - **eBay CAPTCHA**: Triggers after 3-5 rapid page views, especially on search result pages. Direct listing pages (/itm/) work better than search pages (/sch/)
+  - **BrowserBase disconnections**: CDP sessions can drop mid-execution — check connectivity before each navigate
+  - **No residential proxy**: Bot detection is more aggressive without paid proxy support
+  - Detailed specs may not be available in search results
+  - Price filtering may not be precise
+
+troubleshooting: |
+  - **CAPTCHA hit**: Wait 30+ seconds, try a different listing. If persistent, switch to DuckDuckGo search
+  - **Browser disconnect**: Re-call browser_navigate before continuing
+  - **web_search credits exhausted**: Always use DuckDuckGo fallback — it works without API credits
+  - **Alternative marketplaces**: OfferUp, FB Marketplace, Craigslist (low yield for logic boards specifically)
+  - **eBay RSS feeds**: `https://www.ebay.com/sch/i.html?_nkw=QUERY&_rss=1` — works without CAPTCHA but returns limited data
+
+success_metrics: |
+  - Table with at least 5 relevant listings (when search is working)
+  - All filtering criteria applied correctly
+  - Daily execution working
+  - New keywords documented after each run
+  - **Working search approach**: DuckDuckGo site:ebay.com search + browser tools for extraction
