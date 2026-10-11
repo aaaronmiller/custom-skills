@@ -1,0 +1,18 @@
+# Review moves for the lab loop. Pick one or two per round; all at once turns a fix into a rewrite.
+Render stills at frames 0, 24, 48, 72 and 96. Describe each in one sentence as a viewer would. Does that match the shot list? Fix what does not.
+Make a contact sheet of every 12th frame. Mark every frame where two things move at once, then fix the hierarchy.
+Onion-skin frames 24 to 47 at 25% opacity. Spacing should tighten near the keys. Adjust the easing until it does.
+Plot the hero's x position and scale per frame as a PNG chart. Show me where the motion is linear or stops dead, then fix it with our tokens.
+Review this like a senior motion designer: 10 notes ordered by impact, each with a frame number and the exact code change. Apply the top 5.
+It is too busy. Remove 30% of the motion and keep only the moves that guide the eye.
+The ending is abrupt. Add a 36-frame hold with a 2% push, then let it settle on a spring at damping ratio 0.8.
+
+# When a fix does not hold
+The fix at frame 84 did not hold. Render frames 83 and 85 as PNGs, put them side by side and list every difference you can see. Find the line of code that causes it, fix only that line, then render both frames again.
+
+# Feelings, translated before they are sent
+Make it pop: scale 1.0 to 1.08 to 1.0 over 6 frames, peak on the beat.
+Make it feel premium: ease-out-quint on entrances, springs at damping ratio 0.8, no overshoot on text.
+It drags: shorten each hold by 12 frames, one beat at 120 BPM and 24 fps, so every cut stays on the grid.
+It feels busy: one hero move at a time; everything else starts 150 ms later at 60% of its travel.
+It looks like AI: list the defaults it used by name, ban each one, and render again.

@@ -1,0 +1,97 @@
+<!doctype html>
+<!--
+  motion-lab demo score for demo.html: 4 s loop, 96 frames at 24 fps, 120 BPM (12 frames per beat).
+  Everything synthesized with the Web Audio API, no samples. Each hit peaks 1 frame after its
+  visual event. Render: node ../scripts/audio.mjs render demo-score.html out/score.wav
+  Picture events (demo.html): crouch 12 and 60, takeoff 18 and 66, landing 36 and 84.
+-->
+<html><head><meta charset="utf-8"><title>motion-lab demo score</title></head>
+<body>
+<script>
+const LOOP = 4, FPS = 24, BPM = 120;
+const beat = (n) => n * 60 / BPM;                      // seconds, computed per beat, never accumulated
+const at = (frame) => (frame + 1) / FPS;               // a hit peaks 1 frame after its picture
+
+// Score: events in frames of the picture. Levels are linear gains before the final mix.
+const EVENTS = [
+  { type: 'creak', frame: 12, gain: 0.10 },             // crouch
+  { type: 'creak', frame: 60, gain: 0.10 },
+  { type: 'swish', frame: 18, dur: 0.30, gain: 0.25 },  // takeoff, rising air
+  { type: 'swish', frame: 66, dur: 0.30, gain: 0.25 },
+  { type: 'thock', frame: 36, gain: 0.5 },             // landing
+  { type: 'thock', frame: 84, gain: 0.5 },
+];
+const BED = { kickBeats: [0, 2, 4, 6], hatBeats: [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5], kick: 0.7, hat: 0.18 };
+
+// A tonal hit as a buffer that starts on a cosine crest, so its first peak is its start time.
+function toneBuffer(ctx, { f0, f1, decay, harmonics = [1], len }) {
+  const n = Math.round(len * ctx.sampleRate), buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
+  let phase = 0;
+  for (let i = 0; i < n; i++) {
+    const t = i / ctx.sampleRate;
+    const f = f1 + (f0 - f1) * Math.exp(-t / 0.03);     // pitch drop
+    let v = 0;
+    harmonics.forEach((a, k) => { v += a * Math.cos((k + 1) * phase); });
+    d[i] = v * Math.exp(-t / decay);
+    phase += 2 * Math.PI * f / ctx.sampleRate;
+  }
+  return buf;
+}
+function noiseBuffer(ctx, len, seed = 7) {
+  const n = Math.round(len * ctx.sampleRate), buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
+  let a = seed >>> 0;
+  for (let i = 0; i < n; i++) {                           // seeded: the same hiss on every render
+    a = (a + 0x6D2B79F5) >>> 0; let x = Math.imul(a ^ (a >>> 15), 1 | a);
+    x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x; d[i] = (((x ^ (x >>> 14)) >>> 0) / 4294967296) * 2 - 1;
+  }
+  return buf;
+}
+function play(ctx, buf, when, gain, dest) {
+  const src = ctx.createBufferSource(), g = ctx.createGain();
+  src.buffer = buf; g.gain.value = gain; src.connect(g).connect(dest); src.start(when);
+}
+
+window.renderScore = async (rate) => {
+  // Two loops, keep the second: the end of the loop rings into its own start, so the seam is silent of clicks.
+  const ctx = new OfflineAudioContext(2, Math.round(2 * LOOP * rate), rate);
+  const bus = ctx.createGain(); bus.gain.value = 0.9; bus.connect(ctx.destination);
+  const kick = toneBuffer(ctx, { f0: 140, f1: 52, decay: 0.12, harmonics: [1, 0.15], len: 0.4 });
+  const thock = toneBuffer(ctx, { f0: 420, f1: 180, decay: 0.05, harmonics: [1, 0.3, 0.1], len: 0.25 });
+  const creak = toneBuffer(ctx, { f0: 300, f1: 260, decay: 0.08, harmonics: [1, 0.5, 0.3, 0.2], len: 0.2 });
+  const hiss = noiseBuffer(ctx, 0.6);
+  for (let k = 0; k < 2; k++) {
+    const o = k * LOOP;
+    BED.kickBeats.forEach((b) => play(ctx, kick, o + beat(b) + 1 / FPS, BED.kick, bus));
+    BED.hatBeats.forEach((b) => {
+      const src = ctx.createBufferSource(), hp = ctx.createBiquadFilter(), g = ctx.createGain();
+      src.buffer = hiss; hp.type = 'highpass'; hp.frequency.value = 7000;
+      const w = o + beat(b) + 1 / FPS;
+      g.gain.setValueAtTime(BED.hat, w); g.gain.exponentialRampToValueAtTime(0.0001, w + 0.05);
+      src.connect(hp).connect(g).connect(bus); src.start(w, 0, 0.06);
+    });
+    for (const e of EVENTS) {
+      const w = o + at(e.frame);
+      if (e.type === 'thock') play(ctx, thock, w, e.gain, bus);
+      if (e.type === 'creak') play(ctx, creak, w, e.gain, bus);
+      if (e.type === 'swish') {                          // filtered noise sweeping up, peaking at the target
+        const src = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain();
+        src.buffer = hiss; bp.type = 'bandpass'; bp.Q.value = 1.2;
+        bp.frequency.setValueAtTime(600, w - e.dur * 0.5); bp.frequency.exponentialRampToValueAtTime(3500, w + e.dur * 0.5);
+        g.gain.setValueAtTime(0.0001, w - e.dur * 0.5); g.gain.exponentialRampToValueAtTime(e.gain, w);
+        g.gain.exponentialRampToValueAtTime(0.0001, w + e.dur * 0.5);
+        src.connect(bp).connect(g).connect(bus); src.start(w - e.dur * 0.5, 0, e.dur);
+      }
+    }
+  }
+  const full = await ctx.startRendering();
+  // Keep the second loop, and remove each channel's DC offset.
+  const n = Math.round(LOOP * rate), out = new AudioBuffer({ numberOfChannels: 2, length: n, sampleRate: rate });
+  for (let c = 0; c < 2; c++) {
+    const src = full.getChannelData(c).subarray(n, 2 * n);
+    let mean = 0; for (let i = 0; i < n; i++) mean += src[i]; mean /= n;
+    const dst = out.getChannelData(c); for (let i = 0; i < n; i++) dst[i] = src[i] - mean;
+  }
+  return out;
+};
+</script>
+</body></html>

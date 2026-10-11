@@ -1,0 +1,11 @@
+# The render contract: paste it under any motion prompt
+Output one self-contained HTML file. Only the libraries the prompt names, pinned to a version.
+No network requests except fonts and those pinned libraries.
+Every frame must be a pure function of time t, in seconds.
+If JavaScript drives any motion, expose window.renderAt(t) that draws exactly that frame.
+Animate with CSS keyframes, the Web Animations API, SVG, Canvas 2D or WebGL.
+No Date.now, no setTimeout or setInterval starts, no unseeded Math.random.
+Loops: render frames 0 to N-1 only, and frame N-1 must flow into frame 0.
+When the URL has ?t=, draw that frame and start no clock (no requestAnimationFrame loop).
+If setup is async (fonts, textures, bakes), set window.__ready = false first and true when done.
+# Add a line here each time a fix works.

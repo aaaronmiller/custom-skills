@@ -1,0 +1,15 @@
+<script>
+// Paste right before </body>. Open anim.html?t=2.5 to see the exact frame at 2.5 s.
+(function () {
+  var q = new URLSearchParams(location.search);
+  if (!q.has('t')) return;
+  var t = parseFloat(q.get('t')) || 0;
+  function freeze() {
+    if (typeof window.renderAt === 'function') window.renderAt(t);
+    document.getAnimations().forEach(function (a) { a.pause(); a.currentTime = t * 1000; });
+  }
+  freeze();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(freeze);
+  window.addEventListener('load', freeze);
+})();
+</script>

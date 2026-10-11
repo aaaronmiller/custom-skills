@@ -1,0 +1,138 @@
+<!doctype html>
+<!--
+  motion-lab demo: a 4 s seamless loop, 24 fps (96 frames), 1080x1080, that follows the render
+  contract. A block hops pad to pad with anticipation, squash and stretch, an arc and a spring
+  settle. Every value is a pure function of t; every number lives in the tokens block.
+  Preview: open the file in a browser (frame counter, Space pauses, arrows step a frame).
+  Freeze a frame: demo.html?t=2.5. Render: node ../scripts/render.mjs demo.html 4 24
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>motion-lab demo</title>
+<style>
+  :root { --paper: #F0EEE6; --ink: #141413; --accent: #D97757; --mute: #B9B4A8; }
+  html, body { margin: 0; width: 1080px; height: 1080px; overflow: hidden; background: var(--paper); }
+  .stage { position: relative; width: 1080px; height: 1080px; }
+  .title { position: absolute; left: 96px; top: 96px; font: 700 64px/1 ui-monospace, Menlo, Consolas, monospace;
+           letter-spacing: -0.02em; color: var(--ink); }
+  .sub { position: absolute; left: 96px; top: 176px; font: 400 28px/1 ui-monospace, Menlo, Consolas, monospace;
+         color: var(--mute); }
+  .pad { position: absolute; top: 700px; width: 220px; height: 16px; margin-left: -110px; border-radius: 8px;
+         background: var(--mute); }
+  .shadow { position: absolute; top: 696px; width: 180px; height: 24px; margin-left: -90px; border-radius: 50%;
+            background: var(--ink); }
+  .block { position: absolute; width: 160px; height: 160px; margin-left: -80px; top: 540px; border-radius: 20px;
+           background: var(--accent); transform-origin: 50% 100%; }
+  .eye { position: absolute; top: 52px; width: 18px; height: 30px; background: var(--ink); border-radius: 4px; }
+  .mark { position: absolute; right: 120px; top: 108px; width: 44px; height: 44px; border: 6px solid var(--ink); }
+  .counter { position: absolute; right: 24px; bottom: 20px; font: 400 24px/1 ui-monospace, monospace; color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="title">MOTION LAB</div>
+  <div class="sub">anticipation · squash · arc · settle</div>
+  <div class="pad" id="padL"></div>
+  <div class="pad" id="padR"></div>
+  <div class="shadow" id="shadow"></div>
+  <div class="block" id="block"><div class="eye" style="left:44px"></div><div class="eye" style="left:98px"></div></div>
+  <div class="mark" id="mark"></div>
+  <div class="counter" id="counter"></div>
+</div>
+<script type="module">
+// Tokens: every number in the piece. Change one at a time and re-render.
+const LOOP = 4, FPS = 24;                      // 96 frames, frame 96 = frame 0
+const PAD_X = [540 - 260, 540 + 260];          // pad centers, px
+const HOPS = [{ start: 0.5, from: 0, to: 1 }, { start: 2.5, from: 1, to: 0 }];
+const CROUCH = 6 / FPS;                        // 6-frame anticipation
+const AIR = 18 / FPS;                          // 18 frames in the air
+const ARC = 260;                               // arc height, px
+const CROUCH_SCALE = [1.2, 0.75];              // x, y at the bottom of the crouch
+const STRETCH = [0.85, 1.28];                  // at takeoff
+const SQUASH = [1.25, 0.7];                    // on landing
+const SETTLE = { zeta: 0.55, f: 3 };           // landing spring back
+const SHADOW_MIN = 0.35;                       // shadow scale at the top of the arc
+
+// Motion helpers (from scripts/motion.js, pasted inline: a one-file piece cannot import over file://)
+function cubicBezier(x1, y1, x2, y2) {
+  const bx = (u) => 3 * x1 * u * (1 - u) ** 2 + 3 * x2 * u * u * (1 - u) + u ** 3;
+  const by = (u) => 3 * y1 * u * (1 - u) ** 2 + 3 * y2 * u * u * (1 - u) + u ** 3;
+  return (p) => { if (p <= 0) return 0; if (p >= 1) return 1;
+    let lo = 0, hi = 1, u = p; for (let i = 0; i < 40; i++) { u = (lo + hi) / 2; if (bx(u) < p) lo = u; else hi = u; }
+    return by(u); };
+}
+const easeMove = cubicBezier(0.76, 0, 0.24, 1);   // ease-in-out-quart
+const easeOut = cubicBezier(0.22, 1, 0.36, 1);    // ease-out-quint
+function spring(t, zeta, f) {
+  if (t <= 0) return 0; const w = 2 * Math.PI * f, wd = w * Math.sqrt(1 - zeta * zeta);
+  return 1 - Math.exp(-zeta * w * t) * (Math.cos(wd * t) + (zeta * w / wd) * Math.sin(wd * t));
+}
+const clamp01 = (x) => Math.min(1, Math.max(0, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+const mod = (a, n) => ((a % n) + n) % n;
+
+// One hop as a function of its local time u (seconds since its start, wrapped by the loop).
+function hopPose(hop, u) {
+  const x0 = PAD_X[hop.from], x1 = PAD_X[hop.to];
+  if (u < CROUCH) {                                         // anticipation: crouch, hold the pad
+    const p = easeOut(u / CROUCH);
+    return { x: x0, y: 0, sx: lerp(1, CROUCH_SCALE[0], p), sy: lerp(1, CROUCH_SCALE[1], p), landed: hop.from };
+  }
+  if (u < CROUCH + AIR) {                                   // flight: arc, stretch eases out by the apex
+    const p = (u - CROUCH) / AIR;
+    const s = 1 - clamp01(p / 0.5);
+    return { x: lerp(x0, x1, easeMove(p)), y: ARC * 4 * p * (1 - p),
+             sx: lerp(1, STRETCH[0], s), sy: lerp(1, STRETCH[1], s), landed: -1 };
+  }
+  const v = u - CROUCH - AIR;                               // landing: squash, spring back to 1
+  const k = 1 - spring(v, SETTLE.zeta, SETTLE.f);
+  return { x: x1, y: 0, sx: 1 + (SQUASH[0] - 1) * k, sy: 1 + (SQUASH[1] - 1) * k, landed: hop.to };
+}
+
+const $ = (id) => document.getElementById(id);
+window.renderAt = function (t) {
+  t = mod(t, LOOP);
+  // The active hop is the one that started most recently, wrapping through the loop seam.
+  const locals = HOPS.map((h) => mod(t - h.start, LOOP));
+  const i = locals[0] <= locals[1] ? 0 : 1;
+  const pose = hopPose(HOPS[i], locals[i]);
+  $('block').style.transform = `translate(${pose.x}px, ${-pose.y}px) scale(${pose.sx}, ${pose.sy})`;
+  $('block').style.left = '0px';
+  const sh = lerp(1, SHADOW_MIN, pose.y / ARC);
+  $('shadow').style.left = pose.x + 'px';
+  $('shadow').style.transform = `scale(${sh * pose.sx}, ${sh})`;
+  $('shadow').style.opacity = String(0.18 * sh);
+  ['padL', 'padR'].forEach((id, k) => {
+    $(id).style.left = PAD_X[k] + 'px';
+    $(id).style.background = pose.landed === k ? 'var(--accent)' : 'var(--mute)';
+  });
+  $('mark').style.transform = `rotate(${90 * (t / LOOP)}deg)`;   // linear only for the loop phase
+  $('counter').textContent = frozen ? '' : 'frame ' + String(Math.floor(t * FPS + 1e-6)).padStart(3, '0');
+};
+
+// Freeze by URL: demo.html?t=2.5 draws exactly that frame and starts no clock.
+const q = new URLSearchParams(location.search);
+const frozen = q.has('t');
+if (frozen) {
+  const t = parseFloat(q.get('t')) || 0;
+  window.renderAt(t);
+} else {
+  // Preview only: the one place a clock is allowed. Space pauses, arrows step one frame.
+  let t = 0, paused = false, last = performance.now();
+  addEventListener('keydown', (e) => {
+    if (e.code === 'Space') { paused = !paused; e.preventDefault(); }
+    if (paused && e.code === 'ArrowRight') t = mod(Math.round(t * FPS) / FPS + 1 / FPS, LOOP);
+    if (paused && e.code === 'ArrowLeft') t = mod(Math.round(t * FPS) / FPS - 1 / FPS, LOOP);
+  });
+  const tick = (now) => {
+    if (!paused) t = mod(t + (now - last) / 1000, LOOP);
+    last = now;
+    window.renderAt(t);
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+</script>
+</body>
+</html>

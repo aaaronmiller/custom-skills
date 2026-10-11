@@ -1,0 +1,6 @@
+# Sound brief, written against the picture's frame numbers (the shape all three lab pieces used)
+Score this <seconds> s loop, <frames> frames at <fps> fps. Synthesize everything in code with the Web Audio API, no samples, no downloads. <BPM> BPM, <key or chord roots>. Each hit lands 1 frame after its visual event, and so does the bed.
+Bed: <kick pattern by frame>, <shaker or hats>, <bass and pad chords by frame>, <where the bed rests or ducks>.
+Events: <sound> at <frame>, <sound> from <frame> to <frame>, ... (one entry per visual event, by frame number)
+Hits 3 to 6 dB over the bed, nothing above 8 kHz, mono-safe. Render two loops and keep the second, so the seam has no click.
+48 kHz stereo WAV, about -14 LUFS, peak -1 dBTP (limit the WAV to about -2.2 dBTP if AAC lifts the decoded peak). Mux into the MP4 and check every hit in its decoded audio.

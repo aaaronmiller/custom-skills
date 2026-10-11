@@ -1,0 +1,16 @@
+GOAL: what the viewer should feel or do, in one sentence
+OUTPUT: one self-contained HTML file (or Remotion, HyperFrames), W x H
+TIME: seconds x fps = total frames. Loop: yes or no. BPM if the cuts follow a beat
+LOOK: palette in hex, one accent, typeface + weight + size + tracking
+MOTION: easing as cubic-bezier, springs as damping ratio, durations in frames
+SHOTS: frame ranges, one hero move per shot, how each shot hands off (cut on the beat, match cut, mask wipe)
+BANNED: the defaults you never want to see
+QA: stills at named frames, a contact sheet, fix, then the full render
+
+# Add for 3D
+MODEL: units, primitives and sizes, materials with roughness, metalness and clearcoat
+CAMERA: field of view, distance, orbit range and easing, push-ins with their curve and time; never parked
+LIGHTS: key, fill and rim with color, strength and position; reflections and contact shadows
+
+# Add for anything with an identity
+KEEP: what may not change (a character's proportions, a logo's geometry, brand colors), in numbers
