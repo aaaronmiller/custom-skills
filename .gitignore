@@ -9,3 +9,6 @@ node_modules/
 # local artefacts, never source
 *.bak-2026*
 intent-archaeology/.intent-archaeology.db
+
+# oh-my-claudecode session state
+.omc/

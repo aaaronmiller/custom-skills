@@ -222,9 +222,15 @@ each, and editing the file `ld add-page` created:
    and write the first standing page.
 6. `substrate` using `references/substrate-self-location.md`. Declare the honest
    level and the pre-lock boundary.
-7. `constitution`: reference the user's existing constitution if present. If
-   absent, do not generate one. Note its absence and say to create one through
-   the project's governance tooling.
+7. `constitution`: reference the user's existing constitution if present —
+   canonical location is recorded in `references/constitution-source.md`.
+   Reference by name the principles the build inherits; never transplant
+   another project's technical constraints. If absent, do not generate one.
+   Note its absence and say to create one through the project's governance
+   tooling. If the build root has no session-scoped instruction file
+   (`AGENTS.md` / `CLAUDE.md` / `AGENT.md`), write the standing gates there —
+   enforcement living only in chat or dossier pages has no bite until a
+   session loads it. Tell the user to restart rooted in that folder.
 
 ### Phase 5: Refinement and depth verification
 
@@ -352,6 +358,7 @@ timestamps in plays or phases; use phase and step notation. Never ask every
 discovery question in one message. **Never create a Living Documents page with a
 direct file write.** Never trust a validator pass without checking that its token
 list covers the domain.
+Never transplant a constitution wholesale into another project's agent file; reference it and name the inherited principles.
 
 ## Resource files
 
@@ -369,6 +376,7 @@ list covers the domain.
 | `references/research-checklist.md` | Phase 2, prior art |
 | `references/data-architecture-guide.md` | Phase 3, context derivation |
 | `references/compatibility.md` | Phase 6, toolchain handoff |
+| `references/constitution-source.md` | Phase 4 constitution step, Phase 7 enforcement handoff |
 | `scripts/strata-scaffold.sh` | Create an empty tree before filling it |
 | `scripts/strata-validate.py` | Phase 6, enforce the six rules |
 | `scripts/strata-revive.sh` | Resume a dormant project |
