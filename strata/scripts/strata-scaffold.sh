@@ -179,6 +179,7 @@ if [ ! -e "$PARENT_DIR/AGENTS.md" ]; then
   {
     printf '# AGENTS.md\n\nSession-scoped instructions for coding agents in this repository.\n\n'
     printf '## Before anything else\nRead %s/ledger/standing.md and the last five entries of %s/ledger/ledger.md, then intent.md and spec.md in that folder.\n\n' "${ROOT#$PARENT_DIR/}" "${ROOT#$PARENT_DIR/}"
+    printf '## Governance and initiation\nRead .specify/memory/constitution.md when present; it is the project governance authority and must not be duplicated here. Specification preparation creates it from authorized principles. Before implementation, read the native tasks and reset handoff, verify the preparation receipt and artifact hashes, and require current project-initiation authority.\n\n'
     printf '## Standing gates\n- Every change maps to a SPEC-ID; if it cannot, stop and append a ledger entry instead of guessing.\n- Append a ledger entry for every decision and outcome, and overwrite standing.md, every time.\n- Upstream changes enter at intent.md only; derived context is re-derived and reusable plays read its variables.\n- Claims of done require evidence: commands run, results, screenshots for UI.\n- Never search for, open or request the held-out evals.\n'
   } > "$PARENT_DIR/AGENTS.md"
 fi

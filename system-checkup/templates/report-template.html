@@ -1,0 +1,769 @@
+<title>SPECTRE-16 October Checkup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a dark presentation deck. Each section is one "slide": an eyebrow names the system area,
+   the headline states the finding as a sentence, the evidence (chart or table) follows, then the action.
+   Single dark theme by the user's request; every color is set explicitly so the host theme never shows through. */
+:root {
+  color-scheme: dark;
+  --bg: #141413;          /* Anthropic dark */
+  --surface: #1c1b19;     /* slide/card ground */
+  --raised: #24231f;      /* table header, code */
+  --line: #36342e;
+  --ink: #faf9f5;         /* Anthropic light */
+  --ink-2: #cfccc1;
+  --ink-3: #9a978d;
+  --accent: #d97757;      /* Anthropic orange: UI accent */
+  --accent-soft: #3a261d;
+  --blue: #6a9bcc;        /* Anthropic blue: links, secondary accent */
+  --series-a: #d4683f;    /* chart series A (validated vs dark surface) */
+  --series-b: #4f8fd6;    /* chart series B */
+  --neutral-mark: #6f6c63;
+  --good: #8db36b; --warn: #e0a84a; --crit: #e26a5f; --info: #7fa7d6;
+  --f-display: "Poppins", "Segoe UI", Arial, sans-serif;
+  --f-body: "Lora", Georgia, "Times New Roman", serif;
+  --f-mono: "IBM Plex Mono", "Cascadia Mono", Consolas, monospace;
+  --s-xs: 0.78rem; --s-sm: 0.88rem; --s-md: 1rem; --s-lg: 1.25rem; --s-xl: 1.7rem; --s-2xl: 2.4rem; --s-3xl: 3.3rem;
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 17px; line-height: 1.6;
+  padding-inline: clamp(16px, 4vw, 48px); }
+a { color: var(--blue); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.wrap { max-width: 1120px; margin-inline: auto; }
+h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 600; letter-spacing: -0.01em; text-wrap: balance; margin: 0; }
+p { margin: 0; max-width: 68ch; }
+code, .mono { font-family: var(--f-mono); font-size: 0.86em; }
+code { background: var(--raised); padding: 0.1em 0.4em; border-radius: 4px; color: var(--ink); overflow-wrap: anywhere; }
+pre { margin: 0; background: var(--raised); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; overflow-x: auto;
+  font-family: var(--f-mono); font-size: 0.82rem; line-height: 1.55; color: var(--ink-2); }
+pre .c { color: var(--ink-3); }
+
+/* sticky nav */
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); margin-inline: calc(-1 * clamp(16px, 4vw, 48px)); padding-inline: clamp(16px, 4vw, 48px); }
+.nav .wrap { display: flex; gap: 18px; align-items: center; overflow-x: auto; padding-block: 10px; scrollbar-width: thin; }
+.nav b { font-family: var(--f-display); font-weight: 600; font-size: var(--s-sm); white-space: nowrap; color: var(--ink); }
+.nav a { font-family: var(--f-display); font-size: var(--s-xs); color: var(--ink-3); text-decoration: none; white-space: nowrap; letter-spacing: 0.02em; }
+.nav a:hover { color: var(--ink); }
+
+/* cover */
+.cover { padding-block: clamp(40px, 7vw, 84px) 28px; display: grid; gap: 22px; }
+.kicker { font-family: var(--f-mono); font-size: var(--s-xs); text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent); }
+.cover h1 { font-size: var(--s-3xl); line-height: 1.05; font-weight: 700; }
+.cover h1 span { color: var(--ink-3); font-weight: 500; }
+.cover .lede { font-size: var(--s-lg); color: var(--ink-2); max-width: 62ch; }
+.meta-row { display: flex; flex-wrap: wrap; gap: 8px 22px; font-family: var(--f-mono); font-size: var(--s-xs); color: var(--ink-3); }
+.meta-row b { color: var(--ink-2); font-weight: 500; }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 4px; align-content: start; }
+.tile .v { font-family: var(--f-display); font-size: var(--s-xl); font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.15; }
+.tile .v small { font-size: var(--s-sm); color: var(--ink-3); font-weight: 500; }
+.tile .l { font-family: var(--f-display); font-size: var(--s-xs); text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); }
+.tile p { font-size: var(--s-sm); color: var(--ink-2); }
+
+/* slides */
+section.slide { border-top: 1px solid var(--line); padding-block: 56px; display: grid; gap: 22px; scroll-margin-top: 56px; }
+.eyebrow { font-family: var(--f-mono); font-size: var(--s-xs); text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent); }
+section.slide h2 { font-size: var(--s-2xl); line-height: 1.15; max-width: 30ch; }
+section.slide h3 { font-size: var(--s-lg); color: var(--ink); }
+.prose { display: grid; gap: 12px; color: var(--ink-2); }
+.prose strong { color: var(--ink); font-weight: 600; }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 22px; align-items: start; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; display: grid; gap: 12px; min-width: 0; }
+.panel h3 { font-size: var(--s-md); }
+.panel .sub { font-size: var(--s-sm); color: var(--ink-3); }
+.callout { border-left: 3px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; color: var(--ink); font-size: var(--s-md); max-width: 80ch; }
+
+/* tables */
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: var(--s-sm); }
+th { font-family: var(--f-display); font-weight: 500; font-size: var(--s-xs); text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3);
+  text-align: left; background: var(--raised); padding: 9px 12px; white-space: nowrap; }
+td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top; color: var(--ink-2); }
+td:first-child { color: var(--ink); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--f-mono); white-space: nowrap; }
+
+/* chips */
+.chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f-display); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.03em;
+  padding: 2px 9px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.chip.crit { color: var(--crit); } .chip.high { color: var(--warn); } .chip.med { color: var(--info); } .chip.low { color: var(--ink-3); }
+.chip.done { color: var(--good); } .chip.ready { color: var(--info); } .chip.you { color: var(--accent); } .chip.window { color: var(--warn); }
+
+/* charts */
+.chart { width: 100%; min-width: 0; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { font-family: var(--f-mono); font-size: 10.5px; fill: var(--ink-3); }
+.chart .lbl { fill: var(--ink-2); }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .axis { stroke: var(--ink-3); stroke-width: 1; }
+.chart .hit { fill: transparent; cursor: crosshair; }
+.chart .hit:hover + .mark, .chart g.m:hover .mark { filter: brightness(1.25); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-family: var(--f-display); font-size: var(--s-xs); color: var(--ink-2); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+#tip { position: fixed; z-index: 50; pointer-events: none; background: var(--raised); border: 1px solid var(--line); border-radius: 6px;
+  padding: 7px 10px; font-family: var(--f-mono); font-size: 12px; color: var(--ink); box-shadow: 0 6px 20px rgb(0 0 0 / 0.45); max-width: 320px; }
+#tip[hidden] { display: none; }
+
+/* steps (the action plan is a real sequence, so it is numbered) */
+.phase { display: grid; gap: 10px; }
+.phase h3 { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+ol.steps { list-style: none; counter-reset: s; margin: 0; padding: 0; display: grid; gap: 10px; }
+ol.steps > li { counter-increment: s; display: grid; grid-template-columns: 2.2em 1fr; gap: 4px 10px; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 10px; padding: 12px 14px; }
+ol.steps > li::before { content: counter(s); font-family: var(--f-display); font-weight: 600; color: var(--accent); font-size: var(--s-lg); line-height: 1.2; }
+ol.steps > li > div { display: grid; gap: 6px; min-width: 0; }
+ol.steps .who { font-family: var(--f-mono); font-size: var(--s-xs); color: var(--ink-3); }
+
+/* timeline */
+.timeline { display: grid; gap: 0; border-left: 2px solid var(--line); margin-left: 6px; }
+.timeline > div { position: relative; padding: 0 0 16px 20px; display: grid; gap: 2px; }
+.timeline > div::before { content: ""; position: absolute; left: -7px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+.timeline .d { font-family: var(--f-mono); font-size: var(--s-xs); color: var(--accent); }
+.timeline .t { color: var(--ink-2); font-size: var(--s-sm); max-width: 80ch; }
+
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; }
+details summary { cursor: pointer; font-family: var(--f-display); font-size: var(--s-sm); color: var(--ink); }
+details[open] summary { margin-bottom: 10px; }
+footer { border-top: 1px solid var(--line); padding-block: 28px 56px; color: var(--ink-3); font-size: var(--s-sm); display: grid; gap: 8px; }
+@media (max-width: 640px) { body { font-size: 16px; } .cover h1 { font-size: 2.3rem; } section.slide h2 { font-size: 1.7rem; } }
+@media (prefers-reduced-motion: no-preference) { .tile, .panel { transition: border-color .15s; } .tile:hover, .panel:hover { border-color: #4a473f; } }
+</style>
+
+<nav class="nav" aria-label="Sections"><div class="wrap">
+  <b>SPECTRE-16</b>
+  <a href="#summary">Summary</a><a href="#wu">Windows Update</a><a href="#servicing">Servicing</a><a href="#memory">Memory</a>
+  <a href="#telemetry">Telemetry</a><a href="#lasso">Process Lasso</a><a href="#input">Input devices</a><a href="#errors">Crashes</a>
+  <a href="#storage">Storage</a><a href="#packages">Packages</a><a href="#updates">Updates</a><a href="#modern">Modernize</a>
+  <a href="#security">Security</a><a href="#folders">Folders</a><a href="#plan">Plan</a><a href="#history">History</a><a href="#method">Method</a>
+</div></nav>
+
+<div class="wrap">
+<header class="cover">
+  <div class="kicker">System checkup · 13 October 2026 · read-only audit</div>
+  <h1>SPECTRE-16 <span>October Checkup</span></h1>
+  <p class="lede">Windows Update has failed for three months because this Canary build's signing certificate expired on August 11. Disk space is no longer the problem. The fix is an in-place upgrade from an ISO that keeps every app and setting. Memory is the other story: the August crash fixes held, but the machine now lives above 90% RAM most of the day.</p>
+  <div class="meta-row"><span>HP Spectre x360 16 · <b>i7-1360P</b> (4P + 8E) · <b>16 GB</b> soldered</span><span>Windows 11 Pro <b>27965.1</b> (Canary, expired)</span><span>WSL <b>3.0.3</b> · kernel 6.18.54</span><span>Process Lasso Pro <b>18.2.3.42</b></span></div>
+  <div class="tiles" id="kpis"></div>
+</header>
+
+<!-- ======================================================= SUMMARY -->
+<section class="slide" id="summary">
+  <div class="eyebrow">Summary</div>
+  <h2>Fourteen findings, and nothing here has been deleted</h2>
+  <div class="prose"><p>Everything below came from read-only scans plus one elevated pass that ran SFC and DISM and changed exactly one setting the input-device handoff asked for. The removal script, the Process Lasso rules and the service changes are written and waiting for you. Status tells you who acts next.</p></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Finding</th><th>Severity</th><th>Status</th><th>Section</th></tr></thead>
+    <tbody>
+      <tr><td>Windows Update blocked: build 27965.1 carries the Insider signing certificate that expired 2026-08-11 (<code>0x800B0101</code>, 337 failed downloads)</td><td><span class="chip crit">Critical</span></td><td><span class="chip ready">ISO plan ready</span></td><td><a href="#wu">Update</a></td></tr>
+      <tr><td>Memory: median RAM 92.5% and p95 hard faults 2,020/s over Aug 15–Sep 10; Intel's connectivity suite holds 2.6 GB it does not need</td><td><span class="chip high">High</span></td><td><span class="chip you">Needs you</span></td><td><a href="#memory">Memory</a></td></tr>
+      <tr><td>Security posture: no disk encryption, Defender tamper protection off, never a full scan, Edge/WebView2 ten versions behind, keymakers in Downloads</td><td><span class="chip high">High</span></td><td><span class="chip you">Needs you</span></td><td><a href="#security">Security</a></td></tr>
+      <tr><td>Telemetry sampler dead since 2026-09-10 11:53; v2 written and tested</td><td><span class="chip med">Medium</span></td><td><span class="chip ready">Register pending</span></td><td><a href="#telemetry">Telemetry</a></td></tr>
+      <tr><td>Process Lasso: the Logitech pin never matched (14 leaked copies run unpinned); most Pro features unused</td><td><span class="chip med">Medium</span></td><td><span class="chip ready">Rules drafted</span></td><td><a href="#lasso">Lasso</a></td></tr>
+      <tr><td>Bluetooth keyboard and mouse both drop; the shared Intel radio and its July-2025 driver are the common factor</td><td><span class="chip med">Medium</span></td><td><span class="chip done">Power setting fixed</span></td><td><a href="#input">Input</a></td></tr>
+      <tr><td>~42.6 GB safely reclaimable by default, ~125 GB with opt-ins; dry run verified</td><td><span class="chip med">Medium</span></td><td><span class="chip ready">Script ready</span></td><td><a href="#storage">Storage</a></td></tr>
+      <tr><td>In WSL, <code>pnpm</code> resolves to the Windows binary through <code>/mnt/c</code></td><td><span class="chip med">Medium</span></td><td><span class="chip you">One-line fix</span></td><td><a href="#packages">Packages</a></td></tr>
+      <tr><td>Two bugchecks (0xD1 Sep 2, 0x3B Jul 21) and six unclean shutdowns; dumps were not kept</td><td><span class="chip med">Medium</span></td><td><span class="chip window">Watch</span></td><td><a href="#errors">Crashes</a></td></tr>
+      <tr><td>SFC cannot repair 187 files: all are File Explorer SVG icons</td><td><span class="chip low">Low</span></td><td><span class="chip ready">Fixed by upgrade</span></td><td><a href="#servicing">Servicing</a></td></tr>
+      <tr><td>Phone Link's CrossDeviceService crashed 41 times in 30 days (plus 52 .NET errors)</td><td><span class="chip low">Low</span></td><td><span class="chip you">Update or disable</span></td><td><a href="#errors">Crashes</a></td></tr>
+      <tr><td>Shadow-copy storage is 39.9 GB with no cap</td><td><span class="chip low">Low</span></td><td><span class="chip ready">Opt-in in script</span></td><td><a href="#storage">Storage</a></td></tr>
+      <tr><td>Overlapping tools: three backup apps, three cleaners, four disk tools, four download managers, five Logitech components, three notes apps</td><td><span class="chip low">Low</span></td><td><span class="chip you">Your call</span></td><td><a href="#modern">Modernize</a></td></tr>
+      <tr><td>Downloads/Desktop living document refreshed to v3 and widened to every user folder</td><td><span class="chip low">Low</span></td><td><span class="chip done">Done</span></td><td><a href="#folders">Folders</a></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ======================================================= WINDOWS UPDATE -->
+<section class="slide" id="wu">
+  <div class="eyebrow">Windows Update</div>
+  <h2>Updates fail because the build's signing certificate expired on August 11, not because of space or drivers</h2>
+  <div class="cols">
+    <div class="prose">
+      <p>Every feature-update attempt dies with <code>0x800B0101</code> (CERT_E_EXPIRED). Microsoft rotated the Insider flight-signing certificate on <strong>2026-08-11</strong>, and every channel needed to be on a renewal build by then. This machine is on <strong>27965.1</strong>, compiled 2025-10-06. The update Windows Update keeps offering, 28020.2207 from May 29, is itself older than the renewal floor (28020.2623 on Beta 26H1, 28120.2630 on Experimental 26H1), so it can never validate. Drivers, Defender signatures and Store apps download fine because they are signed with production certificates.</p>
+      <p>The disk-space theory from August is closed: C: now has 120 GB free. Clock, time service and root store are all fine. No policy disables updates; <code>wuauserv</code> is simply idle on its default Manual start. The script <code>C:\check_windows_updates_disabled.ps1</code> is a diagnostic, not a switch.</p>
+      <p><strong>The route that works</strong> is an in-place upgrade from an ISO built with UUP dump. Setup validates the media's own signature, keeps apps, settings, WSL and Process Lasso, and does all of its first-phase work before any restart.</p>
+    </div>
+    <div class="panel">
+      <h3>Failed feature-update downloads per week</h3>
+      <div class="sub">Windows Update event 31, all with 0x800B0101. The log retains entries from mid-July onward.</div>
+      <div class="chart" id="ch-wu"></div>
+    </div>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>Target</th><th>Track</th><th>Released</th><th>Keeps apps?</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td><b>28120.3181</b></td><td>Experimental (26H1), successor of the Canary 28000 line</td><td class="num">2026-10-07</td><td>Yes, same edition and language, newer build</td><td><span class="chip ready">Recommended</span> closest to "stay on Canary"</td></tr>
+      <tr><td>28020.3172</td><td>Beta (26H1)</td><td class="num">2026-10-07</td><td>Yes</td><td><span class="chip low">Alternative</span> calmer, near-ship builds</td></tr>
+      <tr><td>29683.1000</td><td>Experimental (Future Platforms)</td><td class="num">2026-10-07</td><td>Unverified across branches</td><td><span class="chip crit">Avoid</span> VMware crash reports, no aligned path back</td></tr>
+      <tr><td>Keep retrying WU, re-enroll, flight signing</td><td>n/a</td><td class="num">n/a</td><td>n/a</td><td><span class="chip crit">Will not work</span> the offered payload is pre-renewal</td></tr>
+    </tbody>
+  </table></div>
+  <div class="cols">
+    <div class="panel">
+      <h3>Run it before restarting, then verify</h3>
+      <pre><span class="c"># 1. Build the ISO (UUP dump, 28120.3181 amd64, en-us, Pro) on D:</span>
+<span class="c">#    UUID cb37f441-7218-4f4b-966d-885cd3b44c9b</span>
+<span class="c"># 2. Compatibility scan only - changes nothing</span>
+E:\setup.exe /auto upgrade /compat scanonly /dynamicupdate disable /quiet
+<span class="c">#    exit 0xC1900210 = no blockers</span>
+<span class="c"># 3. Stage everything that can run before a restart</span>
+E:\setup.exe /auto upgrade /noreboot /dynamicupdate disable /eula accept /showoobe none /copylogs D:\SetupLogs
+<span class="c"># 4. Restart when agents are idle; then keep rollback for 60 days</span>
+DISM /Online /Set-OSUninstallWindow /Value:60</pre>
+    </div>
+    <div class="panel">
+      <h3>What a restart then has to finish</h3>
+      <div class="prose" style="font-size:var(--s-sm)">
+        <p>Steps 1–3 need no restart and do not touch WSL or the agents. Setup's offline phases (SafeOS, first and second boot) only run at the restart you choose, so plan 45–90 minutes of downtime.</p>
+        <p>After the restart, check <code>winver</code> shows 28120.3181, <code>wsl -l -v</code> lists Ubuntu, Process Lasso's governor is running, and SFC is clean. The 187 icon-file mismatches and the stale KB3025096 entries go away with the new component store.</p>
+        <p>Re-check a few settings an upgrade can reset: Windows Search (you keep it disabled), the services in <code>memory-remediation.ps1</code>, and Edge's update services.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= SERVICING -->
+<section class="slide" id="servicing">
+  <div class="eyebrow">Servicing health · handoff task 3</div>
+  <h2>The 187 "corruptions" are 187 File Explorer icons</h2>
+  <div class="cols">
+    <div class="prose">
+      <p>SFC ran today and reported <strong>"found corrupt files but was unable to fix some of them"</strong>. CBS.log names exactly 187 distinct files, and every one belongs to a single component, <code>UserExperience-FileExp</code>: the SVG icons for File Explorer's command bar. Each has a hash mismatch in the component store, which is why the same count has repeated since May and why <code>DISM /RestoreHealth</code> fails with <code>0x800f0915</code>. There is no repair source for an expired build.</p>
+      <p>This is cosmetic. It did not cause the update failures; the certificate did. The in-place upgrade replaces the whole component store and clears it.</p>
+      <p>The <code>0x800f0805</code> lines for <code>Package_for_KB3025096</code> are Info-level entries from a stale package reference (18 on Oct 12–13). Harmless, and also cleared by the upgrade.</p>
+    </div>
+    <div class="tbl"><table>
+      <thead><tr><th>Check</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>Reboot pending (before and after)</td><td>No</td></tr>
+        <tr><td>SFC /scannow</td><td>Corrupt files found, 187 unrepairable, all <code>UserExperience-FileExp</code></td></tr>
+        <tr><td>DISM /ScanHealth</td><td id="dism-result">__DISM_RESULT__</td></tr>
+        <tr><td>DISM /RestoreHealth (May, July)</td><td><code>0x800f0915</code> repair source not found</td></tr>
+        <tr><td>WU policy keys</td><td>None. Updates are idle, not disabled</td></tr>
+        <tr><td><code>wuauserv</code>, <code>bits</code></td><td>Stopped, Manual (Windows default, trigger-started)</td></tr>
+        <tr><td>Version-matched repair ISO</td><td>Not pursued: a 27965 ISO would be a throwaway download; the 28120 upgrade replaces the store anyway</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- ======================================================= MEMORY -->
+<section class="slide" id="memory">
+  <div class="eyebrow">Memory &amp; performance</div>
+  <h2>The crash fixes held, but the machine now lives above 90% RAM</h2>
+  <div class="prose">
+    <p>August's work stopped the <strong>Resource-Exhaustion</strong> events completely: 223 between July 17 and August 20, none since. That came from capping WSL at 8 GB, adding earlyoom and growing the pagefile to about 29 GB. But the 7,482 samples from August 15 to September 10 show memory pressure rising. Median RAM use went from 88.8% before the fixes to 92.5%, two thirds of all samples sat at or above 90%, and the worst five percent of samples hit more than 2,000 hard faults per second.</p>
+  </div>
+  <div class="cols">
+    <div class="panel"><h3>Resource-exhaustion events per day</h3><div class="sub">System log event 2004. The WSL memory governor landed 2026-08-14.</div><div class="chart" id="ch-exh"></div></div>
+    <div class="panel"><h3>Daily RAM use</h3><div class="sub">Line is the daily median; the band reaches the 95th percentile. 5-minute samples.</div><div class="chart" id="ch-ram"></div></div>
+  </div>
+  <div class="cols">
+    <div class="panel"><h3>Hard faults per second, daily 95th percentile</h3><div class="sub">Pages read back from disk. This is the "SSD used as RAM" number.</div><div class="chart" id="ch-hf"></div></div>
+    <div class="tbl"><table id="tbl-phase"><thead><tr><th>Phase</th><th class="num">Samples</th><th class="num">RAM p50</th><th class="num">RAM p95</th><th class="num">≥90% RAM</th><th class="num">Hard faults p95</th></tr></thead><tbody></tbody></table></div>
+  </div>
+  <div class="cols">
+    <div class="panel">
+      <h3>Who holds the commit right now</h3>
+      <div class="sub">Private bytes at 17:53 today, 32 GB in total against a 45.6 GB commit limit.</div>
+      <div class="chart" id="ch-commit"></div>
+    </div>
+    <div class="prose">
+      <h3>Where the slack is</h3>
+      <p><strong>Intel Connectivity Performance Suite</strong> (<code>IntelConnect</code>, <code>Intel Connectivity Network Service</code>, <code>IDBWM</code>): 2.6 GB of private memory for optional bandwidth management. The neighbouring Intel telemetry services were already disabled during the earlier cleanup; the 2026-10-09 Intel driver push brought these back. Wi-Fi does not depend on them.</p>
+      <p><strong>Windows Sandbox</strong> held 4.0 GB while a session was open at 17:53. That session has since closed; its pre-warmed template (<code>vmmemCmZygote</code>, 0.7 GB) stays resident. If you don't use Sandbox, turning off the feature frees that too.</p>
+      <p><strong>Duplicated always-on apps</strong>: Joplin (0.8 GB) next to Obsidian, Phone Link (0.6 GB, crash-looping) and nineteen WebView2 hosts (0.9 GB).</p>
+      <p>The structural answer from August still stands. Seven agents and 40 tabs do not fit in 16 GB of soldered RAM; moving subagents to the 32 GB i7-13800H box over Tailscale removes the pressure instead of managing it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= TELEMETRY -->
+<section class="slide" id="telemetry">
+  <div class="eyebrow">Telemetry · C:\performance-diagnostics</div>
+  <h2>The sampler has been dead since September 10; version 2 is written and tested</h2>
+  <div class="cols">
+    <div class="prose">
+      <p>The last row in <code>perf-samples.csv</code> is 2026-09-10 11:53:10. Twenty-six seconds later <code>Fix-And-Reapply.ps1</code> ran, unregistered the task and re-registered it. That second registration never took, and no <code>Perf Telemetry Sampler</code> task exists today. The original <code>Perf-Telemetry.ps1 -Register</code> still carries the bug that killed the first one in August: a one-time trigger with no repetition duration.</p>
+      <p><strong><code>Perf-Telemetry-v2.ps1</code></strong> fixes both failure modes and measures what actually matters on this machine. It took a clean sample today. Registering it needs one elevated command. It is part of the improvement pass.</p>
+      <pre>&amp; 'C:\performance-diagnostics\Perf-Telemetry-v2.ps1' -Register -Phase checkup-20261013
+&amp; 'C:\performance-diagnostics\Perf-Telemetry-v2.ps1' -Status   <span class="c"># Healthy = True</span></pre>
+    </div>
+    <div class="tbl"><table>
+      <thead><tr><th>v1 (Aug)</th><th>v2 (today)</th></tr></thead>
+      <tbody>
+        <tr><td>One trigger that expired</td><td>10-year repetition plus a boot trigger, verified after registering</td></tr>
+        <tr><td>Silent when dead</td><td>Heartbeat file, error log, <code>-Status</code> health check</td></tr>
+        <tr><td>Working set only</td><td>Commit charge and limit, standby, modified list, disk throughput and queue, CPU clock %</td></tr>
+        <tr><td>One growing CSV</td><td>Monthly files under <code>telemetry\</code>; v1 history left untouched</td></tr>
+        <tr><td>12 tracked processes</td><td>33, including private commit for Intel ICPS, Windows Sandbox, OpenWhispr and the Logitech assistant</td></tr>
+        <tr><td>No power context</td><td>AC/battery, charge, active power plan, uptime, Lasso running</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- ======================================================= LASSO -->
+<section class="slide" id="lasso">
+  <div class="eyebrow">Process Lasso Pro 18.2.3.42</div>
+  <h2>Lasso runs from a split install, and one of its rules never matched anything</h2>
+  <div class="prose"><p>The engine runs from <code>C:\Bitsum … [FTUApps]\App\ProgramFiles64</code>, but it reads its configuration and writes its log in a <strong>Desktop</strong> folder with the same name. The registry value <code>HKLM\SOFTWARE\ProcessLasso\ConfigFolderEx</code> proves it. That Desktop folder must never be moved; the living document now pins it as protected. The rules applied on August 26 are live and verified with elevated reads: Everything, tailscaled and usbipd sit on the E-cores (<code>0xFF00</code>). The Logitech rule targets <code>logi_download_assistant.exe</code>, but the real process is <code>logi_download_assistant-2.0.1020-win64.exe</code>. Fourteen copies of it are running unpinned.</p></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Location</th><th>Role</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td><code>C:\Bitsum Process Lasso Pro v14.0.0.40 … \App\ProgramFiles64</code></td><td>Running binaries (service <code>ProcessGovernor</code>, Auto)</td><td><span class="chip done">Live</span></td></tr>
+      <tr><td><code>Desktop\Bitsum Process Lasso Pro v14.0.0.40 … \Data</code></td><td>Config <code>prolasso.ini</code> (v18 schema) and log</td><td><span class="chip done">Live, protected</span></td></tr>
+      <tr><td><code>C:\Bitsum … \Data\config\prolasso.ini</code></td><td>v14-era config, last written Aug 26</td><td><span class="chip low">Dead, quarantine</span></td></tr>
+      <tr><td><code>C:\ProgramData\ProcessLasso</code>, <code>%APPDATA%\ProcessLasso</code></td><td>Empty installer defaults</td><td><span class="chip low">Remove</span></td></tr>
+      <tr><td><code>Downloads\Bitsum … 18.2.3.42 + Keymaker</code></td><td>Installer bundle with a keymaker</td><td><span class="chip crit">Security group</span></td></tr>
+      <tr><td>Task "Session agent for Process Lasso"</td><td>Passes a placeholder argument, last result 0x1</td><td><span class="chip low">Harmless; Run key covers the GUI</span></td></tr>
+    </tbody>
+  </table></div>
+  <h3>Pro features, and what v3 rules would add</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Feature (ini key)</th><th>Today</th><th>Proposed</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Hard affinity <code>DefaultAffinitiesEx</code></td><td>10 rules, 1 dead</td><td>Fix the Logitech match with a wildcard; add <code>esrv_svc</code>, Bonjour, Acronis scheduler, Google Drive, CrossDeviceService, Intel PIE to E-cores 8–15</td><td>Pure background work off the P-cores</td></tr>
+      <tr><td>CPU Sets <code>CPUSets</code></td><td>Unused</td><td>Discord, Slack, Beeper, Joplin, Phone Link, WebView2 → <code>(0/8-15)</code></td><td>Soft preference that Windows can override; Bitsum's recommendation for hybrid CPUs</td></tr>
+      <tr><td>Efficiency Mode <code>EfficiencyMode</code></td><td>Unused</td><td>Off for WezTerm, OpenWhispr and its ASR engine, Claude, Codex, VS Code; on for the background set</td><td>Keeps EcoQoS off latency-critical work</td></tr>
+      <tr><td>Memory priority <code>DefaultMemoryPriorities</code> (Pro)</td><td>Unused</td><td>Chat apps 2, sync/background 1, Logitech assistant 0</td><td>Under pressure their pages go first, protecting WSL and the foreground</td></tr>
+      <tr><td>I/O priority <code>DefaultIOPriorities</code></td><td>Unused</td><td>Indexers, Drive, Acronis scheduler low or very low</td><td>Less disk contention during agent builds</td></tr>
+      <tr><td>Instance limit <code>InstanceLimitedProcesses</code> (Pro)</td><td>Unused</td><td><code>logi_download_assistant*.exe;1</code></td><td>Stops the 14-copy leak</td></tr>
+      <tr><td>Startup boost <code>StartupBoostRules</code></td><td>Unused</td><td>WezTerm 10 s, VS Code 15 s, Obsidian 10 s at above normal</td><td>Faster cold launches</td></tr>
+      <tr><td>ProBalance exclusions <code>OocExclusions</code></td><td>6 entries</td><td>+ <code>sherpa-onnx-ws-win32-x64.exe</code></td><td>OpenWhispr's realtime ASR must not be throttled</td></tr>
+      <tr><td>Watchdog, IdleSaver, SmartTrim actions, Keep Running</td><td>Off</td><td>Leave off</td><td>Agents run while you're idle; trimming manufactures the hard faults you want to avoid</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ======================================================= INPUT -->
+<section class="slide" id="input">
+  <div class="eyebrow">Input devices · handoff tasks 1 and 2</div>
+  <h2>Both Bluetooth devices drop, which points at the shared Intel radio rather than either device</h2>
+  <div class="cols">
+    <div class="panel"><h3>Bluetooth disconnect events per day</h3><div class="sub">Kernel-PnP 1010 "surprise removed", last 30 days. One disconnect logs about three events.</div><div class="chart" id="ch-bt"></div><div class="legend" id="lg-bt"></div></div>
+    <div class="prose">
+      <p><strong>Verdict: both, alternating.</strong> The Varmilo VS-3 keyboard (BLE <code>d88512a3f888</code>) dominated from September 13 to 30, peaking at 26 events a day. The MX Master mouse (BLE <code>c85696fa97a5</code>, PID B017) dominated from October 2 to 13, peaking at 27 on October 3. Lifetime counts are 1,244 for the keyboard and 1,074 for the mouse. A quarter of the mouse drops land within 60 seconds of a keyboard drop. Both ride on the Intel Wireless Bluetooth radio, whose driver (23.160.0.9) dates from July 2025, and the Wi-Fi side of the same card crashed its extension module 8 times this month.</p>
+      <p>No keyboard or mouse device has a problem code, and the System log has no input errors in the last 2,000 events. <code>BTHUSB 18</code> at each boot is a benign link-key notice.</p>
+      <p><strong>Done:</strong> unticked "Allow the computer to turn off this device" on the five wireless input entries (both BLE HID devices and the three Logitech USB-receiver interfaces). <strong>Already off:</strong> the Spacedesk service is stopped, so its virtual input layer is not in play.</p>
+    </div>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>Next step</th><th>Who</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Update the Intel Wireless Bluetooth and Wi-Fi driver package</td><td>Maintenance window (resets the radio)</td><td>Common factor for both devices; 15 months old</td></tr>
+      <tr><td>Untick power saving on the <b>Intel Wireless Bluetooth</b> radio itself</td><td>You (outside the handoff's authorization)</td><td>Still set to allow power-off</td></tr>
+      <tr><td>Pair the MX Master to the Unifying receiver that is already plugged in (C52B) instead of Bluetooth</td><td>Hands at the machine</td><td>Takes the mouse off the shared radio; if drops stop, it was the radio</td></tr>
+      <tr><td>Fresh batteries, receiver on a front port away from the Thunderbolt dock, exit TouchpadBlocker for a 10-minute test of each device</td><td>Hands at the machine</td><td>Handoff steps 2–4; not possible remotely</td></tr>
+      <tr><td>Fix the Logitech Download Assistant leak (14 instances)</td><td>Improvement pass</td><td>Unrelated to the drops, but it lives on the same stack</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ======================================================= ERRORS -->
+<section class="slide" id="errors">
+  <div class="eyebrow">Crashes &amp; event logs · handoff task 4</div>
+  <h2>Two bugchecks, a crash-looping Phone Link service, and nothing from WSL or DWM in the last 14 days</h2>
+  <div class="cols">
+    <div class="prose">
+      <p><strong>Bugchecks:</strong> <code>0xD1</code> DRIVER_IRQL_NOT_LESS_OR_EQUAL on September 2 and <code>0x3B</code> SYSTEM_SERVICE_EXCEPTION on July 21. Small memory dumps are enabled, but the Minidump folder is empty, so the dumps were cleaned up afterwards. Keep the next one. A 0xD1 on this box usually names a network or Bluetooth driver, which matches the radio findings.</p>
+      <p><strong>Unclean shutdowns:</strong> July 21, July 28, August 20, August 22, September 2 and October 7. The August ones line up with WSL wedges.</p>
+      <p><strong>WER archive:</strong> 16 reports (15 AppCrash, 1 NonCritical). The newest <code>dwm.exe</code> crash is from August 20 and the newest <code>wslservice.exe</code> from August 11, both older than 14 days. 51 reports are still queued. Nothing was cleared.</p>
+      <p><strong>Also seen:</strong> Hyper-V Host Compute Service terminated twice; Acronis Active Protection timed out at start 4 times; defrag was scheduled against the USB D: card; Bonjour renames the host on collision 20 times.</p>
+    </div>
+    <div class="tbl"><table id="tbl-errors"><thead><tr><th>Application log, 30 days</th><th class="num">Count</th></tr></thead><tbody></tbody></table></div>
+  </div>
+</section>
+
+<!-- ======================================================= STORAGE -->
+<section class="slide" id="storage">
+  <div class="eyebrow">Storage</div>
+  <h2>C: has 120 GB free, and the WSL disk is 45% of everything on it</h2>
+  <div class="panel"><h3>What fills the 948 GB C: drive</h3><div class="sub">From the read-only census. The WSL disk is highlighted; grey is free space.</div><div class="chart" id="ch-cdrive"></div></div>
+  <div class="cols">
+    <div class="panel"><h3>Inside the WSL disk (307 GB used)</h3><div class="sub">Largest directories, <code>du -x</code> at depth 4.</div><div class="chart" id="ch-wsl"></div></div>
+    <div class="prose">
+      <h3>What can go, and how safely</h3>
+      <p>The removal manifest lists every candidate with why it is safe, how it regenerates and its risk. The default set is caches and temp that rebuild themselves: the Windows <code>uv</code> cache (16 GB), VS Code's stored extension packages, the WSL <code>uv</code>/<code>pnpm</code>/<code>npm</code> caches, a superseded Rust toolchain, an old Puppeteer Chrome and archived <code>node_modules</code>.</p>
+      <p>Opt-in items need a decision: all 421 hash-identical duplicate copies (13.5 GB; most sit inside folders where moving one file would break the set, so decide them in the living document), the 24 GB <code>/swapfile-cass</code> inside WSL, capping shadow copies at 20 GB, the 6.6 GB of WSL crash dumps (kept for triage), VoiceStudio build caches, model caches and Chrome's caches.</p>
+      <p>Untouched by design: browser profiles, cookies and logins, Obsidian's vault and settings, <code>.claude</code>, the WSL distro, the Acronis image, and <code>C:\0.defenderexclusions</code>. <code>D:\casr-mirror</code> already rotates itself (7 daily + 3 monthly).</p>
+    </div>
+  </div>
+  <div class="tbl"><table id="tbl-reclaim"><thead><tr><th>Manifest section</th><th class="num">Items</th><th class="num">Default set</th><th class="num">With opt-ins</th></tr></thead><tbody></tbody></table></div>
+  <div class="panel">
+    <h3>The removal script</h3>
+    <pre><span class="c"># dry run (default) - prints every action, touches nothing</span>
+&amp; 'C:\performance-diagnostics\checkup-20261013\removal\Remove-CheckupItems.ps1'
+<span class="c"># apply the default set (run elevated to include the admin-only items)</span>
+&amp; '...\Remove-CheckupItems.ps1' -Execute
+<span class="c"># opt into specific items by id after reading the manifest</span>
+&amp; '...\Remove-CheckupItems.ps1' -Only WSL-038,WIN-020 -IncludeOptional -Execute
+<span class="c"># apply your living-document decisions (stages deletions, never hard-deletes)</span>
+&amp; '...\Remove-CheckupItems.ps1' -LivingDocExport .\downloads-desktop-cleanup-change-request.json -Execute</pre>
+    <div class="sub">At run time it re-checks age and file locks, skips anything inside a protected folder, refuses WSL swap disks attached to the running VM, skips app caches while the app is open, and logs every action with sizes to a CSV.</div>
+  </div>
+</section>
+
+<!-- ======================================================= PACKAGES -->
+<section class="slide" id="packages">
+  <div class="eyebrow">Package managers</div>
+  <h2>npm still owns half the JavaScript projects, and in WSL "pnpm" quietly runs the Windows binary</h2>
+  <div class="cols">
+    <div class="prose">
+      <p>WSL holds <strong>155 <code>node_modules</code> trees totalling 34 GB</strong>. 68 projects use npm, 46 pnpm and 41 bun; 71 trees have not been touched in 90 days. On Windows the picture is small: 112 trees, 1.8 GB.</p>
+      <p><strong>The PATH bug.</strong> In a WSL login shell, <code>type -a pnpm</code> finds only <code>/mnt/c/Users/Administrator/AppData/Roaming/npm/pnpm</code>. The Linux pnpm in <code>~/.local/share/pnpm</code> is not on PATH, so every <code>pnpm</code> in WSL runs Windows Node over the 9P bridge against the Windows store. That is slow, and it splits your store across two filesystems. Fix it in <code>~/.zshrc</code> and <code>~/.bashrc</code>:</p>
+      <pre>export PNPM_HOME="$HOME/.local/share/pnpm"
+case ":$PATH:" in *":$PNPM_HOME:"*) ;; *) export PATH="$PNPM_HOME:$PATH" ;; esac</pre>
+      <p>Also duplicated runtimes in WSL: Homebrew node 26.11.1 shadows apt node 22.23.3, and Homebrew Python 3.15 sits next to the system 3.12. Pick one per runtime; <code>mise</code> handles it per project.</p>
+    </div>
+    <div class="tbl"><table>
+      <thead><tr><th>npm project, live</th><th class="num">node_modules</th><th>Move to</th></tr></thead>
+      <tbody>
+        <tr><td><code>~/.hermes/hermes-agent</code></td><td class="num">1.1 GB</td><td>pnpm (workspace) or bun</td></tr>
+        <tr><td><code>~/.paperclip/cli/installs/npm/…</code></td><td class="num">1.4 GB</td><td>Installer-managed; leave</td></tr>
+        <tr><td><code>~/.hermes/hermes-agent/apps/desktop</code></td><td class="num">0.3 GB</td><td>Same workspace as above</td></tr>
+        <tr><td><code>~/.pi/agent/npm</code></td><td class="num">0.3 GB</td><td>bun (pi already uses bun globals)</td></tr>
+        <tr><td><code>~/.omp/agent/cache/tts-runtime/kokoro</code></td><td class="num">0.5 GB</td><td>Tool-managed; leave</td></tr>
+        <tr><td>Windows npm globals</td><td class="num">only pnpm 10.28.2</td><td>pnpm 12 after reading its migration notes</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- ======================================================= UPDATES -->
+<section class="slide" id="updates">
+  <div class="eyebrow">Software currency</div>
+  <h2>Most apps are current; the stale ones are either blocked by a disabled updater or tied to running work</h2>
+  <div class="cols">
+    <div class="tbl"><table>
+      <thead><tr><th>Safe now (not running)</th><th>Installed</th><th>Available</th></tr></thead>
+      <tbody>
+        <tr><td>Edge WebView2 Runtime</td><td class="num">145</td><td class="num">155</td></tr>
+        <tr><td>Microsoft Edge</td><td class="num">145.0.3800</td><td class="num">155.0.4283</td></tr>
+        <tr><td>.NET 8 runtimes (x3)</td><td class="num">8.0.31</td><td class="num">8.0.32</td></tr>
+        <tr><td>.NET Desktop 9 / 10</td><td class="num">9.0.20 / 10.0.12</td><td class="num">9.0.21 / 10.0.13</td></tr>
+        <tr><td>PowerToys</td><td class="num">0.86.0</td><td class="num">0.101.2</td></tr>
+        <tr><td>Kiro · Comet · Unsloth</td><td class="num">1.2.56 · 153 · 0.1.905</td><td class="num">1.3.0 · 154 · 0.1.906</td></tr>
+      </tbody>
+    </table></div>
+    <div class="tbl"><table>
+      <thead><tr><th>Maintenance window (agents idle)</th><th>Why wait</th></tr></thead>
+      <tbody>
+        <tr><td>Git 2.55 → 2.56</td><td>Git Bash is in use by running sessions</td></tr>
+        <tr><td>Tailscale 1.96 → 1.104</td><td>Service restart drops the tailnet</td></tr>
+        <tr><td>Intel Wi-Fi + Bluetooth drivers</td><td>Radio reset; your keyboard and mouse disconnect</td></tr>
+        <tr><td>WSL npm globals (gemini-cli, openclaw, tauri, pi-*)</td><td>Replacing files under a running agent breaks it</td></tr>
+        <tr><td>Docker 29.8 → 29.9, mesa (apt)</td><td>Restarts 13 running containers</td></tr>
+        <tr><td>pnpm 12, Node 26.11, uv 0.13</td><td>Major or default-changing; read release notes first</td></tr>
+        <tr><td>WezTerm (Feb 2024 build)</td><td>Restarting it closes every agent tab</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <div class="callout">.NET 8 and .NET 9 reach end of support on <b>November 10, 2026</b>. Patch them now, and move anything that needs them to .NET 10 before then. The .NET Core 3.1 runtime still installed has been unsupported since 2022.</div>
+  <div class="prose"><p>Edge and WebView2 are stuck at 145 because <code>edgeupdate</code>, <code>edgeupdatem</code> and the Edge elevation service are disabled. That was a deliberate debloat, so it is left alone. The catch is that WebView2 is the browser engine inside 19 running processes: OpenWhispr's UI, Tauri apps and Windows features. Update it with winget now, and either re-enable <code>edgeupdate</code> on Manual or add a monthly <code>winget upgrade Microsoft.EdgeWebView2Runtime</code> to the checkup.</p></div>
+</section>
+
+<!-- ======================================================= MODERNIZE -->
+<section class="slide" id="modern">
+  <div class="eyebrow">Modernization</div>
+  <h2>The biggest win is fewer Node-class agents running at once, not a faster terminal</h2>
+  <div class="prose"><p>A worker researched current releases against your installed inventory. Version numbers below come from that research and from release pages; anything it could not confirm is marked. Every agent harness built on Node costs roughly 300–800 MB per session, and about fifteen are installed. Cap the concurrent set, and give the parallel slots to the Rust and Go harnesses.</p></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Area</th><th>Today</th><th>Suggested</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Parallel agent slots</td><td>claude, codex, omp, muse, opencode, hermes, jcode, kilocode, gemini, openclaw…</td><td>codex (Rust core) and goose (Rust) for fan-out; one or two Node harnesses interactive</td><td>Lowest memory per session; codex is already installed</td></tr>
+      <tr><td>opencode</td><td>Data dirs present, binary missing</td><td>Reinstall the current line, or drop the 1.5 GB of leftovers</td><td>Go/TS, lighter than Node harnesses</td></tr>
+      <tr><td>JS runtime and packages</td><td>npm 11, pnpm 10.28, bun 1.3 (WSL only)</td><td>bun 1.4 on both sides; pnpm 12 for workspaces</td><td>Faster installs, less disk, one global store per OS</td></tr>
+      <tr><td>Runtimes per project</td><td>brew and apt nodes and pythons shadowing each other</td><td><code>mise</code> (Rust)</td><td>One <code>mise.toml</code> per repo ends the PATH roulette</td></tr>
+      <tr><td>Python tooling</td><td>uv 0.9 (WSL), 0.9.30 (Windows)</td><td>uv 0.13 plus ruff; pin 3.14 first because 0.13 defaults to 3.15</td><td>Already Rust-native; just current</td></tr>
+      <tr><td>Disk tools</td><td>WizTree, WizFile, Disk Sorter, Everything</td><td>Keep Everything + WizTree; add <code>dua</code> or Krokiet (Czkawka's Rust GUI) for duplicates and <code>kondo</code> for build folders</td><td>Rust, multithreaded; kondo knows node_modules/target</td></tr>
+      <tr><td>Monitors</td><td>btop4win, HWiNFO</td><td><code>bottom</code> (Rust) for terminals; keep HWiNFO for sensors</td><td>Tiny, native on Windows and WSL</td></tr>
+      <tr><td>Terminal</td><td>WezTerm 20240203</td><td>WezTerm nightly; Ghostty still has no real Windows build</td><td>2.5 years of fixes</td></tr>
+      <tr><td>Shell (WSL)</td><td>zsh</td><td>Optional: fish 4 (Rust core) for interactive use, atuin for shared history across agent panes</td><td>Faster startup across 5–7 panes</td></tr>
+      <tr><td>API client</td><td>Postman 11</td><td>Bruno (offline, git-native files)</td><td>No account, lighter</td></tr>
+      <tr><td>VMware Workstation</td><td>17.6.4</td><td>26H1 (free for all use)</td><td>Major version behind; check Future-Platforms conflicts before upgrading Windows</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Overlap to consolidate</th><th>Installed</th><th>Keep</th></tr></thead>
+    <tbody>
+      <tr><td>Backup</td><td>Acronis (WD), R-Drive, Paragon 15</td><td>Acronis (it made yesterday's image)</td></tr>
+      <tr><td>Cleaners / uninstallers</td><td>Wise Disk Cleaner, Your Uninstaller, Uninstalr</td><td>Uninstalr</td></tr>
+      <tr><td>Disk analysis</td><td>WizTree, WizFile, Disk Sorter, Everything</td><td>Everything + WizTree</td></tr>
+      <tr><td>Downloads</td><td>AB Download Manager, MotrixNext, Rayburst, qBittorrent</td><td>AB DM + qBittorrent</td></tr>
+      <tr><td>Logitech</td><td>Options, Options+, Unifying, Download Assistant, Plugin Service</td><td>Options+ and Unifying</td></tr>
+      <tr><td>Notes</td><td>Obsidian, Joplin, Zettlr</td><td>Obsidian (frees 0.8 GB of always-on Joplin)</td></tr>
+      <tr><td>Duplicate installs</td><td>Two OpenWhispr, two PowerToys rows, two Tailscale rows, Notepad++ and WinMerge as both MSIX and desktop</td><td>One of each</td></tr>
+      <tr><td>Apple legacy</td><td>iTunes, Bonjour, Apple Mobile Device Support</td><td>Store apps (Apple Music, Apple Devices); Bonjour only if you print or AirPlay</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ======================================================= SECURITY -->
+<section class="slide" id="security">
+  <div class="eyebrow">Security posture</div>
+  <h2>A laptop with no disk encryption, Defender's tamper protection off, and keymakers in Downloads</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Item</th><th>State</th><th>Suggestion</th></tr></thead>
+    <tbody>
+      <tr><td>BitLocker / device encryption on C:</td><td><span class="chip crit">Off</span> fully decrypted, no protectors</td><td>Turn it on after the OS upgrade, and save the recovery key somewhere other than this machine</td></tr>
+      <tr><td>Defender tamper protection</td><td><span class="chip high">Off</span></td><td>Turn on unless a tool you rely on needs it off</td></tr>
+      <tr><td>Defender full scan</td><td><span class="chip high">Never run</span> quick scan 5 days ago</td><td>One full scan after the cleanup, with the security-group items isolated first</td></tr>
+      <tr><td>Defender exclusions</td><td>11 paths, including <code>C:\0.defenderexclusions</code></td><td>Review the list once; exclusions plus cracked tools is the risky combination</td></tr>
+      <tr><td>Keymakers, activators, cracked installers</td><td>Process Lasso keymaker, a FileCR utility archive, the Ableton FileCR set</td><td>Isolate, never run; they are the classic malware vector</td></tr>
+      <tr><td>Credential files</td><td>Password exports and API-key text files on the Desktop and in Documents</td><td>Move into a password manager, then delete. Names only were read</td></tr>
+      <tr><td>Edge / WebView2 engine</td><td>Version 145, ten releases behind</td><td>Update now (it is in the safe set)</td></tr>
+      <tr><td>Signatures</td><td><span class="chip done">Current</span> 1.459.691.0, real-time protection on</td><td>Nothing to do</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ======================================================= FOLDERS -->
+<section class="slide" id="folders">
+  <div class="eyebrow">Folder organization</div>
+  <h2>The July cleanup document now covers every user folder, and still moves nothing on its own</h2>
+  <div class="cols">
+    <div class="prose">
+      <p><code>Downloads\downloads-desktop-cleanup.livingdoc</code> is at <strong>v3</strong>. It re-checked all of July's entries; 14 had already gone and are recorded in "resolved since July", and 138 Downloads items and 29 Desktop items were new. It now also covers Documents, Pictures, Music, the home folder, the C:\ and D:\ roots and temp, keeping July's structure: decide per group, override any single file, export a change-request.</p>
+      <p>New in v3: a <strong>protected</strong> group (the live Process Lasso config on the Desktop, the Obsidian vault, the document itself); a security group of 22 entries that now includes keymakers; and project folders for Arduino, Pi-Work, Septabee, Music-Production and Backups-Inbox.</p>
+      <p>Open <code>public\index.html</code> straight from disk, decide, export, then hand the export to the removal script with <code>-LivingDocExport</code>. The originals are kept as <code>*.v2-20261013.bak</code>.</p>
+    </div>
+    <div class="tbl"><table>
+      <thead><tr><th>Location</th><th class="num">Items</th><th class="num">Size</th><th>Highlights</th></tr></thead>
+      <tbody>
+        <tr><td>Downloads</td><td class="num">388</td><td class="num">17.0 GB</td><td>Ableton set (6 GB, twin on D:), OpenVINO symbols 3.8 GB, 35 installers</td></tr>
+        <tr><td>Desktop</td><td class="num">75</td><td class="num">15.6 GB</td><td>One 8 GB catch-all folder; three piles need a human pass</td></tr>
+        <tr><td>Documents</td><td class="num">83</td><td class="num">7.0 GB</td><td>Obsidian vault protected; 3 GB of legacy docs</td></tr>
+        <tr><td>Pictures</td><td class="num">75</td><td class="num">91.9 GB</td><td>Photo library stays; screenshots by year-month</td></tr>
+        <tr><td>Home folder</td><td class="num">132</td><td class="num">31.1 GB</td><td>Tool caches (handled by the removal manifest)</td></tr>
+        <tr><td>D:\ root</td><td class="num">19</td><td class="num">≈493 GB</td><td>Backup image, 31.9 GB of models to triage</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- ======================================================= PLAN -->
+<section class="slide" id="plan">
+  <div class="eyebrow">Action plan</div>
+  <h2>Four windows, in order: now, when the agents are idle, the restart, and after it</h2>
+  <div class="phase">
+    <h3>Now <span class="chip done">no restart · agents keep running</span></h3>
+    <ol class="steps">
+      <li><div><b>Review this report and the removal dry run.</b><span class="who">You · 15 min</span></div></li>
+      <li><div><b>Approve the improvement pass:</b> telemetry v2, Intel ICPS services off, Logitech leak fix, Lasso v3 rules, safe winget updates, Defender signatures. Each change records its previous state; <code>Revert-Improvements.ps1</code> undoes it.<span class="who">You approve, one UAC prompt · 10 min</span></div></li>
+      <li><div><b>Run the removal default set</b> elevated: <code>Remove-CheckupItems.ps1 -Execute</code> (about 42.6 GB).<span class="who">You · 10 min</span></div></li>
+      <li><div><b>Build the 28120.3181 ISO on D:</b> with UUP dump and run the compatibility scan. Neither changes the system.<span class="who">Claude or you · 45 min, mostly download</span></div></li>
+      <li><div><b>Fix the WSL pnpm PATH</b> (two lines in <code>~/.zshrc</code> and <code>~/.bashrc</code>).<span class="who">You · 1 min</span></div></li>
+    </ol>
+  </div>
+  <div class="phase">
+    <h3>Maintenance window <span class="chip window">agents idle, terminals can close</span></h3>
+    <ol class="steps">
+      <li><div><b>Stage the upgrade</b>: <code>setup.exe /auto upgrade /noreboot …</code>. Wait for "ready to restart" in <code>setupact.log</code>.<span class="who">30–90 min, no restart</span></div></li>
+      <li><div><b>Intel Wi-Fi and Bluetooth drivers, Git, Tailscale, WezTerm nightly</b>, then WSL: <code>npm i -g</code> the five outdated globals, <code>apt upgrade</code>.<span class="who">You · 20 min</span></div></li>
+      <li><div><b>Input tests by hand</b>: batteries, receiver port, TouchpadBlocker off, MX Master on the Unifying receiver.<span class="who">You · 20 min</span></div></li>
+      <li><div><b>Decide the opt-ins</b>: <code>/swapfile-cass</code> (24 GB), the shadow-copy cap, model caches, crash dumps once triaged.<span class="who">You</span></div></li>
+    </ol>
+  </div>
+  <div class="phase">
+    <h3>Restart <span class="chip crit">downtime 45–90 min</span></h3>
+    <ol class="steps">
+      <li><div><b>Restart to finish the upgrade.</b> Rollback stays available; extend it with <code>DISM /Online /Set-OSUninstallWindow /Value:60</code> right after.<span class="who">You</span></div></li>
+    </ol>
+  </div>
+  <div class="phase">
+    <h3>After the restart <span class="chip ready">verification</span></h3>
+    <ol class="steps">
+      <li><div><b>Verify</b>: <code>winver</code> = 28120.3181, Windows Update succeeds, SFC is clean, <code>wsl -l -v</code>, Lasso governor running, <code>Perf-Telemetry-v2.ps1 -Status</code> healthy.<span class="who">Claude, with the skill</span></div></li>
+      <li><div><b>Re-apply anything the upgrade reset</b>: Windows Search disabled, services from <code>memory-remediation.ps1</code>, power plan.<span class="who">Claude</span></div></li>
+      <li><div><b>Turn on BitLocker and tamper protection</b>, then run one full Defender scan.<span class="who">You</span></div></li>
+      <li><div><b>Apply the living-document decisions</b> with <code>-LivingDocExport</code>.<span class="who">You decide; the script moves</span></div></li>
+      <li><div><b>Next checkup in 4–8 weeks</b> with the <code>system-checkup</code> skill.<span class="who">Claude</span></div></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ======================================================= HISTORY -->
+<section class="slide" id="history">
+  <div class="eyebrow">History</div>
+  <h2>Eight months of the same three problems, getting narrower each pass</h2>
+  <div class="cols">
+    <div class="timeline">
+      <div><span class="d">2026-02-13</span><span class="t">First diagnostic report. vmmemWSL 1.5 GB, Chrome the largest Windows consumer.</span></div>
+      <div><span class="d">2026-05-04 · 07-23</span><span class="t">DISM RestoreHealth fails twice; 187 store corruptions reported both times.</span></div>
+      <div><span class="d">2026-07-13</span><span class="t">Downloads/Desktop cleanup document built; never applied.</span></div>
+      <div><span class="d">2026-08-11</span><span class="t">Insider flight-signing certificate expires. This build can no longer take feature updates.</span></div>
+      <div><span class="d">2026-08-14</span><span class="t">WSL memory governor and E-core pins applied; reboot. Exhaustion events start falling.</span></div>
+      <div><span class="d">2026-08-15 · 08-20</span><span class="t">WU diagnosed: first 0x80240034 and low disk, then CERT_E_EXPIRED. earlyoom installed, NODE_OPTIONS set to 1536.</span></div>
+      <div><span class="d">2026-08-26</span><span class="t">Split Lasso install found; v18 rules applied to the live Desktop config.</span></div>
+      <div><span class="d">2026-09-10</span><span class="t">Telemetry sampler stops after a re-registration.</span></div>
+      <div><span class="d">2026-10-12</span><span class="t">Full Acronis image to D: (433 GB).</span></div>
+      <div><span class="d">2026-10-13</span><span class="t">This checkup.</span></div>
+    </div>
+    <div class="tbl"><table>
+      <thead><tr><th>Measure</th><th>Feb 13</th><th>Aug 14 (before)</th><th>Oct 13</th></tr></thead>
+      <tbody>
+        <tr><td>C: free</td><td class="num">n/a</td><td class="num">15.5 GB</td><td class="num">120.4 GB</td></tr>
+        <tr><td>Pagefile</td><td class="num">n/a</td><td class="num">16 GB fixed</td><td class="num">28.8 GB</td></tr>
+        <tr><td>Commit limit</td><td class="num">n/a</td><td class="num">32.5 GB</td><td class="num">45.6 GB</td></tr>
+        <tr><td>RAM used, median</td><td class="num">n/a</td><td class="num">88.8%</td><td class="num">92.5% (Aug 15–Sep 10)</td></tr>
+        <tr><td>Exhaustion events / day</td><td class="num">n/a</td><td class="num">≈6</td><td class="num">0 since Aug 20</td></tr>
+        <tr><td>Largest process</td><td class="num">vmmemWSL 1.5 GB</td><td class="num">vmmemWSL 7.8 GB</td><td class="num">vmmemWSL 7.9 GB</td></tr>
+        <tr><td>Lasso rules live</td><td class="num">n/a</td><td class="num">0 (dead config)</td><td class="num">14 of 15</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <p class="prose">Earlier report: the August 16 usage analysis (prompt volume by hour and day) is at <a href="https://claude.ai/code/artifact/279926d5-8c3a-4a63-9632-b3ece8107ff0">claude.ai/code/artifact/279926d5…</a>.</p>
+</section>
+
+<!-- ======================================================= METHOD -->
+<section class="slide" id="method">
+  <div class="eyebrow">Method &amp; provenance</div>
+  <h2>How this was measured, and what was not</h2>
+  <div class="cols">
+    <div class="prose">
+      <p><strong>Orchestration.</strong> Claude Opus 5.5 ran the Windows-side collection, the elevated pass and every verification. The grunt work went to five headless <code>omp</code> sessions on <code>opencode-go/muse-spark-1.3-contributor</code>: W1 audited WSL, W2 classified the folders, W3 researched software, W4 researched Process Lasso and W5 researched the Insider upgrade. Their load-bearing claims were checked before use: the certificate expiry and build numbers against Microsoft and the UUP dump API, the Lasso ini formats against Bitsum's reference, and every one of W2's file names against the inventories.</p>
+      <p><strong>Data.</strong> Windows event logs (System, Application, WindowsUpdateClient, Kernel-PnP), CBS and DISM logs, 7,740 v1 telemetry samples, a Python scandir census of every user folder, AppData, temp and both drives, blake2b hashing of 4,594 candidate files, <code>du</code> inside WSL, and elevated reads of shadow storage, BitLocker, Defender, SSD health and process affinity.</p>
+    </div>
+    <div class="prose">
+      <p><strong>Changed on the system:</strong> SFC's own attempted repairs, and power saving unticked on five wireless-input entries. Everything else is files under <code>C:\performance-diagnostics</code>, the refreshed living document, and the new skill and agent definitions.</p>
+      <p><strong>Not verified:</strong> Bluetooth hardware tests that need hands at the machine. Version numbers in the modernization table beyond the spot checks. The contents of three large Desktop folders. Whether VMware Workstation 17 blocks Setup; the compatibility scan will say.</p>
+      <p><strong>Files:</strong> <code>C:\performance-diagnostics\checkup-20261013\</code> holds <code>raw\</code>, <code>workers\</code>, <code>removal\</code>, <code>report\</code> and <code>scripts\</code>.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div>SPECTRE-16 · checkup 2026-10-13 · generated __GENERATED__</div>
+  <div>Re-run with the <code>system-checkup</code> skill in Claude Code.</div>
+</footer>
+</div>
+<div id="tip" hidden></div>
+
+<script type="application/json" id="report-data">__REPORT_DATA__</script>
+<script>
+(function () {
+  const D = JSON.parse(document.getElementById('report-data').textContent);
+  const NS = 'http://www.w3.org/2000/svg';
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const C = { a: css('--series-a'), b: css('--series-b'), n: css('--neutral-mark'), accent: css('--accent'), line: css('--line'), ink3: css('--ink-3'), bg: css('--surface') };
+  const tip = document.getElementById('tip');
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  function showTip(e, html) { tip.innerHTML = html; tip.hidden = false; const x = Math.min(e.clientX + 14, window.innerWidth - tip.offsetWidth - 8); const y = Math.min(e.clientY + 14, window.innerHeight - tip.offsetHeight - 8); tip.style.left = x + 'px'; tip.style.top = y + 'px'; }
+  function hideTip() { tip.hidden = true; }
+  function el(tag, attrs, parent) { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (parent) parent.appendChild(n); return n; }
+  function nice(max) { if (max <= 0) return 1; const p = Math.pow(10, Math.floor(Math.log10(max))); const f = max / p; const s = f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10; return s * p; }
+  function ticks(max, n) { const top = nice(max); const step = nice(top / n); const out = []; for (let v = 0; v <= top + 1e-9; v += step) out.push(+v.toFixed(6)); return out; }
+  const fmtDay = (s) => { const d = new Date(s + 'T00:00:00'); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); };
+  const fmtN = (v) => v >= 1000 ? (v / 1000).toFixed(v >= 10000 ? 0 : 1) + 'k' : String(Math.round(v * 10) / 10);
+
+  // vertical bars, optional second series (grouped), optional marker
+  function bars(id, rows, opt) {
+    const host = document.getElementById(id); if (!host || !rows.length) return;
+    const W = 720, H = opt.h || 230, m = { t: 14, r: 12, b: 34, l: 44 };
+    const keys = opt.keys; const max = Math.max(...rows.flatMap((r) => keys.map((k) => r[k.key] || 0)));
+    const tk = ticks(max, 4); const top = tk[tk.length - 1];
+    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': opt.label }, host);
+    const iw = W - m.l - m.r, ih = H - m.t - m.b; const y = (v) => m.t + ih - (v / top) * ih;
+    tk.forEach((t) => { el('line', { x1: m.l, x2: W - m.r, y1: y(t), y2: y(t), class: 'grid' }, svg); const tx = el('text', { x: m.l - 6, y: y(t) + 3.5, 'text-anchor': 'end' }, svg); tx.textContent = fmtN(t); });
+    const slot = iw / rows.length; const gap = Math.max(2, slot * 0.18); const bw = (slot - gap) / keys.length;
+    const every = Math.ceil(rows.length / (opt.xLabels || 8));
+    rows.forEach((r, i) => {
+      const g = el('g', { class: 'm' }, svg); const x0 = m.l + i * slot + gap / 2;
+      keys.forEach((k, j) => {
+        const v = r[k.key] || 0; const h = Math.max(0, m.t + ih - y(v)); const x = x0 + j * bw;
+        if (v > 0) {
+          const rad = Math.min(3, bw / 2, h);
+          el('path', { d: `M${x},${m.t + ih} V${m.t + ih - h + rad} Q${x},${m.t + ih - h} ${x + rad},${m.t + ih - h} H${x + bw - 1 - rad} Q${x + bw - 1},${m.t + ih - h} ${x + bw - 1},${m.t + ih - h + rad} V${m.t + ih} Z`, fill: k.color, class: 'mark' }, g);
+        }
+      });
+      const hit = el('rect', { x: m.l + i * slot, y: m.t, width: slot, height: ih, class: 'hit' }, g);
+      hit.addEventListener('mousemove', (e) => showTip(e, `<b>${esc(opt.xFmt ? opt.xFmt(r[opt.x]) : r[opt.x])}</b><br>` + keys.map((k) => `<span style="color:${k.color}">■</span> ${esc(k.label)}: ${r[k.key] || 0}`).join('<br>')));
+      hit.addEventListener('mouseleave', hideTip);
+      if (i % every === 0) { const t = el('text', { x: m.l + i * slot + slot / 2, y: H - m.b + 16, 'text-anchor': 'middle' }, svg); t.textContent = opt.xFmt ? opt.xFmt(r[opt.x]) : r[opt.x]; }
+    });
+    el('line', { x1: m.l, x2: W - m.r, y1: m.t + ih, y2: m.t + ih, class: 'axis' }, svg);
+    if (opt.marker) {
+      const idx = rows.findIndex((r) => r[opt.x] >= opt.marker.at); if (idx >= 0) {
+        const mx = m.l + idx * slot; el('line', { x1: mx, x2: mx, y1: m.t, y2: m.t + ih, stroke: C.accent, 'stroke-dasharray': '4 3', 'stroke-width': 1.5 }, svg);
+        const t = el('text', { x: mx + 6, y: m.t + 10, class: 'lbl' }, svg); t.textContent = opt.marker.label;
+      }
+    }
+  }
+
+  // line with p50 + band to p95
+  function band(id, rows, opt) {
+    const host = document.getElementById(id); if (!host || !rows.length) return;
+    const W = 720, H = 230, m = { t: 14, r: 14, b: 34, l: 44 };
+    const lo = opt.min, hi = opt.max; const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': opt.label }, host);
+    const iw = W - m.l - m.r, ih = H - m.t - m.b; const x = (i) => m.l + (rows.length === 1 ? iw / 2 : (i / (rows.length - 1)) * iw); const y = (v) => m.t + ih - ((v - lo) / (hi - lo)) * ih;
+    for (let t = lo; t <= hi + 1e-9; t += opt.step) { el('line', { x1: m.l, x2: W - m.r, y1: y(t), y2: y(t), class: 'grid' }, svg); const tx = el('text', { x: m.l - 6, y: y(t) + 3.5, 'text-anchor': 'end' }, svg); tx.textContent = t + (opt.unit || ''); }
+    if (opt.ref != null) { el('line', { x1: m.l, x2: W - m.r, y1: y(opt.ref), y2: y(opt.ref), stroke: C.accent, 'stroke-dasharray': '4 3', 'stroke-width': 1.2 }, svg); const t = el('text', { x: W - m.r, y: y(opt.ref) - 5, 'text-anchor': 'end', class: 'lbl' }, svg); t.textContent = opt.refLabel; }
+    const up = rows.map((r, i) => `${x(i)},${y(Math.min(hi, r[opt.hiKey]))}`); const dn = rows.map((r, i) => `${x(i)},${y(Math.max(lo, r[opt.key]))}`).reverse();
+    el('polygon', { points: up.concat(dn).join(' '), fill: C.a, 'fill-opacity': 0.18 }, svg);
+    el('polyline', { points: rows.map((r, i) => `${x(i)},${y(Math.max(lo, r[opt.key]))}`).join(' '), fill: 'none', stroke: C.a, 'stroke-width': 2, 'stroke-linejoin': 'round' }, svg);
+    const last = rows[rows.length - 1]; el('circle', { cx: x(rows.length - 1), cy: y(last[opt.key]), r: 4, fill: C.a, stroke: C.bg, 'stroke-width': 2 }, svg);
+    const every = Math.ceil(rows.length / 7);
+    rows.forEach((r, i) => {
+      if (i % every === 0) { const t = el('text', { x: x(i), y: H - m.b + 16, 'text-anchor': 'middle' }, svg); t.textContent = fmtDay(r.day); }
+      const hit = el('rect', { x: x(i) - iw / rows.length / 2, y: m.t, width: iw / rows.length, height: ih, class: 'hit' }, svg);
+      hit.addEventListener('mousemove', (e) => showTip(e, `<b>${fmtDay(r.day)}</b> · ${r.n} samples<br>median ${r[opt.key]}${opt.unit || ''} · p95 ${r[opt.hiKey]}${opt.unit || ''}`));
+      hit.addEventListener('mouseleave', hideTip);
+    });
+    el('line', { x1: m.l, x2: W - m.r, y1: m.t + ih, y2: m.t + ih, class: 'axis' }, svg);
+  }
+
+  // horizontal bars
+  function hbars(id, rows, opt) {
+    const host = document.getElementById(id); if (!host || !rows.length) return;
+    const rowH = 26, W = 720, m = { t: 4, r: 64, b: 4, l: opt.labelW || 230 }; const H = m.t + m.b + rows.length * rowH;
+    const max = Math.max(...rows.map((r) => r.v)); const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': opt.label }, host);
+    const iw = W - m.l - m.r;
+    rows.forEach((r, i) => {
+      const g = el('g', { class: 'm' }, svg); const yy = m.t + i * rowH; const w = Math.max(2, (r.v / max) * iw);
+      const t = el('text', { x: m.l - 10, y: yy + rowH / 2 + 4, 'text-anchor': 'end', class: 'lbl' }, g); t.textContent = r.label;
+      el('rect', { x: m.l, y: yy + 5, width: w, height: rowH - 10, rx: 3, fill: r.color || C.a, class: 'mark' }, g);
+      const v = el('text', { x: m.l + w + 6, y: yy + rowH / 2 + 4 }, g); v.textContent = r.v.toFixed(1) + ' ' + (opt.unit || '');
+      const hit = el('rect', { x: 0, y: yy, width: W, height: rowH, class: 'hit' }, g);
+      hit.addEventListener('mousemove', (e) => showTip(e, `<b>${esc(r.label)}</b><br>${r.v.toFixed(2)} ${opt.unit || ''}${r.note ? '<br>' + esc(r.note) : ''}`)); hit.addEventListener('mouseleave', hideTip);
+    });
+  }
+
+  // ---- KPIs
+  const k = document.getElementById('kpis');
+  const tiles = [
+    ['C: free', '120.4 <small>GB</small>', 'Was 15.5 GB on Aug 12. No longer the update blocker.'],
+    ['Failed WU downloads', `${D.wu_total ?? 337}`, 'Since mid-July, all 0x800B0101 (expired certificate).'],
+    ['Median RAM in use', '92.5<small>%</small>', 'Aug 15–Sep 10; two thirds of samples at or above 90%.'],
+    ['Exhaustion events', `${D.exhaustion_total ?? 223} → 0`, 'None since Aug 20, after the WSL memory governor.'],
+    ['Safe to reclaim', '≈42.6 <small>GB</small>', 'Default set, dry run verified. ≈125 GB with opt-ins.']
+  ];
+  k.innerHTML = tiles.map((t) => `<div class="tile"><span class="l">${t[0]}</span><span class="v">${t[1]}</span><p>${t[2]}</p></div>`).join('');
+
+  // ---- charts
+  bars('ch-wu', D.wu_weekly.map((r) => ({ week: r.week, n: r.n })), { x: 'week', keys: [{ key: 'n', label: 'failed downloads', color: C.a }], xFmt: fmtDay, xLabels: 7, label: 'Failed feature-update downloads per week', marker: { at: '2026-08-09', label: 'cert expired Aug 11' } });
+  // fill missing days so gaps read as zero
+  const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  function fillDays(rows, from, to, keys) { const map = Object.fromEntries(rows.map((r) => [r.day, r])); const out = []; for (let d = new Date(from + 'T00:00:00'); d <= new Date(to + 'T00:00:00'); d.setDate(d.getDate() + 1)) { const s = ymd(d); const o = { day: s }; keys.forEach((k) => (o[k] = (map[s] && map[s][k]) || 0)); out.push(o); } return out; }
+  bars('ch-exh', fillDays(D.exhaustion_daily, '2026-07-17', '2026-10-13', ['n']), { x: 'day', keys: [{ key: 'n', label: 'events', color: C.a }], xFmt: fmtDay, xLabels: 7, label: 'Resource exhaustion events per day', marker: { at: '2026-08-14', label: 'memory governor' } });
+  const td = D.tele_daily.filter((r) => r.n >= 12);
+  band('ch-ram', td, { key: 'ram_p50', hiKey: 'ram_p95', min: 70, max: 100, step: 10, unit: '%', ref: 90, refLabel: '90%', label: 'Daily RAM use median and 95th percentile' });
+  bars('ch-hf', td.map((r) => ({ day: r.day, v: r.hf_p95 })), { x: 'day', keys: [{ key: 'v', label: 'hard faults/s (p95)', color: C.b }], xFmt: fmtDay, xLabels: 7, label: 'Daily 95th percentile hard faults per second' });
+  const tb = document.querySelector('#tbl-phase tbody');
+  const pname = { 'pre-reboot-baseline': 'Before fixes (Aug 14)', 'wslconfig-fix': 'Governor, first day', 'post-reboot-0815': 'Aug 15 – Sep 10' };
+  tb.innerHTML = D.tele_phase.map((p) => `<tr><td>${pname[p.phase] || p.phase}</td><td class="num">${p.n.toLocaleString()}</td><td class="num">${p.ram_p50}%</td><td class="num">${p.ram_p95}%</td><td class="num">${p.over90}%</td><td class="num">${Math.round(p.hf_p95).toLocaleString()}/s</td></tr>`).join('');
+  hbars('ch-commit', D.commit_now.map((r) => ({ label: r.name, v: r.gb, color: /Intel|Sandbox/.test(r.name) ? C.a : /Everything else/.test(r.name) ? C.n : C.b })), { unit: 'GB', labelW: 250, label: 'Private memory by owner' });
+  bars('ch-bt', fillDays(D.bt_daily, D.bt_daily[0]?.day || '2026-09-13', '2026-10-13', ['kbd', 'mouse']), { x: 'day', keys: [{ key: 'kbd', label: 'Varmilo keyboard', color: C.b }, { key: 'mouse', label: 'MX Master mouse', color: C.a }], xFmt: fmtDay, xLabels: 7, label: 'Bluetooth disconnects per day' });
+  document.getElementById('lg-bt').innerHTML = `<span><i style="background:${C.b}"></i>Varmilo VS-3 keyboard</span><span><i style="background:${C.a}"></i>MX Master mouse</span>`;
+  hbars('ch-cdrive', D.c_parts.slice().sort((p, q) => q.gb - p.gb).map((r) => ({ label: r.name, v: r.gb, color: /WSL/.test(r.name) ? C.a : r.name === 'Free' ? C.n : C.b, note: (r.gb / 947.9 * 100).toFixed(1) + '% of the drive' })), { unit: 'GB', labelW: 290, label: 'C: drive composition' });
+  hbars('ch-wsl', D.wsl_top.slice(0, 12).map((r) => ({ label: r.path, v: r.gb, color: /swapfile|coding-agent/.test(r.path) ? C.a : C.b })), { unit: 'GB', labelW: 250, label: 'Largest directories in the WSL disk' });
+  document.querySelector('#tbl-reclaim tbody').innerHTML = D.reclaim.map((r) => `<tr><td>${esc(r.section)}</td><td class="num">${r.items}</td><td class="num">${r.default_gb.toFixed(1)} GB</td><td class="num">${r.all_gb.toFixed(1)} GB</td></tr>`).join('') +
+    `<tr><td><b>Total</b></td><td class="num">${D.reclaim.reduce((a, r) => a + r.items, 0)}</td><td class="num"><b>${D.reclaim.reduce((a, r) => a + r.default_gb, 0).toFixed(1)} GB</b></td><td class="num">${D.reclaim.reduce((a, r) => a + r.all_gb, 0).toFixed(1)} GB</td></tr>`;
+  document.querySelector('#tbl-errors tbody').innerHTML = D.app_errors.slice(0, 10).map((r) => `<tr><td>${esc(r.name)}</td><td class="num">${r.n}</td></tr>`).join('');
+})();
+</script>

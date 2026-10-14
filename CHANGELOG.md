@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- `system-checkup` — SPECTRE-16-specific periodic system checkup (Windows Update/servicing, memory and telemetry, Process Lasso Pro rules, crashes, Bluetooth input, storage reclaim with a dry-run removal script, npm→pnpm/bun hygiene, software currency, living-document folder cleanup, dark HTML report). Grunt work runs on headless omp workers (opencode-go/muse-spark-1.3-contributor). Windows Claude Code uses a deployed copy; `scripts/deploy-windows.sh` keeps it in sync.
 - `third-party-skills.json` manifest at `~/code/agents/third-party-skills.json` — manifest-driven integration for external skill repos (taste-skill, ponytail, drawio-skill, SkillSpector, skill-audit).
 - `scripts/sync-third-party.py` at `~/code/agents/scripts/` — sync engine that clones/pulls third-party repos and selectively symlinks skills, commands, hooks, and agents.
 - Integrated `--third-party` flag into `sync.sh` — runs automatically during `--fix` and previews during `--dry-run`.
