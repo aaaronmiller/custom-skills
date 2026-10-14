@@ -484,8 +484,9 @@ class GitRepo:
         except (RuntimeError, ValueError, IndexError):
             pass
 
-        if r:
-            lines = [l.strip() for l in r.split("\n") if l.strip()]
+        st = maybe_run_git(self.path, "status", "--porcelain", timeout=15)
+        if st:
+            lines = [l.strip() for l in st.split("\n") if l.strip()]
             self.uncommitted = len(lines)
             self.untracked_files = [l[3:] for l in lines if l.startswith("??")]
 
