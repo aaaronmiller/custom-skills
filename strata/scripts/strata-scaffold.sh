@@ -1,17 +1,25 @@
 #!/usr/bin/env bash
 # strata-scaffold.sh
-# Creates an empty, valid STRATA artifact tree for a new project.
+# Creates empty STRATA authoring templates (not a validated prepared project) for a new project.
 # Defaults to macOS bash semantics. Spaces in the project name are handled.
 #
 # Usage:
-#   ./strata-scaffold.sh "My Project Name" [parent-dir]
+#   ./strata-scaffold.sh "My Project Name" [repo-dir]
+#
+# Environment (all optional):
+#   STRATA_AUTHOR   frontmatter author   (default: ice-ninja)
+#   STRATA_MODEL    frontmatter model    (default: unknown; set to the model doing the work)
+#   STRATA_EVALS    eval store directory (default: ~/.strata/evals/<slug>), kept OUTSIDE the repo
+#   STRATA_LAYOUT   docs | strata        (default: docs -> <repo>/docs/specs/<slug>;
+#                                         strata -> <repo>/strata/<slug>)
 #
 # Produces:
-#   <parent-dir>/strata/<slug>/{intent,spec,context,substrate,constitution}.md
-#   <parent-dir>/strata/<slug>/plays/{scaffold,commit,deploy}.md
-#   <parent-dir>/strata/<slug>/ledger/{ledger,standing}.md
-#   <parent-dir>/strata/<slug>/evals/README.md   (eval set lives OUTSIDE the build tree by rule;
-#                                                  this directory is the pointer, not the store)
+#   <root>/{intent,spec,context,experience,substrate,constitution}.md
+#   <root>/plays/{scaffold,commit,deploy,build}.md
+#   <root>/ledger/{ledger,standing}.md
+#   <root>/EVALS-LOCATION.md                 pointer only; the store lives outside the repo
+#   $STRATA_EVALS/evals.md                   held-out eval manifest skeleton
+#   <repo>/AGENTS.md and <repo>/CLAUDE.md    only if absent: standing gates, CLAUDE.md imports AGENTS.md
 
 set -euo pipefail
 
@@ -22,6 +30,8 @@ fi
 
 PROJECT_NAME="$1"
 PARENT_DIR="${2:-.}"
+AUTHOR="${STRATA_AUTHOR:-ice-ninja}"
+MODEL="${STRATA_MODEL:-unknown}"
 
 # Slug: lowercase, spaces and non-alphanumerics to single hyphens, trimmed.
 SLUG="$(printf '%s' "$PROJECT_NAME" \
@@ -33,21 +43,40 @@ if [ -z "$SLUG" ]; then
   exit 2
 fi
 
-ROOT="$PARENT_DIR/strata/$SLUG"
+case "${STRATA_LAYOUT:-docs}" in
+  strata) ROOT="$PARENT_DIR/strata/$SLUG" ;;
+  docs)   ROOT="$PARENT_DIR/docs/specs/$SLUG" ;;
+  *)      echo "error: STRATA_LAYOUT must be docs or strata" >&2; exit 2 ;;
+esac
+EVALS_DIR="${STRATA_EVALS:-$HOME/.strata/evals/$SLUG}"
 
 if [ -e "$ROOT" ]; then
   echo "error: $ROOT already exists; STRATA does not overwrite an existing tree" >&2
   exit 1
 fi
 
+# Validate the eval boundary before any directory or template mutation.
+python3 - "$PARENT_DIR" "$EVALS_DIR" <<'PYBOUNDARY'
+from pathlib import Path
+import sys
+repo = Path(sys.argv[1]).expanduser().resolve()
+for ancestor in [repo, *repo.parents]:
+    if (ancestor / '.git').exists():
+        repo = ancestor
+        break
+evals = Path(sys.argv[2]).expanduser().resolve()
+if evals == repo or repo in evals.parents:
+    raise SystemExit('error: held-out eval store must be outside the build root')
+PYBOUNDARY
+
 NOW="$(date '+%Y-%m-%d %H:%M:%S %Z')"
 
-mkdir -p "$ROOT/plays" "$ROOT/ledger" "$ROOT/evals"
+mkdir -p "$ROOT/plays" "$ROOT/ledger" "$EVALS_DIR"
 
 fm() {
   # $1 = tag list, $2 = title
-  printf -- '---\ndate: %s\nver: 1.0.0\nauthor: ice-ninja\nmodel: claude-opus-4-7\ntags: [%s]\n---\n\n# %s\n\n' \
-    "$NOW" "$1" "$2"
+  printf -- '---\ndate: %s\nver: 1.0.0\nauthor: %s\nmodel: %s\ntags: [%s]\n---\n\n# %s\n\n' \
+    "$NOW" "$AUTHOR" "$MODEL" "$1" "$2"
 }
 
 {
@@ -56,16 +85,16 @@ fm() {
   printf '## 2. Intent level\n[Consumer or engineering, list each.]\n\n'
   printf '## 3. Constraints\n[Hard constraints. The deployment target lives here as a constraint.]\n\n'
   printf '## 4. Scale and quality expectations\n[The numbers architecture is derived from.]\n\n'
-  printf '## 5. Success conditions\n\n## 6. Failure conditions\n\n## 7. Personas\n\n'
-  printf '## 8. Scope boundaries\n\n## 9. Prior art\n\n## 10. Assumptions and dependencies\n\n'
-  printf '## 11. Open intent questions\n[Max three NEEDS CLARIFICATION markers.]\n'
+  printf '## 5. Success conditions\n\n## 6. Failure conditions\n\n## 7. Personas\n\n## 8. User stories\n[As a <persona>, I want <capability> so that <outcome>. Given/When/Then acceptance; each story lists the SPEC-IDs that verify it.]\n\n'
+  printf '## 9. Scope boundaries\n\n## 10. Prior art\n\n## 11. Assumptions and dependencies\n\n'
+  printf '## 12. Open intent questions\n[Max three NEEDS CLARIFICATION markers.]\n'
 } > "$ROOT/intent.md"
 
 {
   fm "strata,spec" "$PROJECT_NAME Specification v1.0"
   printf '## 1. Contract clauses\n[Every clause testable. Every clause carries an EVAL-ID. No technology tokens.]\n\n'
-  printf 'SPEC-001 [EVAL-001] THE system SHALL [observable behavior].\n\n'
-  printf '## 2. Acceptance scenarios\n\n## 3. Eval index\n| EVAL-ID | Asserts | Bound clause | Stored at |\n|---|---|---|---|\n| EVAL-001 | ... | SPEC-001 | evals/ outside build tree |\n'
+  printf '**SPEC-001** [EVAL-001] THE system SHALL [observable behavior].\n- Eval: [what the held-out evaluation asserts]\n- Traces to: intent section [n]\n\n'
+  printf '## 2. Acceptance scenarios\n\n## 3. Eval index\n| EVAL-ID | Asserts | Bound clause | Stored at |\n|---|---|---|---|\n| EVAL-001 | ... | SPEC-001 | held-out store (see EVALS-LOCATION.md) |\n'
 } > "$ROOT/spec.md"
 
 {
@@ -78,16 +107,39 @@ fm() {
 
 {
   fm "strata,substrate,self-location" "Substrate Self-Location"
-  printf '## Declared level\nS3\n\n## Pre-locked decisions\n[Be specific. This is the required honesty.]\n\n'
+  printf '## Declared level\nS0\n\n## Pre-locked decisions\n[Be specific. This is the required honesty.]\n\n'
   printf '## Live-resolved decisions\n\n## Empirical memory state\nempty (Context Crafting is intuition-based on this project)\n\n## Known reach\n'
 } > "$ROOT/substrate.md"
 
 {
   fm "strata,constitution,governance" "Constitution (reference only)"
-  printf 'STRATA does not generate a constitution from scratch. If the project has one, replace this file with it. If not, create one through SpecKit or OpenSpec tooling and place it here. The human owns this file.\n'
+  printf 'Governance is human-owned. During specification preparation, use the project constitution or create it through the installed Spec Kit constitution workflow from authorized principles. The authoritative path is .specify/memory/constitution.md; this file is only a reference.\n'
 } > "$ROOT/constitution.md"
 
-for play in scaffold commit deploy; do
+{
+  printf -- '---\ndate: %s\nver: 1.0.0\nauthor: %s (system-derived)\nmodel: %s\nlayer: derived\ntags: [strata,experience,ux]\n---\n\n# %s Experience v1.0 (derived)\n\n' "$NOW" "$AUTHOR" "$MODEL" "$PROJECT_NAME"
+  printf '## 1. Interaction model
+[Screens or states, navigation, first thirty seconds. Each element cites the intent persona or story it serves.]
+
+'
+  printf '## 2. Design tokens
+[Colour, type, spacing, radius, motion. Source of truth is the mockup when one exists.]
+
+'
+  printf '## 3. Copy rules
+[Voice, banned terms, error and empty-state patterns.]
+
+'
+  printf '## 4. Mockup
+[Path to the interactive mockup and its screenshots, both themes, phone and desktop.]
+
+'
+  printf '## 5. Accessibility
+[Target level and how each SPEC accessibility clause is met.]
+'
+} > "$ROOT/experience.md"
+
+for play in scaffold commit deploy build; do
   {
     fm "strata,plays,$play" "Play: $play"
     printf '## Reads\n[Every variable and its location, e.g. deployment target: intent.md section 3. Never store the value.]\n\n'
@@ -108,13 +160,32 @@ done
   printf '## Last decisions that matter\n- 0001: tree scaffolded.\n\n'
   printf '## Not yet decided\nAll content. Intake and the Confidence Gate come next.\n\n'
   printf '## Next\nRun Phase 1 intake, then Phase 2 research.\n\n'
-  printf '## Substrate note\nDeclared S3, empirical memory empty.\n'
+  printf '## Substrate note\nDeclared S0 (templates only), empirical memory empty.\n'
 } > "$ROOT/ledger/standing.md"
 
 {
-  fm "strata,evals" "Eval store pointer"
-  printf 'The eval set bound to spec.md EVAL-IDs MUST live outside this build tree and out of the implementing agent view. This file records where it lives; it is not the store itself.\n\nStore location: [set this to a path or repository outside the build tree]\n'
-} > "$ROOT/evals/README.md"
+  fm "strata,evals,pointer" "Eval store location"
+  printf 'The held-out evals bound to spec EVAL-IDs live OUTSIDE this repository. Genuine held-out isolation also requires an evaluator context inaccessible to the implementing agent; an external path alone does not establish that boundary.\n\nStore: %s/evals.md\n\nValidate with: strata-validate.py %s --evals %s\n' "$EVALS_DIR" "$ROOT" "$EVALS_DIR"
+} > "$ROOT/EVALS-LOCATION.md"
+
+if [ ! -e "$EVALS_DIR/evals.md" ]; then
+  {
+    fm "strata,evals,held-out" "$PROJECT_NAME held-out evals"
+    printf '## EVAL-001\n- Bound clause: SPEC-001\n- Asserts: [pass/fail statement, no implementation reference]\n- Method: [manual check, scripted scenario, metric with threshold]\n- Fixture: [inputs, stored here, never in the repo]\n'
+  } > "$EVALS_DIR/evals.md"
+fi
+
+if [ ! -e "$PARENT_DIR/AGENTS.md" ]; then
+  {
+    printf '# AGENTS.md\n\nSession-scoped instructions for coding agents in this repository.\n\n'
+    printf '## Before anything else\nRead %s/ledger/standing.md and the last five entries of %s/ledger/ledger.md, then intent.md and spec.md in that folder.\n\n' "${ROOT#$PARENT_DIR/}" "${ROOT#$PARENT_DIR/}"
+    printf '## Standing gates\n- Every change maps to a SPEC-ID; if it cannot, stop and append a ledger entry instead of guessing.\n- Append a ledger entry for every decision and outcome, and overwrite standing.md, every time.\n- Upstream changes enter at intent.md only; derived context is re-derived and reusable plays read its variables.\n- Claims of done require evidence: commands run, results, screenshots for UI.\n- Never search for, open or request the held-out evals.\n'
+  } > "$PARENT_DIR/AGENTS.md"
+fi
+if [ ! -e "$PARENT_DIR/CLAUDE.md" ]; then
+  printf '@AGENTS.md\n' > "$PARENT_DIR/CLAUDE.md"
+fi
 
 echo "scaffolded: $ROOT"
-echo "next: fill intent.md and spec.md (human), let the system derive context.md and plays/, then run strata-validate.py"
+echo "evals: $EVALS_DIR/evals.md (outside the repo)"
+echo "next: fill intent.md and spec.md (human), let the system derive context.md, experience.md and plays/, then run strata-validate.py $ROOT --evals $EVALS_DIR"

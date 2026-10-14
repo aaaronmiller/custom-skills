@@ -51,7 +51,7 @@ tags: [{{TAGS}}]
 
 ## Minimum play set for any project
 
-A scaffold play that creates the project skeleton from `context.md` section 9. A commit play that groups changes by concern and follows the constitution's commit convention, halting when a change cannot be mapped to a SPEC-ID. A deploy play that reads the deployment constraint from intent and never names a provider. Add domain plays as the project requires.
+A scaffold play that creates the project skeleton from `context.md` section 9. A commit play that groups changes by concern and follows the constitution's commit convention, halting when a change cannot be mapped to a SPEC-ID. A deploy play that reads the deployment constraint from intent and never names a provider. A build play that turns context build phases into work packages: each package names the SPEC-IDs it satisfies, its dependencies, the folder it owns, a machine-checkable definition of done, and its parallel lane, so independent packages can run as separate agents in separate worktrees. The build play reads phases from `context.md` section 8 at run time; it never copies them. Add domain plays as the project requires.
 
 ## Rules
 

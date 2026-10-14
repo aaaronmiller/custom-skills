@@ -46,21 +46,24 @@ tags: [{{TAGS}}]
 ## 7. Personas
 [Each primary user type, their goal, their frustration, their context, their technical sophistication.]
 
-## 8. Scope boundaries
+## 8. User stories
+[One story per meaningful capability, grouped into epics. Form: As a <persona>, I want <capability> so that <outcome>. Each story carries Given/When/Then acceptance in user-observable terms and lists the SPEC-IDs that verify it. Stories are intent: they say what a person needs, never how the system does it.]
+
+## 9. Scope boundaries
 | In scope | Out of scope | Rationale |
 |----------|-------------|-----------|
 | ... | ... | ... |
 
-## 9. Prior art
+## 10. Prior art
 | Solution | Strength | Weakness | Gap this fills |
 |----------|----------|----------|----------------|
 | ... | ... | ... | ... |
-[Patterns adopted and patterns deliberately avoided, with reasoning. This is where Phase 2 research lands. It lives nowhere else.]
+[Patterns adopted and patterns deliberately avoided, with reasoning. This is where Phase 2 research lands. It lives nowhere else. Naming products here is expected; the validator exempts any section titled "Prior art" from the separation check.]
 
-## 10. Assumptions and dependencies
+## 11. Assumptions and dependencies
 [Assumptions about users and environment. External dependencies as capabilities, not products.]
 
-## 11. Open intent questions
+## 12. Open intent questions
 [Maximum three `[NEEDS CLARIFICATION]` markers, only for decisions that materially change scope.]
 ```
 

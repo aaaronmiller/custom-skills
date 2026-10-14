@@ -12,7 +12,9 @@ STRATA artifacts are plain markdown and feed directly into existing spec-driven 
 
 ## SpecKit
 
-`intent.md` plus `spec.md` feed `/speckit.specify`. Append intent for the why and constraints, spec for the testable contract. `context.md` feeds `/speckit.plan`; SpecKit decomposes it into its multi-file plan structure during the plan phase, no manual splitting needed. `plays/` feeds `/speckit.tasks`, but STRATA plays are intent-encoded so they survive the pivots that shatter a generated `tasks.md`. `constitution.md` is the shared governance file SpecKit also uses. SpecKit has no equivalent of `ledger/` or `substrate.md`; those are the STRATA value-add and should be carried alongside the SpecKit tree, not discarded.
+For the current preparation pipeline and native artifact paths, read `intake-and-speckit.md`. That 2.2 reference supersedes this legacy mapping.
+
+`intent.md` plus `spec.md` feed `/speckit.specify`. Append intent for the why and constraints, spec for the testable contract. `context.md` feeds `/speckit.plan`; SpecKit decomposes it into its multi-file plan structure during the plan phase, no manual splitting needed. `experience.md` travels with `context.md` into the plan. `plays/` feeds `/speckit.tasks`, but STRATA plays are intent-encoded so they survive the pivots that shatter a generated `tasks.md`. `constitution.md` is the shared governance file SpecKit also uses. SpecKit has no equivalent of `ledger/` or `substrate.md`; those are the STRATA value-add and should be carried alongside the SpecKit tree, not discarded.
 
 ## OpenSpec
 

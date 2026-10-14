@@ -1,27 +1,17 @@
-# Constitution source (user-canonical)
+---
+title: Project constitution and task gates
+version: "2.2.0"
+tags: [strata, constitution, governance, gates]
+---
 
-Location: `/home/cheta/code/quartermaster/.specify/memory/constitution.md`
-(v1.0.0, ratified 2026-06-26). This pointer IS the location. Do not duplicate
-the file into skills or build roots — duplicates drift and a drifted
-constitution enforces the wrong law.
+# Project constitution and task gates
 
-## How to use (Phase 4 step 7)
+This 2.2 procedure supersedes the bundled 2.1 instruction to never create a constitution. The current user authorized Strata to create a project-local constitution through Spec Kit during specification preparation.
 
-- Reference by name the principles the new build inherits. Typical carryover:
-  preview-before-write with rollback, provenance on every artifact,
-  deterministic procedures with advisory model judgment.
-- Never transplant another project's Technical Constraints. A stack bound to
-  one build (language, storage, CLI surface) is a defect in any other.
-- If no applicable constitution exists, do not generate one. Note the absence
-  and route creation through the project's governance tooling.
-- If the build root lacks a session-scoped instruction file (`AGENTS.md` /
-  `CLAUDE.md` / `AGENT.md`), write the standing gates there.
+Resolve governance from the existing `.specify/memory/constitution.md`, a declared project constitution, or an explicitly supplied `$STRATA_CONSTITUTION`. Preserve project-owned principles. Another project's constitution is reference material only; do not automatically inherit its technology choices or policy.
 
-## Enforcement (why restart matters)
+If absent, run the installed Spec Kit constitution workflow using the source's explicit principles and authorized project constraints. Resolve material ambiguities through targeted questions when they block preparation. The authoritative file is `.specify/memory/constitution.md`; other locations point to it rather than creating editable copies.
 
-- Instruction files load by directory scope at session start. A session rooted
-  elsewhere never sees the build root's file — the gates exist on disk and
-  bind nothing.
-- After writing gates, tell the user to restart rooted in the build folder.
-  Until then the gates have no bite. A restart without the file changes
-  nothing; the file without a restart changes nothing.
+The constitution and session instructions require each task to cite its requirement/story, state its dependencies, name its acceptance gate and supply evidence before completion. Meaningful risky changes include recovery. Unresolved critical analysis findings prevent initiation. Producing specs or tasks does not authorize implementation.
+
+Extend existing scoped AGENTS.md/CLAUDE.md/AGENT.md files narrowly and preserve operator work. Point fresh harnesses at the real build root and reset-handoff.md. Consult intake-and-speckit.md and fresh-session-initiation.md for the named gates and receipt format.

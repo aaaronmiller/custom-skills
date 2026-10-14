@@ -16,7 +16,7 @@ Every clause must be convertible into an evaluation that returns pass or fail. I
 
 ## Eval binding
 
-Every clause carries an `EVAL-ID`. The evaluation it points at is stored outside the build tree, in an eval set the implementing agent does not see, for the same reason a separated test exists in a dark factory: an agent that can read the test it is graded on optimizes to pass the test, not to satisfy the intent. An unbound clause fails validation.
+Every clause carries an `EVAL-ID`. The evaluation it points at is stored outside the repository (default `~/.strata/evals/<slug>/evals.md`, or `$STRATA_EVALS`), in an eval set the implementing agent does not see, for the same reason a separated test exists in a dark factory: an agent that can read the test it is graded on optimizes to pass the test, not to satisfy the intent. An unbound clause fails validation.
 
 ## EARS-style phrasing
 
@@ -50,7 +50,7 @@ tags: [{{TAGS}}]
 ### 1.2 [Next capability group]
 
 ## 2. Acceptance scenarios
-[Given / When / Then, each scenario bound to one or more EVAL-IDs. Cover happy path, the failure conditions named in intent section 6, and the boundaries named in intent section 8.]
+[Given / When / Then, each scenario bound to one or more EVAL-IDs. Cover happy path, the failure conditions named in intent section 6, and the boundaries named in intent section 9, and every user story in intent section 8.]
 
 ## 3. Eval index
 | EVAL-ID | Asserts | Bound clause | Stored at |

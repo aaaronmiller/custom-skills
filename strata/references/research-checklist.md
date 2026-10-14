@@ -8,7 +8,7 @@ tags: [strata, research, prior-art, checklist]
 
 # Prior Art Research Checklist
 
-Mandatory in Phase 2. The minimum is a floor, not a ceiling. Always survey how others approached the problem and extract reusable patterns and documented pitfalls. Findings land in `intent.md` section 9, never in a separate scratch file.
+Mandatory in Phase 2. The minimum is a floor, not a ceiling. Always survey how others approached the problem and extract reusable patterns and documented pitfalls. Findings land in `intent.md` section 10 (Prior art), never in a separate scratch file.
 
 ## Step 1: Local workspace scan (always first)
 
@@ -36,4 +36,4 @@ If an existing tool fully solves the problem, stop, surface it with a comparison
 
 ## Output
 
-Comparison table, patterns adopted, and patterns avoided go into `intent.md` section 9. Process notes go nowhere. If a known project is later found to have been missed, append a ledger entry recording what was missed, when it surfaced, and why it matters, then update `intent.md`.
+Comparison table, patterns adopted, and patterns avoided go into `intent.md` section 10. Process notes go nowhere. If a known project is later found to have been missed, append a ledger entry recording what was missed, when it surfaced, and why it matters, then update `intent.md`.
