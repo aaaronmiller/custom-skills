@@ -393,18 +393,24 @@ class GitRepo:
         except OSError:
             pass
 
-        # Check for active merge/rebase/cherry-pick/revert
-        GIT_LOCK_FILES = ["MERGE_HEAD", "REBASE_HEAD", "CHERRY_PICK_HEAD",
-                          "REVERT_HEAD", "MERGE_MSG", "MERGE_MODE", "sequencer/todo"]
+        # Check for active merge/rebase/cherry-pick/revert.
+        # NOTE: REBASE_HEAD, MERGE_MSG and MERGE_MODE can linger after the
+        # operation finished (observed live: a completed rebase left
+        # REBASE_HEAD behind, flagging a clean repo forever), so they must
+        # NOT mark a repo in-progress. A rebase is active only while its
+        # state dirs exist; a merge only while MERGE_HEAD exists.
+        GIT_LOCK_FILES = ["MERGE_HEAD", "CHERRY_PICK_HEAD", "REVERT_HEAD",
+                          "sequencer/todo"]
         git_dir = self.path / ".git"
         active_ops = []
         for lf in GIT_LOCK_FILES:
             fp = git_dir / lf
             if fp.exists():
-                name = lf.replace("_HEAD", "").replace("_MSG", " (merge)") \
-                          .replace("_MODE", " (merge)") \
+                name = lf.replace("_HEAD", "") \
                           .replace("sequencer/todo", "rebase (interactive)")
                 active_ops.append(name)
+        if (git_dir / "rebase-merge").exists() or (git_dir / "rebase-apply").exists():
+            active_ops.append("rebase")
         self.active_git_op = active_ops[0] if active_ops else None
         if self.active_git_op:
             return
@@ -447,10 +453,23 @@ class GitRepo:
             else:
                 self.error = f"fetch failed: {e}"
             return
-
-        # Upstream tracking
+        # Upstream tracking. If `@{u}` fails because the tracking ref is
+        # stale (remote branch deleted: `git branch -vv` shows
+        # "[origin/main: gone]"), do NOT invent an upstream — that would
+        # misclassify the repo (observed live: a repo whose remote branch is
+        # gone would look "clean/no-upstream" instead of flagging remap).
+        # Surface it via remote_missing so the agent asks where to push.
         upstream = maybe_run_git(self.path, "rev-parse", "--abbrev-ref",
                                  "--symbolic-full-name", "@{u}", timeout=10)
+        if upstream is None:
+            cfg_remote = maybe_run_git(self.path, "config",
+                                       "branch.main.remote", timeout=5)
+            if cfg_remote:
+                self.remote_missing = True
+                self.error = (f"upstream '{cfg_remote}/main' is gone — origin "
+                              f"branch deleted/renamed; agent to repoint or "
+                              f"confirm new destination")
+                return
         self.has_upstream = upstream is not None
         if not self.has_upstream:
             return
@@ -465,8 +484,6 @@ class GitRepo:
         except (RuntimeError, ValueError, IndexError):
             pass
 
-        # Uncommitted + untracked
-        r = maybe_run_git(self.path, "status", "--porcelain", timeout=15)
         if r:
             lines = [l.strip() for l in r.split("\n") if l.strip()]
             self.uncommitted = len(lines)
@@ -643,7 +660,26 @@ def find_git_repos(root: Path, maxdepth: int = 3) -> list[Path]:
                 continue
             repo_dir = Path(line).parent
             repos.append(repo_dir)
-        return sorted(set(repos))
+        repos = sorted(set(repos))
+        seen: dict[str, Path] = {}
+        for rp in repos:
+            try:
+                real = (rp / ".git").resolve().parent
+            except OSError:
+                real = rp.resolve()
+            key = str(real)
+            if key not in seen or len(str(rp)) < len(str(seen[key])):
+                seen[key] = rp
+        # live case was a bare `.git/` directory under code2/skills that is
+        # not a repo and only produced a confusing rev-parse error row.
+        live = []
+        for rp in seen.values():
+            gd = rp / ".git"
+            if gd.is_dir() and not (gd / "HEAD").exists() \
+                    and not (gd / "commondir").exists():
+                continue
+            live.append(rp)
+        return sorted(live)
     except Exception:
         repos = []
         for entry in sorted(root.iterdir()):
@@ -651,9 +687,6 @@ def find_git_repos(root: Path, maxdepth: int = 3) -> list[Path]:
                 repos.append(entry)
         return repos
 
-
-# ── Globals shared with worker threads ──────────────────────────────────────
-_PROCESS_QUIET = False
 _GITHUB_USER = ""        # used to verify we OWN an origin before pushing to it
 
 

@@ -79,12 +79,21 @@ the report.
 
 **Repo discovery**: recursively walks the tree (skipping `node_modules`,
 `.cache`, `venv`, build artifacts), finding repos at any nesting depth.
+When the same checkout is reachable at two paths (symlinked shadow trees,
+nested checkouts), only the real path is processed — the phantom path is
+reported as skipped so counts stay honest.
+
+Stale op markers (`REBASE_HEAD` left after a finished rebase) do NOT flag a
+repo in-progress; only live state (`rebase-merge/`, `rebase-apply/`,
+`MERGE_HEAD`, `CHERRY_PICK_HEAD`, `REVERT_HEAD`, `sequencer/todo`) does. A
+tracking ref pointing at a deleted remote branch (`[gone]`) is an error
+asking where to push, never a silent "no-upstream".
 
 ### Flags
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--workers N` | `min(16, cpu*2)` | Parallel workers. Each gets its own repos — zero shared state. |
+| `--fix` | off | No-op today: same safe sync as default (the script never commits). The agent follow-up under "Handling flagged repos" is what finishes the push. Cron's weekly `fix` mode relies on that agent pass. |
 | `--since-days N` | all | Only process repos modified in the last N days (`.git` mtime). |
 | `--exclude r1,r2` | none | Comma/space-separated repo names to skip. |
 | `--maxdepth N` | 3 | Max directory depth for discovery. |
