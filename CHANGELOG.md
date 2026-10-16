@@ -1,5 +1,10 @@
 # Changelog
 
+## [strata 2.3.2] — 2026-10-16
+
+### Fixed
+- Initiation-transport violation (Helix 2026-10-16 post-mortem): prior session read "prepare then implement via new session" as authority to spawn a task/subagent in-tree as the "fresh" session, executing T001 and committing ack/code without user restart. `strata/SKILL.md` Phase 7 now forbids in-process task/subagent spawn as initiation transport, adds a launch-authority test (named project + direct launch instruction) and an authoring-session freeze after handoff; `references/fresh-session-initiation.md` marks subagent-authored implementation artifacts VOID and validates acks only from parentless session IDs; `references/terminology.md` states a spawned subagent is never a fresh harness. User STOP overrides todo/resume reminders. Distributable archives (`strata.skill`, `strata/strata.SKILL`) rebuilt from canonical sources with no nested archives (33 files).
+
 ## [Unreleased]
 
 ### Added

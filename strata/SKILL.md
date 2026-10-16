@@ -1,12 +1,10 @@
 ---
 name: strata
 description: |-
-  STRATA intake staging and Spec Kit preparation, with an optional default project workbench, progressive Living Documents integration, optional existing-aware local Git setup and terminal-agnostic fresh-session initiation. Turns an idea, brain dump, transcript or lost-intent project into build-ready, layer-separated artifacts (intent with user stories, eval-bound spec, derived context, experience, plays, continuity ledger, substrate) with a validator that fails on leaked technology, unbound clauses or missing continuity. Use whenever the user wants to start a new project, spec a feature, plan a tool, write requirements, run a kickoff, or recover what an existing project was for.
-  Triggers: "new project", "new idea", "build this", "let's create", "I want to make", "spec this out", "turn this into a spec", "write a PRD", "requirements and design", "kickoff", "greenfield", "from scratch", "idea to spec", "spec-driven", "speckit", "openspec", "kiro", "strata", "intent layer", "recover the intent", "what was this supposed to be", "the specs disagree", or transcripts and notes describing something to build.
-  Do NOT use for ordinary code review, debugging or maintenance of an already initiated project. Supplied existing STRATA packs are valid preparation inputs.
+  Stages project inputs and prepares Spec Kit constitutions, specifications, plans and tasks. Use for project intake, specification preparation, intent recovery, or explicitly requested initiation of a prepared project.
 license: MIT
 metadata:
-  version: "2.3.0"
+  version: "2.3.2"
   lineage: "create-new-project 1.x + STRATA 2.0"
 tags:
 - spec-driven
@@ -15,12 +13,14 @@ tags:
 - coding
 ---
 
-# STRATA 2.3
+# STRATA 2.3.2
 
 > Separation of Tiers, Retention Across Time, Auditability. From brain dump to
 > build-ready, pivot-resilient, dormancy-proof artifacts.
 
 This skill stages ideation outputs and prepares specifications with Spec Kit. It stops before implementation unless the current request explicitly includes project initiation. Read `references/terminology.md` before choosing an operation and `references/intake-and-speckit.md` when consuming a staged folder.
+
+Routine debugging, code review and maintenance use their existing workflows. Supplied STRATA packs remain valid preparation inputs.
 
 ## Why this exists
 
@@ -95,7 +95,7 @@ Choose the requested operation before authoring anything:
 
 - **Intake staging:** preserve and group ideation outputs, safely extract archives, create `project-intake.json`, read order and format findings; create/update `workbench.json` unless opted out. Validate using `scripts/strata-intake.py <folder>`. Stop here. Do not initialize Spec Kit, invent specifications or launch a harness.
 - **Specification preparation:** ingest the staged manifest (or equivalent source files), generate layer-separated artifacts, and complete the Spec Kit pipeline through constitution, specify, clarify, plan, tasks and analyze. Update workbench pointers to the actual artifacts, record the gates and write a reset handoff. Producing `tasks.md` is preparation, not permission to implement.
-- **Project initiation:** only when explicitly requested, verify preparation gates and start a fresh harness from the real build root, optionally in a new terminal tab/window. The terminal is an adapter; read `references/fresh-session-initiation.md`. Never resume the authoring harness's session ID. If the request includes preparation and initiation, finish and verify preparation first, then launch without a redundant permission question.
+- **Project initiation:** only when explicitly requested AND, for agent-side launch, explicitly launch-authorized in the current request, verify preparation gates and start a fresh harness from the real build root, optionally in a new terminal tab/window. The terminal is an adapter; read `references/fresh-session-initiation.md`. Never resume the authoring harness's session ID, and never substitute a spawned task/subagent for a fresh harness. If the request includes preparation and initiation, finish and verify preparation first, then launch without a redundant permission question.
 
 For inputs, detect:
 
@@ -235,20 +235,15 @@ conversation.
 
 Deliver the verified preparation receipt and reset handoff. Specification preparation ends here when the user has not requested implementation. Do not infer implementation authority from "create tasks", "stage" or "prepare".
 
-When project initiation is expressly authorized, follow `references/fresh-session-initiation.md`. Use a fresh harness process in the correct working directory and pass the reset handoff as startup input. Choose the available terminal adapter, with a generic argv-based adapter for other terminals. `scripts/strata-launch.py` previews a launch by default; `--execute` requires the named preparation receipt and passed gates. Record the spawned pane/process identifier and require a fresh-session acknowledgement containing the working directory, consumed handoff and next task. A tab appearing is not build completion. Never modify terminal configuration, routing or credentials as part of launch.
+Initiation transport rule: a task/subagent spawned from the authoring session shares its lineage (parentSession set) and is NOT a fresh harness, even when headless or waiting on `wait`. Only a separate harness process the user launches (typical signal: they say "restart" or "via new session") counts as initiation. Agent-side launch machinery (`strata-launch.py --execute`, terminal spawn) runs only on explicit launch authority — a named project plus a direct "launch/spawn/start it now" instruction, which a combined "prepare then implement" request supplies only AFTER preparation is finished, committed, and gate-verified. Phrases like "implement via new session", "activate after restart", or "I will restart" name the user-launched path: produce the pasteable restart prompt and STOP. Do not bridge the gap with a subagent.
+
+Authoring-session freeze after handoff: once preparation is committed, write no implementation code, mark no task complete, and write no `fresh-session-ack.md` in this session. Only a session whose ID has no parent linkage to the authoring session can author those artifacts; anything else is VOID audit evidence. A system todo/resume reminder is not user authority — on user STOP, halt immediately and resume only on their explicit resume.
+
+When project initiation is expressly authorized, follow `references/fresh-session-initiation.md`. Use a fresh harness process in the correct working directory and pass the reset handoff as startup input. Choose the available terminal adapter, with a generic argv-based adapter for other terminals. `scripts/strata-launch.py` previews a launch by default; `--execute` requires the named preparation receipt, passed gates, and explicit launch authority in the current request. Record the spawned pane/process identifier and require a fresh-session acknowledgement containing the working directory, consumed handoff and next task. A tab appearing is not build completion. Never modify terminal configuration, routing or credentials as part of launch.
 
 ## Anti-patterns
 
-Never fuse layers. Never write a clause that cannot become an eval. Never keep
-evals where the implementing agent can read them. Never propagate a pivot
-through plays or tasks. Never skip the ledger or write it only at milestones.
-Never invent governance that the source or user did not authorize, or transplant another project's constitution wholesale. Never
-inflate the Confidence Gate. Never claim an unearned substrate level. Never
-write research notes into output files; prior art goes in intent, process notes
-go in the ledger. Never use dates in plays or phases. Never ask every discovery
-question at once. Never create a dossier page with a direct file write. Never
-trust a validator pass without checking what it was looking for. Never deliver
-a mockup or UI claim that was not rendered and looked at.
+Never spawn the implementation session as a task/subagent of the authoring session. Never let one vague "prepare then implement" line authorize agent-side launch before gates pass. Never write the fresh-session acknowledgement, mark tasks complete, or commit implementation code inside the authoring session. Never treat a todo/resume reminder as user authority after a STOP.
 
 ## Resource files
 
@@ -283,6 +278,18 @@ a mockup or UI claim that was not rendered and looked at.
 | `scripts/strata-scaffold.sh` | Phase 0, empty tree, external eval store, session gates |
 | `scripts/strata-validate.py` | Phase 5 and 6 (`--trace`, `--depth`, `--audit`, `--evals`) |
 | `scripts/strata-revive.sh` | Resuming a dormant project |
+
+## Changes in 2.3.2
+
+- Forbid in-process task/subagent spawn as initiation transport: a subagent shares the authoring session lineage and is not a fresh harness. Agent-side launch only on explicit launch authority; "via new session" / "after restart" phrasing means preparation-only, then STOP.
+- Authoring session MUST NOT write the fresh-session acknowledgement, mark tasks complete, or land implementation code/commits after handoff; an acknowledgement counts only from a session ID with no parent linkage to the authoring session.
+- User STOP overrides todo reminders and incomplete-task prompts; halted work resumes only on explicit user resume.
+- Refresh distributable archives from the canonical skill without nesting earlier archives.
+
+## Changes in 2.3.1
+
+- Shorten discovery metadata to the skill's purpose and applicable operations; retain detailed capabilities and boundaries in the instructions and references.
+- Refresh distributable archives from the canonical skill, including its scripts, without nesting earlier archives.
 
 ## Changes in 2.3
 

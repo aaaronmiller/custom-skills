@@ -1,6 +1,6 @@
 ---
 title: Strata lifecycle terminology
-version: "2.2.0"
+version: "2.3.2"
 tags: [strata, intake, lifecycle]
 ---
 
@@ -14,7 +14,7 @@ tags: [strata, intake, lifecycle]
 | Fresh-session handoff | Verified preparation and reset-handoff.md | A fresh harness consumes the handoff from the real build root | New context acknowledges exact inputs and next task |
 | Project initiation | Explicit implementation authority and passed preparation gates | First implementation task starts in that fresh harness | Initiation acknowledged; implementation completion is a separate outcome |
 
-A harness reset means a new context, not necessarily closing a terminal. A new terminal tab can host a fresh harness; reattaching the old session does not reset it. The skill is terminal agnostic. Terminal adapters only transport a validated command and working directory.
+A harness reset means a new context, not necessarily closing a terminal. A new terminal tab can host a fresh harness; reattaching the old session does not reset it. A task/subagent spawned by the authoring session is never a fresh harness (parentSession lineage). The skill is terminal agnostic. Terminal adapters only transport a validated command and working directory.
 
 "Stage" means intake staging. "Prepare specs" and "take through tasks" mean specification preparation. "Initiate" and an explicit request to build include project initiation. Never equate these operations.
 
