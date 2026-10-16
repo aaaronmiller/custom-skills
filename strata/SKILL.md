@@ -2,9 +2,10 @@
 name: strata
 description: |-
   Stages project inputs and prepares Spec Kit constitutions, specifications, plans and tasks. Use for project intake, specification preparation, intent recovery, or explicitly requested initiation of a prepared project.
+  Triggers: "new project", "new idea", "build this", "spec this out", "turn this into a spec", "write a PRD", "requirements and design", "kickoff", "greenfield", "idea to spec", "spec-driven", "speckit", "openspec", "kiro", "requirements.md", "design.md", "run speckit", "build from spec", "execute the specs", "sdd run", "strata", "intent layer", "recover the intent". Do NOT use for post-hoc drift auditing (use spec-audit).
 license: MIT
 metadata:
-  version: "2.3.3"
+  version: "2.4.0"
   lineage: "create-new-project 1.x + STRATA 2.0"
 tags:
 - spec-driven
@@ -13,7 +14,7 @@ tags:
 - coding
 ---
 
-# STRATA 2.3.3
+# STRATA 2.4.0
 
 > Separation of Tiers, Retention Across Time, Auditability. From brain dump to
 > build-ready, pivot-resilient, dormancy-proof artifacts.
@@ -188,7 +189,7 @@ refinement log; do not write a separate one.
 **5b. Depth verification.** Compare output with the source material:
 `strata-validate.py --depth <source files> --against <intent.md> <spec.md>`
 must keep at least 90% of requirement-like statements. Design-section coverage
-must be 100%; name any section that did not survive. Every play must be
+must be 100%; name any section that did not survive. Density heuristic: if the average task description in `tasks.md` (excluding IDs and path headers) is under ~80 words, treat as probable depth loss and regenerate with explicit depth-preservation directives. Every play must be
 startable without re-reading the source. Regenerate shallow artifacts with
 explicit depth-preservation directives; do not accept a well-formed but thin
 artifact.
@@ -271,6 +272,10 @@ Never spawn the implementation session as a task/subagent of the authoring sessi
 | `scripts/strata-scaffold.sh` | Phase 0, empty tree, external eval store, session gates |
 | `scripts/strata-validate.py` | Phase 5 and 6 (`--trace`, `--depth`, `--audit`, `--evals`) |
 | `scripts/strata-revive.sh` | Resuming a dormant project |
+
+## Changes in 2.4.0
+
+- Supersede spec-workflow: CREATE/IMPLEMENT gates absorbed (Mode C, depth-preservation, 80-word density heuristic, per-category done-criteria merged; spec-workflow retired). AUDIT gate split out to standalone spec-audit skill (backtranslation, cold-pass, drift taxonomy preserved). Trigger phrases consolidated; audit triggers routed to spec-audit.
 
 ## Changes in 2.3.3
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## [strata 2.4.0 + spec-audit 1.0.0] — 2026-10-16
+
+### Changed
+- Superseded `spec-workflow` by strata 2.4.0 (per-file comparison at `/tmp/spec-workflow-compare.md`: 1 COVERED, 5 PARTIAL, 7 UNIQUE, 1 SUPERSEDED). CREATE/IMPLEMENT absorbed — Mode C, depth-preservation directives, 80-word density heuristic, per-category done-criteria merged into strata. Retired `spec-workflow/` to `staged-for-deletion/spec-workflow--superseded-by-strata-2.4.0/`.
+- Split AUDIT gate to new standalone `spec-audit` 1.0.0 skill (backtranslation, cold-pass, drift taxonomy, stage checklists, report templates — no strata equivalent existed). Strata triggers consolidated; audit triggers route to spec-audit.
+
 ## [strata 2.3.3] — 2026-10-16
 
 ### Changed

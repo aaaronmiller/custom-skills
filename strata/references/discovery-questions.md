@@ -34,5 +34,6 @@ Open source, commercial, or internal. Monetization if any. Competitive landscape
 ## STRATA-specific probes (always ask before exiting intake)
 Which decisions does the user want fixed up front versus left for the system to resolve. This populates `substrate.md`. What is the single sentence outcome. If it does not fit in one sentence, intake is not done. What are the failure branches when things go wrong. These become intent failure conditions, not spec test cases.
 
-## Exit
-When the Confidence Gate clears 85%, confirm: "I have enough clarity. Here is what I understand in one paragraph: [...]. Should I proceed to research and artifact generation?"
+## Done criteria per category
+Problem space: articulate the problem to a stranger in 2 sentences. Solution vision: walk the primary workflow step by step. Users: name each persona and explain why they care. Data: sketch the entity relationships. Technical: list hard constraints vs preferences. UX: describe the first 30 seconds of interaction and the primary navigation model. Business: explain who pays (or why free) and how users find it.
+
