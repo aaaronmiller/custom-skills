@@ -8,7 +8,7 @@ tags: [strata, spec, template, eval-binding, contract]
 
 # Spec Template (`spec.md`)
 
-Author: the human, system may draft and human ratifies. Layer: Specification. This file is the evaluable contract and nothing else. Zero technology tokens. Zero prose that can be read a dozen ways.
+Author: the human. A human-authored source pack is pre-ratified (authorship IS ratification); system-drafted or system-inferred clauses require human ratification. Layer: Specification. This file is the evaluable contract and nothing else. Zero technology tokens. Zero prose that can be read a dozen ways.
 
 ## The single litmus
 

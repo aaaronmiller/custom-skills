@@ -1,5 +1,10 @@
 # Changelog
 
+## [strata 2.3.3] — 2026-10-16
+
+### Changed
+- Tiered ratification (user directive: author-supplied specs are pre-ratified, review wastes author time). `strata/SKILL.md` Authorship rule, Existing-specs and Recovery entries, and Phase 6 delivery now state: human-authored packs need no review gate — the gate battery (audit, trace, depth, prerequisites) IS the review; delivery names paths with MAY-review/never-REQUIRED wording and silence-is-consent. Mandatory ratification survives only for system-drafted or system-inferred material. `references/spec-template.md` authorship tiered likewise. Distributable archives rebuilt (36 files, no nesting).
+
 ## [strata 2.3.2] — 2026-10-16
 
 ### Fixed

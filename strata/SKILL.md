@@ -4,7 +4,7 @@ description: |-
   Stages project inputs and prepares Spec Kit constitutions, specifications, plans and tasks. Use for project intake, specification preparation, intent recovery, or explicitly requested initiation of a prepared project.
 license: MIT
 metadata:
-  version: "2.3.2"
+  version: "2.3.3"
   lineage: "create-new-project 1.x + STRATA 2.0"
 tags:
 - spec-driven
@@ -13,7 +13,7 @@ tags:
 - coding
 ---
 
-# STRATA 2.3.2
+# STRATA 2.3.3
 
 > Separation of Tiers, Retention Across Time, Auditability. From brain dump to
 > build-ready, pivot-resilient, dormancy-proof artifacts.
@@ -51,9 +51,8 @@ Read `references/artifact-contract.md` when choosing outputs. The default contra
    a defect. A spec clause that cannot become a pass/fail evaluation is a
    defect. Preserve explicit user constraints and product names with a justified `layer-allow.txt` entry rather than deleting them. The validator fails the build on leaked choices, and it self-arms by
    harvesting every technology the derived layer names.
-2. **Authorship.** The human owns intent and spec (the system may draft; the
-   human ratifies). The system owns context, experience and plays. Never ask the
-   human to choose an architecture for context.
+2. **Authorship.** The human owns intent and spec. Who ratifies depends on provenance: when the human authored the source pack (Existing-specs mode — the pack IS their spec), authorship itself is ratification and no review gate blocks preparation or initiation. When the system drafted or reconstructed intent/spec (Interactive, Transcript gap-fill, Recovery), the human ratifies before Phase 3 or before initiation, whichever comes first. The system owns context, experience and plays. Never ask the
+  human to choose an architecture for context.
 3. **Eval binding.** Every spec clause carries an `EVAL-ID` bound to a held-out
    evaluation stored outside the repository (default
    `~/.strata/evals/<slug>/evals.md`). The validator rejects stores inside the build root even without Git. An external directory alone is not an access-control boundary: genuine held-out evaluation requires an evaluator context whose files and tools are inaccessible to the implementing agent. Disclose isolation that has not been established.
@@ -105,17 +104,13 @@ For inputs, detect:
 - **Fast Track**: a complete description covering problem, solution, users,
   data, constraints and scope. Score the gate once; if it clears 85%, go to
   Phase 2.
-- **Existing specs**: detailed `requirements.md` and `design.md` (each 5K+).
-  Skip Phases 1 and 2, derive context and re-separate layers in Phase 3, still
-  run the validator (external specs routinely fuse layers). Measure first with
-  `strata-validate.py --audit <files>`.
+- **Existing specs**: detailed `requirements.md` and `design.md` (each 5K+). Skip Phases 1 and 2, derive context and re-separate layers in Phase 3, still run the validator (external specs routinely fuse layers). Measure first with `strata-validate.py --audit <files>`. Authorship note: a human-authored pack arrives pre-ratified — run the full gate battery (audit, trace, depth, prerequisites) as the review, notify artifact locations with MAY-review wording (Phase 6), and never gate preparation or initiation on a re-read of the human's own spec.
 - **Recovery**: the project exists and nobody can say what it was for, or two
   specs disagree. Reconstruct intent before anything else: if the
   `intent-archaeology` skill is available, run it on this project's session
   logs and spec versions; otherwise read commit history, READMEs, issue threads
   and every spec version, and tag each recovered statement with its source.
-  Write recovered intent with provenance, mark every inferred (not stated)
-  statement as such, and get the human to ratify before Phase 3.
+  Write recovered intent with provenance, mark every inferred (not stated) statement as such. Ratification follows inference load: pure compilation of stated material (no `[INFERENCE]` tags) is pre-ratified like Existing-specs — notify locations with MAY-review wording and proceed. Any inferred statement requires human ratification of the inferred items before Phase 3.
 
 Then: read user preferences and memory for stack, design language, hosting and
 formatting conventions (they inform context and experience, never intent or
@@ -227,9 +222,7 @@ Deliver: the tree (zipped if the user wants a package), and a summary with the
 confidence score and sub-threshold dimensions, declared substrate level, key
 derived decisions, remaining `[NEEDS CLARIFICATION]` markers, prior-art
 findings with sources, refinement and depth results, validator output, and the
-artifact location. State the handoff path: a fresh session reads `standing.md`
-and the ledger tail first, then intent and spec, and never needs this
-conversation.
+artifact location. For human-authored packs (Existing-specs mode): name each prepared artifact path, state the gate battery passed, and say review is available but NOT REQUIRED for build to proceed — silence is consent, and any later disagreement enters as a layer-scoped change request, never a retroactive block. State the handoff path: a fresh session reads `standing.md` and the ledger tail first, then intent and spec, and never needs this conversation.
 
 ### Phase 7: Reset handoff and optional initiation
 
@@ -278,6 +271,10 @@ Never spawn the implementation session as a task/subagent of the authoring sessi
 | `scripts/strata-scaffold.sh` | Phase 0, empty tree, external eval store, session gates |
 | `scripts/strata-validate.py` | Phase 5 and 6 (`--trace`, `--depth`, `--audit`, `--evals`) |
 | `scripts/strata-revive.sh` | Resuming a dormant project |
+
+## Changes in 2.3.3
+
+- Tiered ratification: a human-authored source pack arrives pre-ratified — the gate battery (audit, trace, depth, prerequisites) IS the review, delivery names artifact paths with MAY-review (never REQUIRED) wording, and silence is consent. Mandatory human ratification applies only to system-drafted or system-inferred material before Phase 3 or initiation. Recovery with zero inference compiles pre-ratified; any inferred statement gates only on the inferred items.
 
 ## Changes in 2.3.2
 
