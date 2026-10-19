@@ -37,3 +37,8 @@ Last verified: 2026-10-13 checkup. Re-verify anything you act on; this is a map,
 - Prefers pnpm/bun over npm, Rust-native tools, anything that saves RAM. Hates SSD-as-RAM thrash more than OOM kills.
 - Agents run 24/7 in WSL (busiest around 01:00). Do not `wsl --shutdown`, reboot, or restart WezTerm/agents without explicit go-ahead.
 - Grunt work goes to headless omp sessions on opencode-go/muse-spark-1.3-contributor.
+- **Security posture is intentional (user, 2026-10-14).** No BitLocker, tamper protection off, UAC as set, Defender exclusions, keymakers/activators/cracked installers, MDM-bypass and credential files all stay exactly as they are. Do not recommend changes, do not isolate or move those files, and exclude them from every cleanup plan (`build_cleanup_plan.py` filters them with its SECURITY regex).
+- Cleanup decisions go through `removal/Cleanup-Approvals.html` (approve/reject per item, by folder, exportable in parts) and `Remove-CheckupItems.ps1 -Approvals <export>`. The user wants Downloads organized by project, then by type for leftovers.
+
+## Disk-space drain to watch
+Shadow-copy storage on C: is UNBOUNDED (39.9 GB on 2026-10-13). While snapshots exist, every block WSL rewrites inside the ~373 GB ext4.vhdx is copied into shadow storage, so C: free can fall by GBs per day with no visible files growing. Check `vssadmin list shadowstorage` (admin) whenever C: free drops unexplained; the cap item in the cleanup plan addresses it.

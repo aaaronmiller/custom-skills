@@ -84,14 +84,16 @@ if ($Status) {
     $i = if ($t) { $t | Get-ScheduledTaskInfo } else { $null }
     $hb = if (Test-Path $Heartbeat) { Get-Item $Heartbeat } else { $null }
     $age = if ($hb) { [math]::Round(((Get-Date) - $hb.LastWriteTime).TotalMinutes, 1) } else { $null }
+    $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
     [pscustomobject]@{
-        TaskPresent   = [bool]$t
-        TaskState     = if ($t) { "$($t.State)" } else { 'MISSING' }
+        # A SYSTEM task is invisible to an unelevated shell, so health is judged by the heartbeat.
+        TaskPresent   = if ($t) { $true } elseif ($admin) { $false } else { 'not visible without admin' }
+        TaskState     = if ($t) { "$($t.State)" } elseif ($admin) { 'MISSING' } else { 'unknown (run elevated to see)' }
         LastRun       = if ($i) { $i.LastRunTime } else { $null }
         LastResult    = if ($i) { '0x{0:X}' -f $i.LastTaskResult } else { $null }
         NextRun       = if ($i) { $i.NextRunTime } else { $null }
         LastSampleMin = $age
-        Healthy       = [bool]($t -and $age -ne $null -and $age -lt 15)
+        Healthy       = [bool]($age -ne $null -and $age -lt 15)
         Phase         = (Get-Content $PhaseFile -ErrorAction SilentlyContinue)
         ErrorLines    = if (Test-Path $ErrLog) { (Get-Content $ErrLog).Count } else { 0 }
         CurrentCsv    = $Csv

@@ -1,17 +1,12 @@
 ---
 name: deep-research
-description: 'Multi-source investigation, synthesis, comprehensive topic exploration.
-  Use for research requiring 3+ sources, competitive intel, market analysis, due diligence,
-  or any structured investigation with >6 expected searches. Provides parameterized scope
-  control via R(W,D,S,V,F) — Width, Depth, Saturation, Verification, Fidelity — with four
-  preset profiles (Survey, Standard, Thorough, Exhaustive) plus working-state management
-  (scratchpad, pointer notes, memory rotation) for long sessions.
+description: 'Investigates questions on the web across many sources and synthesizes a cited report. Use for competitive intel, market analysis, due diligence, technology evaluation, or any question needing 3+ sources and 6+ searches, with scope control from quick survey to exhaustive. For material already in hand — a folder of documents, PDFs, a corpus — use examine-documents instead.
   Do NOT use for simple factual lookups, single-source summaries, or creative writing.
   '
 license: MIT
 metadata:
   author: ice-ninja
-  version: 4.0.0
+  version: 4.1.0
 tags:
 - research
 - academic
@@ -124,6 +119,20 @@ Rules (map-reduce for the context window):
 - On interruption or compaction, the scratchpad is the resume point: read it,
   find the first incomplete branch, continue.
 
+### Phase 0.6: Delivery and cleanup
+
+The user asked for an answer, not a dozen files. Default to one deliverable:
+
+1. Write the final report to the agreed path (default: the working
+   directory, `<slug>-report.md`).
+2. Then ask: "Keep the working files (`scratchpad.md`, `findings.md`,
+   query logs), or shall I remove them?" Default recommendation: remove,
+   keeping only the report. If the user confirms — or said "clean up" up
+   front — delete the scratch directory and say what was removed.
+3. Keep working files only when the user says the research continues
+   (another depth pass, a follow-up question on the same material). On any
+   later run in the same directory, offer removal again at the end.
+
 ### Phase 1: Query Decomposition (Width)
 
 Split the query into W sub-questions. Each must be independently searchable,
@@ -184,14 +193,15 @@ Open Questions".
 **Budget-aware scaling**: limited time → raise W over D (breadth). Single-topic
 deep-dive → raise D over W.
 
-**Cost awareness**: each web_search call costs ~$0.01 on metered APIs. Approximate
-search-fee costs: Survey ~$0.06, Standard ~$0.48, Thorough ~$1.80, Exhaustive ~$6.00.
-Make users aware when selecting Thorough+ profiles.
+**Cost awareness**: metered search APIs charge per call; Thorough+ profiles run
+hundreds of searches. State the expected call count before starting and confirm
+for anything over ~100 calls. Never quote per-call prices — they change.
 
 ## Tool Compatibility
 
-Tool-agnostic. Backends: `web_search`, `web_fetch` (deep-read high-value sources —
+Tool-agnostic. Backends: web search, page fetch (deep-read high-value sources —
 important at S≥4), MCP search servers (Tavily, Brave), internal connectors.
+Name the tool you actually used in the report's metadata, not a fixed brand.
 
 ## Grounding Requirements
 

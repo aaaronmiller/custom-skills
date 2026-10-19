@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Organizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one column of locations; each location = proposed tree + one card per destination group.
+   Manila-folder accent on a graphite ground; red = staged removal, violet = needs you, grey = stays. */
+:root {
+  color-scheme: dark;
+  --ground: #121416; --panel: #1a1d20; --panel-2: #22262a; --line: #2e3337;
+  --ink: #e7e5df; --ink-2: #b4b2aa; --muted: #82847f;
+  --folder: #d8a64a; --folder-ink: #1b1508;
+  --remove: #e0715f; --unsure: #a99be8; --stay: #7f8a86; --ok: #8fbf7a;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", Consolas, "Cascadia Mono", monospace;
+}
+@media (prefers-color-scheme: light) {
+  :root { color-scheme: light; --ground: #f4f2ec; --panel: #ffffff; --panel-2: #f0eee7; --line: #dcd8cd;
+    --ink: #1d1f20; --ink-2: #44474a; --muted: #6c6f70; --folder: #a8741a; --folder-ink: #fff;
+    --remove: #b5402e; --unsure: #5b4bb3; --stay: #5e6966; --ok: #3f7a2c; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: 14px/1.5 var(--sans); }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 28px 18px 80px; display: grid; gap: 22px; }
+h1 { font-size: 26px; margin: 0; font-weight: 600; letter-spacing: -.01em; }
+h2 { font-size: 18px; margin: 0; font-weight: 600; text-wrap: balance; }
+.sub { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+.lede { color: var(--ink-2); max-width: 70ch; margin: 6px 0 0; }
+.stats { display: flex; flex-wrap: wrap; gap: 10px; }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; min-width: 120px; }
+.stat b { display: block; font: 600 18px var(--mono); font-variant-numeric: tabular-nums; }
+.stat span { color: var(--muted); font-size: 12px; }
+.stat.remove b { color: var(--remove); } .stat.unsure b { color: var(--unsure); } .stat.org b { color: var(--folder); }
+.bar { position: sticky; top: 0; z-index: 5; background: var(--ground); padding: 10px 0; border-bottom: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.bar input[type=search] { flex: 1 1 240px; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; font: inherit; }
+button { font: inherit; border-radius: 6px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); padding: 8px 12px; cursor: pointer; }
+button.primary { background: var(--folder); color: var(--folder-ink); border-color: var(--folder); font-weight: 600; }
+button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--folder); outline-offset: 2px; }
+.section { display: grid; gap: 12px; }
+.sechead { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; border-top: 2px solid var(--line); padding-top: 14px; }
+.tree { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px 14px; font: 12.5px/1.7 var(--mono); color: var(--ink-2); overflow-x: auto; }
+.tree .n { color: var(--muted); }
+.treebox > summary { padding: 0 0 6px; }
+.cards { display: grid; gap: 8px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--folder); border-radius: 6px; }
+.card.remove { border-left-color: var(--remove); } .card.unsure { border-left-color: var(--unsure); } .card.stay { border-left-color: var(--stay); }
+.card.off { opacity: .55; }
+.chead { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: start; padding: 10px 12px; }
+.chead input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--folder); }
+.dest { font: 500 14px var(--mono); word-break: break-word; }
+.dest .k { font-family: var(--sans); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-right: 6px; }
+.summ { color: var(--ink-2); margin-top: 2px; max-width: 80ch; }
+.meta { color: var(--muted); font: 12px var(--mono); white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+details > summary { cursor: pointer; padding: 0 12px 10px 42px; color: var(--muted); font-size: 12.5px; list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
+details > summary::before { content: "▸ "; } details[open] > summary::before { content: "▾ "; }
+.members { padding: 0 12px 12px 42px; display: grid; gap: 8px; }
+.m { display: grid; grid-template-columns: auto 1fr; gap: 10px; padding: 8px 10px; background: var(--panel-2); border-radius: 5px; }
+.m input { margin-top: 3px; accent-color: var(--folder); }
+.m .nm { font: 500 13px var(--mono); word-break: break-all; }
+.m .why { color: var(--ink-2); }
+.m .ev { color: var(--muted); font-size: 12.5px; }
+.chip { display: inline-block; font: 11px var(--mono); padding: 0 6px; border-radius: 3px; border: 1px solid var(--line); color: var(--muted); margin-left: 6px; vertical-align: 1px; }
+.chip.low { color: var(--unsure); border-color: var(--unsure); } .chip.rev { color: var(--ok); border-color: var(--ok); } .chip.col { color: var(--remove); border-color: var(--remove); }
+.m.ex { opacity: .5; }
+.subs { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+.subs .chip { margin-left: 0; color: var(--ink-2); }
+.sub-block { background: var(--panel-2); border-radius: 5px; }
+.sub-block.off { opacity: .55; }
+.shead { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: start; padding: 8px 10px; }
+.shead input { width: 16px; height: 16px; margin-top: 3px; accent-color: var(--folder); }
+.sub-block details > summary { padding-left: 36px; }
+.sub-block .members { padding-left: 36px; }
+.sub-block .m { background: var(--panel); }
+.export { display: none; background: var(--panel); border: 1px solid var(--folder); border-radius: 6px; padding: 12px 14px; gap: 8px; }
+.export.show { display: grid; }
+.export code, .export textarea { font: 12px var(--mono); }
+.export textarea { width: 100%; height: 90px; background: var(--panel-2); color: var(--ink); border: 1px solid var(--line); border-radius: 5px; padding: 8px; }
+.hidden { display: none !important; }
+@media (max-width: 560px) { .chead { grid-template-columns: auto 1fr; } .meta { grid-column: 2; text-align: left; } details > summary, .members { padding-left: 12px; } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Organizer</h1>
+    <div class="sub" id="planline"></div>
+    <p class="lede">Every item below was read and given an intent by a model, then challenged by a second model. Groups are ON by default: untick a group, or a single item inside it, to leave it where it is. Removals are only moved into <code>_REVIEW-then-delete</code> in the same location; nothing is deleted, and every move can be undone from the run log.</p>
+  </header>
+  <div class="stats" id="stats"></div>
+  <div class="bar">
+    <input type="search" id="q" placeholder="Filter by name, intent or folder" aria-label="Filter items">
+    <button type="button" id="openall">Expand all</button>
+    <button type="button" id="unsureonly">Show only what needs you</button>
+    <button type="button" class="primary" id="export">Export approvals</button>
+  </div>
+  <div class="export" id="exportbox" role="region" aria-label="Export">
+    <div><b>Approvals exported.</b> If the file did not download, copy the text below into <code>organizer-approvals.json</code> next to the plan. Then run, from the skill's scripts folder:</div>
+    <code id="cmd"></code>
+    <textarea id="json" readonly aria-label="Approvals JSON"></textarea>
+  </div>
+  <main id="main"></main>
+</div>
+<script>
+const DATA = __DATA__;
+const KEY = 'organizer:' + DATA.plan_id;
+let state = { off: {}, ex: {} };
+try { state = Object.assign(state, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+const isEx = i => state.ex[i.id] ?? !!(i.referenced_by && i.referenced_by.length && i.action !== 'none');
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const gb = mb => mb >= 1024 ? (mb / 1024).toFixed(1) + ' GB' : mb >= 1 ? mb.toFixed(0) + ' MB' : (mb * 1024).toFixed(0) + ' KB';
+const ORDER = { organize: 0, unsure: 1, remove: 2, stay: 3 };
+const KLABEL = { organize: 'Move to', unsure: 'Needs you', remove: 'Stage for removal', stay: 'Stays' };
+
+document.getElementById('planline').textContent = `plan ${DATA.plan_id} · built ${DATA.generated} · ${DATA.untouched} protected or security items left out entirely`;
+
+// what deserves a personal look: unsure items, low-confidence actions, and anything a guard flagged
+const needs = i => i.gkind === 'unsure' || (i.action !== 'none' && (i.confidence === 'low' || i.collision ||
+  (i.referenced_by && i.referenced_by.length)));
+const groups = {};
+for (const it of DATA.items) {
+  const k = it.section + '|' + it.group;
+  (groups[k] ||= { key: k, section: it.section, group: it.group, kind: it.gkind, items: [] }).items.push(it);
+}
+function stats() {
+  const live = DATA.items.filter(i => i.action !== 'none');
+  const on = live.filter(i => !state.off[i.section + '|' + i.group] && !isEx(i));
+  const rm = DATA.items.filter(i => i.gkind === 'remove');
+  const s = [
+    ['org', DATA.items.filter(i => i.gkind === 'organize').length, 'to organize'],
+    ['', Object.values(groups).filter(g => g.kind === 'organize').length, 'destination folders'],
+    ['remove', rm.length, 'staged removals · ' + gb(rm.reduce((a, i) => a + (i.mb || 0), 0))],
+    ['unsure', DATA.items.filter(needs).length, 'need you (unsure, low confidence or flagged)'],
+    ['', DATA.items.filter(i => i.gkind === 'stay').length, 'stay where they are'],
+    ['', on.length + ' / ' + live.length, 'actions approved'],
+  ];
+  document.getElementById('stats').innerHTML = s.map(([c, n, l]) => `<div class="stat ${c}"><b>${n}</b><span>${l}</span></div>`).join('');
+}
+function tree(section) {
+  const t = {};
+  for (const g of Object.values(groups)) {
+    if (g.section !== section || g.kind === 'stay') continue;
+    const name = g.kind === 'remove' ? '_REVIEW-then-delete' : g.group;
+    const [top, ...rest] = name.split('/');
+    t[top] ||= { n: 0, kids: {} };
+    t[top].n += g.items.length;
+    if (rest.length) t[top].kids[rest.join('/')] = (t[top].kids[rest.join('/')] || 0) + g.items.length;
+  }
+  return Object.keys(t).sort().map(top => `${esc(top)}/ <span class="n">${t[top].n}</span>` +
+    Object.keys(t[top].kids).sort().map(k => `<br>&nbsp;&nbsp;└ ${esc(k)}/ <span class="n">${t[top].kids[k]}</span>`).join('')).join('<br>');
+}
+const RM = { 'Superseded by a newer version': 'Older versions of things you also have in a newer version; the kept copy is named on each item.',
+  'Duplicates': 'Exact copies of files kept elsewhere; the kept copy is named on each item.',
+  'Temporary leftovers': 'Partial downloads, lock files, empty files and similar leftovers that were never meant to be kept.' };
+const topOf = g => g.kind === 'remove' ? 'Staged for removal' : g.kind === 'unsure' ? '_Unsure' : g.kind === 'stay' ? 'Stays where it is' :
+  g.group.startsWith('~/') ? g.group.split('/').slice(0, 2).join('/') : g.group.split('/')[0];   // cross-location moves: ~/Documents, ~/Music...
+const sumMb = items => items.reduce((a, i) => a + (i.mb || 0), 0);
+const plural = n => n + ' item' + (n === 1 ? '' : 's');
+
+function render() {
+  const main = document.getElementById('main');
+  main.innerHTML = DATA.sections.map(sec => {
+    const tops = {};
+    for (const g of Object.values(groups).filter(g => g.section === sec)) {
+      const t = topOf(g);
+      (tops[t] ||= { key: sec + '|' + t, name: t, kind: g.kind, groups: [] }).groups.push(g);
+    }
+    const list = Object.values(tops).sort((a, b) => ORDER[a.kind] - ORDER[b.kind] || a.name.localeCompare(b.name));
+    if (!list.length) return '';
+    list.forEach(t => t.groups.sort((a, b) => a.group.localeCompare(b.group)));
+    return `<section class="section" data-sec="${esc(sec)}">
+      <div class="sechead"><h2>${esc(sec)}</h2><span class="sub">${esc(DATA.section_paths[sec] || '')}</span></div>
+      <details class="treebox"><summary>Proposed folder tree</summary><div class="tree">${tree(sec) || 'nothing to move'}</div></details>
+      <div class="cards">${list.map(topCard).join('')}</div></section>`;
+  }).join('');
+  document.querySelectorAll('input[data-top]').forEach(syncTop);
+  stats();
+}
+function topCard(t) {
+  const items = t.groups.flatMap(g => g.items);
+  const single = t.groups.length === 1 && (t.groups[0].group === t.name || t.kind !== 'organize');
+  const subs = t.groups.map(g => g.kind === 'organize' ? g.group.slice(t.name.length + 1) : g.group).filter(Boolean);
+  const head = single && t.kind === 'organize' ? DATA.summaries[t.groups[0].section + '|' + t.groups[0].group] || '' :
+    t.kind === 'stay' ? 'Left where they are because something depends on the location, or they are already in the right place.' :
+    t.kind === 'unsure' ? 'The model could not tell why these are here. They are gathered into one _Unsure folder for you to sort.' : '';
+  const toggle = t.kind === 'stay' ? '<span></span>' : `<input type="checkbox" data-top="${esc(t.key)}" aria-label="Approve everything in ${esc(t.name)}">`;
+  return `<article class="card ${t.kind}" data-top="${esc(t.key)}">
+    <div class="chead">${toggle}
+      <div><div class="dest"><span class="k">${KLABEL[t.kind]}</span>${esc(t.name)}${t.kind === 'organize' ? '/' : ''}</div>
+      ${head ? `<div class="summ">${esc(head)}</div>` : ''}
+      ${subs.length && !single ? `<div class="subs">${subs.slice(0, 10).map(s => `<span class="chip">${esc(s)}</span>`).join('')}${subs.length > 10 ? `<span class="chip">+${subs.length - 10} more</span>` : ''}</div>` : ''}</div>
+      <div class="meta">${plural(items.length)}<br>${gb(sumMb(items))}</div></div>
+    <details${t.kind === 'unsure' ? ' open' : ''}><summary>${t.kind === 'stay' ? 'Why these stay' : single ? 'What is in it and why' : t.groups.length + ' folders inside'}</summary>
+    <div class="members">${single ? t.groups[0].items.map(member).join('') : t.groups.map(g => subBlock(g, t)).join('')}</div></details></article>`;
+}
+function subBlock(g, t) {
+  const off = !!state.off[g.key];
+  const rel = g.kind === 'organize' ? (g.group.slice(t.name.length + 1) || '(directly in ' + t.name + ')') : g.group;
+  const summ = g.kind === 'remove' ? RM[g.group] || '' : DATA.summaries[g.section + '|' + g.group] || '';
+  return `<div class="sub-block ${off ? 'off' : ''}" data-g="${esc(g.key)}">
+    <div class="shead"><input type="checkbox" ${off ? '' : 'checked'} data-g="${esc(g.key)}" aria-label="Approve ${esc(g.group)}">
+      <div><div class="dest">${esc(rel)}</div>${summ ? `<div class="summ">${esc(summ)}</div>` : ''}</div>
+      <div class="meta">${plural(g.items.length)} · ${gb(sumMb(g.items))}</div></div>
+    <details><summary>What is in it and why</summary><div class="members">${g.items.map(member).join('')}</div></details></div>`;
+}
+function syncTop(box) {
+  const card = box.closest('.card');
+  const subs = [...card.querySelectorAll('input[data-g]')];
+  const keys = subs.length ? subs.map(s => s.dataset.g) : [];
+  const single = !subs.length;
+  const gkeys = single ? Object.values(groups).filter(g => (g.section + '|' + topOf(g)) === box.dataset.top).map(g => g.key) : keys;
+  const on = gkeys.filter(k => !state.off[k]).length;
+  box.checked = on === gkeys.length; box.indeterminate = on > 0 && on < gkeys.length;
+  card.classList.toggle('off', on === 0);
+}
+function member(i) {
+  const ex = isEx(i);
+  const chips = (i.confidence === 'low' ? '<span class="chip low">low confidence</span>' : '') +
+    (i.reviewed ? `<span class="chip rev" title="${esc(i.reviewed)}">reviewed</span>` : '') +
+    (i.collision ? '<span class="chip col" title="Something with this name is already at the destination; the apply step will skip it">name clash</span>' : '') +
+    (i.referenced_by && i.referenced_by.length && i.action !== 'none' ? `<span class="chip col" title="Moving it would break this reference; unticked by default">used by ${esc(i.referenced_by.join(', '))}</span>` : '');
+  const box = i.action === 'none' ? '<span></span>' : `<input type="checkbox" ${ex ? '' : 'checked'} data-i="${esc(i.id)}" aria-label="Include ${esc(i.name)}">`;
+  return `<div class="m ${ex ? 'ex' : ''}" data-need="${needs(i) ? 1 : 0}" data-text="${esc((i.name + ' ' + i.intent + ' ' + i.group + ' ' + i.want).toLowerCase())}">${box}
+    <div><div class="nm">${esc(i.name)}${i.kind === 'dir' ? '/' : ''}<span class="chip">${gb(i.mb || 0)}</span><span class="chip">${esc((i.created || '').slice(0, 10))}</span>${chips}</div>
+    <div class="why">${esc(i.intent)}${i.want ? ' <b>→</b> ' + esc(i.want) : ''}</div>
+    <div class="ev">${esc(i.evidence)}${i.newer_or_original ? ' · kept copy: <code>' + esc(i.newer_or_original) + '</code>' : ''}${i.reviewed ? ' · review: ' + esc(i.reviewed) : ''}${i.note ? ' · ' + esc(i.note) : ''}</div></div></div>`;
+}
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset.top) {
+    for (const g of Object.values(groups)) if ((g.section + '|' + topOf(g)) === t.dataset.top) state.off[g.key] = !t.checked;
+    t.closest('.card').querySelectorAll('input[data-g]').forEach(s => { s.checked = t.checked; s.closest('.sub-block').classList.toggle('off', !t.checked); });
+    syncTop(t);
+  }
+  if (t.dataset.g) {
+    state.off[t.dataset.g] = !t.checked; t.closest('.sub-block').classList.toggle('off', !t.checked);
+    syncTop(t.closest('.card').querySelector('input[data-top]'));
+  }
+  if (t.dataset.i) { state.ex[t.dataset.i] = !t.checked; t.closest('.m').classList.toggle('ex', !t.checked); }
+  save(); stats();
+});
+document.getElementById('q').addEventListener('input', e => {
+  const q = e.target.value.trim().toLowerCase();
+  document.querySelectorAll('.card').forEach(c => {
+    let any = false;
+    c.querySelectorAll('.m').forEach(m => { const hit = !q || m.dataset.text.includes(q); m.classList.toggle('hidden', !hit); any ||= hit; });
+    c.classList.toggle('hidden', !any);
+    if (q && any) c.querySelector('details').open = true;
+  });
+});
+document.getElementById('openall').addEventListener('click', e => {
+  const open = e.target.textContent === 'Expand all';
+  document.querySelectorAll('details').forEach(d => d.open = open);
+  e.target.textContent = open ? 'Collapse all' : 'Expand all';
+});
+document.getElementById('unsureonly').addEventListener('click', e => {
+  const only = e.target.textContent.startsWith('Show only');
+  document.querySelectorAll('.m').forEach(m => m.classList.toggle('hidden', only && m.dataset.need !== '1'));
+  document.querySelectorAll('.sub-block').forEach(b => b.classList.toggle('hidden', only && !b.querySelector('.m[data-need="1"]')));
+  document.querySelectorAll('.card').forEach(c => {
+    const any = !!c.querySelector('.m[data-need="1"]');
+    c.classList.toggle('hidden', only && !any);
+    if (only && any) c.querySelectorAll('details').forEach(d => d.open = true);
+  });
+  e.target.textContent = only ? 'Show everything' : 'Show only what needs you';
+});
+document.getElementById('export').addEventListener('click', () => {
+  const live = DATA.items.filter(i => i.action !== 'none');
+  const ok = i => !state.off[i.section + '|' + i.group] && !isEx(i);
+  const out = { plan_id: DATA.plan_id, scope: 'organizer', exported: new Date().toISOString(),
+    approved: live.filter(ok).map(i => i.id), rejected: live.filter(i => !ok(i)).map(i => i.id) };
+  const txt = JSON.stringify(out, null, 1);
+  document.getElementById('json').value = txt;
+  document.getElementById('cmd').textContent = DATA.apply_cmd ||
+    '.\\Apply-Plan.ps1 -Plan <workdir>\\org-plan.json -Approvals <downloads>\\organizer-approvals.json   (dry run; add -Execute to apply)';
+  document.getElementById('exportbox').classList.add('show');
+  try {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([txt], { type: 'application/json' }));
+    a.download = 'organizer-approvals.json'; document.body.appendChild(a); a.click(); a.remove();
+  } catch (e) {}
+});
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{
+  "skill_name": "agy-headless-driver",
+  "evals": [
+    {
+      "id": 1,
+      "name": "multi-pass-opus-campaign",
+      "prompt": "Run refinement passes 6 to 10 of my spec-prep plan in agy on claude-opus-5-5-high, full V(10,3,1) council per pass. The plan tree, five earlier pass records and two big dossiers are under ~/.local/share/spec-prep/. Write the prompts and the driver manifest.",
+      "expected_output": "Five units (one per pass), a Gemini pack-building unit before the first Opus unit, prompts built from the template with resume and checkpoint protocols, full council preserved, a units.tsv for agy-run.sh with verify commands, and a calibration step before the full campaign.",
+      "assertions": [
+        "Each pass is its own agy session/unit",
+        "Prompts do not instruct whole-file reading of the corpus; only the context pack is read whole",
+        "The council parameters V(10,3,1) are kept unchanged",
+        "Effort level stays at the operator's choice (no downgrade suggested)",
+        "Includes a resume protocol and a done-marker per unit",
+        "Uses the Gemini pool for corpus distillation or pack building"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "recover-from-429",
+      "prompt": "My agy run died with: RESOURCE_EXHAUSTED (code 429): Individual quota reached. Resets in 4h33m58s. It was in the middle of pass 6 and had already edited spec.md. What do I do?",
+      "expected_output": "Classifies as short window, explains the weekly-drain risk of relaunching a full-ingest prompt, prescribes diffing against the last snapshot, preserving unrecorded edits as a diff to re-vote, and relaunching the same unit with a resume protocol after reset plus jitter.",
+      "assertions": [
+        "Identifies the reset as the short window, not weekly",
+        "Warns that relaunching with full preload can trigger the weekly lock",
+        "Unrecorded edits are rolled back and preserved as candidate proposals, not silently kept",
+        "Relaunch resumes the same unit from its checkpoint"
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "sonnet-implementation-with-gemini-support",
+      "prompt": "Use agy to implement the 14 adopted spec changes across our Hono API using Sonnet, and have something double-check the result. The repo is 900 files.",
+      "expected_output": "Gemini Flash or Pro builds a file index and pack, Sonnet units split by module with quiet test runs and incremental checkpoints, verify commands per unit, and a Gemini Pro independent review unit on the other pool.",
+      "assertions": [
+        "Splits the implementation into module-sized units",
+        "Uses quiet test output and line-range reads",
+        "Puts the review on the Gemini pool",
+        "Provides a units.tsv manifest"
+      ],
+      "files": []
+    }
+  ]
+}

@@ -31,7 +31,7 @@ The script tags each repo it won't touch. For each:
 
 | Flag | Meaning | What you do |
 |---|---|---|
-| `⚠️ NEEDS AGENT: uncommitted…` | Local uncommitted work | Inspect the diff. Check for secrets, accidental deletions, and junk/build artifacts. Commit only what belongs, with a real message, then push. Never blind `git add -A`. |
+| `⚠️ NEEDS AGENT: uncommitted…` | Local uncommitted work | Run the automated review below, then commit what belongs with a real message and push. Secrets review is mechanical, not a user gate — the user authorized this standing instruction. |
 | `⚠️ NEEDS AGENT: <N> unpushed…` | Committed but not pushed | Push if origin is yours; otherwise treat as the foreign-origin case below. |
 | `⚠️ NEEDS AGENT: diverged…` | Behind **and** ahead | Read `git diff HEAD..@{u}`. If the changes don't overlap, integrate (ff/rebase) and push. If they overlap, resolve the conflict **keeping all functionality** — find the reason for the conflict before editing; never delete to clear it. Ask if non-trivial. |
 | `⚠️ NEEDS AGENT: not a fast-forward…` | Clean but diverged from remote | Same as diverged — reconcile, don't force. |
@@ -40,6 +40,15 @@ The script tags each repo it won't touch. For each:
 | `❌ remote not found` | Origin deleted/renamed (404) | Ask whether to repoint or remove the remote. Never auto-remove a remote. |
 | `⏭️ active merge/rebase in progress` | Repo mid-operation | Finish or abort the operation with the user, then re-run. |
 | `secrets`/`untracked` in detail | Hints attached to the result | Use them: don't commit secrets; decide per-file whether untracked artifacts belong. |
+
+## Automated pre-commit review (standing authorization)
+
+The user has authorized this review as a mechanical step — it does not require per-repo user approval. For each flagged repo with uncommitted work:
+
+1. **Secrets scan.** `git diff` plus untracked files against content patterns (`github_pat_|ghp_|sk-(live|proj)-|BEGIN.*PRIVATE KEY|aws_secret|AIza`, plus the script's filename patterns in `check_secrets`). A filename hit is a hint, not a verdict — read the file before excluding it. If a real secret is found: stop that repo, report it, do not commit.
+2. **Deletions check.** `git diff --stat` for mass deletions or `delete mode` entries. One or two removed files with a clear reason (rename, superseded) is fine; unexplained bulk deletion stops that repo for user review.
+3. **Junk check.** Build artifacts (`__pycache__`, `node_modules`, `dist/`, `*.pyc`), editor swap files, and local-only logs do not belong — leave uncommitted or add to `.gitignore`.
+4. **Commit and push.** `git add` only reviewed files (never blind `git add -A` across unknown content), real message naming what changed, then `git pull --ff-only` + `git push`. If pull is not fast-forward, reconcile per the diverged row above; never force.
 
 If the script reports no flags: "X repos processed, all current — nothing to do."
 

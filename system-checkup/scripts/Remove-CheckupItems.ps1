@@ -8,6 +8,11 @@
 #   .\Remove-CheckupItems.ps1 -Only WIN-123,WSL-140 -IncludeOptional -Execute   # opt-in items by id
 #   .\Remove-CheckupItems.ps1 -LivingDocExport .\downloads-desktop-cleanup-change-request.json -Execute
 #
+#   APPROVAL MODE (preferred): decide item by item in Cleanup-Approvals.html, export, then
+#   .\Remove-CheckupItems.ps1 -Approvals <exported.json>            # dry run of exactly what you approved
+#   .\Remove-CheckupItems.ps1 -Approvals <exported.json> -Execute   # apply it
+#   Only approved ids from cleanup-plan.json run; rejected and undecided items are never touched.
+#
 # Rules this script enforces at run time (not just at manifest-build time):
 #   * Protected roots are never touched (C:\0.defenderexclusions, the Obsidian vault, the live Process
 #     Lasso Data folder on the Desktop, .claude/.config/.ssh, the WSL distro package, the Acronis backup,
@@ -26,13 +31,27 @@ param(
     [string[]]$Only,
     [switch]$IncludeOptional,
     [string]$LivingDocExport,
-    [switch]$UseRecycleBin
+    [switch]$UseRecycleBin,
+    [string]$Approvals,
+    [string]$Plan
 )
 $ErrorActionPreference = 'Continue'
 $Here = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+if ($Approvals) {
+    if (-not $Plan) { $Plan = Join-Path $Here 'cleanup-plan.json' }
+    $Manifest = $Plan
+}
 if (-not $Manifest) { $Manifest = Join-Path $Here 'removal-manifest.json' }
 Add-Type -AssemblyName Microsoft.VisualBasic
-$m = Get-Content -LiteralPath $Manifest -Raw | ConvertFrom-Json
+$m = Get-Content -LiteralPath $Manifest -Raw -Encoding UTF8 | ConvertFrom-Json
+$approvedIds = $null
+if ($Approvals) {
+    $ap = Get-Content -LiteralPath $Approvals -Raw -Encoding UTF8 | ConvertFrom-Json
+    if ($ap.plan_id -ne $m.plan_id) { Write-Host "Approvals file is for plan '$($ap.plan_id)' but the plan is '$($m.plan_id)'. Stopping." -ForegroundColor Red; exit 2 }
+    $approvedIds = @($ap.approved)
+    Write-Host ("Approvals: {0} approved, {1} rejected (scope: {2})" -f @($ap.approved).Count, @($ap.rejected).Count, $ap.scope) -ForegroundColor Magenta
+    foreach ($it in $m.items) { if (-not $it.PSObject.Properties['section']) { $it | Add-Member -NotePropertyName section -NotePropertyValue $it.folder }; if (-not $it.PSObject.Properties['title']) { $it | Add-Member -NotePropertyName title -NotePropertyValue $it.name } }
+}
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $logCsv = Join-Path $Here "run-$stamp.csv"
@@ -102,14 +121,30 @@ $vmStart = try { (Get-Process vmmemWSL -ErrorAction Stop | Select-Object -First 
 
 $selected = @($m.items) | Where-Object {
     $it = $_
+    if ($null -ne $approvedIds) { return ($approvedIds -contains $it.id) }   # approval mode: exactly what you approved
     if ($it.action -eq 'stage-by-name') { return $false }        # handled by -LivingDocExport below
     $picked = (-not $Only) -or ($Only -contains $it.id) -or ($Only -contains $it.section)
     $picked -and ($it.default -or $IncludeOptional -or ($Only -contains $it.id))
 }
+# moves first, so a folder that is both organized and has stale siblings ends up in the right place
+$selected = @($selected | Sort-Object { if ($_.action -eq 'move') { 0 } else { 1 } })
 foreach ($it in $selected) {
     $why = Test-Requirements $it
     if ($why) { Write-Result $it ($it.path, $it.command, $it.wsl | Where-Object { $_ } | Select-Object -First 1) 'SKIP-req' 0 $why; continue }
     switch ($it.action) {
+        'move' {
+            $p = $it.path; $dest = $it.target
+            if (Test-Protected $p) { Write-Result $it $p 'SKIP-protect' 0 'inside a protected root'; continue }
+            if (-not (Test-Path -LiteralPath $p)) { Write-Result $it $p 'SKIP-gone' 0 'already gone or already moved'; continue }
+            if ((Split-Path $p -Parent).TrimEnd('\') -ieq $dest.TrimEnd('\')) { Write-Result $it $p 'SKIP-there' 0 'already in place'; continue }
+            $final = Join-Path $dest (Split-Path $p -Leaf)
+            if (Test-Path -LiteralPath $final) { Write-Result $it $p 'SKIP-exists' 0 "a file with that name is already in $dest"; continue }
+            if (-not (Get-Item -LiteralPath $p -Force).PSIsContainer -and (Test-Locked $p)) { Write-Result $it $p 'SKIP-locked' 0 'file is open'; continue }
+            $bytes = Get-Bytes $p
+            if (-not $Execute) { Write-Result $it $p 'WOULD-move' $bytes "-> $dest"; continue }
+            try { New-Item -ItemType Directory -Force -Path $dest | Out-Null; Move-Item -LiteralPath $p -Destination $final -ErrorAction Stop; Write-Result $it $p 'DONE-moved' $bytes "-> $dest" }
+            catch { Write-Result $it $p 'FAIL' 0 $_.Exception.Message }
+        }
         { $_ -in 'delete', 'delete-contents', 'quarantine', 'stage', 'delete-wsl-swap' } {
             $paths = @(); if ($it.path) { $paths += $it.path }; if ($it.paths) { $paths += @($it.paths) }
             foreach ($p in $paths) {
@@ -169,7 +204,7 @@ foreach ($it in $selected) {
 # ------------------------------------------------------------- living-document decisions (user folders)
 if ($LivingDocExport) {
     Write-Host "`n--- Living document decisions: $LivingDocExport" -ForegroundColor Magenta
-    $cr = Get-Content -LiteralPath $LivingDocExport -Raw | ConvertFrom-Json
+    $cr = Get-Content -LiteralPath $LivingDocExport -Raw -Encoding UTF8 | ConvertFrom-Json
     $roots = @{ 'Downloads' = "$env:USERPROFILE\Downloads"; 'Desktop' = "$env:USERPROFILE\Desktop"; 'Documents' = "$env:USERPROFILE\Documents";
                 'Pictures' = "$env:USERPROFILE\Pictures"; 'Videos' = "$env:USERPROFILE\Videos"; 'Music' = "$env:USERPROFILE\Music";
                 'Home' = $env:USERPROFILE; 'C:' = 'C:\'; 'D:' = 'D:\'; 'Temp' = $env:TEMP }

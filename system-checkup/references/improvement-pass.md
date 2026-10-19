@@ -12,7 +12,7 @@ The auto-mode classifier refused to let Claude write this as a ready-to-run scri
    - `DefaultIOPriorities` = searchindexer 0, logi_download_assistant* 0, everything 1, googledrivefs 1, schedul2 1, crossdeviceservice 1.
    - `DefaultMemoryPriorities` = discord/slack/beeper/joplin/phoneexperiencehost 2; googledrivefs/crossdeviceservice/searchindexer/intel_pie_service 1; logi_download_assistant* 0.
    - `InstanceLimitedProcesses` = `logi_download_assistant*.exe;1`, `ApplyInstanceCountLimitsToAllUsers=true`.
-   - `StartupBoostRules` = `wezterm-gui.exe;above normal;10;1,code.exe;above normal;15;1,obsidian.exe;above normal;10;1`.
+   - (StartupBoostRules dropped: not supported by Lasso 18.2.3.42; re-add only after upgrading Lasso)
    - `DefaultPriorities` += googledrivefs, crossdeviceservice, joplin, phoneexperiencehost -> below normal.
    - `OocExclusions` += `sherpa-onnx-ws-win32-x64.exe`.
 5. **winget, non-disruptive set** (apps not running): Microsoft.EdgeWebView2Runtime, Microsoft.Edge, .NET 8/9/10 runtimes, Microsoft.PowerToys, Perplexity.Comet, Amazon.Kiro, UnslothAI.Unsloth. Defer Git (Git Bash in use), Tailscale (drops tailnet), Intel radio drivers, WSL packages, Docker, pnpm 12/Node/uv majors, and WezTerm to a maintenance window.

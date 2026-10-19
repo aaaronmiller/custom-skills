@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "projectId": "agy-headless-driver",
+  "title": "AGY Headless Driver",
+  "summary": "A packaged skill for planning and supervising Antigravity sessions with context and quota budgets.",
+  "lifecycle": "staged",
+  "assignment": "tooling",
+  "kind": "tooling",
+  "nextOperation": "tooling-review",
+  "readOrder": [
+    "start-here.md",
+    "workbench.json",
+    "sources/agy-headless-driver/SKILL.md",
+    "sources/agy-headless-driver/references/agy-system-model.md"
+  ],
+  "sources": [
+    {
+      "path": "archives/agy-headless-driver.zip",
+      "format": "archive",
+      "role": "original-archive",
+      "sha256": "6d4f0648c10a19a2a3dad7ca6651932e080ebb7cb9f2a333427e3f77efb42a9f"
+    },
+    {
+      "path": "sources/agy-headless-driver/SKILL.md",
+      "format": "markdown",
+      "role": "ideation-source",
+      "sha256": "54ec3f5c38d4ed9801f32c581bcd1cf2059df0b3e51786e66f987c4c2a97db68"
+    },
+    {
+      "path": "sources/agy-headless-driver/assets/campaign-kit.md",
+      "format": "markdown",
+      "role": "ideation-source",
+      "sha256": "fbee622b876dc3c85b2d8cefa7cb7f98127b44955b739f2e8a896a79161da6b8"
+    },
+    {
+      "path": "sources/agy-headless-driver/assets/example-spec-prep-pass06.md",
+      "format": "markdown",
+      "role": "ideation-source",
+      "sha256": "239b4bf1acc02ed3e6367b6148d92650b21709e41d2322a3b949f9ad3fc8034c"
+    },
+    {
+      "path": "sources/agy-headless-driver/assets/pack-builder-template.md",
+      "format": "markdown",
+      "role": "ideation-source",
+      "sha256": "dea3ef4bcdb2302f12489f13cc8d2ce4d65df60da4e385ffa3c90af746b9c413"
+    },
+    {
+      "path": "sources/agy-headless-driver/assets/prompt-template.md",
+      "format": "markdown",
+      "role": "ideation-source",
+      "sha256": "e03e5af6264b51c2b1be94059ec7cf61383f4be5916902672df65394cea31ab2"
+    },
+    {
+      "path": "sources/agy-headless-driver/evals/evals.json",
+      "format": "json",
+      "role": "ideation-source",
+      "sha256": "91aaea1836e225c9eecd26c5b7afeeef12047bf68c4bcc3ca9f021287cb5010b"
+    },
+    {
+      "path": "sources/agy-headless-driver/references/agy-system-model.md",
+      "format": "markdown",
+      "role": "ideation-source",
+      "sha256": "3bff246c3b0f57f4f1c0702a34eb64080f03c610f8a0ef192fa337dcb44fe732"
+    },
+    {
+      "path": "sources/agy-headless-driver/references/case-study-spec-prep-lockout.md",
+      "format": "markdown",
+      "role": "ideation-source",
+      "sha256": "e62b14342e764d5a54e4a83a09136274f3206d3febf33c903ef25a9753ef59d0"
+    },
+    {
+      "path": "sources/agy-headless-driver/references/claude-models.md",
+      "format": "markdown",
+      "role": "ideation-source",
+      "sha256": "0fd2a8fffdd7750117fa422e0e0303c3b7309fb2ed41a3603dd22f66b5811c73"
+    },
+    {
+      "path": "sources/agy-headless-driver/references/deliberation-in-agy.md",
+      "format": "markdown",
+      "role": "ideation-source",
+      "sha256": "23bdfbb784976bc48d96dc8201c6fbeab2831531480724bf8c90ba95c55a54b8"
+    },
+    {
+      "path": "sources/agy-headless-driver/references/failure-recovery.md",
+      "format": "markdown",
+      "role": "ideation-source",
+      "sha256": "008bac25d360fa579657ed147067ff00c9344de1e003f2db2e40a19103507302"
+    },
+    {
+      "path": "sources/agy-headless-driver/references/gemini-models.md",
+      "format": "markdown",
+      "role": "ideation-source",
+      "sha256": "45dc7cbbc8783581386d424dfaf957470983589195d7b9b5ec1b5eb41ef844c5"
+    },
+    {
+      "path": "sources/agy-headless-driver/references/session-design.md",
+      "format": "markdown",
+      "role": "ideation-source",
+      "sha256": "db76d2ce7e7690a9fee0249bbfd6318b551aca5b6803d21cc598efdf2e303eea"
+    },
+    {
+      "path": "sources/agy-headless-driver/scripts/agy-run.sh",
+      "format": "shell",
+      "role": "ideation-source",
+      "sha256": "901d01dd7d7e333bb78998372a80c6b782040b6b54096f1021fc19d3dd8fbe71"
+    },
+    {
+      "path": "sources/agy-headless-driver/scripts/budget.py",
+      "format": "python",
+      "role": "ideation-source",
+      "sha256": "84e8fc5f52352811e11b26e4e229f21c3d62578216e0a40305df39e0fb896d20"
+    }
+  ],
+  "issues": [
+    {
+      "severity": "info",
+      "detail": "This is a skill package, not a product brief. It is staged for tooling review, not silently installed or launched."
+    }
+  ],
+  "relatedProjects": [
+    "spec-prep-tooling"
+  ],
+  "externalResources": [],
+  "stagedAt": "2026-10-14T02:46:04.201107+00:00",
+  "spec-prepVersion": "2.2.0",
+  "scope": "Intake staging only. No specification preparation, repository creation or implementation is authorized by this folder."
+}

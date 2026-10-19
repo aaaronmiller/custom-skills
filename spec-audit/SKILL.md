@@ -6,7 +6,7 @@ description: |-
 license: MIT
 metadata:
   version: "1.0.0"
-  lineage: "spec-workflow AUDIT gate (backtranslation-spec-auditor 2.2.0) split out; strata covers CREATE and IMPLEMENT"
+  lineage: "spec-workflow AUDIT gate (backtranslation-spec-auditor 2.2.0) split out; spec-prep covers CREATE and IMPLEMENT"
 tags:
 - spec-driven
 - audit

@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SPECTRE-16 Cleanup Approvals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Lora:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an approval console. Folder rail on the left (do one folder at a time), filter + bulk bar on top,
+   groups of rows below; every row carries its own approve/reject toggle, reason and impact.
+   Dark only, matching the checkup report (Anthropic palette). */
+:root {
+  color-scheme: dark;
+  --bg: #141413; --surface: #1c1b19; --raised: #24231f; --line: #36342e; --line-2: #4a473f;
+  --ink: #faf9f5; --ink-2: #cfccc1; --ink-3: #9a978d;
+  --accent: #d97757; --accent-soft: #3a261d; --blue: #6a9bcc;
+  --ok: #8db36b; --ok-soft: #22301a; --no: #e26a5f; --no-soft: #3a1d1a; --warn: #e0a84a; --info: #7fa7d6;
+  --f-display: "Poppins", "Segoe UI", Arial, sans-serif; --f-body: "Lora", Georgia, serif; --f-mono: "IBM Plex Mono", Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+button { font: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code, .mono { font-family: var(--f-mono); font-size: 0.85em; }
+
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); border-bottom: 1px solid var(--line);
+  padding: 12px clamp(16px, 3vw, 32px); display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; }
+.top h1 { font-family: var(--f-display); font-size: 1.15rem; font-weight: 600; margin: 0; white-space: nowrap; }
+.stats { display: flex; flex-wrap: wrap; gap: 6px 16px; font-family: var(--f-mono); font-size: 0.8rem; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.stats b { color: var(--ink); font-weight: 500; } .stats .ok b { color: var(--ok); } .stats .no b { color: var(--no); }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+.btn { background: var(--raised); color: var(--ink); border: 1px solid var(--line-2); border-radius: 7px; padding: 6px 12px; font-family: var(--f-display); font-size: 0.8rem; }
+.btn:hover { border-color: var(--ink-3); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #1a120d; font-weight: 600; }
+.btn.small { padding: 3px 9px; font-size: 0.75rem; }
+
+.shell { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 0; min-height: calc(100vh - 60px); }
+@media (max-width: 820px) { .shell { grid-template-columns: 1fr; } .rail { position: static !important; display: flex; overflow-x: auto; gap: 6px; padding: 10px 16px !important; border-right: 0 !important; border-bottom: 1px solid var(--line); } .rail button { flex: 0 0 auto; } .rail h2 { display: none; } }
+.rail { border-right: 1px solid var(--line); padding: 16px 12px; position: sticky; top: 60px; align-self: start; max-height: calc(100vh - 60px); overflow-y: auto; display: grid; gap: 4px; align-content: start; }
+.rail h2 { font-family: var(--f-mono); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin: 4px 8px 8px; font-weight: 500; }
+.rail button { text-align: left; background: transparent; border: 1px solid transparent; color: var(--ink-2); border-radius: 8px; padding: 8px 10px; display: grid; gap: 4px; }
+.rail button:hover { background: var(--surface); }
+.rail button.on { background: var(--surface); border-color: var(--line-2); color: var(--ink); }
+.rail .fn { font-family: var(--f-display); font-size: 0.85rem; font-weight: 500; display: flex; justify-content: space-between; gap: 8px; }
+.rail .fm { font-family: var(--f-mono); font-size: 0.7rem; color: var(--ink-3); }
+.bar { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; display: flex; }
+.bar i { display: block; height: 100%; } .bar .a { background: var(--ok); } .bar .r { background: var(--no); }
+
+main { padding: 20px clamp(16px, 3vw, 32px) 80px; display: grid; gap: 18px; align-content: start; min-width: 0; }
+.fhead { display: grid; gap: 8px; }
+.fhead h2 { font-family: var(--f-display); font-size: 1.6rem; font-weight: 600; margin: 0; text-wrap: balance; }
+.fhead p { margin: 0; color: var(--ink-2); max-width: 75ch; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.filters label { display: inline-flex; gap: 6px; align-items: center; font-family: var(--f-display); font-size: 0.78rem; color: var(--ink-2); cursor: pointer; }
+.filters input[type=search] { background: var(--bg); border: 1px solid var(--line-2); color: var(--ink); border-radius: 6px; padding: 5px 9px; font-family: var(--f-mono); font-size: 0.8rem; min-width: 0; width: 220px; max-width: 100%; }
+.filters .sp { flex: 1; }
+
+.callout { background: var(--accent-soft); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 12px 16px; display: grid; gap: 8px; }
+.callout h3 { margin: 0; font-family: var(--f-display); font-size: 0.95rem; }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+th { text-align: left; font-family: var(--f-display); font-weight: 500; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); padding: 6px 10px; }
+td { padding: 6px 10px; border-top: 1px solid rgb(255 255 255 / 0.06); vertical-align: top; color: var(--ink-2); }
+td:first-child { color: var(--ink); white-space: nowrap; }
+
+details.group { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+details.group > summary { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; padding: 12px 16px; cursor: pointer; }
+details.group > summary::-webkit-details-marker { display: none; }
+details.group > summary::before { content: "\25B8"; color: var(--ink-3); transition: transform .15s; }
+details.group[open] > summary::before { transform: rotate(90deg); }
+.gname { font-family: var(--f-display); font-weight: 600; font-size: 0.95rem; }
+.gmeta { font-family: var(--f-mono); font-size: 0.75rem; color: var(--ink-3); }
+.gbulk { margin-left: auto; display: flex; gap: 6px; }
+.rows { display: grid; border-top: 1px solid var(--line); }
+.row { display: grid; grid-template-columns: 116px minmax(0, 1fr) 92px; gap: 6px 14px; padding: 12px 16px; border-top: 1px solid rgb(255 255 255 / 0.05); align-items: start; }
+.row:first-child { border-top: 0; }
+.row.a { background: linear-gradient(90deg, var(--ok-soft), transparent 40%); }
+.row.r { background: linear-gradient(90deg, var(--no-soft), transparent 40%); opacity: 0.8; }
+@media (max-width: 640px) { .row { grid-template-columns: 1fr; } .row .sz { text-align: left !important; } }
+.seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 7px; overflow: hidden; align-self: start; }
+.seg button { background: transparent; border: 0; color: var(--ink-3); padding: 5px 10px; font-family: var(--f-display); font-size: 0.75rem; }
+.seg button + button { border-left: 1px solid var(--line-2); }
+.seg button.ap.on { background: var(--ok); color: #12200a; font-weight: 600; }
+.seg button.rj.on { background: var(--no); color: #2a0c09; font-weight: 600; }
+.main { display: grid; gap: 5px; min-width: 0; }
+.nm { font-family: var(--f-mono); font-size: 0.85rem; color: var(--ink); overflow-wrap: anywhere; }
+.pth { font-family: var(--f-mono); font-size: 0.72rem; color: var(--ink-3); overflow-wrap: anywhere; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-family: var(--f-display); font-size: 0.68rem; font-weight: 500; padding: 1px 8px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.chip.act { color: var(--blue); } .chip.rec { color: var(--accent); }
+.chip.lv-none { color: var(--ok); } .chip.lv-slower { color: var(--info); } .chip.lv-redownload { color: var(--warn); } .chip.lv-history { color: var(--warn); }
+.chip.lv-functional { color: var(--no); } .chip.lv-moves { color: var(--ink-2); } .chip.lv-staged { color: var(--ok); }
+.why { color: var(--ink-2); font-size: 0.85rem; max-width: 90ch; }
+.imp { color: var(--ink-3); font-size: 0.82rem; max-width: 90ch; }
+.imp b { color: var(--ink-2); font-weight: 500; }
+.sz { font-family: var(--f-mono); font-size: 0.8rem; color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; }
+.empty { color: var(--ink-3); font-style: italic; padding: 12px 16px; }
+.howto { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; display: grid; gap: 8px; }
+.howto pre { margin: 0; background: var(--raised); border-radius: 8px; padding: 10px 12px; overflow-x: auto; font-family: var(--f-mono); font-size: 0.78rem; color: var(--ink-2); }
+#toast { position: fixed; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: var(--raised); border: 1px solid var(--line-2); border-radius: 8px; padding: 8px 14px; font-family: var(--f-display); font-size: 0.85rem; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Cleanup Approvals</h1>
+  <div class="stats" id="stats"></div>
+  <div class="tools">
+    <button class="btn" id="b-import">Load approvals file</button>
+    <button class="btn" id="b-export-folder">Export this folder</button>
+    <button class="btn primary" id="b-export-all">Export all decisions</button>
+    <input type="file" id="f-import" accept=".json" hidden>
+  </div>
+</header>
+<div class="shell">
+  <nav class="rail" id="rail" aria-label="Folders"></nav>
+  <main id="main"></main>
+</div>
+<div id="toast" hidden></div>
+<script type="application/json" id="plan">__PLAN__</script>
+<script>
+(function () {
+  const P = JSON.parse(document.getElementById('plan').textContent);
+  const KEY = 'cleanup-approvals:' + P.plan_id;
+  let D = {};               // id -> 'a' | 'r'
+  try { D = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { D = {}; }
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) {} };
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const gb = (v) => v >= 1 ? v.toFixed(1) + ' GB' : v >= 0.001 ? Math.round(v * 1024) + ' MB' : '<1 MB';
+  const byId = Object.fromEntries(P.items.map((i) => [i.id, i]));
+  const LV = { none: 'No functional change', slower: 'Rebuilds itself, slower once', redownload: 'Needs a re-download', history: 'Loses old logs / evidence', functional: 'Changes how something works', moves: 'Path changes', staged: 'Reversible (staged)' };
+  const DESC = {
+    downloads: 'The messy one. Project files move into project folders, files nothing claims are sorted by type, and duplicates, installers for apps you already have, superseded versions and extracted zips go to _REVIEW-then-delete (moved, not deleted). Model weights, disk images and big new arrivals are left for you to decide one by one.',
+    desktop: 'Mostly the catch-all folder "txt md ps1 zip 7-11-26": admin scripts move to Win-Admin, empty files and old driver packages go to review. Shortcuts stay. The live Process Lasso folder is never touched.',
+    documents: 'Project files move into project folders. Duplicates found by hash are listed but off by default, because most sit inside exported folders where pulling one file out breaks the set. The Obsidian vault is never touched.',
+    pictures: 'Only hash-identical duplicate photos, all off by default. The photo library itself is not reorganized.',
+    music: 'Only hash-identical duplicate tracks, off by default.', home: 'Loose exports in the home folder.',
+    d: 'Model weights and disk images you may no longer use. Nothing is recommended here; it is your call per file. The backup image and the session mirror are never touched.',
+    appcache: 'App caches only. No item here signs you out of anything: cookies, saved logins, history, sessions, local storage and settings live in other files that are not touched. See the table below for exactly what each one does.',
+    devcache: 'Package-manager and tool caches that refill themselves. Nothing stops working; the next install re-downloads what it needs.',
+    temp: 'Windows temp. Everything is re-checked at run time: untouched for 7+ days and not locked, or it is skipped. WSL swap disks attached to the running VM are skipped automatically.',
+    system: 'Items that need an elevated run. Shadow-copy capping deletes old restore points, so it is off by default.',
+    wsl: 'Runs inside Ubuntu. Caches and superseded toolchains are on; anything that a pinned project could need again is off.'
+  };
+  const fstate = { folder: P.folders.find((f) => P.items.some((i) => i.folder === f.key)).key, onlyImpact: false, onlyUndecided: false, hideMoves: false, q: '' };
+
+  function totals(list) {
+    let a = 0, r = 0, u = 0, agb = 0;
+    list.forEach((i) => { if (D[i.id] === 'a') { a++; if (i.action !== 'move') agb += i.gb; } else if (D[i.id] === 'r') r++; else u++; });
+    return { a, r, u, agb, n: list.length };
+  }
+  function renderStats() {
+    const t = totals(P.items);
+    document.getElementById('stats').innerHTML = `<span class="ok">approved <b>${t.a}</b></span><span class="no">rejected <b>${t.r}</b></span><span>undecided <b>${t.u}</b></span><span>space approved <b>${gb(t.agb)}</b></span><span>plan <b>${esc(P.plan_id)}</b></span>`;
+  }
+  function renderRail() {
+    const rail = document.getElementById('rail');
+    rail.innerHTML = '<h2>Folders</h2>' + P.folders.map((f) => {
+      const list = P.items.filter((i) => i.folder === f.key); if (!list.length) return '';
+      const t = totals(list); const size = list.filter((i) => i.action !== 'move').reduce((s, i) => s + i.gb, 0);
+      return `<button data-f="${f.key}" class="${f.key === fstate.folder ? 'on' : ''}"><span class="fn"><span>${esc(f.label)}</span><span class="fm">${t.n}</span></span>
+        <span class="fm">${t.a} ok · ${t.r} no · ${gb(size)}</span><span class="bar"><i class="a" style="width:${t.a / t.n * 100}%"></i><i class="r" style="width:${t.r / t.n * 100}%"></i></span></button>`;
+    }).join('');
+    rail.querySelectorAll('button[data-f]').forEach((b) => b.onclick = () => { fstate.folder = b.dataset.f; render(); window.scrollTo({ top: 0 }); });
+  }
+  function actionText(i) {
+    if (i.action === 'move') return 'Move to ' + (i.target || '').replace(/^C:\\Users\\Administrator\\/i, '');
+    if (i.action === 'stage') return 'Move to _REVIEW-then-delete';
+    if (i.action === 'quarantine') return 'Quarantine (move aside)';
+    if (i.action === 'command') return 'Run: ' + i.command;
+    if (i.action === 'command-ps') return 'Run (admin): ' + i.command;
+    if (i.action === 'wsl') return 'Run in WSL';
+    if (i.action === 'delete-contents') return 'Empty folder contents';
+    if (i.action === 'delete-wsl-swap') return 'Delete old swap disk';
+    return 'Delete';
+  }
+  function visible(i) {
+    if (fstate.onlyImpact && !['functional', 'redownload', 'history'].includes(i.impact_level) && !/sign|logged|Chrome|Slack|Obsidian/i.test(i.impact)) return false;
+    if (fstate.onlyUndecided && D[i.id]) return false;
+    if (fstate.hideMoves && i.action === 'move') return false;
+    if (fstate.q) { const q = fstate.q.toLowerCase(); if (!((i.name + ' ' + (i.path || '') + ' ' + i.group + ' ' + (i.wsl || '') + ' ' + (i.command || '')).toLowerCase().includes(q))) return false; }
+    return true;
+  }
+  function rowHtml(i) {
+    const d = D[i.id] || '';
+    const where = i.path ? i.path : i.wsl ? i.wsl : i.command ? i.command : (i.paths ? i.paths.length + ' paths (each re-checked)' : '');
+    return `<div class="row ${d}" data-id="${i.id}">
+      <div class="seg" role="group" aria-label="Decision"><button class="ap ${d === 'a' ? 'on' : ''}" data-d="a" aria-pressed="${d === 'a'}">Approve</button><button class="rj ${d === 'r' ? 'on' : ''}" data-d="r" aria-pressed="${d === 'r'}">Reject</button></div>
+      <div class="main"><span class="nm">${esc(i.name)}</span><span class="pth">${esc(where)}</span>
+        <div class="chips"><span class="chip act">${esc(actionText(i))}</span><span class="chip lv-${i.impact_level}">${esc(LV[i.impact_level] || i.impact_level)}</span>${i.recommended ? '<span class="chip rec">Recommended</span>' : ''}</div>
+        <div class="why">${esc(i.why)}</div><div class="imp"><b>Effect:</b> ${esc(i.impact)}${i.keep ? ' <b>Kept copy:</b> <span class="mono">' + esc(i.keep) + '</span>' : ''}</div></div>
+      <div class="sz">${i.action === 'move' ? gb(i.gb) + '<br><span class="pth">moved</span>' : gb(i.gb)}</div></div>`;
+  }
+  function render() {
+    renderStats(); renderRail();
+    const f = P.folders.find((x) => x.key === fstate.folder);
+    const all = P.items.filter((i) => i.folder === f.key);
+    const shown = all.filter(visible);
+    const groups = {}; shown.forEach((i) => (groups[i.group] = groups[i.group] || []).push(i));
+    const t = totals(all); const recN = all.filter((i) => i.recommended).length;
+    let h = `<section class="fhead"><h2>${esc(f.label)}</h2><p>${esc(DESC[f.key] || '')}</p><p class="mono" style="color:var(--ink-3);font-size:.78rem">${t.n} items · ${recN} recommended · ${t.a} approved · ${t.r} rejected</p></section>`;
+    if (f.key === 'appcache' || f.key === 'devcache') h += cacheTable(all);
+    if (f.key === 'downloads') h += `<div class="callout"><h3>Left exactly as is</h3><div>${esc(P.excluded_note)} Folders nobody classified stay where they are.</div></div>`;
+    h += `<div class="filters"><label><input type="checkbox" id="c-imp" ${fstate.onlyImpact ? 'checked' : ''}> Only items that affect how apps work</label>
+      <label><input type="checkbox" id="c-und" ${fstate.onlyUndecided ? 'checked' : ''}> Only undecided</label>
+      <label><input type="checkbox" id="c-mov" ${fstate.hideMoves ? 'checked' : ''}> Hide moves</label>
+      <input type="search" id="q" placeholder="filter by name or path" value="${esc(fstate.q)}" aria-label="Filter">
+      <span class="sp"></span><button class="btn small" id="f-rec">Approve recommended here</button><button class="btn small" id="f-rej">Reject the rest here</button><button class="btn small" id="f-clr">Clear this folder</button></div>`;
+    const names = Object.keys(groups);
+    if (!names.length) h += '<div class="empty">Nothing matches the filters.</div>';
+    names.forEach((g) => {
+      const list = groups[g]; const size = list.filter((i) => i.action !== 'move').reduce((s, i) => s + i.gb, 0); const gt = totals(list);
+      h += `<details class="group" ${list.length <= 40 || fstate.q ? 'open' : ''} data-g="${esc(g)}"><summary><span class="gname">${esc(g)}</span><span class="gmeta">${list.length} · ${gb(size)}${list.some((i) => i.action === 'move') ? ' (moves)' : ''} · ${gt.a} ok · ${gt.r} no</span>
+        <span class="gbulk"><button class="btn small" data-bulk="a">Approve all</button><button class="btn small" data-bulk="r">Reject all</button></span></summary>
+        <div class="rows">${list.map(rowHtml).join('')}</div></details>`;
+    });
+    h += howTo();
+    const main = document.getElementById('main'); main.innerHTML = h;
+    main.querySelectorAll('.row .seg button').forEach((b) => b.onclick = () => { const id = b.closest('.row').dataset.id; D[id] = D[id] === b.dataset.d ? undefined : b.dataset.d; if (!D[id]) delete D[id]; save(); updateRow(id); renderStats(); renderRail(); });
+    main.querySelectorAll('[data-bulk]').forEach((b) => b.onclick = (e) => { e.preventDefault(); const g = b.closest('details').dataset.g; groups[g].forEach((i) => (D[i.id] = b.dataset.bulk)); save(); render(); });
+    document.getElementById('c-imp').onchange = (e) => { fstate.onlyImpact = e.target.checked; render(); };
+    document.getElementById('c-und').onchange = (e) => { fstate.onlyUndecided = e.target.checked; render(); };
+    document.getElementById('c-mov').onchange = (e) => { fstate.hideMoves = e.target.checked; render(); };
+    const q = document.getElementById('q'); q.oninput = () => { fstate.q = q.value; clearTimeout(q._t); q._t = setTimeout(() => { render(); const n = document.getElementById('q'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); }, 250); };
+    document.getElementById('f-rec').onclick = () => { all.forEach((i) => { if (i.recommended && !D[i.id]) D[i.id] = 'a'; }); save(); render(); toast('Recommended items approved in ' + f.label); };
+    document.getElementById('f-rej').onclick = () => { all.forEach((i) => { if (!D[i.id]) D[i.id] = 'r'; }); save(); render(); toast('Undecided items rejected in ' + f.label); };
+    document.getElementById('f-clr').onclick = () => { all.forEach((i) => delete D[i.id]); save(); render(); toast('Cleared ' + f.label); };
+  }
+  function updateRow(id) {
+    const row = document.querySelector(`.row[data-id="${id}"]`); if (!row) return; const d = D[id] || '';
+    row.className = 'row ' + d; row.querySelector('.ap').classList.toggle('on', d === 'a'); row.querySelector('.rj').classList.toggle('on', d === 'r');
+    row.querySelector('.ap').setAttribute('aria-pressed', d === 'a'); row.querySelector('.rj').setAttribute('aria-pressed', d === 'r');
+  }
+  function cacheTable(list) {
+    return `<div class="callout"><h3>What each cache wipe does to your apps</h3><div class="tbl"><table><thead><tr><th>Item</th><th>Signs you out?</th><th>What changes</th></tr></thead><tbody>${
+      list.map((i) => `<tr><td>${esc(i.name)}</td><td>${i.impact_level === 'functional' ? 'No, but see effect' : 'No'}</td><td>${esc(i.impact)}</td></tr>`).join('')}</tbody></table></div></div>`;
+  }
+  function howTo() {
+    return `<section class="howto"><h3 style="margin:0;font-family:var(--f-display);font-size:.95rem">Apply what you approved</h3>
+      <div style="color:var(--ink-2);font-size:.88rem">Export your decisions (all folders, or just this one if you are doing it in parts), then run the script on that file. It does a dry run first; add <code>-Execute</code> when the dry run looks right. Run it elevated if you approved anything in "System". Rejected and undecided items are never touched.</div>
+      <pre>cd C:\\performance-diagnostics\\checkup-20261013\\removal
+.\\Remove-CheckupItems.ps1 -Approvals "$env:USERPROFILE\\Downloads\\cleanup-approvals-downloads-YYYYMMDD-HHMM.json"
+.\\Remove-CheckupItems.ps1 -Approvals "...json" -Execute</pre></section>`;
+  }
+  function exportDecisions(folderKey) {
+    const ids = Object.keys(D).filter((id) => byId[id] && (!folderKey || byId[id].folder === folderKey));
+    const out = { plan_id: P.plan_id, exported: new Date().toISOString(), scope: folderKey || 'all',
+      approved: ids.filter((id) => D[id] === 'a'), rejected: ids.filter((id) => D[id] === 'r') };
+    if (!out.approved.length && !out.rejected.length) { toast('Nothing decided ' + (folderKey ? 'in this folder ' : '') + 'yet'); return; }
+    const stamp = new Date(); const pad = (n) => String(n).padStart(2, '0');
+    const name = `cleanup-approvals-${folderKey || 'all'}-${stamp.getFullYear()}${pad(stamp.getMonth() + 1)}${pad(stamp.getDate())}-${pad(stamp.getHours())}${pad(stamp.getMinutes())}.json`;
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 1)], { type: 'application/json' })); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    toast(`Saved ${name} (${out.approved.length} approved, ${out.rejected.length} rejected)`);
+  }
+  let tt; function toast(m) { const t = document.getElementById('toast'); t.textContent = m; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => (t.hidden = true), 2600); }
+  document.getElementById('b-export-all').onclick = () => exportDecisions(null);
+  document.getElementById('b-export-folder').onclick = () => exportDecisions(fstate.folder);
+  document.getElementById('b-import').onclick = () => document.getElementById('f-import').click();
+  document.getElementById('f-import').onchange = (e) => { const f = e.target.files[0]; if (!f) return; f.text().then((t) => { const j = JSON.parse(t); if (j.plan_id !== P.plan_id) { toast('That file belongs to a different plan'); return; } (j.approved || []).forEach((id) => (D[id] = 'a')); (j.rejected || []).forEach((id) => (D[id] = 'r')); save(); render(); toast('Loaded decisions from ' + f.name); }); };
+  render();
+})();
+</script>
+</body>
+</html>

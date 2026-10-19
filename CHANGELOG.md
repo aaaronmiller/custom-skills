@@ -1,20 +1,20 @@
 # Changelog
 
-## [strata 2.4.0 + spec-audit 1.0.0] — 2026-10-16
+## [spec-prep 2.4.0 + spec-audit 1.0.0] — 2026-10-16
 
 ### Changed
-- Superseded `spec-workflow` by strata 2.4.0 (per-file comparison at `/tmp/spec-workflow-compare.md`: 1 COVERED, 5 PARTIAL, 7 UNIQUE, 1 SUPERSEDED). CREATE/IMPLEMENT absorbed — Mode C, depth-preservation directives, 80-word density heuristic, per-category done-criteria merged into strata. Retired `spec-workflow/` to `staged-for-deletion/spec-workflow--superseded-by-strata-2.4.0/`.
-- Split AUDIT gate to new standalone `spec-audit` 1.0.0 skill (backtranslation, cold-pass, drift taxonomy, stage checklists, report templates — no strata equivalent existed). Strata triggers consolidated; audit triggers route to spec-audit.
+- Superseded `spec-workflow` by spec-prep 2.4.0 (per-file comparison at `/tmp/spec-workflow-compare.md`: 1 COVERED, 5 PARTIAL, 7 UNIQUE, 1 SUPERSEDED). CREATE/IMPLEMENT absorbed — Mode C, depth-preservation directives, 80-word density heuristic, per-category done-criteria merged into spec-prep. Retired `spec-workflow/` to `staged-for-deletion/spec-workflow--superseded-by-spec-prep-2.4.0/`.
+- Split AUDIT gate to new standalone `spec-audit` 1.0.0 skill (backtranslation, cold-pass, drift taxonomy, stage checklists, report templates — no spec-prep equivalent existed). spec-prep triggers consolidated; audit triggers route to spec-audit.
 
-## [strata 2.3.3] — 2026-10-16
+## [spec-prep 2.3.3] — 2026-10-16
 
 ### Changed
-- Tiered ratification (user directive: author-supplied specs are pre-ratified, review wastes author time). `strata/SKILL.md` Authorship rule, Existing-specs and Recovery entries, and Phase 6 delivery now state: human-authored packs need no review gate — the gate battery (audit, trace, depth, prerequisites) IS the review; delivery names paths with MAY-review/never-REQUIRED wording and silence-is-consent. Mandatory ratification survives only for system-drafted or system-inferred material. `references/spec-template.md` authorship tiered likewise. Distributable archives rebuilt (36 files, no nesting).
+- Tiered ratification (user directive: author-supplied specs are pre-ratified, review wastes author time). `spec-prep/SKILL.md` Authorship rule, Existing-specs and Recovery entries, and Phase 6 delivery now state: human-authored packs need no review gate — the gate battery (audit, trace, depth, prerequisites) IS the review; delivery names paths with MAY-review/never-REQUIRED wording and silence-is-consent. Mandatory ratification survives only for system-drafted or system-inferred material. `references/spec-template.md` authorship tiered likewise. Distributable archives rebuilt (36 files, no nesting).
 
-## [strata 2.3.2] — 2026-10-16
+## [spec-prep 2.3.2] — 2026-10-16
 
 ### Fixed
-- Initiation-transport violation (Helix 2026-10-16 post-mortem): prior session read "prepare then implement via new session" as authority to spawn a task/subagent in-tree as the "fresh" session, executing T001 and committing ack/code without user restart. `strata/SKILL.md` Phase 7 now forbids in-process task/subagent spawn as initiation transport, adds a launch-authority test (named project + direct launch instruction) and an authoring-session freeze after handoff; `references/fresh-session-initiation.md` marks subagent-authored implementation artifacts VOID and validates acks only from parentless session IDs; `references/terminology.md` states a spawned subagent is never a fresh harness. User STOP overrides todo/resume reminders. Distributable archives (`strata.skill`, `strata/strata.SKILL`) rebuilt from canonical sources with no nested archives (33 files).
+- Initiation-transport violation (Helix 2026-10-16 post-mortem): prior session read "prepare then implement via new session" as authority to spawn a task/subagent in-tree as the "fresh" session, executing T001 and committing ack/code without user restart. `spec-prep/SKILL.md` Phase 7 now forbids in-process task/subagent spawn as initiation transport, adds a launch-authority test (named project + direct launch instruction) and an authoring-session freeze after handoff; `references/fresh-session-initiation.md` marks subagent-authored implementation artifacts VOID and validates acks only from parentless session IDs; `references/terminology.md` states a spawned subagent is never a fresh harness. User STOP overrides todo/resume reminders. Distributable archives (`spec-prep.skill`, `spec-prep/spec-prep.SKILL`) rebuilt from canonical sources with no nested archives (33 files).
 
 ## [Unreleased]
 

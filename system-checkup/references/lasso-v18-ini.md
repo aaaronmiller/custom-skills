@@ -21,7 +21,7 @@ There is no rule CLI in v18 (no plcmd). Installer supports `/importconfigfrom=`;
 | `DefaultIOPriorities` | `match,value,...` 0 very low .. 2 normal .. 4 critical | `searchindexer.exe,0` |
 | `DefaultMemoryPriorities` (Pro) | `match,value,...` 0 lowest .. 5 normal | `discord.exe,2` |
 | `InstanceLimitedProcesses` (Pro) | `match;max,...` | `logi_download_assistant*.exe;1` |
-| `StartupBoostRules` | `match;priority;seconds;efficiency,...` | `code.exe;above normal;15;1` |
+| `StartupBoostRules` | NOT supported by 18.2.3.42 (GUI drops the key on load; newer builds only) | - |
 | `OocExclusions` (ProBalance) | comma list | `claude.exe,codex.exe,vmmemwsl,vmmemwsl.exe` |
 | `WatchdogRules2` (Pro) | 12 `;` fields per rule | `leaky.exe;1;1;2048.00;30000;0;1;1;-;-;-;-` |
 | `DefaultPowerSchemes` (Pro) | `match;plan name,...` | |

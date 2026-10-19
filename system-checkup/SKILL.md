@@ -61,12 +61,13 @@ powershell.exe -NoProfile -Command "Start-Process powershell -Verb RunAs -Wait -
 ```
 Covers RebootPending, WU policy, WER triage, HID power-saving, SSD health, VSS, BitLocker, Defender, elevated process affinity (Lasso verification), admin cache sizes, battery report, SFC, DISM ScanHealth and AnalyzeComponentStore, CBS errors. The log is UTF-16: read with `iconv -f UTF-16`. Get the SFC unrepairable list with `grep -a "<date>.*\[SR\] Cannot repair member file" C:/Windows/Logs/CBS/CBS.log`.
 
-## Phase 5 - removal manifest + script
+## Phase 5 - cleanup plan, approval page, removal script
 ```bash
-python -I $CK/scripts/build_removal_manifest.py C:/performance-diagnostics/checkup-YYYYMMDD
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File 'C:\performance-diagnostics\checkup-YYYYMMDD\removal\Remove-CheckupItems.ps1'   # dry run
+python -I $CK/scripts/build_removal_manifest.py C:/performance-diagnostics/checkup-YYYYMMDD     # caches, temp, WSL, system, hash dupes
+python -I $CK/scripts/build_cleanup_plan.py C:/performance-diagnostics/checkup-YYYYMMDD        # + living-doc organize/stage + Downloads type sort
+python -I $CK/scripts/build_approval_page.py C:/performance-diagnostics/checkup-YYYYMMDD       # -> removal/Cleanup-Approvals.html
 ```
-Review the dry run for anything that is user data before presenting it. The script re-checks age, locks, protected roots, running apps and WSL swap attachment at run time.
+The user decides per item in `Cleanup-Approvals.html` (by folder, approve/reject, exports a JSON per folder or for everything). Then `Remove-CheckupItems.ps1 -Approvals <export>` (dry run) and `-Execute`. Only approved ids run. Check that every cache item states plainly whether it signs anything out (none should). Security-flagged items are filtered out by design. Never rebuild the plan while the user is mid-approval: ids are path hashes and stay stable, but the plan_id changes and old exports are refused.
 
 ## Phase 6 - living document
 `C:\Users\Administrator\Downloads\downloads-desktop-cleanup.livingdoc`: back up `public/app.js`, `content/index.json` and `data/annotations.json`; swap in W2's DATA (adapt `update_livingdoc_v3.mjs`: version, ids, worklog); refresh `content/sections/*.md` (Read before Write); add `worklogs/YYYY-MM-DD-*.md`; then `node validate.mjs` and `node --check public/app.js`.

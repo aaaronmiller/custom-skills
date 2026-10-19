@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "kind": "spec-prep-workbench",
+  "intake": "project-intake.json",
+  "mode": "auto",
+  "additionalFiles": "discover",
+  "integrations": {
+    "livingDocuments": {
+      "mode": "auto"
+    }
+  },
+  "artifacts": []
+}

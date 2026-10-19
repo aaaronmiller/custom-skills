@@ -340,7 +340,7 @@ Layer, and LLM Integration.md'
 ├──  slashcommand-humanize-writing.md
 ├──  speckit-autonomous-run
 │   └──  SKILL.md
-├──  strata
+├──  spec-prep
 │   ├──  references
 │   │   ├──  compatibility.md
 │   │   ├──  confidence-gate.md
@@ -355,11 +355,11 @@ Layer, and LLM Integration.md'
 │   │   ├──  spec-template.md
 │   │   └──  substrate-self-location.md
 │   ├──  scripts
-│   │   ├──  strata-revive.sh
-│   │   ├──  strata-scaffold.sh
-│   │   └──  strata-validate.py
+│   │   ├──  spec-prep-revive.sh
+│   │   ├──  spec-prep-scaffold.sh
+│   │   └──  spec-prep-validate.py
 │   └──  SKILL.md
-├──  strata.zip
+├──  spec-prep.zip
 ├──  SUBMISSION_GUIDE.md
 ├──  ui-ux-doctor
 │   ├──  LICENSE.txt
@@ -437,7 +437,7 @@ Layer, and LLM Integration.md'
 │   ├──  satirical-media-generator.skill
 │   ├──  skill-audit.skill
 │   ├──  speckit-autonomous-run.skill
-│   ├──  strata.skill
+│   ├──  spec-prep.skill
 │   ├──  weekly-report-suite.skill
 │   └──  youtube-transcript-extraction.skill
 ├──  weekly-report-suite
