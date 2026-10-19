@@ -46,7 +46,7 @@ python3 scripts/audit_mechanical.py <skills-root> --json --threshold 50
 
 **Trigger collision.** Two skills quoting the same trigger phrases compete for
 the same activation, and which one loads is arbitrary. Name similarity does not
-find this: in the 2026-08-22 audit, `deprecated/strata` and `strata-authoring`
+find this: in the 2026-08-22 audit, `deprecated/spec-prep` and `spec-prep-authoring`
 shared 100% of their quoted triggers while two skills with near-identical names
 turned out to be a pipeline split rather than a duplicate. The inverse matters
 as much - a skill quoting no trigger phrases cannot activate on intent at all,

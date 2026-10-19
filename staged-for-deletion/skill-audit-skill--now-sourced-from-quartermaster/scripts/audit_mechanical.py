@@ -9,7 +9,7 @@ eye.
 
   COLLISION   Two skills that quote the same trigger phrases compete for the
               same activation. Which one loads is arbitrary. Measured on that
-              corpus: `deprecated/strata` and `strata-authoring` shared 100% of
+              corpus: `deprecated/spec-prep` and `spec-prep-authoring` shared 100% of
               their quoted triggers, and three separate skills opened with the
               identical sentence "ALWAYS invoke when the user wants to start a
               new project". Name similarity found none of this - two of those
