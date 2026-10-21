@@ -39,7 +39,7 @@ Run `python3 scripts/recover.py` — it snapshots `%LOCALAPPDATA%/Packages/...No
 
 ## Operation 2: Secrets + classify
 
-Secrets scan over extracted content (key/token/private-key patterns) → `sensitive-local-only/`, redacted stub only. Then classify each note against the project index (`~/LIVING_DOCUMENTS/projects/` + assignments catalog) with 1–3 `cass search` probes per hypothesis. Confidence ≥75 auto-routes; below goes to `unassigned/` or the human-review queue.
+Secrets scan over extracted content (key/token/private-key patterns) → `sensitive-local-only/`, redacted stub only. Then classify each note against the project index (`~/LIVING_DOCUMENTS/projects/ (unchanged)` + assignments catalog) with 1–3 `cass search` probes per hypothesis. Confidence ≥75 auto-routes; below goes to `unassigned/` or the human-review queue.
 
 ## Operation 3: Route
 
@@ -51,5 +51,6 @@ Write new dated pages into dossiers (never overwrite), vault topics to the scrat
 |------|-----------|
 | `references/monthly-cadence.md` | Scheduling the sweep; delta-only runs (new tabs since last snapshot) |
 | `references/classification-rubric.md` | Class definitions, split/merge rules, confidence thresholds |
-| `scripts/recover.py` | Every snapshot + parse run |
+| `scripts/recover.py` | Every snapshot + parse run (defaults to `~/agent-notes/recovery/`) |
+| `~/agent-notes/` | Evergreen root: `scratchpad/` vault + `recovery/` runs; commit + push per sweep |
 | `reports/process-notes.md` (per-run) | Steering rules accumulated across runs |

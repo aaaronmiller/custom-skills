@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Monthly notes snapshot + parse. Proven 2026-10-21: 78 NPP tabs + 120 Notepad bins -> 81 extracted.
-Usage: python3 recover.py [--run-dir ~/Documents/notepad-recovery/<TS>Z]
+Usage: python3 recover.py [--run-dir ~/agent-notes/recovery/<TS>Z]
 Read-only on live apps; snapshots go read-only after hashing. Never touches dossiers/vault."""
 import argparse, csv, hashlib, os, re, shutil, sys
 from datetime import datetime, timezone
@@ -17,7 +17,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--run-dir", default=None)
     a = ap.parse_args()
-    run = Path(a.run_dir) if a.run_dir else Path.home() / "Documents/notepad-recovery" / (datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%SZ"))
+    run = Path(a.run_dir) if a.run_dir else Path.home() / "agent-notes/recovery" / (datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%SZ"))
     snap, ext, rep = run/"source-snapshots", run/"extracted-exact", run/"reports"
     for d in [snap/"windows-notepad", snap/"notepad-plus-plus", ext, rep]: d.mkdir(parents=True, exist_ok=True)
     # 1. snapshot (copy, never move)
