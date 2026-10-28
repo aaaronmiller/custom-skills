@@ -8,7 +8,7 @@ tags: [spec-prep, confidence-gate, intake, rubric]
 
 # Confidence Gate
 
-Score conservatively. One extra question round costs minutes. A fused-layer artifact costs hours. Threshold to proceed is 85% weighted.
+Use the dimensions to identify missing information. A weighted score is advisory, not an empirical probability or an approval gate. Sufficient information for the next authorized action controls progress; no score changes the output mode.
 
 | Dimension | Weight | 0 to 25% | 50% | 75% | 100% |
 |-----------|--------|----------|-----|-----|------|
@@ -23,6 +23,6 @@ Score conservatively. One extra question round costs minutes. A fused-layer arti
 | Layer-separation integrity | 10% | Intent, spec, implementation fully fused in what the user said | Two of three separable | All three separable with effort | User already speaks in distinct layers |
 | Continuity readiness | 8% | Nothing to seed a ledger | Some decisions implied | Kickoff decisions extractable | First standing.md writable now |
 
-Below 85%, ask 3 to 5 questions targeting the lowest-weighted-times-lowest-scored dimensions. Reassess after each round. At or above 85%, confirm a one-paragraph understanding summary with the user before proceeding. Dimensions below 75% at proceed time become `[NEEDS CLARIFICATION]` markers in `intent.md`, maximum three.
+Ask only about material missing inputs that block their dependent action; continue independent reversible preparation. State the understood scope and provisional defaults without redundant confirmation. Respect native clarification marker limits, keeping other unresolved source needs in the assumption/source map rather than dropping them.
 
 The two spec-prep-specific dimensions matter most. Layer-separation integrity below 50% means the user is speaking in fused layers and the artifacts will inherit the fusion unless intake separates it first. Continuity readiness below 50% means the project cannot seed a ledger and will be born without the spine.

@@ -1,6 +1,6 @@
 ---
 title: Terminal agnostic fresh-session initiation
-version: "2.3.2"
+version: "2.5.1"
 tags: [spec-prep, terminal, handoff, initiation]
 ---
 
@@ -19,3 +19,7 @@ The default preview opens nothing. Use --execute only when the active request au
 If the terminal is unavailable, use another authorized installed adapter. If launch fails, preserve the handoff and report the exact failed mechanism with a pasteable manual launch. Do not kill or reset the authoring session.
 
 Primary terminal references: https://wezterm.org/cli/cli/spawn.html, https://learn.microsoft.com/windows/terminal/command-line-arguments, https://sw.kovidgoyal.net/kitty/launch/, https://manpages.ubuntu.com/manpages/noble/man1/gnome-terminal.1.html. Local CLI help decides installed syntax.
+
+## Separate launch-authority record
+
+Preparation receipts remain implementationAuthorized:false. For a later actual user-authorized launch, the agent records the already-given instruction; it does not ask for a second approval or rewrite preparation as permission. Pass this JSON file as --launch-authority together with --execute. Required fields are schemaVersion:1, operation:"project-initiation", buildRoot (exact absolute root), source:"user", userInstruction (the actual current launch instruction), authorizedAt, receiptSha256 and handoffSha256. The verifier checks target and digests before any spawn. This is an audit/scope record, not cryptographic authentication of a human instruction. Preview remains side-effect free and states that preparation alone cannot authorize implementation.

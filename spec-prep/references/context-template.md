@@ -8,7 +8,7 @@ tags: [spec-prep, context, template, system-derived, architecture]
 
 # Context Template (`context.md`)
 
-Author: the system. Layer: Implementation. This file is derived, never hand-authored. A human writing a technology choice into this file by hand is the same defect as a human writing one into the spec. The validator does not block humans from editing it, but the methodology does: if you are typing the architecture, you are doing Context Crafting wrong.
+Author: the system derives mechanisms from source requirements, intent and explicit user constraints. Layer: Implementation. Record user-selected constraints as such; distinguish derived proposals and source decisions instead of pretending every choice was inferred. Native plan.md is the operational plan when Spec Kit is selected; context.md is then source/rationale, not a competing editable plan.
 
 ## Derivation inputs, in order
 
@@ -21,7 +21,7 @@ Every decision in this file cites the intent input and, where it exists, the led
 
 ## The empty-ledger honesty rule
 
-On a project with no prior ledger, there is no empirical memory. Context Crafting then degrades toward architect intuition. Do not hide this. State it in this file and in `substrate.md`. The differentiator is accumulated history; on day one you have none, and pretending otherwise is the failure mode the paradigm exists to prevent.
+An empty project ledger supplies no project-specific outcome evidence. Disclose that gap here and in `substrate.md`, while distinguishing current research, inspected-system facts and applicable prior outcomes from intuition. Cite actual evidence rather than treating an empty ledger as proof that no relevant knowledge exists.
 
 ## Template structure
 
@@ -45,8 +45,10 @@ tags: [{{TAGS}}]
 ## 3. Decisions
 **CTX-001: [decision, e.g. single-node relational store]**
 - Derived from: intent section 4 (peak concurrency [n]), intent section 3 (data residency [x])
-- Memory: ledger entry [id] (prior project at similar scale chose [y], outcome [z]) OR "no empirical memory, intuition-based"
+- Memory: ledger entry [id] (prior project at similar scale chose [y], outcome [z]) OR "no project-specific outcome evidence; cite other evidence or identify intuition"
 - Options considered: [2 to 3]
+- Decision status and authority: [user-mandated, provisional, accepted or live-resolved; source and rationale]
+- Revisit trigger: [what new evidence or constraint change invalidates this choice; affected dependents]
 - Trade-offs accepted: [what is given up]
 
 ## 4. Data model

@@ -19,8 +19,16 @@ fi
 ROOT="$1"
 N="${2:-5}"
 
-STANDING="$ROOT/ledger/standing.md"
-LEDGER="$ROOT/ledger/ledger.md"
+STANDING="$ROOT/standing.md"
+LEDGER="$ROOT/ledger.md"
+[ -f "$STANDING" ] || STANDING="$ROOT/ledger/standing.md"
+[ -f "$LEDGER" ] || LEDGER="$ROOT/ledger/ledger.md"
+for name in standing ledger; do
+  if [ -f "$ROOT/$name.md" ] && [ -f "$ROOT/ledger/$name.md" ] && ! cmp -s "$ROOT/$name.md" "$ROOT/ledger/$name.md"; then
+    echo "error: flat and nested $name.md disagree; inspect continuity authority" >&2
+    exit 1
+  fi
+done
 
 if [ ! -f "$STANDING" ]; then
   echo "error: $STANDING not found; this project has no continuity spine and must be triaged manually" >&2
@@ -38,7 +46,7 @@ echo "=============================================================="
 echo
 echo "----- STANDING (full) ----------------------------------------"
 # Strip the frontmatter block for readability, keep the body.
-awk 'BEGIN{fm=0} /^---$/{fm++; next} fm>=2{print}' "$STANDING"
+awk 'NR==1 && /^---$/{fm=1; next} fm && /^---$/{fm=0; next} !fm{print}' "$STANDING"
 echo
 echo "----- LAST $N LEDGER ENTRIES ---------------------------------"
 # Ledger entries begin with a line like "## NNNN ...". Print the last N blocks.

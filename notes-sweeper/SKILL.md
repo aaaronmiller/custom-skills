@@ -30,6 +30,8 @@ Proven on the 2026-10-21 run: 78 Notepad++ tabs + 120 Notepad bins → 81 extrac
 - Classes: actionable / plan-input / project-input / vault-topic / transcript-done / task-completed / junk-drop / unknown → human review.
 - Multi-topic notes split (accidental) or keep whole (intentional consolidation — verify before splitting).
 - Clean spelling/grammar/toolcall noise at route time, never in the exact layer.
+- Fuzzy/typo-tolerant folder & project matching: older notes and voice dictations frequently misspell or hyphenate project/folder names differently from disk (e.g., `001-pspace-lab` ↔ `ai-book-writing/ai_novel/p-space-lab` and `p_space_observability_lab`; `dot claud/agents` ↔ `.claude/agents` / `agents`; `realtime-voice-ass` ↔ `voice-agent`; `clear mobile hotsppot` ↔ vault `clear mobile hotsppot reverse engineer information.md`; `adrf` ↔ `ardf`; `orchest` ↔ `orchestrator-stack`; `newcomputersscript`; `MODEL-DASHOARD`; `orchestration-mastrerplan`; `MacroMap-my prodiuctivity app`; `findit-small temrinal utility to find ish`). Always match against all four roots (`~/code`, `~/code2`, `~/LIVING_DOCUMENTS/projects`, and the Windows Obsidian vault `/mnt/c/Users/Administrator/Documents/chetaz`) using normalized/fuzzy token matching before placing anything in `unassigned/`.
+- Naming guard: folder name = GitHub remote name = lowercase-dash, always (with `~/LIVING_DOCUMENTS` ↔ `living-docs-content` / `living-documents-corpus` as the sole grandfathered exception). Any new checkout or created repo whose folder name does not match its remote gets flagged/renamed at creation, never left mismatched.
 
 ## Operation 1: Snapshot (scripts/recover.py)
 

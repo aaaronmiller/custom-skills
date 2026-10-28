@@ -21,6 +21,8 @@ grade: B
 source: custom
 ---
 
+> HISTORICAL SOURCE ONLY, superseded by implementing.md and intake-and-speckit.md in 2.5.1. Do not execute the old force-init, inline-constitution or reload examples below. Retained as provenance, not an active workflow.
+
 # spec-prep Implementing
 
 > Full spec-driven pipeline, from authored specifications to implementation in one

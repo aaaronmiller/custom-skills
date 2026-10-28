@@ -148,7 +148,7 @@ def write_workbench(root, mode=None, ld_mode=None, build_root=None):
             old_build = (root / old_raw).resolve() if not old_raw.is_absolute() else old_raw.resolve()
             if old_build != build:
                 raise ValueError('existing buildRoot differs; review mappings before retargeting')
-        doc['buildRoot'] = str(build)
+        doc['buildRoot'] = Path(os.path.relpath(build, root)).as_posix()
     artifacts = doc.setdefault('artifacts', [])
     seen = {(x['scope'], x['path']) for x in artifacts}
     discovered = discover(root, 'intake')

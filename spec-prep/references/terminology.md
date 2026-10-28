@@ -16,6 +16,6 @@ tags: [spec-prep, intake, lifecycle]
 
 A harness reset means a new context, not necessarily closing a terminal. A new terminal tab can host a fresh harness; reattaching the old session does not reset it. A task/subagent spawned by the authoring session is never a fresh harness (parentSession lineage). The skill is terminal agnostic. Terminal adapters only transport a validated command and working directory.
 
-"Stage" means intake staging. "Prepare specs" and "take through tasks" mean specification preparation. "Initiate" and an explicit request to build include project initiation. Never equate these operations.
+"Input handoff" means a complete requirements/design/intent trio per workstream with governance, reset instructions and the conversion guide; it is not native pipeline completion. "Stage" means intake staging. "Prepare specs" and "take through tasks" mean specification preparation. "Initiate" and an explicit request to build include project initiation. Never equate these operations.
 
 For Living Documents scope labels, use its system terminology when available. An intake folder is not a project dossier or an implementation repository. No other reference covered these operation boundaries, so this reference adds a shared vocabulary rather than duplicating one.

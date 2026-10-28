@@ -8,15 +8,15 @@ tags: [spec-prep, spec, template, eval-binding, contract]
 
 # Spec Template (`spec.md`)
 
-Author: the human. A human-authored source pack is pre-ratified (authorship IS ratification); system-drafted or system-inferred clauses require human ratification. Layer: Specification. This file is the evaluable contract and nothing else. Zero technology tokens. Zero prose that can be read a dozen ways.
+Layer: Specification. Preserve the source authority of each requirement: direct user instruction, accepted decision or explicit proposal/inference. Authorized preparation can derive provisional observable clauses without creating implementation authority. Keep mechanisms in plan and retain genuine source-constrained platform/interface acceptance with cited layer exceptions. Write evaluable clauses and preserve native user scenarios; intent remains the source for goals/stories, not a reason to delete native template content.
 
 ## The single litmus
 
-Every clause must be convertible into an evaluation that returns pass or fail. If a clause cannot become an eval, it is intent disguised as spec or it is noise. Kick it back to `intent.md` or delete it. A spec that describes rather than verifies is not a spec.
+Every clause must be convertible into an evaluation that returns pass or fail. If an obligation is not yet evaluable, classify it as intent, a proposal or an unresolved requirement and preserve its source/disposition. Do not silently delete a material need. A specification may include explanatory context, but its contract clauses need observable acceptance.
 
 ## Eval binding
 
-Every clause carries an `EVAL-ID`. The evaluation it points at is stored outside the repository (default `~/.spec-prep/evals/<slug>/evals.md`, or `$spec-prep_EVALS`), in an eval set the implementing agent does not see, for the same reason a separated test exists in a dark factory: an agent that can read the test it is graded on optimizes to pass the test, not to satisfy the intent. An unbound clause fails validation.
+Every clause carries an `EVAL-ID` linked to a defined evaluation. Retain the external evaluation-definition store expected by the validator (default `~/.spec-prep/evals/<slug>/evals.md`); this storage convention does not establish held-out isolation. Public acceptance criteria and development tests remain available to the implementer. Use evaluator-only tests when appropriate and claim held-out evaluation only with actual file/tool access separation. An unbound clause fails validation; a bound identifier alone does not prove a useful test.
 
 ## EARS-style phrasing
 
@@ -60,4 +60,4 @@ tags: [{{TAGS}}]
 
 ## Rules
 
-No technology. A framework name here is a defect. Every clause has a SPEC-ID and an EVAL-ID. Every clause traces to an intent section. Every failure condition in intent section 6 has at least one clause. Evals are described by what they assert, never by how they are implemented, and they live outside the build tree. If the human starts writing architecture into a clause, stop them; that is `context.md` and they do not own it.
+Keep derived mechanisms in design/plan. Preserve explicit source-mandated platform/interface constraints with provenance and justified layer exceptions. Every clause has a SPEC-ID and an EVAL-ID and traces to intent. Cover material failure conditions and measurable quality obligations; keep their originating expectations in intent. Distinguish public acceptance from evaluator-only fixtures. Reclassify architecture proposals into the owning layer without erasing user authority.

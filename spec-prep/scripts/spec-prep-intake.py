@@ -34,7 +34,7 @@ def validate(root, manifest=None):
         for key in ['title', 'summary', 'nextOperation']:
             if not isinstance(m.get(key), str) or not m[key].strip():
                 errors.append(f'{key} must be a nonempty string')
-        if m.get('lifecycle') not in ['staged', 'specification-prepared', 'initiated']:
+        if m.get('lifecycle') not in ['staged', 'input-handoff-ready', 'specification-reviewed-incomplete', 'specification-prepared', 'initiated']:
             errors.append('invalid lifecycle')
         if m.get('assignment') not in ['unassigned', 'assigned', 'tooling']:
             errors.append('invalid assignment')

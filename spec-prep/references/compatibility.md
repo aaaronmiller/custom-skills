@@ -14,7 +14,7 @@ spec-prep artifacts are plain markdown and feed directly into existing spec-driv
 
 For the current preparation pipeline and native artifact paths, read `intake-and-speckit.md`. That 2.2 reference supersedes this legacy mapping.
 
-`intent.md` plus `spec.md` feed `/speckit.specify`. Append intent for the why and constraints, spec for the testable contract. `context.md` feeds `/speckit.plan`; SpecKit decomposes it into its multi-file plan structure during the plan phase, no manual splitting needed. `experience.md` travels with `context.md` into the plan. `plays/` feeds `/speckit.tasks`, but spec-prep plays are intent-encoded so they survive the pivots that shatter a generated `tasks.md`. `constitution.md` is the shared governance file SpecKit also uses. SpecKit has no equivalent of `ledger/` or `substrate.md`; those are the spec-prep value-add and should be carried alongside the SpecKit tree, not discarded.
+For new native preparation, requirements.md plus intent.md feed specify under the constitution; generated spec.md plus constitution, design.md and intent guidance feed plan. Preserve native stories and scenarios, then generate tasks and analyze. Read intake-and-speckit.md for the actual procedure. Do not feed an already-generated spec back into specify as raw intake or duplicate an operational plan. Existing legacy context/design sources remain accepted. The input trio is the compact interface; generated native artifacts and governance are separate outputs.
 
 ## OpenSpec
 
@@ -30,11 +30,11 @@ All files are self-contained markdown with no tool-specific syntax. Any agent th
 
 ## Handoff protocol
 
-A fresh session resumes by reading `ledger/standing.md` and the tail of `ledger/ledger.md` first, then `intent.md` and `spec.md`, then proceeds. It never needs the originating conversation's context. This is the property that makes the tree dormancy-proof: the continuity files carry what the chat history used to carry, and they do not evaporate when the session ends.
+A fresh session reads AGENTS.md, the constitution and reset handoff first. Read existing standing/ledger and verify receipt hashes when present, then intent and the applicable native spec/plan/task. An input handoff does not need a fabricated ledger or native pass. Preparation-only status survives reset: stop before implementation until the user explicitly authorizes it. The handoff must supply the context needed without the authoring conversation.
 
 ## Next-step commands
 
-SpecKit: `specify init <project>` then `/speckit.specify` with `intent.md` and `spec.md`.
+Spec Kit: inspect installed syntax/integration and existing tree, initialize safely only when needed, then run constitution/specify/clarify/plan/tasks/analyze with the source mapping above. Finish the reset handoff and stop before implementation for a preparation-only request.
 OpenSpec: `openspec init` then `/opsx:propose` with the intent and spec.
 Kiro: load `intent.md` and `context.md` into the spec workflow.
 Direct: hand the tree to any markdown-reading coding agent and point it at `standing.md` first.

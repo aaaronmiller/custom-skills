@@ -151,6 +151,7 @@ precisely:
 - **Divergence** — reconcile keeping all functionality; understand the conflict before resolving; never delete to clear a conflict.
 - **Foreign origin (not yours)** — ask; fork to the user's account or leave local. Never push to a repo that isn't theirs.
 - **No / dead remote** — ask whether to add, repoint, or remove. Never auto-remove a remote.
+- **Folder↔remote naming mismatch** — rule: folder name = GitHub repo name = lowercase-dash, always (except grandfathered `~/LIVING_DOCUMENTS` corpus). Flag any checkout whose folder name does not match its `origin` repository name at creation/audit so mismatches are fixed immediately rather than discovered months later.
 - **Active merge/rebase/cherry-pick** — finish or abort with the user first.
 - **Detached HEAD** — `git switch <branch>` first.
 

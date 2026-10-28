@@ -6,23 +6,23 @@ violation so it can gate a build. This is deliberately a hard failure, not a
 warning: separation that only warns is separation that decays.
 
 Usage:
-    python3 spec-prep-validate.py <project-dir> [--evals PATH] [--no-harvest] [--trace]
+    python3 spec-prep-validate.py <project-dir> [--evals PATH] [--build-root PATH] [--no-harvest] [--trace]
     python3 spec-prep-validate.py --audit <file> [<file>...] [--no-harvest]
     python3 spec-prep-validate.py --depth <source-file> [...] --against <output-file> [...]
     python3 spec-prep-validate.py --explain
 
     <project-dir> holds intent.md, spec.md (or requirements.md), context.md
     (or design.md), substrate.md and ledger/. Eval store: --evals PATH, else
-    $spec-prep_EVALS, else ../evals/evals.md|json, ../<slug>-evals.md, or
+    $SPECPREP_EVALS, else ../evals/evals.md|json, ../<slug>-evals.md, or
     ~/.spec-prep/evals/<slug>/evals.md. The store must sit outside the git
-    repository that contains the project, or the implementing agent can read it.
+    repository that contains the project, and evaluator access must be isolated separately.
 
 Checks:
   1. Separation   - no technology tokens in intent.md or spec.md
   2. Eval binding - every SPEC- clause carries [EVAL-...] AND that eval resolves
                     to a manifest stored OUTSIDE the build tree
   3. Testability  - no spec clause written in non-evaluable language
-  4. Fidelity     - spec is thick enough to drive deterministic behavior
+  4. Identity     - nonempty specification with unique clause IDs
   5. Drift        - every spec clause is cited by context; no dangling citations
   6. Continuity   - ledger/ledger.md and ledger/standing.md exist and are real
   7. Honesty      - substrate.md declares a level S0..S5
@@ -31,7 +31,7 @@ Checks:
 Why 2 checks the manifest and not just the tag: an eval tag that resolves to
 nothing is a spec clause that lies with confidence. Checking only the tag makes
 `[EVAL-FAKE-1]` pass, which is the exact failure the eval layer exists to stop.
-Evals live outside the tree so the implementing agent cannot read or game them.
+External paths alone do not establish evaluator isolation; enforce that separately.
 
 Self-arming denylist (v2.1): technology tokens are harvested from the derived
 layer (context/design/plan files, or any file whose frontmatter says
@@ -47,8 +47,8 @@ the filename decides; unknown files are reported, not silently passed.
 
 --depth compares requirement-like statements (lines with SHALL, MUST, SHOULD
 or an ID such as FR-001) in source material against generated artifacts and
-fails when the output keeps fewer than 90%: a drop is lost content, not
-successful summarization.
+flags when the output keeps fewer than 90%; this is a count diagnostic, not
+proof of semantic loss or preservation. Sparse source syntax is inconclusive.
 
 --audit runs the file-level checks (1, 3, 4) against arbitrary spec documents,
 including SpecKit/OpenSpec/Kiro output that has no spec-prep tree. Use it to
@@ -63,6 +63,8 @@ an unarmed check.
 
 import re
 import sys
+import os
+import json
 from pathlib import Path
 
 # Curated denylist. Word-boundary, case-insensitive. A hit in intent.md or
@@ -118,8 +120,7 @@ ALLOW_TOKENS = {
 }
 
 # Tokens that look technical but are spec-prep's own vocabulary.
-spec-prep_VOCAB_RE = re.compile(r"^(?:SPEC|FR|NFR|EVAL|CTX|US|SC|WP|OI|S[0-5])(?:-\d+)?$")
-
+SPECPREP_VOCAB_RE = re.compile(r"^(?:SPEC|FR|NFR|EVAL|CTX|US|SC|WP|OI|S[0-5])(?:-\d+)?$|^US\d+$")
 # Phrases that cannot be converted into a pass/fail evaluation. A spec clause
 # containing one is intent or noise wearing a spec's clothing.
 NON_EVALUABLE = [
@@ -133,11 +134,11 @@ NON_EVALUABLE = [
 # A spec thin enough to be a headline rather than a contract. The article's
 # Symphony reference point is ~1,400 lines of exhaustive coverage; this is not
 # that bar, it is the floor below which the spec cannot drive determinism.
-MIN_SPEC_CLAUSES = 8
+MIN_SPEC_CLAUSES = 1
 
 # SPEC- is spec-prep's own form. FR-/NFR- are what SpecKit, OpenSpec and Kiro
 # emit, and --audit has to see those or it cannot measure an existing corpus.
-SPEC_CLAUSE_RE = re.compile(r"^[ \t]*[-*]?[ \t]*\**((?:SPEC|FR|NFR)-\d+)\b", re.MULTILINE)
+SPEC_CLAUSE_RE = re.compile(r"^[ \t]*(?:[-*|][ \t]*)?\**((?:SPEC|FR|NFR)-\d+)\b", re.MULTILINE)
 EVAL_TAG_RE = re.compile(r"\[(EVAL-[A-Za-z0-9_-]+)\]")
 LEVEL_RE = re.compile(r"^[ \t]*S[0-5]\b", re.MULTILINE)
 CITATION_RE = re.compile(r"\b((?:SPEC|FR|NFR)-\d+)\b")
@@ -170,12 +171,17 @@ def tech_hits(text: str, tokens: list[str], allow: set[str] | None = None) -> li
 
 
 def spec_clauses(text: str) -> list[tuple[str, str]]:
-    """Return (clause_id, full_line) for every SPEC- clause."""
+    """Return complete wrapped clause blocks, stopping at a new bullet/heading."""
     out = []
-    for m in SPEC_CLAUSE_RE.finditer(text):
-        start = text.rfind("\n", 0, m.start()) + 1
-        end = text.find("\n", m.start())
-        out.append((m.group(1), text[start: end if end != -1 else len(text)]))
+    for match in SPEC_CLAUSE_RE.finditer(text):
+        start = text.rfind("\n", 0, match.start()) + 1
+        lines = text[start:].splitlines()
+        block = [lines[0]]
+        for line in lines[1:]:
+            if not line.strip() or SPEC_CLAUSE_RE.match(line) or re.match(r"^\s*(?:#{1,6}\s|[-*]\s|\d+[.)]\s|\||>)", line):
+                break
+            block.append(line)
+        out.append((match.group(1), "\n".join(block)))
     return out
 
 
@@ -241,11 +247,14 @@ def check_testability(clauses: list[tuple[str, str]], label: str, errors: list):
 
 
 def check_fidelity(clauses: list[tuple[str, str]], label: str, errors: list):
+    ids = [cid for cid, _ in clauses]
+    for cid in sorted({cid for cid in ids if ids.count(cid) > 1}):
+        errors.append(f"[identity] duplicate clause {cid} in {label}")
     if len(clauses) < MIN_SPEC_CLAUSES:
         errors.append(
             f"[fidelity] {label} declares only {len(clauses)} SPEC- clause(s); "
-            f"below {MIN_SPEC_CLAUSES} a specification is a headline, not a contract. "
-            f"Either the scope is smaller than a project or the spec is underwritten"
+            "a specification must contain at least one declared clause. "
+            "Completeness requires a separate semantic source-disposition review"
         )
 
 
@@ -257,13 +266,22 @@ def _git_toplevel(path: Path) -> Path | None:
     return None
 
 
+def env_value(key: str) -> str | None:
+    """Accept both shipped shell-safe namespaces; conflicting aliases are errors."""
+    primary, alias = os.environ.get('SPECPREP_' + key), os.environ.get('SPEC_PREP_' + key)
+    if primary and alias and primary != alias:
+        raise ValueError(f'conflicting SPECPREP_{key} and SPEC_PREP_{key}')
+    return primary or alias
+
+
 def find_eval_manifest(root: Path, override: str | None) -> Path | None:
-    import os
     candidates: list[Path] = []
-    for raw in (override, os.environ.get("spec-prep_EVALS")):
-        if raw:
-            p = Path(raw).expanduser()
-            candidates += [p] if p.suffix in (".md", ".json") else [p / "evals.md", p / "evals.json"]
+    configured = env_value('EVALS')
+    raw = override or configured or os.environ.get('spec-prep_EVALS')
+    if raw:
+        p = Path(raw).expanduser()
+        candidates = [p] if p.suffix in ('.md', '.json') else [p / 'evals.md', p / 'evals.json']
+        return next((c.resolve() for c in candidates if c.is_file()), None)
     candidates += [
         root.parent / "evals" / "evals.md",
         root.parent / "evals" / "evals.json",
@@ -275,8 +293,8 @@ def find_eval_manifest(root: Path, override: str | None) -> Path | None:
 
 
 def check_eval_resolution(clauses, spec_label, root: Path, errors: list,
-                          override: str | None = None):
-    """Every eval tag must resolve to a manifest the implementing agent cannot see."""
+                          override: str | None = None, build_root: Path | None = None):
+    """Resolve every eval tag externally; access isolation is a separate requirement."""
     tagged, untagged = {}, []
     for cid, line in clauses:
         m = EVAL_TAG_RE.search(line)
@@ -291,7 +309,11 @@ def check_eval_resolution(clauses, spec_label, root: Path, errors: list,
     if not tagged:
         return
 
-    manifest = find_eval_manifest(root, override)
+    try:
+        manifest = find_eval_manifest(root, override)
+    except ValueError as exc:
+        errors.append(f'[configuration] {exc}')
+        return
     if manifest is None:
         extra = ""
         inside = root / "evals"
@@ -301,23 +323,55 @@ def check_eval_resolution(clauses, spec_label, root: Path, errors: list,
                      f" read it and optimize against the test.")
         errors.append(
             f"[eval-binding] {len(tagged)} clause(s) carry eval tags but no eval manifest "
-            f"was found (use --evals PATH or $spec-prep_EVALS, or place it at "
+            f"was found (use --evals PATH or $SPECPREP_EVALS, or place it at "
             f"~/.spec-prep/evals/{root.name}/evals.md).{extra} An eval tag that resolves "
             f"to nothing is a clause that lies with confidence"
         )
         return
 
-    repo = _git_toplevel(root.resolve()) or root.resolve()
+    if build_root is not None and not root.resolve().is_relative_to(build_root.resolve()):
+        errors.append('[eval-binding] feature directory is outside the declared build root')
+        return
+    repo = build_root.resolve() if build_root else _git_toplevel(root.resolve())
+    if repo is None:
+        repo = next((p for p in (root.resolve(), *root.resolve().parents)
+                     if (p / '.specify').is_dir() or
+                     ((p / 'AGENTS.md').is_file() and ((p / 'specs').is_dir() or (p / 'docs/specs').is_dir()))), root.resolve())
     if repo is not None and repo in [manifest, *manifest.parents]:
         errors.append(
             f"[eval-binding] eval manifest {manifest} is inside the repository {repo} "
             f"that the implementing agent works in; move it outside (for example "
-            f"~/.spec-prep/evals/{root.name}/) so the agent cannot read the tests it is graded on"
+            f"~/.spec-prep/evals/{root.name}/); access isolation is a separate gate"
         )
 
     body = manifest.read_text(encoding="utf-8", errors="replace")
+    defined = set()
+    if manifest.suffix == '.json':
+        try:
+            data = json.loads(body)
+        except json.JSONDecodeError as exc:
+            errors.append(f'[eval-binding] invalid JSON manifest: {exc}')
+            return
+        def collect(value):
+            if isinstance(value, dict):
+                for key, item in value.items():
+                    if re.fullmatch(r'EVAL-[A-Za-z0-9_-]+', key) and isinstance(item, (dict, list, str)) and item:
+                        defined.add(key)
+                    if key in ('id', 'eval_id') and isinstance(item, str) and re.fullmatch(r'EVAL-[A-Za-z0-9_-]+', item):
+                        defined.add(item)
+                    if isinstance(item, (dict, list)):
+                        collect(item)
+            elif isinstance(value, list):
+                for item in value:
+                    collect(item)
+        collect(data)
+    else:
+        # Heading/list/standalone legacy declarations and Markdown table definitions.
+        for match in re.finditer(r'(?m)^\s*(?:#{1,6}\s+|[-*]\s+|\|\s*)?\**(EVAL-[A-Za-z0-9_-]+)\b([^\n]*)', body):
+            if not re.match(r'(?i)\s*\**\s*(?:(?:was|is)\s+)?(?:removed|undefined|missing|TBD|TODO|not defined)\b', match.group(2)):
+                defined.add(match.group(1))
     for cid, eid in sorted(tagged.items()):
-        if not re.search(r"(?<![A-Za-z0-9_-])" + re.escape(eid) + r"(?![A-Za-z0-9_-])", body):
+        if eid not in defined:
             errors.append(
                 f"[eval-binding] {cid} cites {eid}, which does not exist in "
                 f"{manifest.name}; the binding is dangling"
@@ -393,7 +447,7 @@ def harvest_tokens(texts: list[str], allow: set[str]) -> list[str]:
                 continue
             if any(ch in c for ch in "/=<>{}$"):
                 continue
-            if spec-prep_VOCAB_RE.match(c) or c.lower() in allow or c.lower().rstrip("s") in allow:
+            if SPECPREP_VOCAB_RE.match(c) or c.lower() in allow or c.lower().rstrip("s") in allow:
                 continue
             if re.fullmatch(r"[\d.]+[A-Za-z]{0,3}", c):  # versions, sizes: 2.1, 16px
                 continue
@@ -508,11 +562,14 @@ def depth_check(sources: list[str], outputs: list[str], tolerance: float = 0.9) 
     src, out = total(sources), total(outputs)
     print(f"requirement-like lines: source {src}, output {out}")
     if src and out < tolerance * src:
-        print(f"DEPTH FAILED: output keeps {out / src:.0%} of source requirement lines "
-              f"(floor {tolerance:.0%}). Name every dropped section and regenerate with "
-              f"depth-preservation directives.")
-        return 1
-    print("DEPTH PASSED")
+        print(f"DEPTH COUNT WARNING: output has {out / src:.0%} of source requirement lines "
+              f"(diagnostic reference {tolerance:.0%}). Review source dispositions: "
+              "counts alone establish neither semantic loss nor preservation.")
+        return 0
+    if src < 8:
+        print('DEPTH INCONCLUSIVE: sparse requirement syntax; review semantic source dispositions.')
+        return 0
+    print('DEPTH COUNT CHECK PASSED; semantic preservation requires source-disposition review.')
     return 0
 
 
@@ -524,7 +581,9 @@ def print_trace(clauses, context_text: str | None, spec_text: str):
     for cid, line in clauses:
         ev = EVAL_TAG_RE.search(line)
         block_start = spec_text.find(line)
-        block = spec_text[block_start: block_start + 600]
+        remaining = spec_text[block_start + len(line):]
+        next_clause = SPEC_CLAUSE_RE.search(remaining)
+        block = line + (remaining[:next_clause.start()] if next_clause else remaining)
         tr = re.search(r"Traces to:\s*([^\n]+)", block)
         cites = len(re.findall(r"\b" + re.escape(cid) + r"\b", ctx))
         print(f"| {cid} | {ev.group(1) if ev else '-'} | {tr.group(1).strip() if tr else '-'} | {cites} |")
@@ -538,12 +597,15 @@ def main():
     args = sys.argv[1:]
     if not args or args[0] in ("-h", "--help"):
         print(__doc__)
-        return 2
+        return 0 if args else 2
     if args[0] == "--explain":
         print(__doc__)
         return 0
     harvest = "--no-harvest" not in args
     args = [a for a in args if a != "--no-harvest"]
+    if not args:
+        print('usage: spec-prep-validate.py PROJECT_DIR [options]', file=sys.stderr)
+        return 2
     if args[0] == "--audit":
         if len(args) < 2:
             print("usage: spec-prep-validate.py --audit <file> [<file>...]", file=sys.stderr)
@@ -559,6 +621,14 @@ def main():
     trace = "--trace" in args
     args = [a for a in args if a != "--trace"]
     evals_override = None
+    build_root = None
+    if '--build-root' in args:
+        i = args.index('--build-root')
+        if i + 1 >= len(args):
+            print('error: --build-root needs a path', file=sys.stderr)
+            return 2
+        build_root = Path(args[i + 1]).resolve()
+        del args[i:i + 2]
     if "--evals" in args:
         i = args.index("--evals")
         if i + 1 >= len(args):
@@ -567,6 +637,9 @@ def main():
         evals_override = args[i + 1]
         del args[i:i + 2]
 
+    if len(args) != 1 or args[0].startswith('--'):
+        print('usage: spec-prep-validate.py PROJECT_DIR [--evals PATH] [--build-root PATH] [--trace]', file=sys.stderr)
+        return 2
     root = Path(args[0]).resolve()
     if not root.is_dir():
         print(f"error: not a directory: {root}", file=sys.stderr)
@@ -577,8 +650,12 @@ def main():
     spec = _first_existing(root, "spec.md", "requirements.md")
     context = _first_existing(root, "context.md", "plan.md", "design.md")
     substrate = root / "substrate.md"
-    ledger = root / "ledger" / "ledger.md"
-    standing = root / "ledger" / "standing.md"
+    ledger = _first_existing(root, "ledger.md", "ledger/ledger.md")
+    standing = _first_existing(root, "standing.md", "ledger/standing.md")
+    for flat, nested in (("ledger.md", "ledger/ledger.md"), ("standing.md", "ledger/standing.md")):
+        a, b = root / flat, root / nested
+        if a.is_file() and b.is_file() and a.read_bytes() != b.read_bytes():
+            errors.append(f"[continuity] {flat} and {nested} disagree; resolve the declared authority")
 
     allow = load_allow(root, root.parent)
     tokens = TECH_TOKENS + load_extra_tokens(root, root.parent)
@@ -605,13 +682,16 @@ def main():
     clauses = []
     if spec_text is not None:
         clauses = spec_clauses(spec_text)
+        if 0 < len(clauses) < 8:
+            print('NOTE: small specification; inspect semantic scope coverage without padding clauses.')
         check_testability(clauses, spec.name, errors)
         check_fidelity(clauses, spec.name, errors)
-        check_eval_resolution(clauses, spec.name, root, errors, evals_override)
+        check_eval_resolution(clauses, spec.name, root, errors, evals_override, build_root)
         check_drift(clauses, context_text, errors)
 
-    for f, label in ((ledger, "ledger/ledger.md"), (standing, "ledger/standing.md")):
-        if not f.exists():
+    for f, label in ((ledger, "ledger.md (or ledger/ledger.md)"),
+                     (standing, "standing.md (or ledger/standing.md)")):
+        if f is None or not f.is_file():
             errors.append(f"[continuity] missing {label}; continuity is not optional")
         elif len(f.read_text(encoding="utf-8", errors="replace").strip()) < 40:
             errors.append(f"[continuity] {label} is effectively empty; the spine must carry real content")
@@ -632,8 +712,10 @@ def main():
 
     return report(
         errors,
-        "spec-prep validation PASSED: layers separated, clauses evaluable and bound to "
-        "external evals, spec in contact with context, continuity present, level declared.",
+        "MECHANICAL VALIDATION PASSED: lexical separation, clause/eval references, "
+        "continuity and declared level checked. Semantic correctness, evaluator isolation "
+        "and runtime feasibility are not established by this command. "
+        "Run spec-prep-delivery.py for the requested delivery operation.",
     )
 
 

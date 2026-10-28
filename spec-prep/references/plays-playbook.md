@@ -8,15 +8,15 @@ tags: [spec-prep, plays, playbook, prompt-craft, pivot-resilience]
 
 # Plays Playbook (`plays/`)
 
-Author: the system. Layer: Prompt. Plays are reusable, intent-encoded interaction patterns that give the system determinism. They are not a one-shot task list. A task list is the thing that detonates on an upstream pivot, because every task baked in the assumption that changed. A play never bakes in the assumption. It reads the assumption from `intent.md` at execution time.
+Author: the system. Layer: Prompt. Plays are reusable, intent-encoded interaction patterns that make procedure and inputs explicit; they do not make model reasoning deterministic. They are not a one-shot task list. A task list is the thing that detonates on an upstream pivot, because every task baked in the assumption that changed. A play never bakes in the assumption. It reads the assumption from `intent.md` at execution time.
 
 ## The coupling rule
 
-A play must never name a target it could instead read. Wrong: "deploy to Cloudflare Workers." Right: "deploy according to the deployment constraint in intent.md section 3." When the constraint changes, the play does not change, because the play never knew the constraint. It only knew where to read it. This is the entire reason plays survive pivots and tasks do not.
+A play must never name a target it could instead read. Wrong: "deploy to Cloudflare Workers." Right: "deploy according to the deployment constraint in intent.md section 3." When only the constraint value changes, the play need not change because it reads that value. When the workflow or variable contract itself changes, update the play and its dependents. It only knew where to read it. This is the entire reason plays survive pivots and tasks do not.
 
 ## The maturity-gap honesty
 
-Plays are scaffolding across the gap between where models are now and where they will be when they resolve intent directly with no precompiled workflow. They thin as models improve. They do not vanish. State this in `substrate.md`. Anyone presenting plays as a permanent destination rather than a bridge is selling certainty they have not earned.
+The source describes plays as scaffolding that may thin as models become more capable; that is a proposed direction, not a guaranteed forecast. Use plays where reusable procedure, coordination or a fragile operation benefits from explicit inputs, checks and halts. Let the agent resolve ordinary mechanisms within the accepted contract instead of encoding every coding step. Preserve governance and evaluation even when detailed procedural scaffolding is unnecessary. State actual fixed and live decisions in substrate.md rather than assigning maturity from a model name.
 
 ## Play file structure
 
@@ -49,9 +49,9 @@ tags: [{{TAGS}}]
 [What this play appends to ledger/ledger.md on completion: decision made, outcome observed.]
 ```
 
-## Minimum play set for any project
+## Optional play examples when reusable procedures are needed
 
-A scaffold play that creates the project skeleton from `context.md` section 9. A commit play that groups changes by concern and follows the constitution's commit convention, halting when a change cannot be mapped to a SPEC-ID. A deploy play that reads the deployment constraint from intent and never names a provider. A build play that turns context build phases into work packages: each package names the SPEC-IDs it satisfies, its dependencies, the folder it owns, a machine-checkable definition of done, and its parallel lane, so independent packages can run as separate agents in separate worktrees. The build play reads phases from `context.md` section 8 at run time; it never copies them. Add domain plays as the project requires.
+Do not generate this full set by default or run implementation/publication actions during preparation. Examples include a scaffold play that creates the project skeleton from `context.md` section 9. A commit play that groups changes by concern and follows the constitution's commit convention, halting when a change cannot be mapped to a SPEC-ID. A deploy play that reads the deployment constraint from intent and never names a provider. A build play that turns context build phases into work packages: each package names the SPEC-IDs it satisfies, its dependencies, the folder it owns, a machine-checkable definition of done, and its parallel lane, so independent packages can run as separate agents in separate worktrees. The build play reads phases from `context.md` section 8 at run time; it never copies them. Add domain plays as the project requires.
 
 ## Rules
 

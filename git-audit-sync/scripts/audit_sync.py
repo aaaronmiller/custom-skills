@@ -93,7 +93,48 @@ def release_lock():
             pass
 
 
-# ── Colours / icons ─────────────────────────────────────────────────────────
+# ── ANSI colours ──────────────────────────────────────────────────────────────
+# Off when piped or NO_COLOR is set; force with --color=always, kill with
+# --color=never. Aliases pass --color=always (the table is for human eyes).
+_COLOR_MODE = os.environ.get("GIT_AUDIT_COLOR", "auto")
+
+def _use_color() -> bool:
+    if _COLOR_MODE == "always":
+        return True
+    if _COLOR_MODE == "never":
+        return False
+    return sys.stdout.isatty() and os.environ.get("NO_COLOR", "") == ""
+
+def _apply_color() -> None:
+    global _C, RST, BOLD, DIM, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, STATE_COLOR
+    _C = _use_color()
+    RST = "\033[0m" if _C else ""
+    BOLD = "\033[1m" if _C else ""
+    DIM = "\033[2m" if _C else ""
+    RED = "\033[31m" if _C else ""
+    GREEN = "\033[32m" if _C else ""
+    YELLOW = "\033[33m" if _C else ""
+    BLUE = "\033[34m" if _C else ""
+    MAGENTA = "\033[35m" if _C else ""
+    CYAN = "\033[36m" if _C else ""
+    STATE_COLOR = {
+        "clean": GREEN, "pullable": CYAN, "pushable": YELLOW,
+        "dirty-even": YELLOW, "local-ahead": YELLOW, "stashed": MAGENTA,
+        "diverged": RED, "conflict-risk": RED, "merge-conflict": RED,
+        "no-upstream": BLUE, "no-remote": BLUE, "empty": DIM,
+        "detached": MAGENTA, "nested": CYAN, "spec-only": BLUE,
+        "stale": DIM, "skipped": DIM, "error": RED,
+    }
+
+# State → colour (built inside _apply_color so --color re-modes take effect).
+# Needs-attention states are warm; parity states are green; informational
+# states are dim/cyan. Shared visual language: keep in sync with the
+# [look]/[audit] aliases in ~/.zshrc.
+
+def paint(state: str, text: str) -> str:
+    """Wrap text in its state colour (no-op when colour disabled)."""
+    return f"{STATE_COLOR.get(state, '')}{text}{RST}" if text else text
+
 OK = "✅"
 PULLED = "⏩"
 PUSHED = "📤"
@@ -371,7 +412,6 @@ class GitRepo:
         self.uncommitted: int = 0
         self.ahead: int = 0
         self.behind: int = 0
-        self.has_stashed: bool = False
         self.active_git_op: Optional[str] = None
         self.is_detached: bool = False
         self.conflict_files: list[str] = []
@@ -380,6 +420,9 @@ class GitRepo:
         self.has_skip_marker: bool = False
         self.untracked_files: list[str] = []
         self.remote_missing: bool = False
+        self.stash_count: int = 0
+        self.nested_repos: list[str] = []
+        self.has_specs: bool = False
 
     def inspect(self):
         """Gather all state info about this repo."""
@@ -490,16 +533,32 @@ class GitRepo:
             self.uncommitted = len(lines)
             self.untracked_files = [l[3:] for l in lines if l.startswith("??")]
 
-        # Stashed
+        # Stashed (count entries — parked work is easy to forget)
         r = maybe_run_git(self.path, "stash", "list", timeout=10)
         self.has_stashed = bool(r and r.strip())
+        self.stash_count = len([l for l in (r or "").split("\n") if l.strip()])
+
+        # Nested child repos (a folder holding >1 project needs per-child care)
+        try:
+            kids = subprocess.run(
+                ["find", str(self.path), "-mindepth", "2", "-maxdepth", "3",
+                 "-name", ".git", "-not", "-path", "*/node_modules/*",
+                 "-not", "-path", "*/.*/*"],
+                capture_output=True, text=True, timeout=15)
+            if kids.returncode == 0 and kids.stdout.strip():
+                self.nested_repos = sorted({
+                    str(Path(l.strip()).parent.relative_to(self.path))
+                    for l in kids.stdout.strip().split("\n") if l.strip()
+                })
+        except Exception:
+            pass
 
     def classify(self) -> str:
         """Return the state classification."""
         if self.has_skip_marker:
             return "skipped"
         if self.active_git_op:
-            return "in-progress"
+            return "merge-conflict"
         if self.error:
             return "error"
         if not self.has_origin:
@@ -751,12 +810,16 @@ def process_repo(repo_path: Path, excludes: set[str], dry_run: bool,
 
     state = r.classify()
     if not _PROCESS_QUIET:
-        print(f"{name} [{state}] br={r.branch} u={r.uncommitted} "
-              f"a={r.ahead} b={r.behind}", flush=True)
+        stash_tag = f" s={r.stash_count}" if r.stash_count else ""
+        nest_tag = f" nest={len(r.nested_repos)}" if r.nested_repos else ""
+        print(paint(state, f"{name} [{state}] br={r.branch} u={r.uncommitted} "
+                  f"a={r.ahead} b={r.behind}{stash_tag}{nest_tag}"), flush=True)
 
     detail: dict[str, Any] = {
         "name": name, "state": state, "branch": r.branch,
         "uncommitted": r.uncommitted, "ahead": r.ahead, "behind": r.behind,
+        "stashed": r.stash_count,
+        "nested": r.nested_repos,
     }
 
     # Annotate every result with anything the agent will need to act safely.
@@ -765,6 +828,8 @@ def process_repo(repo_path: Path, excludes: set[str], dry_run: bool,
         detail["secrets"] = secrets[:3]
     if r.untracked_files:
         detail["untracked"] = r.untracked_files[:10]
+    if r.nested_repos:
+        detail["needs"] = (detail.get("needs", "") + f" | contains {len(r.nested_repos)} nested repo(s): " + ", ".join(r.nested_repos[:5])).strip(" |")
 
     try:
         # ── States the script handles itself (provably safe) ──────────────
@@ -794,7 +859,7 @@ def process_repo(repo_path: Path, excludes: set[str], dry_run: bool,
         # The script makes NO changes here. It records exactly what the agent
         # must resolve so nothing is committed/merged/rebased automatically.
         reasons = {
-            "in-progress": f"active {r.active_git_op} in progress — agent to finish or abort",
+            "merge-conflict": f"active {r.active_git_op} in progress — finish or abort, then push",
             "dirty-even":  f"{r.uncommitted} uncommitted file(s) on '{r.branch}' — agent to review, commit, push",
             "local-ahead": f"{r.uncommitted} uncommitted + {r.ahead} unpushed on '{r.branch}' — agent to commit & push",
             "diverged":    f"diverged: {r.ahead} ahead, {r.behind} behind, {r.uncommitted} uncommitted — agent to reconcile",
@@ -872,6 +937,8 @@ def main():
                         help="Number of parallel workers (default: min(16, cpu_count*2))")
     parser.add_argument("--table", action="store_true",
                         help="Compact table output (good for terminal)")
+    parser.add_argument("--color", choices=["auto", "always", "never"],
+                        default="auto", help="ANSI colour mode (default: auto)")
     parser.add_argument("--quiet", "-q", action="store_true",
                         help="Suppress per-repo output")
     parser.add_argument("--output-dir", type=Path, default=None,
@@ -885,6 +952,10 @@ def main():
                              "origin you own (auto-detected via gh/git if unset)")
     args = parser.parse_args()
 
+    # Apply --color before any painted output
+    global _COLOR_MODE
+    _COLOR_MODE = args.color
+    _apply_color()
     # Parse excludes with shlex to handle spaces properly
     excludes = set()
     if args.exclude:
@@ -915,7 +986,22 @@ def main():
 
     try:
         repos = find_git_repos(root, args.maxdepth)
-        if not repos:
+        # Spec-only projects: real work present but no git repo (untracked).
+        spec_only: list[Path] = []
+        try:
+            repo_names = {rp.resolve().name for rp in repos}
+            for entry in sorted(root.iterdir()):
+                if not entry.is_dir() or (entry / ".git").exists():
+                    continue
+                if entry.name in repo_names:
+                    continue
+                markers = ["specs", ".spec", "spec", ".specs",
+                           "spec.md", "SPECS.md", "PROJECT.md"]
+                if any((entry / m).exists() for m in markers):
+                    spec_only.append(entry)
+        except OSError:
+            pass
+        if not repos and not spec_only:
             print(f"No git repos found in {root}")
             return
 
@@ -989,19 +1075,49 @@ def main():
         for name, icon, msg, detail in results:
             report.add(name, icon, msg, detail)
 
-        # --table: compact terminal table
+        # --table: compact terminal table (horizontal — scan many repos at a glance).
+        # State column carries the colour: green = parity, yellow = needs push/commit,
+        # red = needs reconcile now, cyan = cloud has content, blue = setup needed.
         if args.table:
-            print(f"\n{'Repo':30s} {'State':15s} {'Branch':20s} {'Files':>6s} {'Action':30s}")
-            print("-" * 101)
+            print(f"\n{BOLD}{'Repo':30s} {'State':15s} {'Branch':20s} {'Files':>6s} {'Stash':>5s} {'Sync':>9s} {'Action':30s}{RST}")
+            print(DIM + "-" * 122 + RST)
             for name, icon, msg, detail in sorted(results, key=lambda x: x[0]):
                 d = detail or {}
-                state = d.get("state", "?")[:15]
+                raw_state = d.get("state", "?")
+                state = raw_state[:15]
                 branch = d.get("branch", "?")[:20]
                 files = str(d.get("uncommitted", 0))
+                stash_n = d.get("stashed", 0) or 0
+                stash = str(stash_n)
+                ahead = d.get("ahead", 0)
+                behind = d.get("behind", 0)
+                sync = f"+{ahead}/-{behind}"
+                # Parked work on an otherwise-parity repo still needs attention:
+                # surface it as a stashed badge rather than plain clean.
+                shown_state = raw_state
+                if stash_n and raw_state in ("clean", "pullable"):
+                    shown_state = "stashed"
+                    state = "stashed"
                 # Strip repo name prefix from msg
                 action = msg.replace(f"{name} — ", "")[:30]
-                print(f"{name:30s} {state:15s} {branch:20s} {files:>6s} {action:30s}")
+                row = (f"{name:30s} {state:15s} {branch:20s} {files:>6s} "
+                       f"{stash:>5s} {sync:>9s} {action:30s}")
+                print(paint(shown_state, row))
+            for sp in sorted(spec_only, key=lambda p: p.name):
+                sprow = (f"{sp.name:30s} {'spec-only':15s} {'—':20s} {'?':>6s} "
+                         f"{'0':>5s} {'—':>9s} {'project present, no git repo':30s}")
+                print(paint("spec-only", sprow))
             print()
+            # Colour key (only when colour is on)
+            if _C:
+                print(DIM + "key: " + RST
+                      + f"{GREEN}clean{ RST} parity · "
+                      + f"{YELLOW}pushable/dirty{ RST} needs commit/push · "
+                      + f"{CYAN}pullable{ RST} cloud ahead · "
+                      + f"{RED}diverged/conflict{ RST} reconcile · "
+                      + f"{BLUE}no-remote/upstream{ RST} setup · "
+                      + f"{MAGENTA}stash/detached{ RST} parked · "
+                      + f"{DIM}skipped/error{RST}")
 
         # NOTE: the script intentionally writes NOTHING into the repos themselves
         # (not even a plan file — that would dirty the working tree). Everything

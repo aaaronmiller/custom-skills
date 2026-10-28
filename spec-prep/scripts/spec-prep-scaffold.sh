@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # spec-prep-scaffold.sh
-# Creates empty spec-prep authoring templates (not a validated prepared project) for a new project.
+# Creates legacy standalone authoring templates, not a compact input handoff or prepared native project.
 # Defaults to macOS bash semantics. Spaces in the project name are handled.
 #
 # Usage:
 #   ./spec-prep-scaffold.sh "My Project Name" [repo-dir]
 #
 # Environment (all optional):
-#   spec-prep_AUTHOR   frontmatter author   (default: ice-ninja)
-#   spec-prep_MODEL    frontmatter model    (default: unknown; set to the model doing the work)
-#   spec-prep_EVALS    eval store directory (default: ~/.spec-prep/evals/<slug>), kept OUTSIDE the repo
-#   spec-prep_LAYOUT   docs | spec-prep        (default: docs -> <repo>/docs/specs/<slug>;
+#   SPECPREP_AUTHOR   frontmatter author   (default: ice-ninja)
+#   SPECPREP_MODEL    frontmatter model    (default: unknown; set to the model doing the work)
+#   SPECPREP_EVALS    eval store directory (default: ~/.spec-prep/evals/<slug>), kept OUTSIDE the repo
+#   SPECPREP_LAYOUT   docs | spec-prep        (default: docs -> <repo>/docs/specs/<slug>;
 #                                         spec-prep -> <repo>/spec-prep/<slug>)
 #
 # Produces:
@@ -18,7 +18,7 @@
 #   <root>/plays/{scaffold,commit,deploy,build}.md
 #   <root>/ledger/{ledger,standing}.md
 #   <root>/EVALS-LOCATION.md                 pointer only; the store lives outside the repo
-#   $spec-prep_EVALS/evals.md                   held-out eval manifest skeleton
+#   $SPECPREP_EVALS/evals.md                   held-out eval manifest skeleton
 #   <repo>/AGENTS.md and <repo>/CLAUDE.md    only if absent: standing gates, CLAUDE.md imports AGENTS.md
 
 set -euo pipefail
@@ -30,8 +30,18 @@ fi
 
 PROJECT_NAME="$1"
 PARENT_DIR="${2:-.}"
-AUTHOR="${spec-prep_AUTHOR:-ice-ninja}"
-MODEL="${spec-prep_MODEL:-unknown}"
+resolve_setting() {
+  local primary="SPECPREP_$1" alias="SPEC_PREP_$1"
+  local a="${!primary-}" b="${!alias-}"
+  if [ -n "$a" ] && [ -n "$b" ] && [ "$a" != "$b" ]; then
+    echo "error: conflicting $primary and $alias" >&2
+    return 2
+  fi
+  printf '%s' "${a:-${b:-$2}}"
+}
+AUTHOR="$(resolve_setting AUTHOR ice-ninja)" || exit 2
+MODEL="$(resolve_setting MODEL unknown)" || exit 2
+LAYOUT="$(resolve_setting LAYOUT docs)" || exit 2
 
 # Slug: lowercase, spaces and non-alphanumerics to single hyphens, trimmed.
 SLUG="$(printf '%s' "$PROJECT_NAME" \
@@ -43,12 +53,13 @@ if [ -z "$SLUG" ]; then
   exit 2
 fi
 
-case "${spec-prep_LAYOUT:-docs}" in
+EVALS_DIR="$(resolve_setting EVALS "$HOME/.spec-prep/evals/$SLUG")" || exit 2
+
+case "$LAYOUT" in
   spec-prep) ROOT="$PARENT_DIR/spec-prep/$SLUG" ;;
   docs)   ROOT="$PARENT_DIR/docs/specs/$SLUG" ;;
-  *)      echo "error: spec-prep_LAYOUT must be docs or spec-prep" >&2; exit 2 ;;
+  *)      echo "error: SPECPREP_LAYOUT must be docs or spec-prep" >&2; exit 2 ;;
 esac
-EVALS_DIR="${spec-prep_EVALS:-$HOME/.spec-prep/evals/$SLUG}"
 
 if [ -e "$ROOT" ]; then
   echo "error: $ROOT already exists; spec-prep does not overwrite an existing tree" >&2
@@ -87,7 +98,7 @@ fm() {
   printf '## 4. Scale and quality expectations\n[The numbers architecture is derived from.]\n\n'
   printf '## 5. Success conditions\n\n## 6. Failure conditions\n\n## 7. Personas\n\n## 8. User stories\n[As a <persona>, I want <capability> so that <outcome>. Given/When/Then acceptance; each story lists the SPEC-IDs that verify it.]\n\n'
   printf '## 9. Scope boundaries\n\n## 10. Prior art\n\n## 11. Assumptions and dependencies\n\n'
-  printf '## 12. Open intent questions\n[Max three NEEDS CLARIFICATION markers.]\n'
+  printf '## 12. Open intent questions\n[Material unresolved decisions and explicit provisional defaults; respect the installed native template limits.]\n'
 } > "$ROOT/intent.md"
 
 {
@@ -179,8 +190,8 @@ if [ ! -e "$PARENT_DIR/AGENTS.md" ]; then
   {
     printf '# AGENTS.md\n\nSession-scoped instructions for coding agents in this repository.\n\n'
     printf '## Before anything else\nRead %s/ledger/standing.md and the last five entries of %s/ledger/ledger.md, then intent.md and spec.md in that folder.\n\n' "${ROOT#$PARENT_DIR/}" "${ROOT#$PARENT_DIR/}"
-    printf '## Governance and initiation\nRead .specify/memory/constitution.md when present; it is the project governance authority and must not be duplicated here. Specification preparation creates it from authorized principles. Before implementation, read the native tasks and reset handoff, verify the preparation receipt and artifact hashes, and require current project-initiation authority.\n\n'
-    printf '## Standing gates\n- Every change maps to a SPEC-ID; if it cannot, stop and append a ledger entry instead of guessing.\n- Append a ledger entry for every decision and outcome, and overwrite standing.md, every time.\n- Upstream changes enter at intent.md only; derived context is re-derived and reusable plays read its variables.\n- Claims of done require evidence: commands run, results, screenshots for UI.\n- Never search for, open or request the held-out evals.\n'
+    printf '## Governance and initiation\nRead .specify/memory/constitution.md when present; it is the project governance authority and must not be duplicated here. Specification preparation creates it from authorized principles. Read reset-handoff.md before changes when it exists. Preparation only: do not implement or launch after generating tasks. A later explicit implementation request requires the verified receipt, native tasks and current project-initiation authority.\n\n'
+    printf '## Standing gates\n- Every change maps to a SPEC-ID; if it cannot, stop and append a ledger entry instead of guessing.\n- Record material decisions, outcomes and task-state changes in the ledger; refresh standing.md when resumable state changes.\n- Goal changes enter intent; behavior, architecture and workflow corrections enter their owning layer and propagate to affected dependents; reusable plays read their variables.\n- Claims of done require evidence: commands run, results, screenshots for UI.\n- Never search for, open or request the held-out evals.\n'
   } > "$PARENT_DIR/AGENTS.md"
 fi
 if [ ! -e "$PARENT_DIR/CLAUDE.md" ]; then

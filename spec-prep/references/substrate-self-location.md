@@ -10,14 +10,28 @@ tags: [spec-prep, substrate, self-location, honesty, maturity]
 
 Author: the human. This file turns the closing question of the autopsy, are you being honest with yourself, into a required field. You declare which substrate level the project actually operates at and which decisions are pre-locked at preparation time versus resolved live at implementation time. You do not get to claim a level you have not earned.
 
-## The levels (lineage: Dan Shapiro, January 2026, zero-indexed)
+## Source taxonomies and legacy compatibility
 
-S0, manual with spicy autocomplete. The human writes the code.
-S1, the AI handles discrete well-scoped tasks under full human review.
-S2, the AI handles multi-file change while the human reads every line. The field's documented majority sits here and mistakes it for the destination.
-S3, the human directs and verifies, the AI develops. spec-prep operationalizes this level honestly.
-S4, the human is a product manager, writes specifications, evaluates outcomes, does not read the code.
-S5, the dark factory. A specification enters, tested software exits, evaluated against separated scenarios the system cannot game. No human writes or reviews code.
+Ahuja's **Substrate Stack** in the supplied article has five numbered levels:
+
+1. Vibe: model and coding interface, without the proposed persistent intent/contract substrate.
+2. Spec-driven: structured specification tooling.
+3. Intent-driven: separated layers, the four crafts, plays and an empirical knowledge base.
+4. Autonomous: shared guardrails and reasoning across plays. The author explicitly describes this as not yet lived.
+5. Dark Factory: live resolution within a largely autonomous methodology. The author explicitly treats the implementation as unresolved.
+
+These are Ahuja's proposed substrate categories, not a benchmark or a capability certification. His article locates his own implementation around 2.5-2.75, not fully at 3. It credits Dan Shapiro for the Dark Factory term and autonomy-model influence; it does not make the two taxonomies numerically interchangeable.
+
+**Existing STRATA labels S0-S5 are retained as legacy file/validator syntax.** They describe the local operating arrangement, not an exact Shapiro scale or a renumbering of Ahuja's five levels:
+
+- S0: human implementation with autocomplete.
+- S1: discrete agent tasks with human review.
+- S2: agent changes with line-by-line human review.
+- S3: human direction and verification with agent development.
+- S4: specification/outcome-oriented human oversight rather than routine line review.
+- S5: claimed autonomous production with separately evaluated outcomes, requiring evidence beyond this declaration.
+
+Name the framework beside the label, and describe actual human review, agent permissions, protected evaluation and decision timing. Using this skill does not establish any maturity level. Do not silently reinterpret old declarations under a new taxonomy; record any revised interpretation with its source and evidence.
 
 ## What you must declare
 
@@ -33,16 +47,16 @@ tags: [{{TAGS}}]
 # Substrate Self-Location
 
 ## Declared level
-[S0 through S5. One level. If you are between, say the lower one and explain the reach.]
+[Legacy STRATA label S0 through S5 for compatibility, followed by the actual operating arrangement and evidence. If also discussing Ahuja's Levels 1-5, label that framework separately; do not imply numeric equivalence.]
 
 ## Pre-locked decisions
-[Every decision fixed at preparation time that a true level above this one would resolve live. Be specific. This is the honesty the methodology demands.]
+[Decisions fixed at preparation time, their source authority, and why they are fixed. Distinguish required user constraints from provisional agent choices. Do not infer a maturity rank from timing alone.]
 
 ## Live-resolved decisions
 [What is genuinely resolved at implementation time, not pre-locked.]
 
 ## Empirical memory state
-[Full, partial, or empty ledger. If empty, Context Crafting is intuition-based and this is stated here and in context.md.]
+[Full, partial, or empty project ledger; distinguish applicable observed outcomes, current research and unsupported intuition. Record access and relevance limits.]
 
 ## Known reach
 [What this project claims it can do that it has not yet proven. Stated as reach, not as fact.]
@@ -50,4 +64,4 @@ tags: [{{TAGS}}]
 
 ## Why this is required, not optional
 
-Two failure modes the field repeats. One, claiming a high level while pre-locking like a low one, which produces a methodology that looks autonomous and behaves brittle. Two, selling certainty about a level nobody involved has lived. spec-prep blocks both by making the admission a file the validator checks for the presence of a declared level. The honest practice is to name your level of certainty and then do the work. This file is where you name it.
+The declaration makes pre-locking, missing evidence and unproven autonomy visible. The validator checks the presence of a legacy level label, not whether the claimed capabilities exist. Validate material capabilities separately; neither a label nor this file enforces evaluator isolation or certifies autonomy.
