@@ -49,7 +49,7 @@ Spec Kit references checked 2026-10-14: https://github.github.com/spec-kit/refer
 
 ## Delivery manifest and gate
 
-Create one package-level delivery.json for an input handoff or native preparation. `scripts/spec-prep-delivery.py PACKAGE_ROOT` verifies this interface; it never launches anything. A missing CLI does not select standalone. If native execution is unavailable, finish the input handoff, mark native preparation incomplete in its handoff/status, and name preparation as the next action. Do not label fallback documents native-complete.
+Create one package-level delivery.json for an input handoff or native preparation. Verify this interface against the artifact contract; it never launches anything. A missing CLI does not select standalone. If native execution is unavailable, finish the input handoff, mark native preparation incomplete in its handoff/status, and name preparation as the next action. Do not label fallback documents native-complete.
 
 The compact input form is:
 

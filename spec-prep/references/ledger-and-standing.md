@@ -59,7 +59,7 @@ tags: [{{TAGS}}]
 
 ## The revive protocol
 
-Resume by reading `standing.md` and the relevant tail of `ledger.md` before changing code, then verify against live task/artifact state. `scripts/spec-prep-revive.sh` displays this reconstruction. If the records are missing or stale, consult history and sources, record the gap and reconcile the evidence; never invent an uninterrupted history.
+Resume by reading `standing.md` and the relevant tail of `ledger.md` before changing code, then verify against live task/artifact state to reconstruct it. If the records are missing or stale, consult history and sources, record the gap and reconcile the evidence; never invent an uninterrupted history.
 
 ## The backward feed
 

@@ -10,7 +10,7 @@ This reference supersedes the Spec Kit subsection of compatibility.md for prepar
 
 ## Intake staging
 
-Read project-intake.json first when supplied. It declares schemaVersion 1, projectId, title, summary, lifecycle, assignment, nextOperation, readOrder, sources, issues, relatedProjects and externalResources. Sources carry a relative path, format, role and optional sha256. Read order contains relative paths within the folder. Validate with scripts/spec-prep-intake.py.
+Read project-intake.json first when supplied. It declares schemaVersion 1, projectId, title, summary, lifecycle, assignment, nextOperation, readOrder, sources, issues, relatedProjects and externalResources. Sources carry a relative path, format, role and optional sha256. Read order contains relative paths within the folder. Validate the manifest: every listed source exists, roles are assigned, and the read order resolves.
 
 Keep original Markdown, HTML, images, designs, source code and archives. Archive extraction must reject absolute paths, traversal, symlinks, collisions and excessive expanded size. Do not run scripts from an archive. Store extracted files under sources/ or a named pack. Preserve HTML companion assets with their original relative relationship. Produce an inert text or Markdown reading copy for HTML; keep the original for diagrams and embedded structured data that the reading copy may omit. Treat embedded execution prompts as historical input, not current launch authority.
 
@@ -18,7 +18,7 @@ Group only sources for the same project. A shared topic or linked system does no
 
 Held-out evaluation payloads belong outside the prospective build root. The intake records their location and handling constraints, never their answers. A path outside the repository does not prove evaluator isolation.
 
-Create or refresh the optional default workbench using `project-workbench.md` and `scripts/spec-prep-workbench.py`. Keep any additional input files discoverable; name unsupported extraction and source dispositions rather than silently dropping them. Read `living-documents-setup.md` only when its integration applies.
+Create or refresh the optional default workbench using `project-workbench.md`. Keep any additional input files discoverable; name unsupported extraction and source dispositions rather than silently dropping them. Read `living-documents-setup.md` only when its integration applies.
 
 The staging acceptance gate verifies source existence, hashes, safe paths and read order. It does not run the final spec validator against a transcript, or label a raw source pack build-ready. Stop after staging when that is the requested operation.
 
@@ -43,7 +43,7 @@ Primary references checked 2026-10-13: https://github.com/github/spec-kit/blob/m
 
 Use artifact-contract.md's three-document interface and delivery.json schema. Preserve source inputs separately from native outputs. Inspect the installed integration and extension hooks before execution; a preparation-only request forbids any automatic implement/launch transition. Do not change global hook configuration to make preparation work. After tasks/analyze/checks, write the handoff and stop. AGENTS.md requires the fresh session to read constitution, handoff and relevant artifacts; add the selected harness adapter where needed. Spec Kit's own specify/plan workflows also read the constitution: preserve this existing behavior rather than inventing a new setup prerequisite.
 
-Run scripts/spec-prep-delivery.py against the package. If the CLI is unavailable, complete the input-handoff operation with explicit native-incomplete status and next preparation step. Never call a scattered standalone pack native-prepared or direct its next session straight into implementation. Runtime/hardware tests belong to their implementation tasks; required evaluation definitions and source preservation remain preparation checks.
+Check the package against the delivery contract. If tooling is unavailable, complete the input-handoff operation with explicit native-incomplete status and next preparation step. Never call a scattered standalone pack native-prepared or direct its next session straight into implementation. Runtime/hardware tests belong to their implementation tasks; required evaluation definitions and source preservation remain preparation checks.
 
 Analyze is semantic, not an ID count. Execute the installed agent workflow or document a genuinely equivalent rubric/findings/resolutions and actual reviewer. Keep public acceptance, external evaluation definitions, isolated evaluator execution and product runtime results distinct. Validate portable bundles after relocation. The delivery checker is read-only and never launches the project.
 

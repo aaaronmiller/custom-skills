@@ -34,7 +34,7 @@ For a skill change, `--target skill --root /absolute/path/to/the/skill` must poi
 
 ## Typed provider adapter
 
-`scripts/spec-prep-jev.py` builds a request from an explicit packet, performs no discovery, and defaults to an offline preview. Sources must be UTF-8 files resolving inside the chosen root. The packet chooses excerpts by line range; the receipt fingerprints the complete source files. Requests/responses are capped at 64 KiB and rejected rather than silently truncated. Do not include secrets, private URLs, evaluator-only fixtures or unnecessary project data. Preview the exact request before any approved external send.
+Build the review request from an explicit packet, perform no discovery, and default to an offline preview. Sources must be UTF-8 files resolving inside the chosen root. The packet chooses excerpts by line range; the receipt fingerprints the complete source files. Requests/responses are capped at 64 KiB and rejected rather than silently truncated. Do not include secrets, private URLs, evaluator-only fixtures or unnecessary project data. Preview the exact request before any approved external send.
 
 Packet example (for a skill with at least two lines in SKILL.md):
 
@@ -53,7 +53,7 @@ Packet example (for a skill with at least two lines in SKILL.md):
 Use actual relevant line ranges and criteria for the review; the example demonstrates the packet shape only. Given a reviewed packet at `/tmp/spec-prep-review.json`, this previews the installed canonical skill without a network request:
 
 ```bash
-python3 scripts/spec-prep-jev.py --root /home/cheta/code/custom-skills/spec-prep --target skill --stage intake --packet /tmp/spec-prep-review.json --request-out /tmp/spec-prep-jev-request.json
+Build the request from an explicit packet (target, stage, packet path, request output path); preview the exact request before any approved external send.
 ```
 
 A separate invocation with `--allow-network` authorizes one request to OpenCode's typed System One API. The adapter reads an existing OPENCODE_API_KEY or OPENCODE_ZEN_API_KEY, then literal OPENCODE_API_KEY/OPENCODE_ZEN_API_KEY assignments in the existing `~/.cuddle-bucket`, then the `opencode.key` entry from the existing OpenCode auth store. The credential file is parsed as data and never executed. It never logs keys, repairs auth, changes provider configuration, follows redirects, retries, or switches to a paid model. The request uses `state` and `questions`, not chat `messages`, and identifies its client truthfully as `spec-prep/2.5.1`. Python’s default urllib user agent was rejected with Cloudflare error 1010 during verification; a truthful application user agent and the documented curl request both succeeded. Error receipts distinguish that edge rejection from expired credentials without logging provider messages or keys. It pins the requested free ID `jev-1.13-free`; confirm availability before depending on it. OpenCode's current endpoint is `https://opencode.ai/inference/systemone/v1/systemone`. A generic `opencode run` chat session is not the typed decision contract. If the requested CLI path is unavailable, disclose that and use this same-provider API adapter only within the authorized scope.

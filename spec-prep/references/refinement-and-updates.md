@@ -52,11 +52,7 @@ Review source preservation, cross-document consistency and feasibility, not mere
 Resolve the skill root, intake root, build root, feature root and external evaluation location separately. Run helpers from the loaded skill, not from an assumed scripts directory in the product. The workbench helper requires a subcommand. With these paths already resolved, the following are command forms for the relevant mechanical checks:
 
 ```bash
-python3 "$skill_root/scripts/spec-prep-intake.py" "$intake_root"
-python3 "$skill_root/scripts/spec-prep-workbench.py" write "$intake_root" --build-root "$build_root"
-python3 "$skill_root/scripts/spec-prep-workbench.py" check "$intake_root"
-python3 "$skill_root/scripts/spec-prep-validate.py" "$feature_root" --build-root "$build_root" --evals "$eval_store" --trace
-python3 "$skill_root/scripts/spec-prep-validate.py" --audit "$feature_root/intent.md" "$feature_root/spec.md"
+Validate the intake manifest, write and check the workbench pointers, then run the full validation checks (trace) and the intent/spec audit against the eval store.
 ```
 
 Select applicable commands for the existing layout; do not fabricate an intake manifest for a package that lacks one. Evaluation binding checks must respect evaluator access restrictions. Count/depth checks are coarse diagnostics, never semantic preservation evidence.

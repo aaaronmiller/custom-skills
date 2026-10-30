@@ -21,8 +21,7 @@ The default artifact set is intent, native specification, native plan, gated tas
 After establishing a valid intake manifest, run the bundled helper:
 
 ```bash
-python3 scripts/spec-prep-workbench.py write <intake-folder> --mode auto --living-documents auto
-python3 scripts/spec-prep-workbench.py check <intake-folder>
+Write the workbench pointers for the intake folder (mode auto), then check them.
 ```
 
 When the real build root has been resolved, repeat `write` with `--build-root <actual-build-root>`. The helper lists existing recognized artifacts as source or operational pointers. It never creates a pretend spec, changes task state or generates a successful preparation receipt. It preserves custom configuration and existing valid artifact mappings. An invalid existing workbench requires repair rather than silent overwrite.
