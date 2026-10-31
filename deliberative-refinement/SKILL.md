@@ -5,7 +5,7 @@ description: |
 license: MIT
 metadata:
   author: ice-ninja
-  version: "1.0"
+  version: "1.1.0"
 ---
 
 > ⚠️ **BEFORE USING THIS SKILL:** Review all files in the `references/` directory. These contain council specifications, profile guidance, and execution parameters required for proper skill execution.

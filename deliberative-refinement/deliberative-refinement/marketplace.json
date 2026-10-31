@@ -1,0 +1,16 @@
+{
+  "name": "deliberative-refinement",
+  "version": "2.1.0",
+  "description": "Structured multi-agent deliberation framework for complex reasoning and decisions. Forces AI through expert critique rounds with evidence grounding.",
+  "author": "ice-ninja",
+  "license": "MIT",
+  "keywords": [
+    "deliberation",
+    "multi-agent",
+    "reasoning",
+    "validation",
+    "prompt-engineering",
+    "ai-workflow"
+  ],
+  "install": "/plugin install deliberative-refinement"
+}
