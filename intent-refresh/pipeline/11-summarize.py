@@ -67,6 +67,23 @@ DERIVED INTENTS (type: statement):
 """
 
 
+def fill(template: str, values: dict) -> str:
+    """One-pass substitution; each value is fenced as data.
+
+    Chained str.replace let text inside one value (a summary containing
+    "{intents}") be substituted again by a later call (2026-11-05 security
+    review: injection). Here placeholders are resolved once, from the
+    template only, and every inserted value sits between BEGIN/END DATA lines.
+    """
+    def sub(m):
+        key = m.group(1)
+        if key == "d":
+            return re.sub(r"[^a-z0-9._:-]", "", str(values[key]))
+        body = str(values[key]).replace("END DATA", "END_DATA")
+        return f"<<<BEGIN DATA {key}>>>\n{body}\n<<<END DATA {key}>>>"
+    return re.sub(r"\{(d|state|old|sessions|intents)\}", sub, template)
+
+
 def state_band(ddir: Path) -> str:
     t = (ddir / "landing.md").read_text(errors="replace") if (ddir / "landing.md").exists() else ""
     m = re.search(r"<!-- ld:generated:landing-state:start.*?-->(.*?)<!-- ld:generated:landing-state:end",
@@ -94,9 +111,9 @@ def one(d: str, ps: list, sessions: dict, intents: list, run: str, lane: int) ->
     pf = work / f"{d}.prompt.txt"
     # Dossier text is not redacted at source, so redact everything sent
     # (2026-11-05 security review: sensitive-data exposure).
-    pf.write_text(redact(ASK.replace("{d}", d).replace("{state}", state_band(ddir))
-                  .replace("{old}", old_exec(ddir) or "(none)")
-                  .replace("{sessions}", stext[:30000]).replace("{intents}", itext))[0])
+    pf.write_text(redact(fill(ASK, {
+        "d": d, "state": state_band(ddir), "old": old_exec(ddir) or "(none)",
+        "sessions": stext[:30000], "intents": itext}))[0])
     for attempt in range(2):
         model = MODELS[(lane + attempt) % 2]
         raw = work / f"{d}.raw"
