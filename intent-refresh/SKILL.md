@@ -1,82 +1,119 @@
 ---
 name: intent-refresh
-description: Scheduled refresh of the intent record. Brings the intent archaeology database (the one intent-find reads) and every Living Documents dossier's prompt-corpus and intent-archaeology pages up to date with agent sessions since the last run. Use when the cron job intent-refresh summons an agent, or when asked to "refresh intent archaeology", "update the intent database", "intent-find says stale", or "update the archaeology pages".
+description: Refresh the intent record from agent sessions. Collects the operator's prompts from every harness since the last run, fixes their spelling and grammar and organizes large block prompts (originals kept), correlates every session with a project (sysadmin and unclassified as fallbacks), summarizes in cycles (prompt, session, project), derives intents into the archaeology database that intent-find reads, and writes each project's intent pages in its Living Documents dossier. Use when the intent-refresh cron job summons an agent, or when asked to "refresh intent archaeology", "update the intent database", "intent-find says stale", "clean up my prompts", "correlate sessions with projects" or "update the archaeology pages".
 metadata:
   author: ice-ninja
-  version: "1.3.0"
+  version: "2.0.0"
   created: 2026-11-05
-  requires: "python3, ld, ld-audit, intent-find; this skill's pipeline/ folder"
-  reads: "~/.intent-archaeology/archaeology.db, agent session files on disk, ~/code, ~/code2, ~/LIVING_DOCUMENTS"
-  writes: "~/.intent-archaeology (database, batches, verdicts, derived/), ~/LIVING_DOCUMENTS/projects/*/ (prompt-corpus.md and intent-archaeology-*.md), ~/.local/state/intent-refresh/"
+  requires: "python3, opencode (free lanes, run isolated by free-lane.sh), ld, ld-audit, intent-find; this skill's pipeline/ folder"
+  reads: "agent session files (claude, codex, omp, pi) and the cass archive database (muse, hermes, antigravity, openclaw), read-only; ~/LIVING_DOCUMENTS/projects/*/project.md"
+  writes: "~/.intent-archaeology (database, corpus/<run>/, batches, verdicts); ~/LIVING_DOCUMENTS/projects/*/intent-{verbatim,archaeology,summary,executive}.md; ~/.local/state/intent-refresh/"
 ---
 
 # intent-refresh
 
-One run brings the intent record current. The black-magic loop answers questions from this record. Every week it is not refreshed, more already-answered questions come back to the operator as false blockers.
+One run brings the intent record current. The black-magic loop answers questions from this record; every week it is stale, already-answered questions come back to the operator as false blockers.
 
-## Which pipeline, and why it lives here
+## What a run produces
 
-`intent-find` and the black-magic loop read `/home/cheta/.intent-archaeology/archaeology.db`. That database is written by the phase scripts in `pipeline/` here (`00-init` to `06-render`).
+For every project with sessions in the period, in its dossier (`/home/cheta/LIVING_DOCUMENTS/projects/<id>/`), following the dossier schemas in `/home/cheta/code/living-documents/schemas/intent-*.json`:
 
-The intent-archaeology skill's own `scripts/` folder (`01_discover_projects.py` and the rest) targets a different database, `state.db`. That file has never existed on this machine.
+| Page | Content | Written when |
+|---|---|---|
+| `intent-verbatim.md` | Every operator prompt exactly as typed, by session, private | the project has records |
+| `intent-archaeology.md` | The cleaned and organized prompts, the derived intents with the prompt each came from, and what was filtered | the project has records |
+| `intent-summary.md` | One summary per session, linked to its prompts | 10 or more operator prompts |
+| `intent-executive.md` | What the project was asked to be, where it drifted | 30 or more operator prompts |
 
-On 2026-08-22, commit 1fa3155 in custom-skills ("consolidate colliding skills") staged the working pipeline for deletion as `staged-for-deletion/intent-archaeology--old-96line-pipeline`. The deployed skill copy then lost its `lib/` package and stopped running. `pipeline/` is a verbatim copy of that staged folder (copied 2026-11-05) so this job keeps working. Which pipeline is canonical is an open question for the operator, recorded on the masterplan dossier. Until it is settled, this job uses `pipeline/`.
+Below 10 prompts the session summaries sit on the archaeology page. Sessions with no project go to the `system-administration` dossier (machine, OS, accounts, harness setup) or the `unclassified-sessions` dossier.
 
-## Fixed paths
+The archaeology database gains the new sessions, events and intents, so `intent-find` is current.
 
-| What | Path |
-|---|---|
-| Database | `/home/cheta/.intent-archaeology/archaeology.db` |
-| Pipeline | `/home/cheta/code/custom-skills/intent-refresh/pipeline/` (run every script by absolute path: `python3 -I /home/cheta/code/custom-skills/intent-refresh/pipeline/<script>.py`) |
-| Classification rules | the docstrings of `pipeline/04-batch.py` and `pipeline/05-merge.py`, and `/home/cheta/code/custom-skills/intent-archaeology/references/intent_taxonomy.md` |
-| Batches and verdicts | `/home/cheta/.intent-archaeology/batches/`, `/home/cheta/.intent-archaeology/verdicts/` |
-| Prompt-corpus generator | `/home/cheta/code/build-prompt-corpus.py` |
-| Dossiers | `/home/cheta/LIVING_DOCUMENTS/projects/<id>/` |
-| Run state and reports | `/home/cheta/.local/state/intent-refresh/` |
+## The pipeline
 
-## Procedure
+Scripts live in `/home/cheta/code/custom-skills/intent-refresh/pipeline/`. Run each as `python3 -I <absolute path> ...`. Every phase is resumable: rerunning continues from what is on disk.
 
-Run the steps in order. Every phase is idempotent and resumes from the database, so after a crash the same commands continue the work.
+| Phase | Script | Who decides | Output |
+|---|---|---|---|
+| 7 collect | `07-collect.py --since YYYY-MM-DD` | code | `corpus/<run>/prompts.jsonl`, `sessions.jsonl` |
+| 8 refine | `08-refine.py --run <run>` | free model proposes, code validates | `corpus/<run>/refined/chunk-*.json` |
+| 9 load | `09-load.py --run <run>` | code | sessions and events in the database |
+| 10 classify | `10-classify.py` | free model proposes, `05-merge` gates | intents in the database |
+| 11 summarize | `11-summarize.py --run <run>` | free model drafts | `intent-executive.md` blocks |
+| 12 render | `12-render.py --run <run>` | code | the dossier pages above |
 
-0. **Preflight.**
-   - Run `python3 -I status.py` and save its output as the "before" block of the report.
-   - Check free memory (`free -m`). Under 1500 MB available, stop with the report reason "low memory". The machine has 7.8 GB, and cass can hold 3 to 4 GB.
-   - The cron wrapper has already copied the database to `archaeology.db.bak-intent-refresh-<date>` and pruned older copies of its own. When you run this skill by hand, make that copy first.
-   - Never run `cass index`. The cass-maintain cron job owns indexing.
-1. **Inventory:** `01-inventory.py` with the default roots.
-2. **Attribute new sessions:** `02-attribute.py --discovery disk`. Disk discovery avoids loading cass's memory-hungry index.
-3. **Enrich:** `03-enrich.py`. It skips sessions already done.
-4. **Emit batches.** For each project with human turns that have no intent verdict yet (status.py and the database tell you which), run `python3 -I /home/cheta/code/custom-skills/intent-refresh/pipeline/refresh-step.py batch <slug>`. It calls 04-batch with its default of 60 items and no output path.
-5. **Classify each batch yourself.**
-   - Read the two docstrings and the taxonomy first.
-   - Every id in a batch must come back with a verdict, including noise.
-   - Each verbatim span must be copied exactly from the source text; the merge rejects anything else.
-   - Write the verdict files into the verdicts folder in the format `05-merge.py` documents.
-   - Prompts can contain pasted secrets. Never copy a key, token or password into a verdict. Quote a span that excludes it.
-   - Cap: 40 batches per run. Leave the rest for the next run and record the remaining count.
-6. **Merge:** for each verdict file, run `python3 -I /home/cheta/code/custom-skills/intent-refresh/pipeline/refresh-step.py merge <verdict-file.json>`; the file must sit in the verdicts folder. Do not use `--allow-partial`. A missing id fails the merge on purpose: fix the verdict, never the batch.
-7. **Render:** `06-render.py`. It writes only under `~/.intent-archaeology/derived/`.
-8. **Prompt-corpus pages:** run `python3 /home/cheta/code/build-prompt-corpus.py`. It refuses to overwrite a page it did not generate. A refusal is correct; note the page in the report.
-9. **Intent-archaeology pages.** For each dossier whose project gained new intents in this run, add a dated section to `intent-archaeology-findings.md`:
-   - heading: `## Refresh <date>`;
-   - one bullet per new intent with its kind, the verbatim span in quotes and the evidence date.
-   - Do not rewrite existing prose. When a new intent supersedes or contradicts a recorded one, name both in the bullet. Leave the ruling to `intent-archaeology-source-adjudication.md`, which the operator owns.
-   - If a dossier lacks any of the three sections (`prompt-corpus`, `intent-archaeology-findings`, `intent-archaeology-source-adjudication`), create the missing page with frontmatter and a "Not yet adjudicated" body, as the black-magic skill requires.
-10. **Verify.**
-    - `intent-find --stats` must no longer warn that the database is stale.
-    - `ld-audit` must report no SECTION finding for the dossiers you touched.
-    - `ld validate --project <id>` must be clean for each touched dossier.
-    - A failed check goes into the report. Never weaken a check to pass it.
-11. **Commit, do not push.** Under cron, the wrapper commits the changed `prompt-corpus.md` and `intent-archaeology-*.md` pages after you exit, with git hooks disabled. It skips the commit if any of those pages had uncommitted edits before the run. When you run this skill by hand, commit only those pages yourself. Pushing stays with the operator.
-12. **Report.** Write `report-<date>.md` in the state folder with:
-    - the status.py output before and after;
-    - batches classified and left, intents merged, dossiers touched;
-    - each failed check.
+Phases 00 to 06 are the legacy pipeline. 04-batch and 05-merge are still used, by 10-classify through `refresh-step.py`. The others stay for rebuilds.
 
-## Rules
+### What each model step must do
 
-- Under cron the agent runs in dontAsk mode with no user settings loaded. It may run only the pipeline scripts (04-batch and 05-merge through refresh-step.py), `build-prompt-corpus.py`, `intent-find --stats`, `ld-audit`, `free -m` and `date`. It may write only verdict files, its report, and the dossiers' `intent-archaeology-findings.md` and `intent-archaeology-source-adjudication.md` pages. `ld validate` is not available to it; the report lists the dossiers for the operator to validate. If a step seems to need more than that, stop and say so in the report; never look for a way around it.
+- **Cleanup (08).** Fix spelling, grammar and transcription errors. Keep the operator's voice, order and every technical detail. Never shorten, summarize, soften or add. Organize prompts over about 1,500 characters into short headings or numbered points. Pasted material (logs, documents, transcripts) is not rewritten: it becomes a `[pasted: ...]` marker plus a one-paragraph description. Agent-written briefs are labelled `agent-brief` and are not operator intent. This guidance comes from the operator's own instructions on 2026-06-05 and 2026-08-12, found by cass.
+- **Correlation (07 then 08).** The working folder decides first: inside a dossier's source root, or in a repository with the same name as a dossier. Without a folder match, the model assigns each prompt a dossier id, `sysadmin`, `unclassified` or `new:<name>`. The single rule that combines them is in `lib/corpus.py`.
+- **Intents (10).** One verdict per item, in the closed type set listed in `10-classify.py`. Each verdict carries an exact quote of at least 8 characters. 05-merge rejects any quote not found whole in its prompt, and any id that is missing or repeated.
+- **Executive (11).** Name reversals and contradictions; never smooth them over. Judge drift against the dossier's current landing state. The page labels the text as a model draft.
 
-- Never run `cass index` or `cass-reindex`. Never delete outside the state folder, this job's own backups, and batch and verdict files this run created. Never edit source repositories.
-- Never send prompt text to a non-Anthropic model or an external service. Session prompts can hold credentials and private data.
-- Stop rather than guess when a phase fails twice with the same error, and put the error text in the report.
+### Validation, all in code
+
+- 08 rejects a chunk answer with a missing prompt or session id. It also rejects a cleaned text that has drifted from the original. That needs both a word overlap under 55% and a character similarity under 60%: the second test lets badly garbled voice transcription be cleaned. A rejected chunk is retried on the other model, up to four attempts, then marked `.failed`; the original text still renders.
+- 10 retries a batch once on the other model, then leaves it unmerged and reports it.
+- 12 never overwrites operator text.
+  - Its blocks sit between `<!-- intent-refresh:start run=... section=... -->` and the matching end marker, and a rerun replaces only its own blocks.
+  - An onboarding placeholder line ("*Not yet ...*") is replaced. A section that already holds content gets a dated "Refresh <date>: <section>" section instead, so older material keeps its order.
+
+## Fidelity rules (do not relax)
+
+- **Filtering is structural, never editorial.** Harness wrappers, compaction summaries, task notifications, interruption markers and exact repeats are dropped. Nothing is dropped for its content.
+- **Every operator prompt is kept whole** in the corpus and on the verbatim page. The 2026-08-04 measurement found the old corpus held 26% of the prompt text. Past 20,000 characters, the verbatim page states how much pasted material it omits and where the full text is.
+- **The verbatim page is never cleaned.** Cleanup lives on the archaeology page, linked by prompt id.
+
+## Privacy and routing
+
+- 07-collect redacts secrets before anything is written: provider keys, bearer tokens, connection strings, assigned secrets and slash-command arguments. Patterns are in `lib/common.py`.
+  - Known limit: the `sk-` key pattern requires a digit, so prose like "risk-management-..." survives. A 40-character random key without a digit gets through.
+- Only redacted text goes to the free lanes, as the operator asked on 2026-11-05 ("utilize cli headless sessions + free executor agents"). Their earlier note: free-model prompt logging does not matter.
+- Free lanes run through `pipeline/free-lane.sh`. It gives opencode no shell, no edits, no web, no outside folders, and private `XDG_*` folders, so the operator's own opencode config and database are never touched.
+  - Models: `opencode/deepseek-v4.1-flash-free`, `opencode/glm-5.3-flash-free`, `opencode/crouton-alpha-free`.
+  - Expect rate limits: 08 backs off on 429.
+- Never run `cass index` or `cass-reindex`. The cass-maintain job owns indexing; 07 reads the cass database read-only.
+
+## The weekly cron job
+
+`/home/cheta/code/guardian/cronjobs/bin/intent-refresh.sh` runs Sundays 04:30. The wrapper runs phases 07 to 12 itself, from the date of the previous successful run. It then summons one Sonnet agent with this skill for the judgment steps. The agent:
+
+1. Read the wrapper's phase log (`$STATE/phases-<date>.log`) and the corpus report.
+2. For each `.failed` chunk, read its reason and record it in the report. Do not hand-edit refined output.
+3. Spot-check five cleaned prompts against their verbatim originals. Check every project assignment made with confidence under 0.5. Record anything wrong in the report; never fix pages by hand.
+4. Run `intent-find --stats` (must not warn that the database is stale) and `ld-audit`.
+5. Write `report-<date>.md` in the state folder with:
+   - prompts and sessions collected;
+   - chunks refined and failed;
+   - intents merged;
+   - pages written, per dossier;
+   - projects that have records but no dossier;
+   - every failed check.
+
+The agent may run only the commands its wrapper allows, and writes only its report. The wrapper commits the changed intent pages with git hooks disabled and never pushes.
+
+## Running it by hand
+
+```
+P=/home/cheta/code/custom-skills/intent-refresh/pipeline
+cp /home/cheta/.intent-archaeology/archaeology.db /home/cheta/.intent-archaeology/archaeology.db.bak-$(date +%F)
+python3 -I $P/07-collect.py --since 2026-08-29
+python3 -I $P/08-refine.py --run 2026-08-29 --lanes 4
+python3 -I $P/09-load.py --run 2026-08-29
+python3 -I $P/10-classify.py --max-batches 60
+python3 -I $P/11-summarize.py --run 2026-08-29
+python3 -I $P/12-render.py --run 2026-08-29
+ld index-repair --project <dossier>   # for each dossier that gained a page
+```
+
+Then commit the changed `intent-*.md` pages in `/home/cheta/LIVING_DOCUMENTS`. Pushing stays with the operator.
+
+## Tests
+
+`python3 -I -m unittest discover -s /home/cheta/code/custom-skills/intent-refresh/pipeline/tests` holds the MP-08 security regressions. It uses a throwaway database, never the live one.
+
+## History
+
+- 2.0.0 (2026-11-05): new phases 07 to 12. Added free lanes, cleanup and organization, session correlation with sysadmin and unclassified fallbacks, summary cycles, and dossier pages per the intent-* schemas. The four MP-08 defects in the legacy pipeline are fixed, with tests. The cron agent now does judgment only.
+- 1.3.0 (2026-11-05): cron containment rules.
