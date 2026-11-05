@@ -3,7 +3,7 @@ name: intent-refresh
 description: Scheduled refresh of the intent record. Brings the intent archaeology database (the one intent-find reads) and every Living Documents dossier's prompt-corpus and intent-archaeology pages up to date with agent sessions since the last run. Use when the cron job intent-refresh summons an agent, or when asked to "refresh intent archaeology", "update the intent database", "intent-find says stale", or "update the archaeology pages".
 metadata:
   author: ice-ninja
-  version: "1.2.0"
+  version: "1.3.0"
   created: 2026-11-05
   requires: "python3, ld, ld-audit, intent-find; this skill's pipeline/ folder"
   reads: "~/.intent-archaeology/archaeology.db, agent session files on disk, ~/code, ~/code2, ~/LIVING_DOCUMENTS"
@@ -75,7 +75,7 @@ Run the steps in order. Every phase is idempotent and resumes from the database,
 
 ## Rules
 
-- Under cron the agent may run only the pipeline scripts, `build-prompt-corpus.py`, `intent-find`, `ld-audit`, `ld validate`, `free -m` and `date`. Edit and Write are denied on source code, the database files and `.git` folders. If a step seems to need more than that, stop and say so in the report; never look for a way around it.
+- Under cron the agent runs in dontAsk mode with no user settings loaded. It may run only the pipeline scripts (04-batch and 05-merge through refresh-step.py), `build-prompt-corpus.py`, `intent-find --stats`, `ld-audit`, `free -m` and `date`. It may write only verdict files, its report, and the dossiers' `intent-archaeology-findings.md` and `intent-archaeology-source-adjudication.md` pages. `ld validate` is not available to it; the report lists the dossiers for the operator to validate. If a step seems to need more than that, stop and say so in the report; never look for a way around it.
 
 - Never run `cass index` or `cass-reindex`. Never delete outside the state folder, this job's own backups, and batch and verdict files this run created. Never edit source repositories.
 - Never send prompt text to a non-Anthropic model or an external service. Session prompts can hold credentials and private data.
