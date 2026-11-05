@@ -237,6 +237,8 @@ def main() -> int:
     ap.add_argument("--plan", action="store_true", help="print the chunk plan and stop")
     ap.add_argument("--include-dispatched", action="store_true")
     ap.add_argument("--models", help="comma-separated free models (default: deepseek, glm)")
+    ap.add_argument("--start", type=int, default=0,
+                    help="begin at this chunk number (a third process can start mid-run)")
     ap.add_argument("--reverse", action="store_true",
                     help="work from the last chunk backwards (a second process can share a run)")
     a = ap.parse_args()
@@ -253,6 +255,8 @@ def main() -> int:
         return 0
     if a.limit:
         cs = cs[: a.limit]
+    if a.start:
+        cs = cs[a.start:] + cs[:a.start]
     if a.reverse:
         cs = cs[::-1]
     if a.models:

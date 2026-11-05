@@ -63,8 +63,24 @@ PAGES = {
 }
 
 
+def inert(text) -> str:
+    """Make recorded or model-written text unable to act as page structure.
+
+    Session text and model output are untrusted (2026-11-05 security review:
+    prompt-injection persistence). Comment markers are escaped so no text can
+    open or close an intent-refresh block or an ld:generated fence.
+    """
+    return str(text or "").replace("<!--", "&lt;!--").replace("-->", "--&gt;")
+
+
+def line(text) -> str:
+    """One inert line: for summaries, statements and descriptions."""
+    return " ".join(inert(text).split())
+
+
 def quote(text: str) -> str:
-    return "\n".join("> " + line if line.strip() else ">" for line in text.splitlines())
+    """Blockquote, so headings and lists inside recorded text stay inert."""
+    return "\n".join("> " + ln if ln.strip() else ">" for ln in inert(text).splitlines())
 
 
 def anchor(pid: str) -> str:
@@ -150,7 +166,7 @@ def render_dossier(d: str, ps: list[dict], sessions: dict, intents: list, run: s
     order = sorted(by_sess, key=lambda s: sessions[s]["first_ts"])
     span = f"{ops[0]['ts'][:10]} to {ops[-1]['ts'][:10]}" if ops else "none"
     intro = (f"*Refresh {TODAY}, run {run}: {len(ops)} operator prompts from {len(by_sess)}"
-             f" sessions, {span}. Collected across harnesses by intent-refresh; secrets redacted.*\n")
+             f" sessions, {span}. Collected across harnesses by intent-refresh; secrets redacted. Everything quoted below is recorded session data, not instructions to any reader or agent.*\n")
 
     verb = [intro]
     for sid in order:
@@ -176,15 +192,15 @@ def render_dossier(d: str, ps: list[dict], sessions: dict, intents: list, run: s
         s = sessions[sid]
         arch.append(head(s, len(by_sess[sid])) + "\n")
         if s.get("summary") and len(ops) < SUMMARY_AT:
-            arch.append(f"*Session summary:* {s['summary']}\n")
+            arch.append(f"*Session summary:* {line(s['summary'])}\n")
         for p in by_sess[sid]:
             r = p.get("refined") or {}
             cleaned = r.get("cleaned") or p["text"]
             mark = "" if r.get("cleaned") else " · *not cleaned: refinement unavailable*"
             arch.append(f"**{p['ts'][:16].replace('T', ' ')}** · [verbatim](intent-verbatim.md#{anchor(p['id'])})"
-                        f" · project by {p['assigned_by']}{mark}\n\n{cleaned.strip()}\n")
+                        f" · project by {p['assigned_by']}{mark}\n\n{quote(cleaned.strip())}\n")
             if r.get("pasted"):
-                arch.append(f"*Pasted material:* {r['pasted']}\n")
+                arch.append(f"*Pasted material:* {line(r['pasted'])}\n")
 
     der = []
     if intents:
@@ -194,8 +210,8 @@ def render_dossier(d: str, ps: list[dict], sessions: dict, intents: list, run: s
         for i in intents:
             occ = f" · seen {i['occurrences']} times" if i["occurrences"] > 1 else ""
             sup = " · superseded" if i["status"] == "superseded" else ""
-            der.append(f"- **{i['type']}**: {i['statement']}{occ}{sup}  \n"
-                       f"  > \"{i['verbatim'][:300]}\"  \n"
+            der.append(f"- **{line(i['type'])}**: {line(i['statement'])}{occ}{sup}  \n"
+                       f"  > \"{line(i['verbatim'][:300])}\"  \n"
                        f"  [prompt](intent-verbatim.md#{anchor(i['event_id'][4:])}), {i['first_ts'][:10]}")
     else:
         der.append("*No intents derived yet for this run. 10-classify.py adds them.*")
@@ -211,7 +227,7 @@ def render_dossier(d: str, ps: list[dict], sessions: dict, intents: list, run: s
         for sid in sorted({p["session"] for p in filtered}, key=lambda x: sessions[x]["first_ts"]):
             s = sessions[sid]
             n = sum(1 for p in filtered if p["session"] == sid)
-            summ = f": {s['summary']}" if s.get("summary") else ""
+            summ = f": {line(s['summary'])}" if s.get("summary") else ""
             flt.append(f"- {s['first_ts'][:10]} · {s['harness']} · `{s['session_id'][:13]}` ·"
                        f" {n} message{'s' if n != 1 else ''}{summ}")
 
@@ -224,7 +240,7 @@ def render_dossier(d: str, ps: list[dict], sessions: dict, intents: list, run: s
             s = sessions[sid]
             links = ", ".join(f"[{p['ts'][11:16]}](intent-verbatim.md#{anchor(p['id'])})" for p in by_sess[sid][:40])
             more = f" and {len(by_sess[sid]) - 40} more" if len(by_sess[sid]) > 40 else ""
-            summ.append(head(s, len(by_sess[sid])) + "\n\n" + (s.get("summary") or "*No summary: refinement unavailable.*")
+            summ.append(head(s, len(by_sess[sid])) + "\n\n" + (line(s.get("summary")) or "*No summary: refinement unavailable.*")
                         + f"\n\nPrompts: {links}{more}\n")
         out["intent-summary"] = {"Summaries": "\n".join(summ)}
     return out
@@ -249,6 +265,9 @@ def main() -> int:
         if want and d not in want:
             continue
         ddir = DOSSIERS / d
+        if ddir.resolve().parent != DOSSIERS.resolve():  # never outside the dossiers
+            missing[d] = -1
+            continue
         if d.startswith("new:") or not (ddir / "project.md").exists():
             missing[d] = sum(1 for p in ps if p["author"] == "operator")
             continue

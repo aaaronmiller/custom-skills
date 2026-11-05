@@ -17,6 +17,7 @@ with no dossier yet.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 DETERMINISTIC = {"cwd-in-dossier-root", "repo-name-matches-dossier"}
@@ -24,12 +25,22 @@ FALLBACK_DOSSIER = {"sysadmin": "system-administration",
                     "unclassified": "unclassified-sessions"}
 
 
-def dossier_of(project: str | None) -> str:
-    if not project:
+SAFE_ID = re.compile(r"^(new:)?[a-z0-9][a-z0-9._-]{0,80}$")
+
+
+def dossier_of(project) -> str:
+    """Map a project value to a dossier id. Model output is untrusted: any
+    value that is not a plain slug (path separators, '..', odd characters)
+    becomes unclassified, so no caller can be steered outside the dossiers.
+    (2026-11-05 commit security review: path traversal.)"""
+    if not isinstance(project, str) or not project:
         return FALLBACK_DOSSIER["unclassified"]
     if project.startswith("code:"):
-        return "new:" + project[5:]
-    return FALLBACK_DOSSIER.get(project, project)
+        project = "new:" + project[5:]
+    project = FALLBACK_DOSSIER.get(project, project)
+    if not SAFE_ID.match(project) or ".." in project:
+        return FALLBACK_DOSSIER["unclassified"]
+    return project
 
 
 def load(run: Path) -> tuple[list[dict], dict[str, dict]]:

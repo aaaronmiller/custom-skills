@@ -28,7 +28,7 @@ from collections import defaultdict
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from lib.common import BASE, confined, connect  # noqa: E402
+from lib.common import BASE, confined, connect, redact  # noqa: E402
 from lib.corpus import load  # noqa: E402
 
 HERE = Path(__file__).parent
@@ -92,9 +92,11 @@ def one(d: str, ps: list, sessions: dict, intents: list, run: str, lane: int) ->
     work = confined(f"corpus/{run}/executive", BASE)
     work.mkdir(parents=True, exist_ok=True)
     pf = work / f"{d}.prompt.txt"
-    pf.write_text(ASK.replace("{d}", d).replace("{state}", state_band(ddir))
+    # Dossier text is not redacted at source, so redact everything sent
+    # (2026-11-05 security review: sensitive-data exposure).
+    pf.write_text(redact(ASK.replace("{d}", d).replace("{state}", state_band(ddir))
                   .replace("{old}", old_exec(ddir) or "(none)")
-                  .replace("{sessions}", stext[:30000]).replace("{intents}", itext))
+                  .replace("{sessions}", stext[:30000]).replace("{intents}", itext))[0])
     for attempt in range(2):
         model = MODELS[(lane + attempt) % 2]
         raw = work / f"{d}.raw"
@@ -113,8 +115,8 @@ def one(d: str, ps: list, sessions: dict, intents: list, run: str, lane: int) ->
                  " A model draft: check it against intent-summary.md before relying on it.*\n\n")
         f = ddir / "intent-executive.md"
         page = f.read_text() if f.exists() else executive_page()
-        page = render.put_block(page, "What this project was asked to be", run, label + ans["what"].strip())
-        page = render.put_block(page, "Where it drifted", run, ans["drift"].strip())
+        page = render.put_block(page, "What this project was asked to be", run, label + render.inert(ans["what"]).strip())
+        page = render.put_block(page, "Where it drifted", run, render.inert(ans["drift"]).strip())
         f.write_text(render.touch_updated(page))
         return f"ok via {model}"
     return "FAILED: no valid answer from either model"
