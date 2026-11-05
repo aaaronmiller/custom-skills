@@ -56,9 +56,17 @@ SPEC_PATTERNS = [
 ]
 
 # Redaction runs before anything is stored. Order matters: longest first.
+# 2026-11-05 (MP-08): the generic sk- pattern missed dashed and underscored
+# keys (sk-proj-..., sk-or-v1-...), and bearer, Hugging Face, Google OAuth,
+# GitLab and npm tokens were not covered at all.
 SECRET_PATTERNS = [
     ("anthropic_key", re.compile(r"sk-ant-[A-Za-z0-9_\-]{20,}")),
-    ("openai_key", re.compile(r"sk-[A-Za-z0-9]{32,}")),
+    ("openai_key", re.compile(r"sk-[A-Za-z0-9_\-]{20,}")),
+    ("bearer", re.compile(r"\bBearer\s+[A-Za-z0-9_\-.=+/]{16,}", re.I)),
+    ("hf_token", re.compile(r"\bhf_[A-Za-z0-9]{30,}")),
+    ("google_oauth", re.compile(r"\bya29\.[A-Za-z0-9_\-]{20,}")),
+    ("gitlab_pat", re.compile(r"\bglpat-[A-Za-z0-9_\-]{20,}")),
+    ("npm_token", re.compile(r"\bnpm_[A-Za-z0-9]{36}")),
     ("aws_key", re.compile(r"AKIA[A-Z0-9]{16}")),
     ("google_key", re.compile(r"AIza[A-Za-z0-9_\-]{35}")),
     ("github_pat", re.compile(r"gh[pousr]_[A-Za-z0-9]{36,}")),
@@ -108,6 +116,20 @@ def redact(text: str) -> tuple[str, list[str]]:
             hits.append(name)
             text = pat.sub(f"[REDACTED:{name}]", text)
     return text, hits
+
+
+def confined(path: str | Path, root: Path) -> Path:
+    """Resolve path and refuse it unless it sits inside root (MP-08).
+
+    Every phase that takes an output path goes through this, so no argument,
+    agent or prompt can make a phase write outside the archaeology tree.
+    """
+    root = root.resolve()
+    p = Path(path)
+    p = (p if p.is_absolute() else root / p).resolve()
+    if p != root and root not in p.parents:
+        die(f"refused: {p} is outside {root}")
+    return p
 
 
 def connect() -> sqlite3.Connection:

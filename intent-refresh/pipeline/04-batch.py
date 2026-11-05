@@ -27,7 +27,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from lib.common import (  # noqa: E402
-    BATCHES, PIPELINE_VERSION, connect, die, log, now, report, sha,
+    BATCHES, PIPELINE_VERSION, confined, connect, die, log, now, report, sha,
 )
 
 MIN_CHARS = 12
@@ -98,7 +98,8 @@ def main() -> int:
             "text": r["text"],
         })
 
-    out = Path(args.out) if args.out else BATCHES / f"{args.project}-{args.tranche}-{bid[-6:]}.json"
+    # MP-08: --out used to accept any path; it is now confined to BATCHES.
+    out = confined(args.out or f"{args.project}-{args.tranche}-{bid[-6:]}.json", BATCHES)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({
         "batch_id": bid,

@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from lib.common import DERIVED, HUMAN, PIPELINE_VERSION, connect, log, now, report  # noqa: E402
+from lib.common import DERIVED, HUMAN, PIPELINE_VERSION, confined, connect, log, now, report  # noqa: E402
 
 OPEN = "<!-- GENERATED:intent-archaeology BEGIN. Do not edit inside this fence. -->"
 CLOSE = "<!-- GENERATED:intent-archaeology END -->"
@@ -53,7 +53,7 @@ def main() -> int:
     args = ap.parse_args()
 
     conn = connect()
-    out = Path(args.out)
+    out = confined(args.out, DERIVED)  # MP-08: never write outside derived/
     log(conn, "render", "start", str(out))
 
     q = conn.execute

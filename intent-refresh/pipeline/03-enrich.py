@@ -31,7 +31,7 @@ from lib.common import (  # noqa: E402
     is_approval, iter_jsonl, log, observe, redact, report, sha,
 )
 
-MAX_TEXT = 20000  # store enough to classify; drop pasted-dump tails
+MAX_TEXT = 100000  # 2026-11-05: was 20000; operator prompts are kept whole (26% corpus-loss lesson, 2026-08-04)
 
 
 def role_of(obj: dict) -> str:
@@ -128,6 +128,11 @@ def enrich_session(conn, row) -> tuple[int, int, int]:
             seen_hashes.add(th)
 
         clean, hits = redact(text) if text else ("", [])
+        # MP-08: slash_args was stored unredacted, so a secret passed as a
+        # command argument bypassed redaction.
+        if slash_args:
+            slash_args, ahits = redact(slash_args)
+            hits = sorted(set(hits) | set(ahits))
         tname, paths = tool_info(obj)
 
         eid = "evt_" + sha(sid, str(obj.get("uuid") or seq), str(seq))

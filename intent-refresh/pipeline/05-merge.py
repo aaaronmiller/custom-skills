@@ -50,6 +50,11 @@ def norm(text: str) -> str:
     return " ".join(w for w in t.split() if w not in STOPWORDS)
 
 
+def ws(text: str) -> str:
+    """Case- and whitespace-insensitive form for the provenance check."""
+    return " ".join((text or "").lower().split())
+
+
 def similar(a: str, b: str) -> float:
     sa, sb = set(norm(a).split()), set(norm(b).split())
     if not sa or not sb:
@@ -111,6 +116,13 @@ def main() -> int:
             "SELECT event_id FROM batch_item WHERE batch_id=?", (bid,)).fetchall()}
     returned = {v.get("id") for v in verdicts if v.get("id")}
 
+    # MP-08: a repeated id was merged once per copy, inflating occurrence
+    # counts, which the pipeline treats as its strongest importance signal.
+    ids_all = [v.get("id") for v in verdicts if v.get("id")]
+    dupes = sorted({i for i in ids_all if ids_all.count(i) > 1})
+    if dupes:
+        die(f"{len(dupes)} ids appear more than once in the verdict file. First: {dupes[:3]}")
+
     missing = submitted - returned
     orphan = returned - submitted
 
@@ -167,8 +179,10 @@ def main() -> int:
         if not ev:
             rejected += 1
             continue
-        # Provenance gate: the quote must actually be in the turn.
-        if verbatim[:40].lower() not in (ev["text"] or "").lower():
+        # Provenance gate: the WHOLE quote must be in the turn. MP-08: this
+        # used to check only the first 40 characters, so a verdict could
+        # open with a real quote and continue with invented text.
+        if len(verbatim) < 8 or ws(verbatim) not in ws(ev["text"]):
             rejected += 1
             observe(conn, "verifier_disagreement",
                     f"verbatim not found in source turn {eid}", [eid])
