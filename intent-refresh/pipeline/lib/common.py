@@ -61,8 +61,14 @@ SPEC_PATTERNS = [
 # GitLab and npm tokens were not covered at all.
 SECRET_PATTERNS = [
     ("anthropic_key", re.compile(r"sk-ant-[A-Za-z0-9_\-]{20,}")),
-    ("openai_key", re.compile(r"sk-[A-Za-z0-9_\-]{20,}")),
-    ("bearer", re.compile(r"\bBearer\s+[A-Za-z0-9_\-.=+/]{16,}", re.I)),
+    # Not preceded by a word character, and the key must hold a digit, so
+    # prose such as "risk-management-framework-..." is left alone.
+    ("openai_key", re.compile(r"(?<![A-Za-z0-9_\-])sk-(?=[A-Za-z0-9_\-]*\d)[A-Za-z0-9_\-]{20,}")),
+    ("stripe_key", re.compile(r"\b[rs]k_(?:live|test)_[A-Za-z0-9]{16,}")),
+    ("github_fine_pat", re.compile(r"\bgithub_pat_[A-Za-z0-9_]{30,}")),
+    ("aws_temp_key", re.compile(r"\bASIA[A-Z0-9]{16}\b")),
+    ("google_client_secret", re.compile(r"\bGOCSPX-[A-Za-z0-9_\-]{20,}")),
+    ("bearer", re.compile(r"\bBearer[:\s]+[A-Za-z0-9_\-.=+/]{16,}", re.I)),
     ("hf_token", re.compile(r"\bhf_[A-Za-z0-9]{30,}")),
     ("google_oauth", re.compile(r"\bya29\.[A-Za-z0-9_\-]{20,}")),
     ("gitlab_pat", re.compile(r"\bglpat-[A-Za-z0-9_\-]{20,}")),
@@ -78,6 +84,8 @@ SECRET_PATTERNS = [
         r"\b(?:API[_-]?KEY|SECRET|PASSWORD|PASSWD|TOKEN|PRIVATE[_-]?KEY|ACCESS[_-]?KEY)"
         r"\s*[=:]\s*[\"']?[^\s\"'\n]{6,}", re.I)),
 ]
+
+ZERO_WIDTH = re.compile("[​‌‍⁠﻿]")
 
 APPROVAL_TURNS = {
     "y", "yes", "yeah", "yep", "ok", "okay", "k", "go", "go on", "continue",
@@ -110,6 +118,8 @@ def redact(text: str) -> tuple[str, list[str]]:
     """Redact before storage. Returns (clean_text, pattern_ids_hit)."""
     if not text:
         return text or "", []
+    # Zero-width characters inside a key would split it past every pattern.
+    text = ZERO_WIDTH.sub("", text)
     hits: list[str] = []
     for name, pat in SECRET_PATTERNS:
         if pat.search(text):

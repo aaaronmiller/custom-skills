@@ -118,6 +118,27 @@ class Defect3Redaction(Base):
             self.assertNotIn(secret, clean, secret)
             self.assertTrue(hits)
 
+    def test_more_key_shapes_and_zero_width(self):
+        sys.path.insert(0, str(PIPE))
+        from lib.common import redact
+        for secret in ("sk_live_" + "a1" * 12, "github_pat_" + "B2" * 20,
+                       "Bearer:" + "t" * 20, "GOCSPX-" + "c3" * 12):
+            clean, _ = redact(f"x {secret} y")
+            self.assertNotIn(secret, clean, secret)
+        split = "sk-proj-" + "a1b2c3d4e5​" + "f6g7h8i9j0k1l2m3"
+        clean, _ = redact(split)
+        self.assertNotIn("f6g7h8i9j0k1l2m3", clean)
+
+    def test_prose_is_not_redacted(self):
+        sys.path.insert(0, str(PIPE))
+        from lib.common import redact
+        for prose in ("adopt the risk-management-framework-for-agents plan",
+                      "the task-management-dashboard-redesign-notes page",
+                      "use sk-learn-compatible-estimator-interfaces here"):
+            clean, hits = redact(prose)
+            self.assertEqual(clean, prose)
+            self.assertEqual(hits, [])
+
     def test_slash_args_are_redacted(self):
         key = "sk-proj-" + "k9" * 20
         line = {"type": "user", "uuid": "u1", "timestamp": "2026-11-01T00:00:00Z",

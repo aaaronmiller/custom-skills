@@ -26,6 +26,8 @@ import argparse
 import json
 import re
 import sys
+import unicodedata
+from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -51,8 +53,12 @@ def norm(text: str) -> str:
 
 
 def ws(text: str) -> str:
-    """Case- and whitespace-insensitive form for the provenance check."""
-    return " ".join((text or "").lower().split())
+    """NFKC-, case- and whitespace-insensitive form for the provenance check.
+
+    Folding can only make a real quote match despite smart quotes or
+    non-breaking spaces; it cannot make an invented quote match.
+    """
+    return " ".join(unicodedata.normalize("NFKC", str(text or "")).casefold().split())
 
 
 def similar(a: str, b: str) -> float:
@@ -118,8 +124,9 @@ def main() -> int:
 
     # MP-08: a repeated id was merged once per copy, inflating occurrence
     # counts, which the pipeline treats as its strongest importance signal.
-    ids_all = [v.get("id") for v in verdicts if v.get("id")]
-    dupes = sorted({i for i in ids_all if ids_all.count(i) > 1})
+    if any(not isinstance(v, dict) or not isinstance(v.get("id"), str) for v in verdicts):
+        die("every verdict must be an object with a string id")
+    dupes = sorted(i for i, c in Counter(v["id"] for v in verdicts).items() if c > 1)
     if dupes:
         die(f"{len(dupes)} ids appear more than once in the verdict file. First: {dupes[:3]}")
 
@@ -168,8 +175,9 @@ def main() -> int:
             observe(conn, "schema_violation", f"unknown type '{vtype}' on {eid}", [eid])
             continue
 
-        statement = (v.get("statement") or "").strip()
-        verbatim = (v.get("verbatim") or "").strip()
+        statement = v.get("statement") if isinstance(v.get("statement"), str) else ""
+        verbatim = v.get("verbatim") if isinstance(v.get("verbatim"), str) else ""
+        statement, verbatim = statement.strip(), verbatim.strip()
         if not statement or not verbatim:
             rejected += 1
             observe(conn, "schema_violation", f"missing statement or verbatim on {eid}", [eid])
