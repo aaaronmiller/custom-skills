@@ -73,6 +73,7 @@ Phases 00 to 06 are the legacy pipeline. 04-batch and 05-merge are still used, b
 - Free lanes run through `pipeline/free-lane.sh`. It gives opencode no shell, no edits, no web, no outside folders, and private `XDG_*` folders, so the operator's own opencode config and database are never touched.
   - Models: `opencode/deepseek-v4.1-flash-free`, `opencode/glm-5.3-flash-free`, `opencode/crouton-alpha-free`.
   - Expect rate limits: 08 backs off on 429.
+  - Known limit: the prompt reaches opencode as a command-line argument, so it is visible in the process list while a lane runs. Accepted because this is a single-user machine; passing it as an attached file (`-f`) returned empty answers in a 2026-11-05 test.
 - Never run `cass index` or `cass-reindex`. The cass-maintain job owns indexing; 07 reads the cass database read-only.
 
 ## The weekly cron job
