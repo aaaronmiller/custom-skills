@@ -237,6 +237,8 @@ def main() -> int:
     ap.add_argument("--plan", action="store_true", help="print the chunk plan and stop")
     ap.add_argument("--include-dispatched", action="store_true")
     ap.add_argument("--models", help="comma-separated free models (default: deepseek, glm)")
+    ap.add_argument("--catalog", help="frozen catalog JSON from --write-catalog (for another machine)")
+    ap.add_argument("--write-catalog", help="write the catalog and valid ids to this JSON file and stop")
     ap.add_argument("--start", type=int, default=0,
                     help="begin at this chunk number (a third process can start mid-run)")
     ap.add_argument("--reverse", action="store_true",
@@ -261,8 +263,16 @@ def main() -> int:
         cs = cs[::-1]
     if a.models:
         MODELS[:] = a.models.split(",")
-    cat = catalog()
-    valid = {pm.parent.name for pm in DOSSIERS.glob("*/project.md")} | {"sysadmin", "unclassified"}
+    if a.catalog:
+        frozen = json.loads(Path(a.catalog).read_text())
+        cat, valid = frozen["catalog"], set(frozen["valid"])
+    else:
+        cat = catalog()
+        valid = {pm.parent.name for pm in DOSSIERS.glob("*/project.md")} | {"sysadmin", "unclassified"}
+    if a.write_catalog:
+        Path(a.write_catalog).write_text(json.dumps({"catalog": cat, "valid": sorted(valid)}, indent=1))
+        print(f"catalog written: {len(valid)} valid ids")
+        return 0
     done = failed = 0
     with cf.ThreadPoolExecutor(max_workers=a.lanes) as ex:
         futs = [ex.submit(run_chunk, c, sessions, cat, valid, outdir, i % a.lanes)
