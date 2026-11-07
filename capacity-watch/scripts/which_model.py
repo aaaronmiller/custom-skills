@@ -173,7 +173,9 @@ def pool_windows(assessment, pool):
         used = weights.ledger.number(r.get("used"))
         if used is None:
             continue
-        remaining = max(0.0, 1 - used)
+        # The operator reserve (assess.py) lowers the cap agents may plan against until it is released.
+        cap = weights.ledger.number(r.get("cap"))
+        remaining = max(0.0, (cap if cap is not None else 1) - used)
         projected = weights.ledger.number(r.get("projected"))
         demand = max(0.0, projected - used) if projected is not None else None
         result.append({"window": r["window"], "headroom": remaining,

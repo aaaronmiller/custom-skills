@@ -115,3 +115,35 @@ def test_schedule_respects_after_and_observation(tmp_path):
     done = dt.datetime.fromisoformat(json.loads(hist.read_text())["all_unblocked_done_by"].replace("Z", "+00:00"))
     # The soak starts after A (2 h) and runs 48 h without blocking B.
     assert 49.5 <= (done - assess.NOW).total_seconds() / 3600 <= 50.5
+
+
+def _reserve_cal():
+    return {"pools": {"claude": {"operator_reserve": {"fraction": 0.05, "window": "seven_day", "release_hours": 12}}}}
+
+
+def test_operator_reserve_held_lowers_the_cap():
+    now = assess.NOW
+    row = dict(pool="claude", window="seven_day", used=0.80, length_min=10080,
+               reset=now + dt.timedelta(hours=48), hist=[], observed=now, source="")
+    res = assess.reserve_for(row, _reserve_cal())
+    assert res["held"] and res["cap"] == 0.95
+    assert assess.verdict(row, 0.97, res).startswith("SLOW DOWN: would spend the operator reserve")
+    assert assess.verdict(row, 0.90, res) == "on pace"
+    row["used"] = 0.95
+    assert assess.verdict(row, 0.96, res).startswith("STOP: at the operator reserve")
+
+
+def test_operator_reserve_released_in_last_hours():
+    now = assess.NOW
+    row = dict(pool="claude", window="seven_day", used=0.90, length_min=10080,
+               reset=now + dt.timedelta(hours=6), hist=[], observed=now, source="")
+    res = assess.reserve_for(row, _reserve_cal())
+    assert not res["held"] and res["cap"] == 1.0
+    assert assess.verdict(row, 0.93, res).startswith("USE IT: operator reserve released")
+
+
+def test_reserve_ignores_other_windows():
+    now = assess.NOW
+    row = dict(pool="claude", window="five_hour", used=0.5, length_min=300,
+               reset=now + dt.timedelta(hours=3), hist=[], observed=now, source="")
+    assert assess.reserve_for(row, _reserve_cal())["fraction"] == 0.0

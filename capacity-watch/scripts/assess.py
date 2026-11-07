@@ -127,12 +127,35 @@ def project(row):
     return round(min(u + max(rate, 0) * left_h, 9.99), 3), basis, pace
 
 
-def verdict(row, proj):
+def reserve_for(row, cal):
+    """The operator's held-back share of a weekly window, and whether it is still held.
+
+    calibration.json pools.<pool>.operator_reserve = {"fraction", "window", "release_hours"}.
+    Until release_hours before the reset, agents plan against 1 - fraction; after that the
+    reserve is released to agents so the whole window is used before it resets.
+    """
+    spec = ((cal or {}).get("pools", {}).get(row["pool"]) or {}).get("operator_reserve") or {}
+    frac = float(spec.get("fraction") or 0)
+    if not frac or spec.get("window", row["window"]) != row["window"] or not row["reset"]:
+        return {"fraction": 0.0, "held": False, "cap": 1.0, "release_at": None}
+    release_at = row["reset"] - dt.timedelta(hours=float(spec.get("release_hours", 12)))
+    held = NOW < release_at
+    return {"fraction": frac, "held": held, "cap": round(1 - frac, 3) if held else 1.0, "release_at": release_at}
+
+
+def verdict(row, proj, reserve=None):
     left_h = hours(row["reset"] - NOW) if row["reset"] else None
     if row["used"] >= 0.98:
         return "EXHAUSTED"
     if proj is None:
         return "watch"
+    if reserve and reserve["held"]:
+        if row["used"] >= reserve["cap"]:
+            return f"STOP: at the operator reserve ({reserve['fraction']:.0%} held until {pt(reserve['release_at'])})"
+        if proj >= reserve["cap"]:
+            return f"SLOW DOWN: would spend the operator reserve ({reserve['fraction']:.0%})"
+    if reserve and reserve["fraction"] and not reserve["held"] and 1 - row["used"] >= 0.05 and proj < 1.0:
+        return "USE IT: operator reserve released, drain before reset"
     if proj >= 1.0:
         return "SLOW DOWN: runs out before reset"
     if left_h is not None and left_h <= 2 and 1 - row["used"] >= 0.4:
@@ -199,13 +222,19 @@ def main():
     lines.append("|---|---|---|---|---|---|---|---|")
     for r in rows:
         proj, basis, pace = project(r)
-        v = verdict(r, proj)
+        res = reserve_for(r, cal)
+        v = verdict(r, proj, res)
+        if res["fraction"]:
+            basis = (f"{basis}; operator reserve {res['fraction']:.0%} "
+                     f"{'held until ' + pt(res['release_at']) if res['held'] else 'released'}")
         age = f", reading {int(hours(NOW - r['observed']) * 60)} min old" if r["observed"] else ""
         lines.append(f"| {r['pool']} | {r['window']} | {r['used']:.0%} | {pt(r['reset'])} | "
                      f"{'-' if pace is None else f'{pace}x'} | "
                      f"{'-' if proj is None else f'{proj:.0%}'} | {basis}{age} | {v} |")
         summary["pools"].append({"pool": r["pool"], "window": r["window"], "used": r["used"],
-                                 "projected": proj, "pace": pace, "verdict": v})
+                                 "projected": proj, "pace": pace, "verdict": v,
+                                 "reserve": res["fraction"], "cap": res["cap"],
+                                 "reserve_release_at": res["release_at"].strftime("%Y-%m-%dT%H:%M:%SZ") if res["release_at"] else None})
 
     # Demand against headroom, per pool, using calibration priors.
     tasks = [t for t in work.get("tasks", []) if t.get("status") not in ("done", "dropped")]
