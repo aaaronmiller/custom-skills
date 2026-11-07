@@ -39,3 +39,8 @@ folder. Register a skill with
 `python3 -I scripts/import-skill add --name <skill> --path <installed path> --origin <origin> --license MIT`
 (not run by these tests). Run the skills with `python3 -B` so no `__pycache__`
 appears and changes the digest.
+
+
+## Running from custom-skills
+
+In /home/cheta/code/custom-skills these tests live inside project-archive/, so pass the skills root: `python3 -I -B contract-tests/run_all.py --skills /home/cheta/code/custom-skills --mutants`. The default (the parent of this folder) fits the original out/ layout only.
