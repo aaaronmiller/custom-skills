@@ -1,0 +1,229 @@
+<meta name="dash-one-writer">
+<style>
+  .ql { display: grid; gap: var(--cds-gap-lg); font-family: var(--font-anthropic-sans); }
+  .ql-head h1 { font: 400 var(--cds-font-size-title)/1.15 var(--font-anthropic-serif); margin: 0; text-wrap: balance; }
+  .ql-head p { margin: var(--cds-gap-xs) 0 0; color: var(--color-fg-muted); max-width: 70ch; }
+  .ql-take { margin: var(--cds-gap-sm) 0 0; max-width: 75ch; }
+  .ql-grid { display: grid; gap: var(--cds-gap-md); grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); }
+  .ql-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); min-width: 0; display: grid; gap: var(--cds-gap-sm); align-content: start; }
+  .ql-card h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
+  .ql-note { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .ql-chart { position: relative; min-height: 240px; }
+  .ql-chart svg { display: block; }
+  .ql-scroll { overflow-x: auto; }
+  .ql table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+  .ql th { text-align: left; color: var(--color-fg-muted); font-weight: var(--cds-font-weight-medium); padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); white-space: nowrap; }
+  .ql td { padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); vertical-align: top; }
+  .ql td.num, .ql th.num { text-align: right; }
+  .ql-bad { color: var(--color-bad); } .ql-warn { color: var(--color-warn); } .ql-ok { color: var(--color-ok); }
+  .ql-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; }
+  .ql-tip .d { color: var(--cds-text-secondary); }
+  .ql-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .ql-sw { display: inline-block; width: .6rem; height: .6rem; border-radius: 2px; margin-right: .3rem; vertical-align: 0; }
+  [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+  [data-dash-source-state=empty] { color: transparent; }
+</style>
+
+<div class="ql">
+  <header class="ql-head">
+    <h1>Quota Ledger</h1>
+    <p>Every subscription's quota, where it is heading before its reset, how hourly forecasts compared with what was used, and which models did the work. Refreshed by each capacity-watch cycle.</p>
+    <p class="ql-take">Shift work toward: <b data-draw="shift" data-source="verdicts" data-field="pools" data-where="group=shift">—</b>. Slow down on: <b data-draw="slow" data-source="verdicts" data-field="pools" data-where="group=slow">—</b>.</p>
+  </header>
+
+  <section class="ql-card" id="pace">
+    <h2>Pace to each reset</h2>
+    <p class="ql-note">Projected use at the reset if work continues at today's rate. Over 100% means the pool runs out early; well under means quota will expire unused.</p>
+    <div class="ql-scroll">
+      <table data-source="projections" data-row-key="pool,window">
+        <thead><tr><th data-field="pool">Pool</th><th data-field="window">Window</th><th class="num" data-field="used_pct">Used %</th><th class="num" data-field="projected_at_reset_pct">Projected at reset %</th><th data-field="resets_at">Resets (UTC)</th><th data-field="verdict">Verdict</th></tr></thead>
+        <tbody data-draw="pace-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="ql-card" id="history">
+    <h2>Quota used over time</h2>
+    <p class="ql-note">Percent of each window used, from provider probes and Codex's own usage snapshots. Drops are resets.</p>
+    <div class="ql-legend" data-draw="history-legend" data-source="quota_history"></div>
+    <div class="ql-chart" data-draw="history" data-source="quota_history"></div>
+  </section>
+
+  <div class="ql-grid">
+    <section class="ql-card" id="forecast">
+      <h2>Hourly forecast against actual</h2>
+      <p class="ql-note">Percentage points each pool was expected to move in an hour of planned work, and what it actually moved.</p>
+      <div class="ql-chart" data-draw="forecast" data-source="forecast_hours"></div>
+    </section>
+    <section class="ql-card" id="usage">
+      <h2>Output tokens per day by harness</h2>
+      <p class="ql-note">From the call ledger: every logged model call across Claude Code, Codex, omp and direct API calls.</p>
+      <div class="ql-legend" data-draw="usage-legend" data-source="usage_daily"></div>
+      <div class="ql-chart" data-draw="usage" data-source="usage_daily"></div>
+    </section>
+  </div>
+
+  <section class="ql-card" id="lanes">
+    <h2>Model lanes on the same work</h2>
+    <p class="ql-note">The same intent-refine chunks through each model on OpenCode Go. Valid means it passed the pipeline's validator on the first try; allowance is what it counted against the shared $60 Go pool.</p>
+    <div class="ql-scroll">
+      <table data-source="lane_trial" data-row-key="trial_day,model">
+        <thead><tr><th data-field="model">Model</th><th class="num" data-field="calls">Chunks</th><th class="num" data-field="valid">Valid</th><th class="num" data-field="median_latency_s">Median s</th><th class="num" data-field="allowance_per_valid_usd">$ per valid chunk</th><th class="num" data-field="project_agreement">Agreement</th><th class="num" data-field="errors">Errors</th><th data-field="trial_day">Trial</th></tr></thead>
+        <tbody data-draw="lane-rows"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+const num = (x) => (x === '' || x == null ? null : Number(x));
+const parseTs = (s) => new Date(s.length === 16 ? s + ':00Z' : s);
+const pct = d3.format('.0f');
+
+dash.calc('verdicts', {
+  title: 'Pools by pace verdict',
+  description: 'Groups pool windows into those to shift work toward (under-used or resetting with headroom) and those to slow down on.',
+  inputs: ['projections'],
+  fn: (projections) => {
+    const name = (r) => `${r.pool} ${r.window.replace('_', '-')}`;
+    const shift = projections.filter((r) => /under-used|USE IT/i.test(r.verdict)).map(name);
+    const slow = projections.filter((r) => /SLOW DOWN|EXHAUSTED/i.test(r.verdict)).map(name);
+    return [{group: 'shift', pools: shift.join(', ') || 'none'}, {group: 'slow', pools: slow.join(', ') || 'none'}];
+  },
+});
+
+dash.draw('shift', (el) => { const g = dash.data('verdicts'); el.textContent = g.status === 'ok' ? (g.data.find((r) => r.group === 'shift') || {}).pools : '—'; });
+dash.draw('slow', (el) => { const g = dash.data('verdicts'); el.textContent = g.status === 'ok' ? (g.data.find((r) => r.group === 'slow') || {}).pools : '—'; });
+
+dash.draw('pace-rows', (tb) => {
+  const g = dash.data('projections');
+  tb.replaceChildren();
+  if (g.status !== 'ok') return;
+  for (const r of g.data) {
+    const tr = document.createElement('tr');
+    const proj = num(r.projected_at_reset_pct);
+    const cls = /SLOW|EXHAUSTED/i.test(r.verdict) ? 'ql-bad' : /under|USE IT/i.test(r.verdict) ? 'ql-warn' : '';
+    const cells = [r.pool, r.window, r.used_pct === '' ? '' : pct(num(r.used_pct)), proj == null ? '' : pct(proj), r.resets_at ? r.resets_at.replace('T', ' ') : '', r.verdict];
+    cells.forEach((v, i) => { const td = document.createElement('td'); td.textContent = v; if (i === 2 || i === 3) td.className = 'num'; if (i === 5 && cls) td.className = cls; tr.append(td); });
+    tb.append(tr);
+  }
+});
+
+function legend(el, keys, colorOf) {
+  el.replaceChildren(...keys.map((k) => { const s = document.createElement('span'); const sw = document.createElement('span'); sw.className = 'ql-sw'; sw.style.background = colorOf(k); s.append(sw, document.createTextNode(k)); return s; }));
+}
+
+const seriesKey = (r) => `${r.pool} ${r.window}`;
+dash.draw('history-legend', (el) => {
+  const g = dash.data('quota_history');
+  if (g.status !== 'ok') { el.replaceChildren(); return; }
+  const keys = [...new Set(g.data.map(seriesKey))].sort();
+  legend(el, keys, (k) => dash.colors[keys.indexOf(k) % dash.colors.length]);
+});
+
+dash.draw('history', (el) => {
+  const g = dash.data('quota_history');
+  el.replaceChildren();
+  if (g.status !== 'ok') return;
+  const rows = g.data.map((r) => ({k: seriesKey(r), t: parseTs(r.ts), v: num(r.used_pct)})).filter((r) => r.v != null && !isNaN(r.t));
+  const keys = [...new Set(rows.map((r) => r.k))].sort();
+  const W = el.clientWidth || 600, H = 260, m = {t: 10, r: 12, b: 26, l: 36};
+  const x = d3.scaleUtc(d3.extent(rows, (r) => r.t), [m.l, W - m.r]);
+  const y = d3.scaleLinear([0, 100], [H - m.b, m.t]);
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+  svg.append('g').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(Math.max(2, Math.floor(W / 110))).tickFormat(d3.utcFormat('%b %-d'))).attr('font-size', null).attr('font-family', null)
+    .call((a) => { a.selectAll('text').attr('fill', 'var(--color-fg-muted)'); a.selectAll('line,path').attr('stroke', 'var(--cds-chart-axis)'); });
+  svg.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat((d) => d + '%').tickSize(-(W - m.l - m.r))).attr('font-size', null).attr('font-family', null)
+    .call((a) => { a.select('.domain').remove(); a.selectAll('line').attr('stroke', 'var(--cds-chart-grid)'); a.selectAll('text').attr('fill', 'var(--color-fg-muted)'); });
+  const color = (k) => dash.colors[keys.indexOf(k) % dash.colors.length];
+  for (const k of keys) {
+    const pts = rows.filter((r) => r.k === k).sort((a, b) => a.t - b.t);
+    svg.append('path').datum(pts).attr('fill', 'none').attr('stroke', color(k)).attr('stroke-width', 2).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round')
+      .attr('d', d3.line().x((p) => x(p.t)).y((p) => y(p.v)));
+  }
+  const tip = d3.select(el).append('div').attr('class', 'ql-tip').style('display', 'none');
+  const delaunay = d3.Delaunay.from(rows, (r) => x(r.t), (r) => y(r.v));
+  svg.on('pointermove', (ev) => {
+    const [px, py] = d3.pointer(ev); const r = rows[delaunay.find(px, py)]; if (!r) return;
+    tip.style('display', null).html('');
+    tip.append('div').attr('class', 'd').text(d3.utcFormat('%b %-d %H:%M UTC')(r.t));
+    tip.append('div').text(`${r.k}: ${pct(r.v)}%`);
+    const left = Math.min(x(r.t) + 10, W - 180); tip.style('left', `${(left / W) * 100}%`).style('top', `${y(r.v) / H * 100}%`);
+  }).on('pointerleave', () => tip.style('display', 'none'));
+});
+
+dash.draw('forecast', (el) => {
+  const g = dash.data('forecast_hours');
+  el.replaceChildren();
+  if (g.status !== 'ok') return;
+  const rows = g.data.map((r) => ({label: `${r.pool} ${r.window}`, hour: r.hour_start, target: num(r.target_delta), actual: num(r.actual_delta), note: r.note}));
+  const W = el.clientWidth || 400, rowH = 40, m = {t: 6, r: 40, b: 22, l: 150}, H = m.t + m.b + rows.length * rowH;
+  const max = d3.max(rows, (r) => Math.max(r.target, r.actual)) || 1;
+  const x = d3.scaleLinear([0, max], [m.l, W - m.r]);
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+  svg.append('g').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(4).tickFormat((d) => d + ' pts')).attr('font-size', null).attr('font-family', null)
+    .call((a) => { a.selectAll('text').attr('fill', 'var(--color-fg-muted)'); a.selectAll('line,path').attr('stroke', 'var(--cds-chart-axis)'); });
+  rows.forEach((r, i) => {
+    const y0 = m.t + i * rowH;
+    svg.append('text').attr('x', m.l - 8).attr('y', y0 + rowH / 2).attr('text-anchor', 'end').attr('dominant-baseline', 'middle').attr('fill', 'var(--color-fg)').text(r.label);
+    svg.append('rect').attr('x', m.l).attr('y', y0 + 6).attr('width', x(r.target) - m.l).attr('height', 10).attr('rx', 2).attr('fill', 'var(--cds-chart-muted)');
+    const over = r.actual > r.target * 1.25, under = r.actual < r.target * 0.75;
+    svg.append('rect').attr('x', m.l).attr('y', y0 + 18).attr('width', Math.max(1, x(r.actual) - m.l)).attr('height', 12).attr('rx', 2)
+      .attr('fill', over ? 'var(--cds-chart-status-critical)' : dash.colors[0]);
+    svg.append('text').attr('x', x(r.actual) + 4).attr('y', y0 + 24).attr('dominant-baseline', 'middle').attr('fill', 'var(--color-fg-muted)').text(`${r.actual} vs ${r.target}`);
+  });
+});
+
+const harnessKeys = (rows) => [...new Set(rows.map((r) => r.harness))].sort();
+dash.draw('usage-legend', (el) => {
+  const g = dash.data('usage_daily');
+  if (g.status !== 'ok') { el.replaceChildren(); return; }
+  const keys = harnessKeys(g.data);
+  legend(el, keys, (k) => dash.colors[keys.indexOf(k) % dash.colors.length]);
+});
+
+dash.draw('usage', (el) => {
+  const g = dash.data('usage_daily');
+  el.replaceChildren();
+  if (g.status !== 'ok') return;
+  const keys = harnessKeys(g.data);
+  const byDay = d3.rollup(g.data, (v) => d3.rollup(v, (w) => d3.sum(w, (r) => num(r.tokens_out)), (r) => r.harness), (r) => r.day);
+  const days = [...byDay.keys()].sort();
+  const stack = d3.stack().keys(keys).value(([, m], k) => m.get(k) || 0)([...byDay.entries()].sort((a, b) => a[0] < b[0] ? -1 : 1));
+  const W = el.clientWidth || 400, H = 240, m = {t: 10, r: 8, b: 26, l: 44};
+  const x = d3.scaleBand(days, [m.l, W - m.r]).padding(0.2);
+  const y = d3.scaleLinear([0, d3.max(stack.at(-1), (d) => d[1]) || 1], [H - m.b, m.t]).nice();
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+  const compact = Intl.NumberFormat('en', {notation: 'compact', maximumFractionDigits: 1});
+  svg.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickFormat((d) => compact.format(d)).tickSize(-(W - m.l - m.r))).attr('font-size', null).attr('font-family', null)
+    .call((a) => { a.select('.domain').remove(); a.selectAll('line').attr('stroke', 'var(--cds-chart-grid)'); a.selectAll('text').attr('fill', 'var(--color-fg-muted)'); });
+  const every = Math.ceil(days.length / Math.max(2, Math.floor(W / 70)));
+  svg.append('g').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickValues(days.filter((d, i) => i % every === 0)).tickFormat((d) => d3.utcFormat('%b %-d')(new Date(d)))).attr('font-size', null).attr('font-family', null)
+    .call((a) => { a.selectAll('text').attr('fill', 'var(--color-fg-muted)'); a.selectAll('line,path').attr('stroke', 'var(--cds-chart-axis)'); });
+  const tip = d3.select(el).append('div').attr('class', 'ql-tip').style('display', 'none');
+  stack.forEach((s, i) => {
+    svg.append('g').attr('fill', dash.colors[i % dash.colors.length]).selectAll('rect').data(s).join('rect')
+      .attr('x', (d) => x(d.data[0])).attr('width', x.bandwidth()).attr('y', (d) => y(d[1])).attr('height', (d) => Math.max(0, y(d[0]) - y(d[1])))
+      .on('pointerenter', (ev, d) => {
+        tip.style('display', null).html('');
+        tip.append('div').attr('class', 'd').text(d3.utcFormat('%b %-d')(new Date(d.data[0])));
+        tip.append('div').text(`${keys[i]}: ${compact.format(d[1] - d[0])} output tokens`);
+        tip.style('left', `${Math.min(x(d.data[0]), W - 200) / W * 100}%`).style('top', `${y(d[1]) / H * 100}%`);
+      }).on('pointerleave', () => tip.style('display', 'none'));
+  });
+});
+
+dash.draw('lane-rows', (tb) => {
+  const g = dash.data('lane_trial');
+  tb.replaceChildren();
+  if (g.status !== 'ok') return;
+  const money = d3.format('$.4f');
+  for (const r of g.data) {
+    const tr = document.createElement('tr');
+    const a = num(r.allowance_per_valid_usd);
+    const cells = [r.model, r.calls, r.valid, r.median_latency_s, a == null || isNaN(a) ? '' : (a === 0 ? 'free' : money(a)), r.project_agreement, r.errors, r.trial_day];
+    cells.forEach((v, i) => { const td = document.createElement('td'); td.textContent = v; if (i >= 1 && i <= 6) td.className = 'num'; tr.append(td); });
+    tb.append(tr);
+  }
+});
+</script>

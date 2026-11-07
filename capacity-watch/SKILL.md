@@ -69,3 +69,15 @@ The masterplan dossier's `timeline.md` holds one fenced block opened with ```` `
 - Data-sharing models get redacted text only, never credentials or private exports.
 - No low-tier models. The catalog's floor is the gate, and unscored models are trialed before use.
 - The cron agents read and report. Only the meta-review writes, and only `calibration.json` plus its own report.
+
+## Quota Ledger dashboard (MP-14)
+
+Live page: https://claude.ai/artifact/PMkHYC6L33VxiVfeQSJEqi (a Dashboard-type artifact; the Overdrive Night Ledger links to it). Data comes from `scripts/dashboard-data.py`, which writes five CSVs to `~/.local/state/capacity-watch/dashboard/`: quota_history, projections, usage_daily, forecast_hours and lane_trial. They hold counts and percentages only. The page source is `dashboard/index.html` in this skill.
+
+Refresh (any Claude session with the Artifact tools, after `assess` and a ledger `ingest`):
+1. `python3 -I scripts/dashboard-data.py`
+2. Upload each changed CSV to the artifact as an asset (Artifact publish with `url`, `asset: true`, one CSV per call).
+3. For each dataset, ArtifactData `update` of `datasets/<id>` with the new `source.url`, `updated: {at, by}` and `edit`, pinned with `if_version`.
+4. Hourly quota targets: write `~/.local/state/capacity-watch/hour-<date>/scores.json` (hour_start, pool, window, baseline_pct, target_delta, actual_delta, note) before step 1.
+
+The 4-hourly cron agent cannot reach the Artifact tools, so the cron refreshes the CSVs and a coordinator session uploads them. Datasets are marked stale after 6 hours.
