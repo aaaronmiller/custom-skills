@@ -14,6 +14,8 @@
 set -euo pipefail
 [ $# -eq 3 ] || { echo "usage: free-lane.sh MODEL PROMPT_FILE OUT_FILE" >&2; exit 2; }
 MODEL=$1; PROMPT=$(realpath -- "$2"); OUT=$(realpath -m -- "$3")
+# goapi/<model>: direct OpenCode Go API call (no opencode process), same contract.
+case "$MODEL" in goapi/*) exec python3 -I "$(dirname "$(realpath "$0")")/goapi-lane.py" "${MODEL#goapi/}" "$PROMPT" "$OUT" ;; esac
 STATE=${FREE_LANE_STATE:-$HOME/.local/state/intent-refresh/free-lane}
 WORK=$(mktemp -d "${TMPDIR:-/tmp}/free-lane.XXXXXX")
 trap 'rm -rf "$WORK"' EXIT

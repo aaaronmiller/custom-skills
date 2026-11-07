@@ -1,0 +1,6 @@
+{"type": "session", "id": "omp-session", "cwd": "/fixture"}
+{"type": "model_change", "model": "opencode-go/muse-spark-1.3-contributor"}
+{"type": "message", "id": "omp-call", "timestamp": "2026-11-06T10:01:00Z", "message": {"role": "assistant", "usage": {"input": 80, "output": 20, "cacheRead": 15, "cacheWrite": 5, "reasoningTokens": 3, "totalTokens": 120, "cost": {"total": 0.001}}, "duration": 1500, "stopReason": "toolUse"}}
+{"type": "model_change", "model": "opencode/beam-free"}
+{"type": "message", "id": "omp-call-2", "timestamp": "2026-11-06T10:02:00Z", "message": {"role": "assistant", "stopReason": "error"}}
+{"type": "message", "id": "omp-call-3", "timestamp": "2026-11-06T10:03:00Z", "message": {"role": "assistant", "provider": "openrouter", "model": "qwen/qwen3.8-27b:free", "usage": {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0, "totalTokens": 0, "cost": {"total": 0}}, "stopReason": "error", "errorStatus": 429}}

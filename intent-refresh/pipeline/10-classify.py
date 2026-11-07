@@ -26,6 +26,9 @@ from lib.common import BASE, connect  # noqa: E402
 HERE = Path(__file__).parent
 VERDICTS = BASE / "verdicts"
 MODELS = ["opencode/deepseek-v4.1-flash-free", "opencode/glm-5.3-flash-free"]
+# Override with INTENT_LANE_MODELS="goapi/crouton-alpha-free,goapi/muse-spark-1.3-contributor" (exactly two).
+if __import__("os").environ.get("INTENT_LANE_MODELS"):
+    MODELS = __import__("os").environ["INTENT_LANE_MODELS"].split(",")[:2]
 ITEM_VIEW = 6000
 LOCK = threading.Lock()   # 04-batch and 05-merge write the database: one at a time
 

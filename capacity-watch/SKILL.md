@@ -43,6 +43,16 @@ Known limits, 2026-11-06:
 - `references/estimation-rules.md`: how every estimate is built and checked. Agent-hours only, four named reasons for long waits, and the ten-times rule.
 - `references/meta-review.md`: the twice-daily review of the method.
 
+## Ledger
+
+`scripts/ledger.py` keeps one row per model call in `~/.local/state/capacity-watch/ledger.sqlite` (override with `CAPACITY_LEDGER`). It reads the logs harnesses already write, never calls an API, opens every source read-only and stores no prompt text.
+
+- `ingest [--since ISO] [--host NAME]`: idempotent backfill keyed on (harness, session_id, message_id). Adapters: Claude Code JSONL (including subagent transcripts), Codex rollouts (with the rate-limit snapshot per row), omp sessions, opencode.db, and `calls-direct.jsonl`. Each adapter reports its counters and, when it finds nothing, why.
+- `report [--days N] [--by provider|model|harness|day]`: calls, disjoint token buckets, list cost and allowance. Missing costs stay null.
+- `reconcile --pool codex|opencode-go|claude [--days N] [--expect WINDOW=N]`: tokens per window-percent from Codex snapshots or `readings.jsonl`, per window instance, both uncached (input plus output plus cache writes) and all-bucket. The 10% gate passes against `--expect`, or when at least two instances of 5 points or more agree with the pooled ratio.
+
+Phase 0 result, 2026-11-07: rows from four harnesses; the Codex gate fails because tokens per point vary about 15x across windows, most likely by model. Details and raw output: `references/ledger-phase0-2026-11-07.md`. Tests: `python3 -I -m pytest -q tests`.
+
 ## The workload block
 
 The masterplan dossier's `timeline.md` holds one fenced block opened with ```` ```json capacity-workload ````. Each task row has `id`, `title`, `status`, `remaining_agent_hours`, `lanes`, `pools` (shares of the task's agent-hours, keyed by pool name), `basis`, and optionally `wall_hours`, `after`, `not_before`, `blocked_on`, `observation` (a soak window that occupies no work track), `decomposed`, `actual_agent_hours` and `actual_wall_hours`. Coordinator sessions edit it; the cron jobs only read it.
