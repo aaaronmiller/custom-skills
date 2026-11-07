@@ -107,7 +107,7 @@ def usage_daily(out: Path):
 
 def forecast_hours(out: Path):
     rows = []
-    for f in sorted(glob.glob(str(S / "hour-*/scores.json"))):
+    for f in sorted(glob.glob(str(S / "hour*/scores.json"))):
         for r in json.load(open(f)):
             rows.append([r["hour_start"], r["pool"], r["window"], r["baseline_pct"], r["target_delta"], r["actual_delta"], r.get("note", "")])
     return write(out / "forecast_hours.csv", ["hour_start", "pool", "window", "baseline_pct", "target_delta", "actual_delta", "note"], rows)
