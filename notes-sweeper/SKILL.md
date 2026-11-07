@@ -5,7 +5,7 @@ description: |-
   Triggers: "sweep notes", "recover notepad", "notepad recovery", "monthly notes", "unsaved tabs", "clipboard audit", "scratchpad cleanup", "notes-sweeper".
 license: MIT
 metadata:
-  version: "1.0"
+  version: "1.1"
   cadence: monthly
 tags:
 - notes
@@ -47,6 +47,19 @@ Secrets scan over extracted content (key/token/private-key patterns) → `sensit
 
 Write new dated pages into dossiers (never overwrite), vault topics to the scratchpad, actionables as task files. Record splits/merges/drops in the reconciliation report. Unclassifiable → `HUMAN-REVIEW-<date>.md`, not forced.
 
+## Operation 4: Organize into the library (scripts/organize.py)
+
+Run after every snapshot, and whenever the operator asks where a note is. Snapshots alone are not the deliverable: an extraction nobody can browse is the failure the 2026-11-04 run left behind.
+
+`OPENCODE_GO_API_KEY=... python3 -I scripts/organize.py` reads every run under `~/agent-notes/recovery/`, then:
+- **Gather** every Notepad TabState text (current, autosave and deleted history), every Notepad++ backup buffer, and saved Notepad++ tabs in scratch locations (Downloads, Documents, Desktop, `~/tmp`). Aggregate saved files count too: the 534k-char `YEEZYS TURN ME INTO A LIVIGN DOCUMENT ALREEDY.MD` is one. Saved files over 1.5M chars, such as the Apple Notes export, are a separate corpus and are skipped with a log line.
+- **Merge versions.** Exact copies across runs collapse, and an older copy of a tab contained in a newer one is recorded as a version.
+- **Slice.** Split on headings, separators and blank-line gaps, then have Gemini 4 Argon on OpenCode Go group the blocks into separate notes. That model's listed terms are no training and zero retention. The same call gives each note a title, kind, summary, 1 to 3 Living Documents project ids, themes, a has-tasks flag and a status.
+- **Cluster** near-identical notes across tabs into one note with its copies listed.
+- **Write** `~/agent-notes/library/`: `notes/<project>/<date>-<slug>-<id>.md` with YAML frontmatter, `sources/<tab>.md` listing each tab's sections in order, `catalog.json` and a self-contained `index.html`. The index has search, project, kind, status and has-tasks filters, plus a by-tab view and copy buttons that give Windows paths.
+
+Secrets are redacted before text leaves the machine, and the library holds only redacted text; raw text stays in the read-only recovery snapshots. Model plans are cached per tab in `library/.cache/plans/`, so a rerun only pays for new tabs.
+
 ## Resource files
 
 | File | Read when |
@@ -54,5 +67,6 @@ Write new dated pages into dossiers (never overwrite), vault topics to the scrat
 | `references/monthly-cadence.md` | Scheduling the sweep; delta-only runs (new tabs since last snapshot) |
 | `references/classification-rubric.md` | Class definitions, split/merge rules, confidence thresholds |
 | `scripts/recover.py` | Every snapshot + parse run (defaults to `~/agent-notes/recovery/`) |
+| `scripts/organize.py` | After every snapshot: slice, title, tag, de-duplicate and index into `~/agent-notes/library/` |
 | `~/agent-notes/` | Evergreen root: `scratchpad/` vault + `recovery/` runs; commit + push per sweep |
 | `reports/process-notes.md` (per-run) | Steering rules accumulated across runs |
