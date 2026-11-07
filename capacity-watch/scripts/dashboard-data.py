@@ -3,7 +3,7 @@
 
   python3 -I dashboard-data.py [--out DIR]     (default ~/.local/state/capacity-watch/dashboard)
 
-Reads only local state, writes counts and percentages only (no prompt text, no credentials):
+Reads only local state. Task excerpts are redacted before export:
   quota_history.csv   every probe reading per pool and window, plus Codex window snapshots from the ledger
   projections.csv     the latest assessment: used, projected at reset, pace, verdict per pool window
   usage_daily.csv     ledger calls and tokens per day, harness and model
@@ -14,6 +14,8 @@ Each file is under 256 KB by design: usage is aggregated by day, quota history i
 import argparse
 import csv
 import glob
+import importlib.util
+import io
 import json
 import os
 import sqlite3
@@ -23,10 +25,14 @@ S = Path.home() / ".local/state/capacity-watch"
 
 
 def write(path: Path, header, rows):
-    with open(path, "w", newline="") as f:
-        w = csv.writer(f)
-        w.writerow(header)
-        w.writerows(rows)
+    buffer = io.StringIO(newline="")
+    writer = csv.writer(buffer)
+    writer.writerow(header)
+    writer.writerows(rows)
+    data = buffer.getvalue().encode("utf-8")
+    if len(data) >= 256_000:
+        raise ValueError(f"{path.name} exceeds the 256 KB limit; existing dataset preserved")
+    path.write_bytes(data)
     return len(rows)
 
 
@@ -125,6 +131,13 @@ def lane_trial(out: Path):
                                          "tokens_per_min_per_lane", "project_agreement", "errors"], rows)
 
 
+def task_ledger(out):
+    spec = importlib.util.spec_from_file_location("task_ledger", Path(__file__).with_name("task-ledger.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.build(out)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(S / "dashboard"))
@@ -133,8 +146,12 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     counts = {n: fn(out) for n, fn in [("quota_history", quota_history), ("projections", projections), ("usage_daily", usage_daily),
                                         ("forecast_hours", forecast_hours), ("lane_trial", lane_trial)]}
+    task_result = task_ledger(out)
+    counts["tasks"] = task_result["rows"]
     sizes = {p.name: p.stat().st_size for p in out.glob("*.csv")}
-    print(json.dumps({"out": str(out), "rows": counts, "bytes": sizes}))
+    if any(size >= 256_000 for size in sizes.values()):
+        raise ValueError("A dashboard dataset exceeds the 256 KB limit")
+    print(json.dumps({"out": str(out), "rows": counts, "bytes": sizes, "task_ledger": task_result}))
 
 
 if __name__ == "__main__":

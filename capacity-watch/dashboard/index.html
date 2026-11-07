@@ -22,6 +22,31 @@
   .ql-sw { display: inline-block; width: .6rem; height: .6rem; border-radius: 2px; margin-right: .3rem; vertical-align: 0; }
   [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
   [data-dash-source-state=empty] { color: transparent; }
+  .ql-task-controls, .ql-task-chips { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); }
+  #tasks { max-width: 100%; overflow: hidden; }
+  #tasks [data-draw] { min-width: 0; }
+  #tasks label { display: grid; gap: var(--cds-gap-xs); min-width: 0; }
+  #tasks button, #tasks input, #tasks textarea { font: inherit; color: var(--color-fg); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-xs); }
+  #tasks button { cursor: pointer; text-align: left; }
+  #tasks button[aria-pressed="true"] { color: var(--color-ok); border-color: var(--color-ok); }
+  #tasks :focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+  #tasks input, #tasks textarea { box-sizing: border-box; width: 100%; min-width: 0; }
+  .ql-task-table td { overflow-wrap: anywhere; }
+  .ql-task-detail { white-space: normal; overflow-wrap: anywhere; }
+  .ql-task-detail dl { display: grid; grid-template-columns: minmax(7rem, 1fr) minmax(0, 2fr); gap: var(--cds-gap-xs); }
+  .ql-task-detail dd { margin: 0; }
+  .ql-task-detail pre { white-space: pre-wrap; overflow-wrap: anywhere; overflow: auto; max-height: 15rem; font-size: var(--cds-font-size-caption); }
+  .ql-task-detail ul { padding-left: var(--cds-pad-lg); }
+  @media (max-width: 600px) {
+    .ql-task-table, .ql-task-table tbody, .ql-task-table tr, .ql-task-table td { display: block; width: auto; }
+    .ql-task-table thead { display: block; }
+    .ql-task-table thead tr { display: flex; flex-wrap: wrap; }
+    .ql-task-table th { display: inline-block; border: 0; }
+    .ql-task-table tbody > tr { border-bottom: 1px solid var(--color-border-line); padding-block: var(--cds-pad-sm); }
+    .ql-task-table td { border: 0; }
+    .ql-task-table td[data-label] { display: grid; grid-template-columns: 6rem minmax(0, 1fr); gap: var(--cds-gap-xs); }
+    .ql-task-table td[data-label]::before { content: attr(data-label); color: var(--color-fg-muted); }
+  }
 </style>
 
 <div class="ql">
@@ -62,6 +87,12 @@
       <div class="ql-chart" data-draw="usage" data-source="usage_daily"></div>
     </section>
   </div>
+
+  <section class="ql-card" id="tasks" data-source="tasks">
+    <h2>Tasks completed</h2>
+    <p class="ql-note">Select a task to inspect its purpose, usage and full Living Documents record. Partial, failed and running tasks are included for accounting.</p>
+    <div data-draw="task-ledger" data-source="task_summary"></div>
+  </section>
 
   <section class="ql-card" id="lanes">
     <h2>Model lanes on the same work</h2>
@@ -226,4 +257,115 @@ dash.draw('lane-rows', (tb) => {
     tb.append(tr);
   }
 });
+const taskState = {query: '', outcome: 'all', sort: 'started', direction: -1, open: null};
+const taskColumns = [['started', 'Started'], ['title', 'Title'], ['project', 'Project'], ['outcome', 'Outcome'], ['duration_min', 'Minutes'], ['cost_usd', 'List cost'], ['tokens_out', 'Tokens out'], ['subagents', 'Subagents'], ['failures', 'Failures']];
+const taskNumeric = new Set(['duration_min', 'cost_usd', 'tokens_out', 'subagents', 'failures']);
+dash.calc('task_summary', {
+  title: 'Tasks with failure totals', description: 'Preserves unknown failure counts and adds a sortable failure total.', inputs: ['tasks'],
+  fn: (rows) => rows.map((r) => ({...r, failures: [r.tool_errors, r.api_errors].some((v) => num(v) == null) ? '' : Number(r.tool_errors) + Number(r.api_errors)})),
+});
+function taskValue(key, value) {
+  if (value === '' || value == null) return 'Unknown';
+  if (key === 'cost_usd') return '$' + Number(value).toFixed(4);
+  if (key === 'duration_min') return Number(value).toFixed(2);
+  return String(value);
+}
+// This callback is the sole writer for the table, filters and detail panels.
+// Input events only change local view state and invoke the same writer.
+function drawTasks(el) {
+  const focus = document.activeElement;
+  const focusKey = el.contains(focus) ? focus.dataset.focus : null;
+  const selection = focusKey === 'filter' ? focus.selectionStart : null;
+  const g = dash.data('task_summary');
+  el.replaceChildren();
+  const controls = document.createElement('div'); controls.className = 'ql-task-controls';
+  const label = document.createElement('label'); label.textContent = 'Filter tasks';
+  const input = document.createElement('input'); input.type = 'search'; input.value = taskState.query;
+  input.dataset.focus = 'filter'; input.placeholder = 'Title, project, model or task ID';
+  input.addEventListener('input', () => { taskState.query = input.value; drawTasks(el); });
+  label.append(input); controls.append(label);
+  const chips = document.createElement('div'); chips.className = 'ql-task-chips'; chips.setAttribute('aria-label', 'Filter by outcome');
+  for (const status of ['all', 'done', 'partial', 'failed', 'running', 'unknown']) {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = status;
+    b.setAttribute('aria-pressed', String(taskState.outcome === status)); b.dataset.focus = 'chip-' + status;
+    b.addEventListener('click', () => { taskState.outcome = status; drawTasks(el); }); chips.append(b);
+  }
+  controls.append(chips); el.append(controls);
+  const count = document.createElement('p'); count.className = 'ql-note'; count.setAttribute('role', 'status'); el.append(count);
+  if (g.status !== 'ok') { count.textContent = 'Task data is not available.'; return; }
+  const query = taskState.query.toLocaleLowerCase();
+  const rows = g.data.filter((r) => (taskState.outcome === 'all' || r.outcome === taskState.outcome) &&
+    [r.title, r.project, r.ld_task_ids, r.models, r.brief_excerpt].join(' ').toLocaleLowerCase().includes(query));
+  rows.sort((a, b) => {
+    const key = taskState.sort, av = a[key], bv = b[key];
+    if (av === '' || av == null) return bv === '' || bv == null ? 0 : 1;
+    if (bv === '' || bv == null) return -1;
+    return taskState.direction * (taskNumeric.has(key) ? Number(av) - Number(bv) : String(av).localeCompare(String(bv)));
+  });
+  count.textContent = `${rows.length} of ${g.data.length} tasks. Costs are list-price equivalents; subscription costs are not extra charges.`;
+  const scroll = document.createElement('div'); scroll.className = 'ql-scroll';
+  const table = document.createElement('table'); table.className = 'ql-task-table'; table.dataset.source = 'task_summary';
+  const head = document.createElement('thead'), hr = document.createElement('tr');
+  taskColumns.forEach(([key, title]) => {
+    const th = document.createElement('th'); th.scope = 'col'; th.dataset.field = key;
+    th.setAttribute('aria-sort', taskState.sort === key ? (taskState.direction === 1 ? 'ascending' : 'descending') : 'none');
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = title; b.dataset.focus = 'sort-' + key;
+    b.addEventListener('click', () => { taskState.direction = taskState.sort === key ? -taskState.direction : 1; taskState.sort = key; drawTasks(el); });
+    th.append(b); hr.append(th);
+  });
+  head.append(hr); table.append(head);
+  const body = document.createElement('tbody'); table.append(body);
+  rows.forEach((r, index) => {
+    const tr = document.createElement('tr'); const open = taskState.open === r.task_key;
+    const detailId = 'task-detail-' + index;
+    taskColumns.forEach(([key, title]) => {
+      const td = document.createElement('td'); td.dataset.label = title;
+      if (key === 'title') {
+        const b = document.createElement('button'); b.type = 'button'; b.textContent = r.title;
+        b.setAttribute('aria-expanded', String(open)); b.setAttribute('aria-controls', detailId); b.dataset.focus = 'row-' + r.task_key;
+        b.addEventListener('click', (e) => { e.stopPropagation(); taskState.open = open ? null : r.task_key; drawTasks(el); }); td.append(b);
+      } else td.textContent = taskValue(key, r[key]);
+      tr.append(td);
+    });
+    tr.addEventListener('click', () => { taskState.open = open ? null : r.task_key; drawTasks(el); }); body.append(tr);
+    if (open) {
+      const detailRow = document.createElement('tr'); detailRow.className = 'ql-task-detail-row';
+      const td = document.createElement('td'); td.colSpan = taskColumns.length;
+      const panel = document.createElement('div'); panel.className = 'ql-task-detail'; panel.id = detailId;
+      panel.setAttribute('role', 'region'); panel.setAttribute('aria-label', r.title + ' details');
+      const dl = document.createElement('dl');
+      const details = [['project', 'Project'], ['ld_task_ids', 'Living Documents task IDs'], ['models', 'Models'], ['effort', 'Effort'],
+        ['source', 'Source'], ['host', 'Host'], ['outcome', 'Outcome'], ['started', 'Started'], ['ended', 'Ended'], ['duration_min', 'Duration (minutes)'],
+        ['tokens_in', 'Input tokens'], ['tokens_out', 'Output tokens'], ['cache_read', 'Cache read'], ['cache_write', 'Cache write'],
+        ['tokens_total', 'Reported total tokens'], ['cost_usd', 'List cost (USD)'], ['billing', 'Billing'], ['turns', 'Turns'],
+        ['subagents', 'Subagents'], ['tool_errors', 'Tool failures'], ['api_errors', 'API failures'], ['api_retries', 'API retries'],
+        ['phases', 'Workflow phases'], ['labels', 'Workflow labels'], ['out_count', 'Output file count']];
+      for (const [key, title] of details) {
+        const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = title; dd.textContent = taskValue(key, r[key]); dl.append(dt, dd);
+      }
+      panel.append(dl);
+      for (const [key, title] of [['docs', 'Documents'], ['outputs', 'Outputs (first 20)']]) {
+        const h = document.createElement('h3'); h.textContent = title; panel.append(h);
+        const ul = document.createElement('ul');
+        for (const item of (r[key] ? r[key].split('; ') : ['None recorded'])) { const li = document.createElement('li'); li.textContent = item; ul.append(li); }
+        panel.append(ul);
+      }
+      for (const [key, title] of [['brief_excerpt', 'Prompt excerpt'], ['result_excerpt', 'Result excerpt']]) {
+        const h = document.createElement('h3'); h.textContent = title;
+        const pre = document.createElement('pre'); pre.textContent = r[key] || 'Unavailable'; pre.tabIndex = 0; pre.setAttribute('aria-label', title); panel.append(h, pre);
+      }
+      const pathLabel = document.createElement('label'); pathLabel.textContent = 'Living Documents full record (select to copy)';
+      const path = document.createElement('textarea'); path.readOnly = true; path.value = r.ld_path || ''; path.rows = 3;
+      path.addEventListener('focus', () => path.select()); pathLabel.append(path); panel.append(pathLabel);
+      td.append(panel); detailRow.append(td); body.append(detailRow);
+    }
+  });
+  scroll.append(table); el.append(scroll);
+  if (focusKey) {
+    const target = [...el.querySelectorAll('[data-focus]')].find((n) => n.dataset.focus === focusKey);
+    if (target) { target.focus({preventScroll: true}); if (selection != null) target.setSelectionRange(selection, selection); }
+  }
+}
+dash.draw('task-ledger', drawTasks);
+
 </script>

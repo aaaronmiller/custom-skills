@@ -80,7 +80,7 @@ The masterplan dossier's `timeline.md` holds one fenced block opened with ```` `
 
 ## Quota Ledger dashboard (MP-14)
 
-Live page: https://claude.ai/artifact/PMkHYC6L33VxiVfeQSJEqi (a Dashboard-type artifact; the Overdrive Night Ledger links to it). Data comes from `scripts/dashboard-data.py`, which writes five CSVs to `~/.local/state/capacity-watch/dashboard/`: quota_history, projections, usage_daily, forecast_hours and lane_trial. They hold counts and percentages only. The page source is `dashboard/index.html` in this skill.
+Live page: https://claude.ai/artifact/PMkHYC6L33VxiVfeQSJEqi (a Dashboard-type artifact; the Overdrive Night Ledger links to it). Data comes from `scripts/dashboard-data.py`, which writes six CSVs to `~/.local/state/capacity-watch/dashboard/`: quota_history, projections, usage_daily, forecast_hours, lane_trial and tasks. Task excerpts are redacted; the other datasets hold counts and percentages. The page source is `dashboard/index.html` in this skill.
 
 Refresh (any Claude session with the Artifact tools, after `assess` and a ledger `ingest`):
 1. `python3 -I scripts/dashboard-data.py`
@@ -89,3 +89,13 @@ Refresh (any Claude session with the Artifact tools, after `assess` and a ledger
 4. Hourly quota targets: write `~/.local/state/capacity-watch/hour-<date>/scores.json` (hour_start, pool, window, baseline_pct, target_delta, actual_delta, note) before step 1.
 
 The 4-hourly cron agent cannot reach the Artifact tools, so the cron refreshes the CSVs and a coordinator session uploads them. Datasets are marked stale after 6 hours.
+
+## Task ledger
+
+`scripts/task-ledger.py` reads the local `tasks/remote-*.json` summaries, mesh telemetry snapshots, Workflow journals and their adjacent agent transcripts, dispatch `c*.md` briefs and `c*.log` console logs, and Codex calls in `ledger.sqlite`. It matches task IDs against the masterplan task list. It makes no network or model calls.
+
+It writes `~/.local/state/capacity-watch/dashboard/tasks.csv` and one full redacted run page per task plus `index.md` under `/home/cheta/LIVING_DOCUMENTS/projects/masterplan/runs/`. Unchanged pages are not rewritten. The dashboard's Tasks completed section filters and sorts all outcomes and expands each task with metrics, excerpts and its copyable run-page path. Missing evidence stays unknown. Costs are list-price equivalents; subscription rows do not imply an extra charge. Codex console token totals are separate from output tokens. Finished sessions with no exit or result record are marked unknown, because call records do not establish task completion.
+
+To refresh source snapshots, run `scripts/job-summary-remote.py` on each worker over its configured mesh SSH route, saving stdout locally to `~/.local/state/capacity-watch/tasks/remote-<host>.json`. Then run `python3 -I scripts/dashboard-data.py`. That command writes all six datasets, including tasks.csv. Upload/register the tasks dataset with the Dashboard Artifact through the existing coordinator refresh procedure when publication is authorized. Local refresh does not publish the artifact.
+
+Every CSV must be below 256,000 bytes. An oversized task export fails before writing run pages or replacing tasks.csv rather than silently dropping tasks. Full briefs and available result text remain in Living Documents. The remote summary collector limits result text to 4,000 characters and output names to 60; the dashboard shows the first 20 output names. Workflow completion means all launched agents returned, not independent acceptance of their work. Timing derived from telemetry observation or log modification is marked approximate in the run page.
