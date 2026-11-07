@@ -1,0 +1,89 @@
+#!/usr/bin/env -S python3 -I -B
+"""portfolio-lineage contract program (DA-034), for the agent's T045 harness.
+
+Usage: bin/contract --fixture DIR --sandbox DIR
+
+Prints one JSON object on stdout (the shape in the workbench's
+tests/fixtures/archive/CONTRACT.md) and exits 0 only when every DA-034 check
+holds. --fixture is used when it holds proj-c/, proj-d/ and successor/
+folders of Markdown specs; otherwise the skill's bundled fixtures
+(tests/fixtures) are used, and the output says which. All writes go under
+--sandbox, which must be new or empty. Nothing else is touched.
+"""
+import argparse
+import json
+import os
+import shutil
+import sys
+
+sys.dont_write_bytecode = True
+HERE = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.insert(0, os.path.join(HERE, "scripts"))
+import compare as C  # noqa: E402
+import gate as G  # noqa: E402
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--fixture", default="")
+    ap.add_argument("--sandbox", required=True)
+    a = ap.parse_args()
+    box = os.path.abspath(a.sandbox)
+    if os.path.exists(box) and os.listdir(box):
+        print(json.dumps({"error": "sandbox %s is not empty" % box}))
+        sys.exit(2)
+    fx = os.path.abspath(a.fixture) if a.fixture else ""
+    use_arg = fx and all(os.path.isdir(os.path.join(fx, d)) for d in ("proj-c", "proj-d", "successor"))
+    src = fx if use_arg else os.path.join(HERE, "tests", "fixtures")
+    work = os.path.join(box, "fixture")
+    shutil.copytree(src, work, symlinks=True)
+    succ = C.load([os.path.join(work, "successor")])
+    out = {"skill": "portfolio-lineage", "clause": "DA-034", "fixture_arg": a.fixture,
+           "fixture_used": "argument" if use_arg else "bundled tests/fixtures", "clauses": [], "folders": [], "checks": []}
+
+    def check(name, ok, detail=""):
+        out["checks"].append({"check": name, "ok": bool(ok), "detail": detail})
+
+    ledgers = {}
+    for name in ("proj-c", "proj-d"):
+        folder = os.path.join(work, name)
+        ledger = C.compare(C.load([folder]), succ)
+        ledgers[name] = ledger
+        with open(os.path.join(box, "%s-ledger.json" % name), "w", encoding="utf-8") as fh:
+            json.dump(ledger, fh, indent=1)
+        for c in ledger["clauses"]:
+            out["clauses"].append({"id": c["key"], "folder": name, "mark": c["mark"], "score": c["score"]})
+        g = G.gate(ledger, folder)
+        out["folders"].append({"path": folder, "stage": "before any destination is recorded",
+                               "unique_without_destination": g["unique_without_destination"],
+                               "archived": g["allowed"], "gate_allowed": g["allowed"],
+                               "refusals": [r["key"] for r in g["refusals"]]})
+    every = all(c["mark"] in ("covered", "partial", "unique") for c in out["clauses"])
+    check("every clause is marked exactly one of covered, partial, unique", every and out["clauses"], "%d clauses" % len(out["clauses"]))
+    fc, fd = out["folders"]
+    uniq_c = [c["key"] for c in ledgers["proj-c"]["clauses"] if c["mark"] == "unique"]
+    check("proj-c holds a unique clause and archiving is refused naming it",
+          uniq_c and not fc["archived"] and set(uniq_c) <= set(fc["refusals"]), "unique: %s" % uniq_c)
+    check("proj-d has only covered or partial clauses and may be archived",
+          all(c["mark"] != "unique" for c in ledgers["proj-d"]["clauses"]) and fd["archived"], "")
+    copy_dir = os.path.join(box, "destinations")
+    os.makedirs(copy_dir)
+    dest = {}
+    for c in ledgers["proj-c"]["clauses"]:
+        if c["mark"] == "unique":
+            p = os.path.join(copy_dir, "copy-out-%s.md" % (c["id"] or "clause"))
+            with open(p, "w", encoding="utf-8") as fh:
+                fh.write("# Copy-out from proj-c (%s line %d)\n\n%s\n" % (c["file"], c["line"], c["text"]))
+            dest[c["key"]] = p
+    g2 = G.gate(ledgers["proj-c"], os.path.join(work, "proj-c"), dest)
+    out["folders"].append({"path": os.path.join(work, "proj-c"), "stage": "after a destination is recorded for each unique clause",
+                           "unique_without_destination": g2["unique_without_destination"],
+                           "archived": g2["allowed"], "gate_allowed": g2["allowed"], "refusals": [r["key"] for r in g2["refusals"]]})
+    check("proj-c may be archived once each unique clause has a recorded destination", g2["allowed"], "")
+    out["passed"] = all(c["ok"] for c in out["checks"])
+    print(json.dumps(out, indent=1))
+    sys.exit(0 if out["passed"] else 1)
+
+
+if __name__ == "__main__":
+    main()

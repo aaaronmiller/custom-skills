@@ -1,0 +1,187 @@
+#!/usr/bin/env -S python3 -I -B
+"""project-archive contract program (DA-032, DA-033), for the agent's T045 harness.
+
+Usage: bin/contract --fixture DIR --sandbox DIR
+
+Builds the bundled fixture (tests/fixtures/build_fixture.py) under --sandbox,
+which must be new or empty, and runs the skill's own scripts on it:
+  DA-032  a move with no hold and no approval is refused as never-class and
+          leaves the folder byte-identical; a move under a hold without an
+          approval is refused; under a hold with an approval for the exact
+          move, plan.py writes the consumer list (the three planted
+          consumers), a passing sandbox test, manifest, path map, old-path
+          links, working-copy repair and live-use guard before the move; after
+          the sandbox move the old path resolves through the link.
+  DA-033  proj-b (a Git repo with an uncommitted edit, an untracked file and a
+          stash entry) is archived with archive.py in the order mine, index,
+          move, link; steps out of order are refused; identity and locators
+          are kept; status and stash are byte-equal before and after; the
+          recorded recovery passes on a scratch copy; the archive root is
+          excluded from discovery; the lineage entry is on the fixture
+          Living Documents page.
+The DA-034 gate for proj-b comes from the portfolio-lineage skill, found in
+$PORTFOLIO_LINEAGE_DIR or beside this skill; without it the contract fails.
+Prints one JSON object (shape: workbench tests/fixtures/archive/CONTRACT.md).
+Exit 0 only when every check holds. --fixture is recorded but the bundled
+fixture is always used, because this contract needs a live Git repository and
+symlinks that a static fixture folder cannot carry.
+"""
+import argparse
+import json
+import os
+import subprocess
+import sys
+import time
+
+sys.dont_write_bytecode = True
+HERE = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+S = os.path.join(HERE, "scripts")
+sys.path.insert(0, S)
+sys.path.insert(0, os.path.join(HERE, "tests", "fixtures"))
+import _lib as L  # noqa: E402
+import build_fixture as B  # noqa: E402
+import discovery as D  # noqa: E402
+import verify_move as V  # noqa: E402
+
+SEVEN = ["consumers", "sandbox_test", "manifest", "path_map", "old_path_links", "working_copy_repair", "live_use_guard"]
+
+
+def py(script, *args, base=S):
+    r = subprocess.run([sys.executable, "-I", "-B", os.path.join(base, script)] + list(args), capture_output=True, text=True)
+    return r.returncode, r.stdout, r.stderr
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--fixture", default="")
+    ap.add_argument("--sandbox", required=True)
+    a = ap.parse_args()
+    box = os.path.abspath(a.sandbox)
+    if os.path.exists(box) and os.listdir(box):
+        print(json.dumps({"error": "sandbox %s is not empty" % box}))
+        sys.exit(2)
+    out = {"skill": "project-archive", "clauses": ["DA-032", "DA-033"], "fixture_arg": a.fixture,
+           "fixture_used": "bundled tests/fixtures/build_fixture.py", "checks": []}
+
+    def check(clause, name, ok, detail=""):
+        out["checks"].append({"clause": clause, "check": name, "ok": bool(ok), "detail": str(detail)[:400]})
+        return ok
+
+    top = B.build(os.path.join(box, "fx"))
+    root = os.path.join(top, "root")
+    pa, pb = os.path.join(root, "proj-a"), os.path.join(root, "proj-b")
+    arch = os.path.join(top, "archive-root")
+    da, db = os.path.join(arch, "demo", "proj-a"), os.path.join(arch, "demo", "proj-b")
+
+    # DA-032, no hold and no approval: refused as never-class, folder untouched.
+    d0 = L.tree_digest(pa)
+    st = os.path.join(box, "plan-a-nohold")
+    py("plan.py", "--folder", pa, "--dest", da, "--roots", root, "--staging", st)
+    rc, so, _ = py("move_dryrun.py", "--staging", st)
+    refused = rc == 2 and "REFUSED (never-class)" in so
+    out["move_without_hold"] = {"refused": refused and L.tree_digest(pa) == d0, "exit": rc, "output": so.strip().splitlines()[:4],
+                                "tree_unchanged": L.tree_digest(pa) == d0}
+    check("DA-032", "move with no hold and no approval is refused as never-class; folder byte-identical", out["move_without_hold"]["refused"], so.strip()[:200])
+
+    # DA-032, hold but no approval: refused.
+    st = os.path.join(box, "plan-a-hold-noapproval")
+    py("plan.py", "--folder", pa, "--dest", da, "--roots", root, "--staging", st, "--hold-file", os.path.join(top, "hold.yaml"))
+    rc, so, _ = py("move_dryrun.py", "--staging", st)
+    check("DA-032", "move under a hold without an operator approval is refused", rc == 2 and "approval" in so, so.strip()[:200])
+
+    # DA-032, hold and approval for the exact move: seven artifacts first.
+    st = os.path.join(box, "plan-a")
+    rc, so, se = py("plan.py", "--folder", pa, "--dest", da, "--roots", root, "--staging", st,
+                    "--hold-file", os.path.join(top, "hold.yaml"), "--approval", os.path.join(top, "approval-proj-a.json"))
+    ready = L.read_json(os.path.join(st, "readiness.json"))
+    check("DA-032", "plan.py under hold with approval is ready", ready["ready"] and ready["hold_active"], ready["blockers"] or se[-200:])
+    files = dict((k, n) for k, n in [("consumers", "consumers.json"), ("sandbox_test", "sandbox-test.json"), ("manifest", "manifest.json"),
+                                     ("path_map", "path-map.json"), ("old_path_links", "old-path-links.json"),
+                                     ("working_copy_repair", "working-copy-repair.json"), ("live_use_guard", "live-use-guard.json")])
+    arts = {}
+    for k in SEVEN:
+        p = os.path.join(st, files[k])
+        if os.path.isfile(p):
+            body = L.read_json(p)
+            arts[k] = {"file": p, "sha256": L.sha256_file(p), "written_at": ready["artifacts"][k]["written_at"]}
+            if k == "sandbox_test":
+                arts[k]["passed"] = body.get("passed")
+            if k == "consumers":
+                arts[k]["list"] = [(c["kind"], os.path.relpath(c["path"], root)) for c in body["consumers"]]
+            if k == "live_use_guard":
+                arts[k]["passed"] = body.get("passed")
+    out["artifacts"] = arts
+    want = sorted([("path-reference", "config/app.json"), ("path-reference", "scripts/run.sh"), ("symlink", "tools/proj-a-link")])
+    got = sorted(tuple(x) for x in arts.get("consumers", {}).get("list", []))
+    check("DA-032", "consumer list equals the three planted consumers (symlink, config file, script)", got == want, got)
+    check("DA-032", "all seven artifacts present and the sandbox test passed", all(k in arts for k in SEVEN) and arts.get("sandbox_test", {}).get("passed"), sorted(arts))
+    rc, so, _ = py("move_dryrun.py", "--staging", st)
+    check("DA-032", "dry-run mover prints commands and executes nothing", rc == 0 and "DRY RUN" in so and os.path.isdir(pa) and not os.path.islink(pa) and not os.path.exists(da), so.strip()[:120])
+    move_at = L.now_iso()
+    os.makedirs(os.path.dirname(da), exist_ok=True)
+    os.rename(pa, da)
+    os.symlink(da, pa)
+    ver = V.verify(st)
+    check("DA-032", "every artifact was written before the (sandbox) move", all(arts[k]["written_at"] < move_at for k in arts), move_at)
+    check("DA-032", "after the sandbox move the old path resolves through the link and bytes match", ver["passed"], ver["checks"])
+
+    # DA-034 gate for proj-b from portfolio-lineage.
+    pl = os.environ.get("PORTFOLIO_LINEAGE_DIR") or os.path.join(os.path.dirname(HERE), "portfolio-lineage")
+    plS = os.path.join(pl, "scripts")
+    work = os.path.join(box, "archive-b")
+    gate = os.path.join(box, "gate-b.json")
+    if not os.path.isfile(os.path.join(plS, "gate.py")):
+        check("DA-033", "portfolio-lineage skill found for the DA-034 gate", False, pl)
+    else:
+        py("compare.py", "--source", pb, "--successor", os.path.join(top, "successor"), "--out", os.path.join(box, "ledger-b.json"), base=plS)
+        rc, so, _ = py("gate.py", "--ledger", os.path.join(box, "ledger-b.json"), "--folder", pb, "--out", gate, base=plS)
+        check("DA-033", "lineage gate allows proj-b (DA-034 runs before archiving)", rc == 0, so.strip()[:200])
+
+    before = L.git_facts(pb)
+    rc, _, se = py("archive.py", "index", "--work", work)
+    check("DA-033", "index before mine is refused", rc == 3, se.strip()[:200])
+    rc, so, se = py("archive.py", "mine", "--work", work, "--folder", pb, "--archive-root", arch, "--project", "demo",
+                    "--lineage-gate", gate, "--successor-dir", os.path.join(top, "successor"),
+                    "--predecessor", "none (first attempt)", "--successor", "successor/spec.md", "--reason", "contract fixture")
+    check("DA-033", "mine", rc == 0, (so + se).strip()[:200])
+    rc, _, se = py("archive.py", "link", "--work", work, "--ld-page", os.path.join(top, "ld", "project-history.md"),
+                   "--discovery-config", os.path.join(top, "discovery.json"), "--apply")
+    check("DA-033", "link before move is refused", rc == 3, se.strip()[:200])
+    rc, so, se = py("archive.py", "index", "--work", work)
+    check("DA-033", "index", rc == 0, (so + se).strip()[:200])
+    rc, so, se = py("plan.py", "--folder", pb, "--dest", db, "--roots", root, "--staging", os.path.join(work, "plan"),
+                    "--hold-file", os.path.join(top, "hold.yaml"), "--approval", os.path.join(top, "approval-proj-b.json"))
+    rc, so, se = py("archive.py", "move", "--work", work, "--sandbox-root", top)
+    check("DA-033", "move (sandbox, gated by the DA-032 artifacts)", rc == 0, (so + se).strip()[:300])
+    after = L.git_facts(db) if os.path.isdir(db) else {}
+    check("DA-033", "git status --porcelain byte-equal before and after", before.get("status_porcelain") == after.get("status_porcelain") and before.get("dirty"),
+          repr(after.get("status_porcelain"))[:120])
+    check("DA-033", "git stash list byte-equal before and after", before.get("stash_list") == after.get("stash_list") and before.get("stash_count") == 1, repr(after.get("stash_list"))[:120])
+    rc, so, se = py("recovery_test.py", "--work", work, "--scratch", os.path.join(box, "recovery-scratch"))
+    check("DA-033", "recorded recovery restores proj-b byte-identical on a scratch copy", rc == 0, (so + se).strip()[-200:])
+    rc, so, se = py("archive.py", "link", "--work", work, "--ld-page", os.path.join(top, "ld", "project-history.md"),
+                    "--discovery-config", os.path.join(top, "discovery.json"), "--apply")
+    check("DA-033", "link", rc == 0, (so + se).strip()[:200])
+
+    rec = L.read_json(os.path.join(work, "archive-record.json")) if os.path.isfile(os.path.join(work, "archive-record.json")) else {}
+    out["steps"] = [r["step"] for r in L.read_receipts(work)]
+    check("DA-033", "receipts show mine < index < move < link", out["steps"] == ["mine", "index", "move", "link"], out["steps"])
+    out["record"] = {k: rec.get(k) for k in ("identity", "locators", "predecessor", "successor", "uncommitted_state", "working_copy_state")}
+    check("DA-033", "identity and locators kept; digest of the archived folder equals the recorded identity",
+          rec and os.path.isdir(db) and L.tree_digest(db) == rec["identity"]["tree_digest"] and rec["locators"]["original_path"] == pb and rec["locators"]["archive_path"] == db, "")
+    check("DA-033", "predecessor and successor written", rec.get("predecessor") and rec.get("successor"), "")
+    out["recovery"] = {"tested": bool(rec.get("recovery", {}).get("tested")), "tested_at": rec.get("recovery", {}).get("tested_at")}
+    disc = D.check(os.path.join(top, "discovery.json"), arch)
+    out["archive_root_excluded_from_discovery"] = disc["passed"]
+    check("DA-033", "archive root excluded: discovery lists nothing under it", disc["passed"], disc["problems"])
+    page = os.path.join(top, "ld", "project-history.md")
+    text = open(page, encoding="utf-8").read()
+    out["lineage_page"] = page if ("Lineage: proj-b archived" in text and db in text) else ""
+    check("DA-033", "lineage entry shows on the Living Documents page", bool(out["lineage_page"]), "")
+    out["passed"] = all(c["ok"] for c in out["checks"])
+    print(json.dumps(out, indent=1, default=str))
+    sys.exit(0 if out["passed"] else 1)
+
+
+if __name__ == "__main__":
+    main()
