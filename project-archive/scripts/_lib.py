@@ -42,8 +42,12 @@ def now_iso():
     return _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
+USERINFO_RE = re.compile(r"(?<=://)[^/@\s]+@")
+
+
 def redact(text):
-    return SECRET_RE.sub("[redacted]", text)
+    """Mask credentials: URL userinfo (user:password@) first, then token and key patterns."""
+    return SECRET_RE.sub("[redacted]", USERINFO_RE.sub("[redacted]@", text))
 
 
 def is_sensitive_name(path):
@@ -206,7 +210,7 @@ def git_facts(folder):
     facts["dirty"] = bool(st.strip())
     facts["untracked"] = [l[3:] for l in st.splitlines() if l.startswith("?? ")]
     rc, stash, _ = git(folder, "stash", "list")
-    facts["stash_list"] = stash
+    facts["stash_list"] = redact(stash)
     facts["stash_count"] = len([l for l in stash.splitlines() if l.strip()])
     # Content of every path git status lists, hashed by us. `git diff HEAD` is not
     # used because it refreshes .git/index, which is a write.
