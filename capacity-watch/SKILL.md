@@ -53,6 +53,14 @@ Known limits, 2026-11-06:
 
 Phase 0 result, 2026-11-07: rows from four harnesses; the Codex gate fails because tokens per point vary about 15x across windows, most likely by model. Details and raw output: `references/ledger-phase0-2026-11-07.md`. Tests: `python3 -I -m pytest -q tests`.
 
+## Phase 3
+
+`python3 -I scripts/weights.py` fits Codex quota weights by model and window, one shared Claude weight per window, and Go allowance weights. It writes `~/.local/state/capacity-watch/weights.json` with sample counts, fit errors and identifiability. Go limits come from `references/opencode-go-limits.json`. Inputs are local and read-only; no model calls occur.
+
+`python3 -I scripts/which_model.py <task-class> --json` ranks catalog and active subscription routes using success probability, quota scarcity and time. Add `--private` to require non-sharing Anthropic or OpenAI endpoints. Quality and observed 429 rates are hard filters. Bulk JSON validity comes from completed Go lane trials; other task success probabilities start from explicitly labeled ARDF Beta priors. Scores use fractions of the binding quota window, and all windows must have headroom. Results describe the latest assessment, not live availability, and do not dispatch work.
+
+Run `python3 -I -m pytest -q tests` for offline synthetic checks. The Phase 3 receipt, complete command outputs, units, prior assumptions and remaining fit limitations are in `references/phase3-2026-11-07.md`. Model fitting does not by itself pass the failed Phase 0 reconciliation gate. No installation or cron integration is included.
+
 ## The workload block
 
 The masterplan dossier's `timeline.md` holds one fenced block opened with ```` ```json capacity-workload ````. Each task row has `id`, `title`, `status`, `remaining_agent_hours`, `lanes`, `pools` (shares of the task's agent-hours, keyed by pool name), `basis`, and optionally `wall_hours`, `after`, `not_before`, `blocked_on`, `observation` (a soak window that occupies no work track), `decomposed`, `actual_agent_hours` and `actual_wall_hours`. Coordinator sessions edit it; the cron jobs only read it.

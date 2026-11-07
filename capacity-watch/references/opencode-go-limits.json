@@ -1,0 +1,18 @@
+{
+  "source": "/home/cheta/LIVING_DOCUMENTS/projects/masterplan/model-economics-plan-2026-11-07.md",
+  "as_of": "2026-11-07",
+  "allowance_pool_usd": 60,
+  "window_allowance_usd": {"rolling": 12, "weekly": 30, "monthly": 60},
+  "note": "Only limits stated in the plan table. Unlisted models require measured allowance or remain unknown. Prices are per million tokens; DeepSeek uses peak pricing as a conservative prior.",
+  "models": {
+    "muse-spark-1.3-contributor": {"monthly_limit_usd": 60, "input_per_million": 0.10, "output_per_million": 0.20},
+    "deepseek-v4.1-flash": {"monthly_limit_usd": 100, "input_per_million": 0.30, "output_per_million": 1.20, "off_peak_input_per_million": 0.15, "off_peak_output_per_million": 0.60},
+    "mimo-v2.6-flash": {"monthly_limit_usd": 60, "input_per_million": 0.14, "output_per_million": 0.28},
+    "glm-5.3-flash": {"monthly_limit_usd": 60, "input_per_million": 0.15, "output_per_million": 0.50},
+    "gemini-4-argon": {"monthly_limit_usd": 30, "input_per_million": 2.00, "output_per_million": 10.00},
+    "kimi-k3": {"monthly_limit_usd": 15, "input_per_million": 3.00, "output_per_million": 15.00},
+    "crouton-alpha-free": {"free": true, "monthly_limit_usd": null},
+    "beam-free": {"free": true, "monthly_limit_usd": null},
+    "iceman-contributor-free": {"free": true, "monthly_limit_usd": null}
+  }
+}
