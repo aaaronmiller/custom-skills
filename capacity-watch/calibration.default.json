@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "updated": "2026-11-06",
+  "owner": "twice-daily meta-review; the live copy is ~/.local/state/capacity-watch/calibration.json",
+  "agent_hour": "one capable agent working for one wall-clock hour, including its tool time",
+  "pools": {
+    "claude": {
+      "window": "seven_day",
+      "per_agent_hour": 0.012,
+      "confidence": "prior",
+      "basis": "37% of the week used 2026-11-05 01:00 to 2026-11-06 21:30 PT across roughly 30 Claude agent-hours (coordinator plus subagents); agent-hours are an estimate"
+    },
+    "codex": {
+      "window": "weekly",
+      "per_agent_hour": 0.05,
+      "confidence": "prior",
+      "basis": "router-design 2026-11-05: one evening of Codex use took the 5-hour window to 100% and the week to 84%"
+    },
+    "opencode-go": {
+      "window": "weekly",
+      "per_agent_hour": 0.03,
+      "confidence": "guess",
+      "basis": "no measurement yet; the plan has been idle (0% on 2026-11-06). Fit after the first Go-routed job"
+    },
+    "agy": {
+      "window": "per-model",
+      "per_agent_hour": 0.1,
+      "confidence": "guess",
+      "basis": "no measurement yet; reset times read 2026-11-06, window length unknown"
+    }
+  },
+  "throughput": {
+    "free_lane_chunk_minutes": {
+      "value": 6,
+      "confidence": "measured-partial",
+      "basis": "08-refine on Big Surface 2026-11-06: healthy chunks took 4 to 8 minutes per lane; after about 32 chunks every lane stalled to the 600 s timeout (silent throttle, no 429)"
+    },
+    "free_lane_max_concurrency": {
+      "value": 3,
+      "confidence": "measured",
+      "basis": "10 lanes stalled every model on 2026-11-05; 3 ran clean"
+    }
+  },
+  "anchors": [
+    {"id": "A1", "work": "intent-refresh 2.0.0: six pipeline phases, shared library, 8 tests, then security-review fixes", "wall_hours": 1.5, "agents": 1, "evidence": "operator request 2026-11-05 08:31; custom-skills c7a7c9b 08:59, 3ecca1c 09:07, guardian 9dd080c 10:03"},
+    {"id": "A2", "work": "durable-agent Spec Kit spec, plan and 100 tasks with test designs, SRE and five-lens reviews (127 clauses)", "wall_hours": 11, "agents": "1 coordinator plus review fan-outs", "evidence": "agentic-workbench 190f57e 2026-11-04 14:04 to 245e5f0 2026-11-05 01:13, operator Q and A in between"},
+    {"id": "A3", "work": "Mizu UX teardown, site scrape and addendum (two pages, 12 screenshots)", "wall_hours": 1.0, "agents": 1, "evidence": "masterplan 3e91aeb to 9246bab 2026-11-06 01:19 to 01:24 after operator screenshots from 00:55"},
+    {"id": "A4", "work": "MP-08: four pipeline defects fixed with ten regression tests, reviewed by two free models", "wall_hours": 1.0, "agents": 1, "evidence": "custom-skills 2e7c20d and 8b57669 2026-11-05 08:37 and 08:41"},
+    {"id": "A5", "work": "capacity-watch 1.0: four active quota readers, free catalog, assessment, cron, method pages", "wall_hours": 1.5, "agents": 1, "evidence": "operator request 2026-11-06 21:18 PT; this skill's first commit"}
+  ]
+}
