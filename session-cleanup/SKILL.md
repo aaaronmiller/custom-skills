@@ -1,6 +1,6 @@
 ---
 name: session-cleanup
-description: Close out a long agent session cleanly after a break or before context compacts. Finishes minor loose ends directly, organizes big unfinished work into handoff docs for a fresh session, and verifies every touched repo is committed, pushed, and documented. Run when returning after time away, when the context window is getting full, or whenever asked to wrap up, audit session status, or prepare handoffs.
+description: Close out a long agent session cleanly, or survey every running session across harnesses (claude, codex, omp, agy) with handoffs and git state after a break or before context compacts. Finishes minor loose ends directly, organizes big unfinished work into handoff docs for a fresh session, and verifies every touched repo is committed, pushed, and documented. Run when returning after time away, when the context window is getting full, or whenever asked to wrap up, audit session status, or prepare handoffs.
 ---
 
 # Session Cleanup
@@ -72,6 +72,18 @@ Re-run **all of Pass 1's checks** as if you hadn't just done them:
 5. Confirm docs match the final code (not the intermediate version).
 
 Pass 2 findings go through the same sort (finish small / hand off big). Two consecutive clean passes = done.
+
+## Cross-session survey (every running session on the machine)
+
+Use when the operator asks what all the open sessions are doing, or before closing a batch of them. Built and proven 2026-11-07 on 9 laptop sessions (claude, codex, omp, agy).
+
+1. `python3 -I scripts/find-sessions.py > sessions.tsv`: every running claude, codex, omp and agy session, mapped to its folder, session file and process id. Daemons are skipped. For another host, run it there over SSH.
+2. `python3 -I scripts/digest.py <harness> <session_file> <KEY>.txt` per row: operator messages, last replies, paths touched.
+3. `OPENCODE_GO_API_KEY=... python3 -I scripts/summarize.py <dir> L1 L2 ...`: each digest is redacted, then summarized by Gemini 4 Argon on OpenCode Go (no training, zero retention) into JSON: task, status, done, remaining, repos, action, close_safe, evidence. Calls are logged to `~/.local/state/capacity-watch/calls-direct.jsonl`.
+4. Git state per repository the sessions touched (`git status --porcelain`, ahead and behind), then one handoff file per session and the master page: `/home/cheta/code/masterplan/tools/master-report.py`.
+5. Spot-check the summaries before reporting: named commits exist (`git log`), loops and counts are counted directly. A model summary is evidence, not proof.
+
+Closing a session is the operator's call: list it under decisions with its handoff path; never kill a session process unasked.
 
 ## Done criteria
 
