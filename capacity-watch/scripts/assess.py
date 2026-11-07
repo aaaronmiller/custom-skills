@@ -17,6 +17,7 @@ from readings, or a calibration prior. Nothing here calls a model.
 import argparse
 import datetime as dt
 import json
+import math
 import os
 import re
 from zoneinfo import ZoneInfo
@@ -31,6 +32,7 @@ WINDOW_MIN = {"five_hour": 300, "seven_day": 10080, "seven_day_opus": 10080,
 # Units that mark a pre-AI estimate (see references/estimation-rules.md).
 PRE_AI = re.compile(r"\b(\d+(\.\d+)?\s*(weeks?|months?|sprints?|days?|business days?))\b", re.I)
 SINGLE_TASK_MAX_AGENT_HOURS = 8
+SNAP_JITTER = dt.timedelta(minutes=2)
 
 
 def ts(s):
@@ -140,6 +142,39 @@ def verdict(row, proj):
     return "on pace"
 
 
+def snap_start(t, rows, cal, earliest):
+    """Start an observation row exactly at a reset of its largest-share pool.
+
+    A soak that the acceptance test ties to a quota window (DA M3: start at the
+    weekly reset of the pool with the largest planned share) must not start
+    off-reset. The window is the row's reset_window, else the pool's window in
+    calibration.json. The start is the first reset at or after `earliest`,
+    projected forward by whole windows from the newest reading. Returns the
+    start and any flags; rows with no pools are not snapped.
+    """
+    pools = t.get("pools") or {}
+    if not t.get("observation") or not pools:
+        return earliest, []
+    pool = max(pools.items(), key=lambda kv: kv[1])[0]
+    win = t.get("reset_window") or (cal.get("pools", {}).get(pool) or {}).get("window")
+    r = next((x for x in rows if x["pool"] == pool and x["window"] == win and x["reset"]), None)
+    if not r or not r["length_min"]:
+        return earliest, [f"no {pool} {win} reset reading; start not snapped to a reset"]
+    length = dt.timedelta(minutes=r["length_min"])
+
+    def first_reset_from(when):
+        # Readings of one reset can differ by a second, so allow two minutes of jitter.
+        k = max(0, math.ceil((when - SNAP_JITTER - r["reset"]) / length))
+        return r["reset"] + k * length
+
+    start = first_reset_from(earliest)
+    nxt = first_reset_from(NOW)
+    flags = []
+    if start > nxt:
+        flags.append(f"misses the {pool} {win} reset at {pt(nxt)} PT; snapped to {pt(start)} PT")
+    return start, flags
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--readings", required=True)
@@ -226,8 +261,11 @@ def main():
             summary["flags"].append(f"{t['id']}: depends on an unscheduled task {t.get('after')}")
         earliest = max([NOW, ts(t.get("not_before")) or NOW] + deps)
         if t.get("observation"):
-            # A soak or unattended window: it occupies no work track.
-            start = earliest
+            # A soak or unattended window: it occupies no work track, and one with
+            # pools starts exactly at its largest-share pool's next reset.
+            start, snap_flags = snap_start(t, rows, cal, earliest)
+            flags += snap_flags
+            summary["flags"] += [f"{t['id']}: {f}" for f in snap_flags]
         else:
             i = min(range(len(track)), key=lambda k: track[k])
             start = max(track[i], earliest)

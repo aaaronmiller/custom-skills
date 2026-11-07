@@ -74,6 +74,28 @@ def test_rolled_over_window_reads_zero():
     assert w["used_fraction"] == 0.0 and w.get("rolled_over")
 
 
+def test_observation_row_snaps_to_its_pool_next_reset():
+    now = assess.NOW
+    reset = now + dt.timedelta(hours=30)
+    rows = [dict(pool="codex", window="weekly", used=0.5, reset=reset, length_min=10080,
+                 hist=[], observed=now, source=""),
+            dict(pool="claude", window="seven_day", used=0.4, reset=now + dt.timedelta(hours=5),
+                 length_min=10080, hist=[], observed=now, source="")]
+    cal = {"pools": {"codex": {"window": "weekly"}, "claude": {"window": "seven_day"}}}
+    soak = {"id": "S", "observation": True, "wall_hours": 168, "pools": {"codex": 0.7, "claude": 0.3}}
+    # Ready early: waits for the largest-share pool's reset, not the claude one.
+    start, flags = assess.snap_start(soak, rows, cal, now + dt.timedelta(hours=2))
+    assert start == reset and not flags
+    # A reading one second later than the not_before still counts as that reset.
+    start, flags = assess.snap_start(soak, rows, cal, reset + dt.timedelta(seconds=1))
+    assert start == reset and not flags
+    # Ready after the reset: snaps a whole window later and says so.
+    start, flags = assess.snap_start(soak, rows, cal, reset + dt.timedelta(hours=1))
+    assert start == reset + dt.timedelta(days=7) and flags and "misses" in flags[0]
+    # No pools: not snapped.
+    assert assess.snap_start({"id": "T", "observation": True, "pools": {}}, rows, cal, now)[0] == now
+
+
 def test_schedule_respects_after_and_observation(tmp_path):
     page = tmp_path / "timeline.md"
     work = {"serial_lanes": 1, "tasks": [
