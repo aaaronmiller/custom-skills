@@ -75,6 +75,15 @@ def open_report(report_path: Path) -> bool:
         return False
 
 
+DEFAULT_CTA_URL = "https://warp.dev/factories/request-access"
+
+
+def safe_url(v) -> str:
+    """Only http(s) links reach an href; anything else (javascript:, data:) falls back."""
+    value = str(v or "").strip()
+    return value if re.match(r"https?://", value, re.IGNORECASE) else DEFAULT_CTA_URL
+
+
 def esc(v) -> str:
     value = v if v is not None else ""
     return html.escape(str(value))
@@ -309,7 +318,7 @@ def render_page(r) -> str:
     <div class="stamp-name">{esc(STAMP_NAME)}</div>
     <div class="stamp-sub">{esc(STAMP_SUB)}</div>
   </div></div>
-  <a class="cta-button" href="{esc(r.get('cta_url', 'https://warp.dev/factories/request-access'))}">Request access</a>
+  <a class="cta-button" href="{esc(safe_url(r.get('cta_url')))}">Request access</a>
 </div>
 <script>{embedded_diffs_script()}</script>
 <script>{page_script(card_data)}</script>
@@ -541,7 +550,8 @@ def page_script(card_data: str) -> str:
   });
 })();
 """
-    return script.replace("__CARD__", card_data.replace("</", "<\\/")).replace("__CLAMP__", str(DIFF_CLAMP_PX))
+    safe_json = card_data.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+    return script.replace("__CARD__", safe_json).replace("__CLAMP__", str(DIFF_CLAMP_PX))
 
 
 def parse_args(argv=None):

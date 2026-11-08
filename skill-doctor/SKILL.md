@@ -5,7 +5,7 @@ version: "1.0.0-local.1"
 source: adapted
 upstream: "https://github.com/warpdotdev/common-skills/tree/8792394ff1b655e0af451b8fabb68ef0cfcbd208/.agents/skills/skill-doctor"
 upstream_commit: "8792394ff1b655e0af451b8fabb68ef0cfcbd208"
-attribution: "Original skill-doctor by Warp (Denver Technologies, Inc.), MIT License; full notice in LICENSE.upstream. Scripts and report renderer are upstream and unmodified; scorers unmodified except one widened example of rule files in procedure-compliance.md."
+attribution: "Original skill-doctor by Warp (Denver Technologies, Inc.), MIT License; full notice in LICENSE.upstream. Collector is upstream and unmodified; render_report.py hardened (http(s)-only cta_url, <>& escaped in embedded JSON); scorers unmodified except one widened example of rule files in procedure-compliance.md."
 license: MIT
 adapted: "2026-11-08: harness-agnostic startup, extra session sources (omp, cass export), canonical-source edit targets, no vendor call to action. See references/local-setup.md."
 tags:
