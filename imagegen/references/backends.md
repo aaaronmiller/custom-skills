@@ -22,7 +22,7 @@ The default Codex backend is keyless and uses the CLI's own account auth. The op
 
 - `-p` must be the last flag. Placed earlier, agy reads the next flag as the prompt and exits with an error.
 - `--mode accept-edits` auto-approves file writes only. `--dangerously-skip-permissions` is refused by Claude Code auto mode ("Create Unsafe Agents").
-- Run it from the output directory so the file lands inside agy's workspace; a reference image's directory goes in with `--add-dir`.
+- The wrapper runs agy with `--sandbox` in an empty temp workspace, copies any reference image in, and moves only the finished PNG out. The prompt is untrusted text inside an agent instruction and accept-edits auto-approves writes, so never point agy's workspace at a repo or grant `--add-dir` on a user directory.
 - The agent may hand the render to an image subagent and reply before the file exists; the wrapper checks the file, not the reply.
 
 ## antigravity (legacy OAuth helper, entitlement-gated)
