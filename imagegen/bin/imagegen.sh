@@ -112,8 +112,21 @@ gen_agy() {
   (cd "$work" && timeout "$TIMEOUT" agy --model "$model" --mode accept-edits --sandbox \
       --print-timeout "$((TIMEOUT - 10))s" -p "$instr" </dev/null >&2) \
     || log "warn: agy returned non-zero or timed out; checking for output anyway"
-  if [ -s "$work/out.png" ]; then
-    mv "$work/out.png" "$OUT"
+  # The agent controls what sits at out.png. Accept only a regular, single-link, non-symlink
+  # file that starts with the PNG signature, and copy its bytes into a fresh file: a symlink
+  # or hard link to a private file (an SSH key, a token) must never be delivered as the image.
+  local got="$work/out.png"
+  if [ -e "$got" ] || [ -L "$got" ]; then
+    if [ -L "$got" ] || [ ! -f "$got" ]; then
+      rm -rf "$work"; die "agy left a non-regular file at out.png; refusing it"
+    fi
+    if [ "$(stat -c %h "$got")" != "1" ]; then
+      rm -rf "$work"; die "agy left a hard-linked out.png; refusing it"
+    fi
+    if [ "$(head -c 8 "$got" | od -An -tx1 | tr -d ' \n')" != "89504e470d0a1a0a" ]; then
+      rm -rf "$work"; die "agy output is not a PNG; refusing it"
+    fi
+    rm -f "$OUT" && cat "$got" > "$OUT"
   fi
   rm -rf "$work"
   [ -s "$OUT" ] || die "agy produced no image at $OUT (check output above)"
