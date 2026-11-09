@@ -5,7 +5,8 @@ The default Codex backend is keyless and uses the CLI's own account auth. The op
 | Backend | Auth | Model | Headless | Status (verified 2026-07) |
 |---|---|---|---|---|
 | codex | ChatGPT plan login | gpt-image-2 | `codex exec` | Works. Generated a real 1254x1254 PNG. |
-| antigravity | Antigravity Google OAuth (reused) | gemini-3-pro-image-preview (Nano Banana Pro) | `uv run generate_image.py` | Auth works; image returns HTTP 404 on free-tier CloudCode accounts. |
+| agy | Antigravity CLI login | agent's built-in image tool (driven by gemini-3.8-flash-medium) | `agy --mode accept-edits -p` | Works (2026-11-09). Three 1024x1024 PNGs, about 1 to 2 minutes each. |
+| antigravity (legacy) | Antigravity Google OAuth (reused) | gemini-3-pro-image-preview (Nano Banana Pro) | `uv run generate_image.py` | Needs local OAuth client env vars; image returns HTTP 404 on free-tier CloudCode accounts. |
 
 ## codex (default)
 
@@ -15,7 +16,16 @@ The default Codex backend is keyless and uses the CLI's own account auth. The op
 - Codex renders to `~/.codex/generated_images/<session>/ig_*.png`, then the agent copies to the path you name. The wrapper also grabs the newest render as a fallback.
 - Counts toward Codex plan usage, not API billing.
 
-## antigravity (OAuth, entitlement-gated)
+## agy (Antigravity CLI headless, preferred over the OAuth helper)
+
+`cd <out-dir> && agy --model gemini-3.8-flash-medium --mode accept-edits --print-timeout 400s -p "Use your image generation tool to create one image and save it as a PNG file at '<abs>'. Do not write code to draw it. Image: <prompt>" </dev/null`
+
+- `-p` must be the last flag. Placed earlier, agy reads the next flag as the prompt and exits with an error.
+- `--mode accept-edits` auto-approves file writes only. `--dangerously-skip-permissions` is refused by Claude Code auto mode ("Create Unsafe Agents").
+- Run it from the output directory so the file lands inside agy's workspace; a reference image's directory goes in with `--add-dir`.
+- The agent may hand the render to an image subagent and reply before the file exists; the wrapper checks the file, not the reply.
+
+## antigravity (legacy OAuth helper, entitlement-gated)
 
 `bin/generate_image.py` (bundled) reuses `~/.cli-proxy-api/antigravity-*.json` OAuth creds:
 refresh the token using `ANTIGRAVITY_OAUTH_CLIENT_ID` and `ANTIGRAVITY_OAUTH_CLIENT_SECRET` from the local environment, call CloudCode `v1internal:loadCodeAssist`

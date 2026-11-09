@@ -8,7 +8,10 @@
 #   codex        (default, VERIFIED)  OpenAI Codex CLI built-in image gen via
 #                `codex exec`. Uses your ChatGPT plan login ($imagegen -> gpt-image-2).
 #                No OPENAI_API_KEY required.
-#   antigravity  (entitlement-gated) Reuses Antigravity Google OAuth (via
+#   agy          (VERIFIED 2026-11-09) Antigravity CLI headless: `agy --mode accept-edits
+#                -p "<instr>"`; the agent's built-in image tool renders the PNG. Uses the
+#                agy login; model via IMAGEGEN_AGY_MODEL (default gemini-3.8-flash-medium).
+#   antigravity  (legacy, entitlement-gated) Reuses Antigravity Google OAuth (via
 #                ~/.cli-proxy-api/antigravity-*.json) to call Nano Banana Pro through
 #                the CloudCode API. Requires local ANTIGRAVITY_OAUTH_CLIENT_ID and
 #                ANTIGRAVITY_OAUTH_CLIENT_SECRET configuration. Image models may return
@@ -85,9 +88,33 @@ gen_codex() {
   [ -s "$OUT" ] || die "codex produced no image at $OUT (check output above)"
 }
 
-# --- antigravity backend: OAuth reuse -> Nano Banana Pro via CloudCode ---
-# agy has no image model; this drives the nano-banana-antigravity helper script.
-# Image models may return 404 when the account lacks entitlement.
+# --- agy backend: Antigravity CLI headless (the expected Antigravity route) ---
+# `agy models` lists no image model, but the agent's own image tool generates one.
+# Verified 2026-11-09: three 1024x1024 PNGs with gemini-3.8-flash-medium.
+# --mode accept-edits auto-approves file writes only; never --dangerously-skip-permissions
+# (Claude Code auto mode refuses it as an unsafe agent). -p must be the LAST flag:
+# agy reads the token right after -p as the prompt.
+gen_agy() {
+  command -v agy >/dev/null || die "agy CLI not installed"
+  local model="${IMAGEGEN_AGY_MODEL:-gemini-3.8-flash-medium}"
+  local dir; dir="$(cd "$(dirname "$OUT")" && pwd)"
+  local abs="$dir/$(basename "$OUT")"
+  local ref="" add=()
+  if [ -n "$REF" ]; then
+    local rabs; rabs="$(cd "$(dirname "$REF")" && pwd)/$(basename "$REF")"
+    ref=" Use the image at '${rabs}' as the reference."; add=(--add-dir "$(dirname "$rabs")")
+  fi
+  local instr="Use your image generation tool to create one image and save it as a PNG file at '${abs}'. Do not write code to draw it.${ref} Image: ${PROMPT} When done, reply with the saved path only."
+  log "agy: headless image tool via ${model} (up to ${TIMEOUT}s)"
+  (cd "$dir" && timeout "$TIMEOUT" agy --model "$model" --mode accept-edits "${add[@]}" \
+      --print-timeout "$((TIMEOUT - 10))s" -p "$instr" </dev/null >&2) \
+    || log "warn: agy returned non-zero or timed out; checking for output anyway"
+  [ -s "$abs" ] || die "agy produced no image at $abs (check output above)"
+}
+
+# --- antigravity backend (legacy): OAuth reuse -> Nano Banana Pro via CloudCode ---
+# Drives the bundled helper script directly. Needs ANTIGRAVITY_OAUTH_CLIENT_ID and
+# ANTIGRAVITY_OAUTH_CLIENT_SECRET in the environment; free-tier accounts 404. Prefer -b agy.
 gen_antigravity() {
   command -v uv >/dev/null || die "uv required for antigravity backend"
   [ -f "$NBA_SCRIPT" ] || die "helper missing: $NBA_SCRIPT"
@@ -100,9 +127,9 @@ gen_antigravity() {
 
 case "$BACKEND" in
   codex)       gen_codex;;
+  agy)         gen_agy;;
   antigravity) gen_antigravity;;
-  agy)         gen_antigravity;;
-  *)           die "unknown backend: $BACKEND (use: codex | antigravity)";;
+  *)           die "unknown backend: $BACKEND (use: codex | agy | antigravity)";;
 esac
 
 ABS="$(cd "$(dirname "$OUT")" && printf '%s/%s' "$(pwd)" "$(basename "$OUT")")"
