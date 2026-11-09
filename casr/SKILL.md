@@ -9,8 +9,8 @@ description: >-
   claude", "resume in codex", "move session to", "cross-agent resume".
 license: MIT
 metadata:
-  version: 1.2.0
-  requires: casr CLI on PATH (local fork at /home/cheta/git/cross_agent_session_resumer)
+  version: 1.3.0
+  requires: casr CLI on PATH, built from the private fork at /home/cheta/code/cross_agent_session_resumer
 tags:
   - sessions
   - handoff
@@ -24,19 +24,25 @@ One command for every harness. You name the target; casr finds the source
 from the session ID.
 
 ```bash
-casr resume <target> <session-id>            # convert, then print the resume command
+casr -cc <session-id>                        # shorthand: convert into Claude Code
+casr resume <target> <session-id>            # canonical form, any target
 casr resume <target> <session-id> --dry-run  # preview, write nothing
 ```
 
-Examples: `casr resume cc 01a16dcc-0848-726e-b7a1-90cc0f7ea280` (omp into
-Claude Code), `casr resume cod <claude-session-id>` (Claude into Codex).
+Examples: `casr -cc 01a16dcc-0848-726e-b7a1-90cc0f7ea280` (omp into Claude
+Code), `casr resume cod <claude-session-id>` (Claude into Codex).
 
-There is no `-cc` flag form and no `casr <source> ...` form. The target is the
-positional alias right after `resume`.
+The alias always names the **target**. There is no `casr <source> ...` form.
+`casr <target> resume <id>` also works and means the same as the canonical
+form.
+
+Shorthand flags: `-cc`, `-cod`, `-gmi`, `-agy`, `-omp`, `-mus`, `-jcd`, `-ant`.
+Every other target needs the canonical form.
 
 Targets: `cc` Claude Code, `cod` Codex, `gmi` Gemini, `agy` Antigravity, `opc`
-OpenCode, `cur`, `cln`, `aid`, `amp`, `gpt`. `casr providers` shows which are
-installed.
+OpenCode, `pi` Pi-Agent, `omp` Oh My Pi, `ant` Ante, `mus` Muse Code, `jcd`
+J-Code, `ocl` OpenClaw, `kr` Kiro, `grk` Grok, `cur`, `cln`, `aid`, `amp`,
+`gpt`. `casr providers` shows which are installed.
 
 ## Find the session ID
 
@@ -90,11 +96,17 @@ the printed `claude --resume <new-id>`, or convert with `--workspace <dir>`.
 
 ## Maintenance
 
-The installed binary is built from the local fork. Upstream
-(Dicklesworthstone/cross_agent_session_resumer) has no omp, ante or muse
-provider, so do not replace it with an upstream release. Rebuild with
-`cargo build --release` in the fork, then copy
+The installed binary is built from the private fork at
+`/home/cheta/code/cross_agent_session_resumer`. In that repo `origin` is
+`aaaronmiller/cross_agent_session_resumer` (private) and `upstream` is
+`Dicklesworthstone/cross_agent_session_resumer`. Upstream has no omp, Ante,
+Muse or J-Code provider and does not merge outside contributions, so never
+replace the binary with an upstream release. `FORK-CHANGES.md` in the repo
+root lists every fork change, the path index and the upstream sync steps.
+
+Rebuild with `cargo build --release` in the fork, then copy
 `/home/cheta/.cargo/target-shared/release/casr` (the global cargo target dir,
 not the repo's stale `target/`) to `/home/cheta/.local/bin/casr` with
-`command cp -f` (`cp` is aliased to `cp -i`). Check `casr --version` shows the
-fork's current commit.
+`command cp -f` (`cp` is aliased to `cp -i`). `casr --version` must show the
+fork's HEAD commit (`git -C /home/cheta/code/cross_agent_session_resumer
+rev-parse --short HEAD`).
