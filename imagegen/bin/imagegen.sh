@@ -101,6 +101,8 @@ gen_agy() {
   # auto-approves writes. Run agy in an empty throwaway workspace with --sandbox, give it a
   # copy of any reference image, and move only the finished PNG out ourselves.
   local work; work="$(mktemp -d "${TMPDIR:-/tmp}/imagegen-agy.XXXXXX")"
+  # Identity of the workspace we created, checked again before reading the result.
+  local work_id; work_id="$(stat -c '%d:%i' "$work")"
   local ref=""
   if [ -n "$REF" ]; then
     [ -f "$REF" ] || { rm -rf "$work"; die "reference image not found: $REF"; }
@@ -112,21 +114,46 @@ gen_agy() {
   (cd "$work" && timeout "$TIMEOUT" agy --model "$model" --mode accept-edits --sandbox \
       --print-timeout "$((TIMEOUT - 10))s" -p "$instr" </dev/null >&2) \
     || log "warn: agy returned non-zero or timed out; checking for output anyway"
-  # The agent controls what sits at out.png. Accept only a regular, single-link, non-symlink
-  # file that starts with the PNG signature, and copy its bytes into a fresh file: a symlink
-  # or hard link to a private file (an SSH key, a token) must never be delivered as the image.
-  local got="$work/out.png"
-  if [ -e "$got" ] || [ -L "$got" ]; then
-    if [ -L "$got" ] || [ ! -f "$got" ]; then
-      rm -rf "$work"; die "agy left a non-regular file at out.png; refusing it"
-    fi
-    if [ "$(stat -c %h "$got")" != "1" ]; then
-      rm -rf "$work"; die "agy left a hard-linked out.png; refusing it"
-    fi
-    if [ "$(head -c 8 "$got" | od -An -tx1 | tr -d ' \n')" != "89504e470d0a1a0a" ]; then
-      rm -rf "$work"; die "agy output is not a PNG; refusing it"
-    fi
-    rm -f "$OUT" && cat "$got" > "$OUT"
+  # The agent controls the workspace, and a subagent may still be running after agy returns,
+  # so path checks followed by a second open would race a symlink swap. One Python pass opens
+  # the workspace and out.png with O_NOFOLLOW, confirms the workspace is the directory we
+  # created, and runs every check with fstat on the same descriptor it copies from: only a
+  # regular, single-link file starting with the PNG signature is delivered, as fresh bytes.
+  if ! python3 -I - "$work" "$work_id" "$OUT" <<'PYEOF'
+import os, stat, sys
+work, want, out = sys.argv[1], sys.argv[2], sys.argv[3]
+def refuse(msg):
+    print(f"error: {msg}; refusing it", file=sys.stderr); sys.exit(1)
+try:
+    d = os.open(work, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+except OSError:
+    refuse("the agy workspace was replaced")
+ds = os.fstat(d)
+if f"{ds.st_dev}:{ds.st_ino}" != want:
+    refuse("the agy workspace is not the directory imagegen created")
+try:
+    f = os.open("out.png", os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=d)
+except FileNotFoundError:
+    sys.exit(0)  # no output; the caller reports it
+except OSError:
+    refuse("agy left a symlink or unreadable file at out.png")
+st = os.fstat(f)
+if not stat.S_ISREG(st.st_mode):
+    refuse("agy left a non-regular file at out.png")
+if st.st_nlink != 1:
+    refuse("agy left a hard-linked out.png")
+with os.fdopen(f, "rb") as src:
+    data = src.read()
+if not data.startswith(b"\x89PNG\r\n\x1a\n"):
+    refuse("agy output is not a PNG")
+tmp = out + ".imagegen-tmp"
+fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o644)
+with os.fdopen(fd, "wb") as dst:
+    dst.write(data)
+os.replace(tmp, out)
+PYEOF
+  then
+    rm -rf "$work"; die "agy output failed the containment checks (see above)"
   fi
   rm -rf "$work"
   [ -s "$OUT" ] || die "agy produced no image at $OUT (check output above)"
