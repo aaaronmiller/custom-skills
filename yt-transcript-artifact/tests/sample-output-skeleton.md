@@ -75,7 +75,7 @@ Rationale: This is exact transcript language.
 
 | Tool/Resource Name | Usage Context | Command/Pattern/Formula | Provenance | Framework Tags |
 |---|---|---|---|---|
-| Python build command | Validation command example | `python build.py --check` | `[VERBATIM]` | Debugging methodology: validation |
+| Python build command | Validation command illustration (for example, a script such as `example-build.py --check`) | `example-build.py --check` | `[VERBATIM]` | Debugging methodology: validation |
 
 #### 🗣️ Prompt/Instruction Engineering
 

@@ -90,7 +90,7 @@ This is the retrospective from the FIRST use of the Bugbear process (before the 
 - Requirements doc had clear user stories and functional requirements
 
 ### What Went Wrong
-1. **CRITICAL: Missed existing infrastructure** — Built requirements for a system that replaces sync.sh + skillshare, when the user already had a 759-line working sync system. The FIRST thing to do should have been checking the user's actual codebase, not just the files in the target folder.
+1. **CRITICAL: Missed existing infrastructure** — Built requirements for a system that replaces the existing sync script + skillshare, when the user already had a 759-line working sync setup. The FIRST thing to do should have been checking the user's actual codebase, not just the files in the target folder.
    → **Fix:** Phase 4 (Ground Truth Research) now mandates checking the user's workspace before writing requirements.
 
 2. **Asked questions too late** — Already wrote full requirements and design before asking clarifying questions. User's answers (e.g., "all tools equal priority", "SkillScope IS core") required a complete rewrite.

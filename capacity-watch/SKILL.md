@@ -66,7 +66,7 @@ Run `python3 -I -m pytest -q tests` for offline synthetic checks. The Phase 3 re
 
 The masterplan dossier's `timeline.md` holds one fenced block opened with ```` ```json capacity-workload ````. Each task row has `id`, `title`, `status`, `remaining_agent_hours`, `lanes`, `pools` (shares of the task's agent-hours, keyed by pool name), `basis`, and optionally `wall_hours`, `after`, `not_before`, `blocked_on`, `observation` (a soak window that occupies no work track), `decomposed`, `actual_agent_hours` and `actual_wall_hours`. Coordinator sessions edit it; the cron jobs only read it.
 
-## Cadence (guardian cron, `capacity-watch.sh`)
+## Cadence (guardian cron)
 
 - **Hourly at :05**, `probe`: active readings appended to `readings.jsonl`. The free catalog refreshes once a day at the 00:05 run.
 - **Every 4 hours at :15** (00:15, 04:15, 08:15, 12:15, 16:15, 20:15 Pacific), `assess`: a fresh probe, the status page, then a Sonnet judgment agent writes a routing and slippage report to `~/.local/state/capacity-watch/reports/`. Four hours divides the day and the week, and the hourly probe catches 5-hour resets as they come.
@@ -95,7 +95,8 @@ The 4-hourly cron agent cannot reach the Artifact tools, so the cron refreshes t
 
 `scripts/task-ledger.py` reads the local `tasks/remote-*.json` summaries, mesh telemetry snapshots, Workflow journals and their adjacent agent transcripts, dispatch `c*.md` briefs and `c*.log` console logs, and Codex calls in `ledger.sqlite`. It matches task IDs against the masterplan task list. It makes no network or model calls.
 
-It writes `~/.local/state/capacity-watch/dashboard/tasks.csv` and one full redacted run page per task plus `index.md` under `/home/cheta/LIVING_DOCUMENTS/projects/masterplan/runs/`. Unchanged pages are not rewritten. The dashboard's Tasks completed section filters and sorts all outcomes and expands each task with metrics, excerpts and its copyable run-page path. Missing evidence stays unknown. Costs are list-price equivalents; subscription rows do not imply an extra charge. Codex console token totals are separate from output tokens. Finished sessions with no exit or result record are marked unknown, because call records do not establish task completion.
+It writes `~/.local/state/capacity-watch/dashboard/tasks.csv` and one full redacted run page per task plus `index.md` under `/home/cheta/LIVING_DOCUMENTS/projects/masterplan/runs/`. Unchanged pages are not rewritten. The dashboard's Tasks completed section filters and sorts all outcomes and expands each task with metrics, excerpts and its copyable run-page path. Missing evidence stays unknown. Costs are list-price equivalents; subscription rows do not imply an extra charge. Codex console token totals are separate from output tokens.
+Finished sessions with no exit or result record are marked unknown, because call records do not establish task completion.
 
 To refresh source snapshots, run `scripts/job-summary-remote.py` on each worker over its configured mesh SSH route, saving stdout locally to `~/.local/state/capacity-watch/tasks/remote-<host>.json`. Then run `python3 -I scripts/dashboard-data.py`. That command writes all six datasets, including tasks.csv. Upload/register the tasks dataset with the Dashboard Artifact through the existing coordinator refresh procedure when publication is authorized. Local refresh does not publish the artifact.
 

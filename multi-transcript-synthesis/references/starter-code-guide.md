@@ -87,8 +87,8 @@ For code that shouldn't be used directly but contains good ideas, use this patte
 ```markdown
 ### Distribution Strategy (Think About This)
 **Source:** spec-v2.md
-**Notes:** This proposes a custom distribution engine. The user already has 
-sync.sh + skillshare handling distribution. DO NOT rebuild distribution. But 
+**Notes:** This proposes a custom distribution engine. The user already has
+a sync script + skillshare handling distribution. DO NOT rebuild distribution. But
 the adapter interface pattern below is worth considering for the provenance layer.
 
 \`\`\`typescript

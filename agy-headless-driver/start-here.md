@@ -1,7 +1,6 @@
 ---
 title: "AGY Headless Driver intake"
 type: intake-handoff
-version: "1.0.0"
 ---
 
 # AGY Headless Driver

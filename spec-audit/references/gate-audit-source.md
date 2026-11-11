@@ -1,6 +1,6 @@
 ---
-name: backtranslation-spec-auditor
-description: Audits spec-driven development artifacts by reconstructing intent from a downstream artifact, then comparing that reconstruction to its upstream source of truth. Divergence is the audit signal. Use for Spec Kit, OpenSpec, and Kiro-style workflows, requirements.md/design.md reviews, spec.md/plan.md/tasks.md drift checks, decomposition audits, and cold backtranslation question generation.
+title: backtranslation-spec-auditor protocol
+summary: Audits spec-driven development artifacts by reconstructing intent from a downstream artifact, then comparing that reconstruction to its upstream source of truth. Divergence is the audit signal. Use for Spec Kit, OpenSpec, and Kiro-style workflows, requirements.md/design.md reviews, spec.md/plan.md/tasks.md drift checks, decomposition audits, and cold backtranslation question generation.
 license: MIT
 compatibility: Designed for Claude Code and other Agent Skills compatible clients. No required scripts or network access.
 metadata:

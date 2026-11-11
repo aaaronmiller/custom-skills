@@ -1,6 +1,5 @@
 ---
 title: Monthly cadence
-version: "1.0"
 tags: [notes-sweeper, cadence, automation]
 ---
 

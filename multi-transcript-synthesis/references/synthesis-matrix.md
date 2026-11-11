@@ -25,7 +25,7 @@ For each theme, record what EACH file proposes:
 |-------|--------|--------|--------|--------|--------|------------|
 | Architecture | "5-layer monolith" | "microservices" | "extension layer on existing" | (silent) | "plugin system" | Extension layer — user already has working L1-L3 |
 | Storage | "SQLite registry" | "YAML manifests" | "Git-native" | "JSON index" | "SQLite + YAML" | YAML manifests (simpler, Git-friendly, user prefers) |
-| Distribution | "Built-in symlinker" | "Delegate to skillshare" | "Wrap existing sync.sh" | "Custom copy engine" | "npm-style package links" | Wrap sync.sh — it already works for 18 platforms |
+| Distribution | "Built-in symlinker" | "Delegate to skillshare" | "Wrap existing sync script" | "Custom copy engine" | "npm-style package links" | Wrap the existing sync script - it already works for 18 platforms |
 
 ### Step 3: Classify Each Idea
 

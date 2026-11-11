@@ -63,57 +63,9 @@ Every Phase 5+ run is scoped. Scope is composable: any combination of the dimens
 
 Read `references/scope_selectors.md` before the first non-default run. It contains the full spec, the closed vocabulary for `--type`, and the exact mapping from each scope dimension to one or more `cass` CLI flags.
 
-| Dimension | Flag | Default | Maps to cass |
-|-----------|------|---------|--------------|
-| Time — relative | `--since 7d` | `30d` | `--days N` or `--since Nd` on `cass search` |
-| Time — absolute | `--from 2025-01-01 --to 2025-06-30` | (none) | post-filter on `cass search` timestamps |
-| Time — today | `--today` | false | `cass search "" --today --robot-format sessions` |
-| Projects | `--projects foo,bar` or `--project-dir ~/code/foo` | all in DB | `cass search "" --workspace /abs/path --robot-format sessions` per project |
-| Agents | `--agent claude,cursor` | all | `cass search ... --agent <name> --robot-format sessions` (one invocation per agent, results unioned) |
-| Prompt type | `--type correction,scope-cut` | all | post-filter on the distilled `intents.type` column (see `references/intent_taxonomy.md`) |
-| Content regex | `--matches "jwt|auth"` | (none) | `cass search "<regex>" --json` (Phase F) or post-filter on extracted prompt text (Phase C) |
-| Single session | `--session /path/to/session.jsonl` | (none) | `cass export /path --format json` directly, no enumeration |
-| Result cap | `--limit 500` | (none) | `cass search ... --limit N --json` (Phase F) or stop enumeration after N prompts (Phase C) |
-| Ordering | `--ordering newest-first` | `newest-first` | cass search results are processed in-line; per-session ordering in extract_prompts_from_session |
 
-**Mix-and-match examples** (all valid):
+Scope table and mix-and-match examples moved to `references/scope-table.md`; read it when choosing a non-default scope.
 
-```bash
-# Default: all prompts from the last 30 days across all projects and agents
-python scripts/05_extract_prompts.py --db ~/.intent-archaeology/state.db
-
-# All prompts from a single project going back 90 days
-python scripts/05_extract_prompts.py \
-  --db ~/.intent-archaeology/state.db \
-  --projects my-app \
-  --since 90d
-
-# Every prompt on two projects since January, Claude Code only
-python scripts/05_extract_prompts.py \
-  --db ~/.intent-archaeology/state.db \
-  --projects my-app,api-server \
-  --since 2025-01-01 \
-  --agent claude
-
-# Only corrections issued in Cursor in the last week (post-distillation filter)
-python scripts/06_distill_intent.py \
-  --db ~/.intent-archaeology/state.db \
-  --type correction \
-  --agent cursor \
-  --since 7d
-
-# Every prompt containing "auth" or "jwt" across all agents (Phase F-style)
-python scripts/05_extract_prompts.py \
-  --db ~/.intent-archaeology/state.db \
-  --matches "auth|jwt|token" \
-  --since 180d
-
-# One specific session, full export including tool calls
-python scripts/05_extract_prompts.py \
-  --db ~/.intent-archaeology/state.db \
-  --session ~/.claude/projects/abc-123.jsonl \
-  --include-tools
-```
 
 The scope is recorded in the `tranches` table on every run, so a later re-pass with a different scope doesn't clobber earlier results — each (scope, tranche_id) pair is its own row.
 
@@ -229,7 +181,8 @@ These are explained in depth in `references/architecture.md`. They are listed he
 
 2. **Don't extract only user prompts.** Ingest everything once via `cass export`; project the human prompts as a view. The tool calls, file paths, and errors are the evidence layer the audit needs, and you can't get them back after filtering at ingest.
 
-3. **cass selects, raw JSONL extracts.** `cass` normalizes 20+ harness formats and flattens away fields like `isSidechain`, `gitBranch`, `parentUuid`, and `toolUseResult`. Use `cass view /path/to/session.jsonl -n N --json` (path is positional), `cass expand /path/to/session.jsonl --line N -C 3 --json` (note `--line`, not `-n`), and `cass export /path/to/session.jsonl --format json` plus `cass export /path/to/session.jsonl --include-tools` to round-trip back to the raw JSONL on `source_path:line_number`. One enrichment pass materializes a derived table with a foreign key back to cass. Not duplication — the audit fields cass doesn't carry. See `references/cass_fidelity.md` and `references/scope_selectors.md` for the full CLI reference.
+3. **cass selects, raw JSONL extracts.** `cass` normalizes 20+ harness formats and flattens away fields like `isSidechain`, `gitBranch`, `parentUuid`, and `toolUseResult`. Use `cass view /path/to/session.jsonl -n N --json` (path is positional), `cass expand /path/to/session.jsonl --line N -C 3 --json` (note `--line`, not `-n`), and `cass export /path/to/session.jsonl --format json` plus `cass export /path/to/session.jsonl --include-tools` to round-trip back to the raw JSONL on `source_path:line_number`. One enrichment pass materializes a derived table with a foreign key back to cass.
+Not duplication — the audit fields cass doesn't carry. See `references/cass_fidelity.md` and `references/scope_selectors.md` for the full CLI reference.
 
 4. **Don't split by token count.** Split on session boundary, then topic segment. Splitting a big session in half kills exactly the cross-boundary dedup and supersession detection you're after.
 
@@ -237,7 +190,8 @@ These are explained in depth in `references/architecture.md`. They are listed he
 
 6. **The proposer of a status must not be the verifier.** Phase 6b (merge) and Phase 7 (three-way join) run as separate processes, and neither calls a model: 6a emits, you classify, 6b merges deterministically. Everything else in the design is plumbing around that. See `references/failure_modes.md` #1.
 
-7. **Phase C enumerates, Phase F searches.** For exhaustive sweeps (Phase 5), enumerate every session for a project (`cass search "" --workspace /path --robot-format sessions --days N` then `cass export /path --format json` per session), filter, process all of it. Never use `cass search "<topic>"` to pull a project's relevant prompts for Phase C — recall moves into BM25+vector fusion and a turn phrased in unqueried vocabulary silently never appears. `cass search` is fine for Phase F (cited evidence against a question) as long as you use a content-bearing query, not the empty-string session enumeration form. If your cass build supports `cass pack`, use that for deterministic cited bundles in Phase F; otherwise fall back to `cass search "..." --fields full --json`.
+7. **Phase C enumerates, Phase F searches.** For exhaustive sweeps (Phase 5), enumerate every session for a project (`cass search "" --workspace /path --robot-format sessions --days N` then `cass export /path --format json` per session), filter, process all of it. Never use `cass search "<topic>"` to pull a project's relevant prompts for Phase C — recall moves into BM25+vector fusion and a turn phrased in unqueried vocabulary silently never appears.
+`cass search` is fine for Phase F (cited evidence against a question) as long as you use a content-bearing query, not the empty-string session enumeration form. If your cass build supports `cass pack`, use that for deterministic cited bundles in Phase F; otherwise fall back to `cass search "..." --fields full --json`.
 
 8. **Newest-first ordering.** Makes the merge monotonic (every conflicting item arriving is older, so it can only be marked superseded). Makes the run safely truncatable (newest-first at 60% is a correct audit with a known cutoff; oldest-first at 60% asserts things are current when the unprocessed 40% contains the instructions that superseded them).
 
@@ -276,60 +230,7 @@ This skill has three disclosure tiers, matching the Anthropic Agent Skills stand
 
 ## File map
 
-```
-intent-archaeology/
-├── SKILL.md                              # this file
-├── LICENSE                               # Apache-2.0
-├── references/
-│   ├── architecture.md                   # v2.2.0 architecture: 8 phases + retrospective
-│   ├── cass_fidelity.md                  # which cass fields survive normalization
-│   ├── scope_selectors.md                # composable scope spec + cass CLI mapping (v1.1)
-│   ├── era_typology.md                   # 5-era document typology as parser selector
-│   ├── lifecycle_states.md               # 5 lifecycle states + routing
-│   ├── intent_taxonomy.md                # closed-vocabulary intent labels
-│   ├── frontmatter_schema.md             # YAML frontmatter closed-vocabulary tags
-│   ├── metric_vector.md                  # status vector + anti-metrics
-│   ├── failure_modes.md                  # 10 ranked failure modes
-│   ├── corpus_sources.md                 # 13 corpus sources
-│   ├── prior_art.md                      # cass, spec-kit, stackshift, spec-gen, UserTrace, etc.
-│   ├── living_document_v3.md             # era 5 living document format
-│   ├── research_position.md              # S-tier analysis + research framing
-│   ├── eval_protocol.md                  # benchmark / eval protocol
-│   └── retrospective.md                  # PROGRESSIVE DISCLOSURE — load only at completion
-├── scripts/
-│   ├── init_db.py                        # SQLite schema (idempotent)
-│   ├── 01_discover_projects.py           # steps 0+1: scan ~/code, README fetch
-│   ├── 02_classify_era.py                # step 2: era 1..5
-│   ├── 03_spec_archaeology.py            # step 3: cass search specify.spec + requirements.md
-│   ├── 04_derive_lifecycle.py            # step 4: derive + confirm state
-│   ├── 05_extract_prompts.py             # step 5: cass export, is_human filter, newest-first
-│   ├── 06_distill_intent.py              # step 6a: emit batches. No model call.
-│   ├── 06b_merge_verdicts.py             # step 6b: deterministic merge + gates
-│   ├── 07_three_way_join.py              # step 7: session + spec + repo → status vector
-│   ├── 08_emit_wiki.py                   # step 8: Karpathy-style wiki
-│   ├── 09_status_vector.py               # step 8b: status vector per project
-│   ├── 10_post_completion_audit.py       # step 9: retrospective trigger (progressive disclosure)
-│   ├── cass_select.py                    # cass selects, raw JSONL extracts
-│   ├── lint_wiki.py                      # 08-lint: fail build on unmapped section / human edit in fence
-│   ├── meta_learning.py                  # append observations, boundary edits
-│   └── lib/
-│       ├── schema.sql                    # SQLite schema
-│       ├── scope.py                      # ScopeSpec dataclass + cass command compiler (v1.1)
-│       ├── frontmatter_vocab.yaml        # closed-vocabulary tags
-│       └── metric_vector.py              # metric vector definitions (shared)
-├── assets/
-│   └── templates/
-│       ├── master_index.md.tmpl          # wiki master index (Karpathy style)
-│       ├── project_page.md.tmpl          # per-project wiki page
-│       ├── standing_constraints.md.tmpl  # cross-cutting: frequency-ranked constitution
-│       ├── repeated_corrections.md.tmpl  # cross-cutting: to-do for AGENTS.md
-│       ├── abandoned.md.tmpl             # cross-cutting: scope-cuts + reasons
-│       ├── corrections_by_era.md.tmpl    # cross-cutting: are standing instructions read?
-│       ├── constitution.md.tmpl          # for living-document projects (era 5)
-│       └── worklog.md.tmpl               # per-project append-only worklog
-└── evals/
-    └── evals.json                        # test cases for skill-creator
-```
+Full tree moved to `references/file-map.md`; read it when locating scripts, references, or templates.
 
 ## What to do when the user invokes this skill
 
@@ -354,7 +255,8 @@ intent-archaeology/
 
 ## What NOT to do
 
-- **Don't run `cass search "<topic>"` for Phase 5 (exhaustive enumeration).** Phase 5 enumerates via `cass search "" --workspace ... --robot-format sessions --days N` then `cass export /path --format json` per session. `cass search "<topic>"` (with a content query) and `cass pack` belong in Phase F (cited evidence against a specific question) only. The reason: `cass search` recall for content queries moves into BM25+vector fusion, and a turn phrased in vocabulary that wasn't queried silently never appears — disqualifying for an audit whose deliverable is completeness. The empty-string session enumeration form is safe for Phase 5 because it returns all sessions without any recall gap.
+- **Don't run `cass search "<topic>"` for Phase 5 (exhaustive enumeration).** Phase 5 enumerates via `cass search "" --workspace ... --robot-format sessions --days N` then `cass export /path --format json` per session. `cass search "<topic>"` (with a content query) and `cass pack` belong in Phase F (cited evidence against a specific question) only. The reason: `cass search` recall for content queries moves into BM25+vector fusion, and a turn phrased in vocabulary that wasn't queried silently never appears — disqualifying for an audit whose deliverable is completeness.
+The empty-string session enumeration form is safe for Phase 5 because it returns all sessions without any recall gap.
 - **Don't forget the positional path.** `cass view -n 42 --json` will fail. Path is positional: `cass view /path/to/session.jsonl -n 42 --json`. Same for `cass expand` (which uses `--line`, not `-n`) and `cass export`.
 - **Don't conflate `--include-tools` with `--format json`.** They're separate flags. `cass export /path --format json` exports the conversation as JSON. `cass export /path --include-tools` adds tool-call entries to the export. To get both, run both (or check your cass version — newer builds may accept them together).
 - **Don't split a long session in half to fit a context window.** Filter to human prompts first (typically 2–5% of raw corpus), then split on session boundary. The token backstop (~20–30% of window) is for pathological turns only.

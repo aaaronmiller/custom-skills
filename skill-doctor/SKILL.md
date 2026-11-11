@@ -87,7 +87,8 @@ Scoring is based on efficiency, code quality, procedure compliance, and verbosit
 - `$SKILL_ROOT/scorers/procedure-compliance.md`
 - `$SKILL_ROOT/scorers/verbosity.md`
 
-Instructions: For each transcript in `$REPORT_DIR/transcripts/` (and the extra-pass transcript directories), read it and judge it against all four rubrics. For each scorer record: label, numeric score (from the rubric's label table), and a 1–3 sentence reason citing specifics from the transcript. Apply the code-quality scorer only where the transcript shows code changes; otherwise record `insufficient_evidence` and exclude that result from the code-quality average and failed-conversation filter. A transcript that lacks tool calls (some exports carry only messages) gets `insufficient_evidence` for efficiency instead of a guessed score.
+Instructions: For each transcript in `$REPORT_DIR/transcripts/` (and the extra-pass transcript directories), read it and judge it against all four rubrics. For each scorer record: label, numeric score (from the rubric's label table), and a 1–3 sentence reason citing specifics from the transcript. Apply the code-quality scorer only where the transcript shows code changes; otherwise record `insufficient_evidence` and exclude that result from the code-quality average and failed-conversation filter.
+A transcript that lacks tool calls (some exports carry only messages) gets `insufficient_evidence` for efficiency instead of a guessed score.
 
 ## Step 3: Aggregate
 

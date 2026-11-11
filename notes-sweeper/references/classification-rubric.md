@@ -1,6 +1,5 @@
 ---
 title: Classification rubric
-version: "1.0"
 tags: [notes-sweeper, classification, rubric]
 ---
 

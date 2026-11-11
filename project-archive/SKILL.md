@@ -39,7 +39,7 @@ Use one work directory `W` per folder, outside the folder. All scripts are
 Python 3 standard library; run them as `python3 -I -B scripts/<name>.py`.
 
 0. **Lineage gate (portfolio-lineage skill).** Compare the folder's clauses with
-   its successor and run its `gate.py --out W/gate.json`. A unique clause with no
+   its successor and run `python3 -I -B /home/cheta/code/custom-skills/portfolio-lineage/scripts/gate.py --out W/gate.json`. A unique clause with no
    recorded destination stops the archive here.
 1. **Mine.** `archive.py mine --work W --folder F --archive-root ~/archive
    --project <id> --lineage-gate W/gate.json [--successor-dir S]

@@ -60,8 +60,8 @@ Ownership rule: push only to remotes you own. Foreign origins get a fork-or-leav
 
 ### 5. Cron and background jobs
 
-- Every cron line added this session must exist in the repo-owned crontab file (`guardian/cronjobs/crontab`) **and** the live `crontab -l` (installed via `install.sh`, diff-verified). A repo-only line never fires; a live-only line gets wiped on next install.
-- Every new job script must be in the `install.sh` preflight list and executable, with one observed run (`START`/`EXIT rc=0` in its log).
+- Every cron line added this session must exist in the repo-owned crontab file (`guardian/cronjobs/crontab`) **and** the live `crontab -l` (installed via `/home/cheta/code/guardian/install.sh`, diff-verified). A repo-only line never fires; a live-only line gets wiped on next install.
+- Every new job script must be in the `/home/cheta/code/guardian/install.sh` preflight list and executable, with one observed run (`START`/`EXIT rc=0` in its log).
 - Any job that failed since the break: read its log tail, fix or hand off — don't leave a red EXIT for the next session to discover.
 
 ## Pass 2 — Verify from zero

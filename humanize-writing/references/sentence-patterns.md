@@ -1,7 +1,6 @@
 ---
 title: AI Sentence Patterns to Avoid
 date: 2025-12-16 00:00:00 PST
-ver: 1.0.0
 author: Sliither
 model: claude-opus-4-5-20250514
 tags: [ai-detection, sentence-structure, patterns, writing, syntax]

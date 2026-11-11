@@ -380,7 +380,8 @@ def effectiveness(path: Path, skill_text: str) -> list[str]:
         head = t[4:end] if end != -1 else ""
         return bool(re.search(r"^name:", head, re.M) and re.search(r"^description:", head, re.M))
     nested = [p.relative_to(path).as_posix() for p, t in texts.items()
-              if p.name != "SKILL.md" and has_skill_frontmatter(t)]
+              if p.name != "SKILL.md" and "references" in p.relative_to(path).parts
+              and has_skill_frontmatter(t)]  # rubric/agent files elsewhere use the same keys legitimately
     if nested:
         out.append(f"WARN: file(s) carrying a whole skill definition: {', '.join(nested[:4])}")
 
@@ -395,7 +396,10 @@ def effectiveness(path: Path, skill_text: str) -> list[str]:
         out.append(f"ERROR: private data shipped: {', '.join(sorted(private))}")
 
     # 5. Changelog and history inside SKILL.md (it belongs in CHANGELOG or git).
-    if re.search(r"^#{1,3} (Changes|Changelog|History|What's new)\b", skill_text, re.M | re.I):
+    # A heading that IS a changelog ("## Changes in 3.1.0"), not a concept
+    # heading that merely starts with the word ("## History versus changelog").
+    if re.search(r"^#{1,3} (Changes|Changelog|History|Release notes|What's new)"
+                 r"(\s+(in|for|since)\s+v?[\d.]+)?\s*$", skill_text, re.M | re.I):
         out.append("WARN: changelog section inside SKILL.md (move to CHANGELOG.md or git history)")
 
     # 6. Always-read budget, in bytes, and megalines that defeat line limits.

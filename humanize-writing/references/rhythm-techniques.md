@@ -1,7 +1,6 @@
 ---
 title: Rhythm and Voice Techniques
 date: 2025-12-16 00:00:00 PST
-ver: 1.0.0
 author: Sliither
 model: claude-opus-4-5-20250514
 tags: [writing, rhythm, voice, authenticity, prose-style, sentence-variation]

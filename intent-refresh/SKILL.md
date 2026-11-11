@@ -119,9 +119,4 @@ Then commit the changed `intent-*.md` pages in `/home/cheta/LIVING_DOCUMENTS`. P
 
 ## Tests
 
-`python3 -I -m unittest discover -s /home/cheta/code/custom-skills/intent-refresh/pipeline/tests` holds the MP-08 security regressions. It uses a throwaway database, never the live one.
-
-## History
-
-- 2.0.0 (2026-11-05): new phases 07 to 12. Added free lanes, cleanup and organization, session correlation with sysadmin and unclassified fallbacks, summary cycles, and dossier pages per the intent-* schemas. The four MP-08 defects in the legacy pipeline are fixed, with tests. The cron agent now does judgment only.
-- 1.3.0 (2026-11-05): cron containment rules.
+`python3 -I -m unittest discover -s /home/cheta/code/custom-skills/intent-refresh/pipeline/tests` holds the MP-08 security regressions. It uses a throwaway database, never the live one. See CHANGELOG.md for release history.

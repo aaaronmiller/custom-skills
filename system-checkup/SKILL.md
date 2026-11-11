@@ -72,7 +72,7 @@ python -I $CK/scripts/build_approval_page.py C:/performance-diagnostics/checkup-
 The user decides per item in `Cleanup-Approvals.html` (by folder, approve/reject, exports a JSON per folder or for everything). Then `Remove-CheckupItems.ps1 -Approvals <export>` (dry run) and `-Execute`. Only approved ids run. Check that every cache item states plainly whether it signs anything out (none should). Security-flagged items are filtered out by design. Never rebuild the plan while the user is mid-approval: ids are path hashes and stay stable, but the plan_id changes and old exports are refused.
 
 ## Phase 6 - living document
-`C:\Users\Administrator\Downloads\downloads-desktop-cleanup.livingdoc`: back up `public/app.js`, `content/index.json` and `data/annotations.json`; swap in W2's DATA (adapt `update_livingdoc_v3.mjs`: version, ids, worklog); refresh `content/sections/*.md` (Read before Write); add `worklogs/YYYY-MM-DD-*.md`; then `node validate.mjs` and `node --check public/app.js`.
+`C:\Users\Administrator\Downloads\downloads-desktop-cleanup.livingdoc`: back up `public/app.js`, `content/index.json` and `data/annotations.json`; swap in W2's DATA (adapt `scripts/update_livingdoc_v3.mjs`: version, ids, worklog); refresh `content/sections/*.md` (Read before Write); add `worklogs/YYYY-MM-DD-*.md`; then validate the JSON by parsing it and run `node --check public/app.js`.
 
 ## Phase 7 - report
 1. `python -I build_report_data.py <CK>` then edit the narrative in `report/report-template.html` (every headline states the finding; update numbers, tables and the plan).
