@@ -244,3 +244,9 @@ python3 scripts/validate-artifact.py output.md --strict
 - Do not invent timestamps, URLs, prices, commands, or citations that are not in the transcript.
 - Do not label a paraphrase as `[VERBATIM]`; use `[DESCRIBED]` or lower as appropriate.
 - Do not run Phase 0 when transcript text was already provided. Fetching is the exception, not the default.
+
+## Bundled resources
+
+Load or run these when the step they name comes up.
+
+- `assets/obsidian-artifact-template.md`: Fill new artifacts from `assets/obsidian-artifact-template.md`, keeping `references/youtube-transcript-artifact-template-v2.md` authoritative on rules.

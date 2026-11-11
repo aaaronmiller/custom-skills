@@ -67,3 +67,9 @@ The page has one section per location and one card per TOP-LEVEL folder (Install
 `scripts/gather_facts.py` · `scripts/render_briefs.py` · `scripts/run_worker.sh` · `scripts/metrics.py` · `scripts/build_page.py` · `scripts/Apply-Plan.ps1` · `scripts/Undo-Moves.ps1` · `prompts/worker-brief.md` · `prompts/review-brief.md` · `prompts/canonicalize-brief.md` · `templates/organizer.html` · `templates/organize.config.example.json` · `references/steering.md` · `references/user-profile.md` · `references/taxonomy.md` · `references/retrospective.md`
 
 Windows notes: run Python from Git Bash with `MSYS_NO_PATHCONV=1` when passing `//wsl.localhost/...` or `C:\...` paths; keep `.ps1` files ASCII; PowerShell 5.1 must read JSON with `-Encoding UTF8`.
+
+## Bundled resources
+
+Load or run these when the step they name comes up.
+
+- `scripts/deploy-windows.sh`: Run `scripts/deploy-windows.sh` after editing this skill to sync the Windows Claude Code copy.

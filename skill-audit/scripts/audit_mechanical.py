@@ -67,6 +67,7 @@ import itertools
 import json
 import os
 import re
+import shutil
 import sys
 from pathlib import Path
 
@@ -80,8 +81,13 @@ SKIP_DIRS = {".git", "staged-for-deletion", "archive", "inactive", "deprecated",
 DISCLOSURE_DIRS = ("references", "reference", "scripts", "assets", "templates", "data", "bin")
 
 DISCLOSURE_RE = re.compile(
-    r"`?((?:" + "|".join(DISCLOSURE_DIRS) + r")/[A-Za-z0-9_./-]+\.[A-Za-z]{2,6})`?"
+    # Not preceded by a path character: "/x/public/data/a.json" and
+    # "~/.claude/skills/gstack/scripts/y.json" belong to other trees.
+    r"`?(?<![/\w~.-])((?:" + "|".join(DISCLOSURE_DIRS) + r")/[A-Za-z0-9_./-]+\.[A-Za-z0-9]{1,6})(?![A-Za-z0-9])`?"
 )
+# Output-path patterns ("data/reports/YYYY-MM-DD-x.md") name files a run will
+# create, not files the skill ships; they are not broken references.
+PLACEHOLDER_RE = re.compile(r"YYYY|MM-DD|XXXX|\{\{|<[^>]+>|\*")
 # Double-quoted phrases, or single-quoted ones not touching a letter (so the
 # apostrophes in "user's" or "don't" never pair up into a false trigger).
 # Single quotes matter: Gemini's validator forbids inner double quotes in a
@@ -300,6 +306,128 @@ def shipped_but_unreferenced(path: Path, skill_text: str) -> list[str]:
     return out
 
 
+_WHICH: dict[str, bool] = {}
+# Search only Linux-side PATH entries: under WSL, /mnt/<drive> entries are
+# Windows directories over a slow mount and made each lookup take seconds.
+_LOCAL_PATH = os.pathsep.join(d for d in os.environ.get("PATH", "").split(os.pathsep)
+                              if d and not d.startswith("/mnt/"))
+
+
+def on_path(tool: str) -> bool:
+    if tool not in _WHICH:
+        _WHICH[tool] = shutil.which(tool, path=_LOCAL_PATH) is not None
+    return _WHICH[tool]
+
+
+def gh_slug(heading: str) -> str:
+    return re.sub(r"[^\w\- ]", "", heading.strip().lower()).replace(" ", "-")
+
+
+def effectiveness(path: Path, skill_text: str) -> list[str]:
+    """Defects that leave a skill valid but less effective. Each check comes
+    from the 2026-11-10 spec-prep review, where every one fired.
+
+    ERROR: shipped private data. WARN: everything else.
+    """
+    out: list[str] = []
+    texts = {p: p.read_text(encoding="utf-8", errors="replace")
+             for p in path.rglob("*.md") if not any(s in p.parts for s in SKIP_DIRS)}
+    texts[path / "SKILL.md"] = skill_text
+
+    # 1. Dead file#anchor links between the skill's own markdown files.
+    heads = {p: {gh_slug(h) for h in re.findall(r"^#{1,6} (.+)$", t, re.M)} for p, t in texts.items()}
+    dead = set()
+    for p, t in texts.items():
+        for target, anchor in re.findall(r"((?:references|assets|templates)/[\w./-]+\.md)#([\w-]+)", t):
+            tp = path / target
+            if not tp.exists():
+                dead.add(f"{target} (missing file)")
+            elif anchor not in heads.get(tp, set()):
+                dead.add(f"{target}#{anchor}")
+    if dead:
+        out.append(f"WARN: {len(dead)} dead link(s) or anchor(s): {', '.join(sorted(dead)[:5])}")
+
+    # 2. Ghost tools: scripts a skill tells the agent to run that do not exist.
+    walk = [p for p in path.rglob("*") if not any(s in p.parts for s in SKIP_DIRS)]
+    names = {p.name for p in walk if p.is_file()}
+    ghosts = set()
+    # Only lines that tell the agent to run something count; naming a file as
+    # a source or describing a check is not an instruction to execute it.
+    run_cue = re.compile(r"\b(run|execute|invoke|call|python3?|bash|sh|node|bun|uv run|pwsh)\b", re.I)
+    for t in texts.values():
+        for line in t.splitlines():
+            if not run_cue.search(line):
+                continue
+            for tok in re.findall(r"(?<![\w/.-])([\w-]+\.(?:py|sh|mjs|cjs|js|ts|ps1))\b", line):
+                if tok in names or on_path(tok):
+                    continue
+                if (tok.endswith(".js") and tok[0].isupper()) \
+                        or f"//{tok}" in t or f"{tok}/" in t \
+                        or re.match(r"(your|my|example|sample|foo|bar)[_-]|script\.py$", tok, re.I):
+                    continue  # product name (Node.js), site (crt.sh), or placeholder
+                ghosts.add(tok)
+            for phrase in ("the listed tool", "bundled helper"):
+                if phrase in line and f'"{phrase}"' not in line:
+                    ghosts.add(f"'{phrase}'")
+    if ghosts:
+        out.append(f"WARN: {len(ghosts)} tool(s) named but not shipped or on PATH: {', '.join(sorted(ghosts)[:6])}")
+
+    # 3. A second skill hiding inside this one (frontmatter with name+description).
+    def has_skill_frontmatter(t: str) -> bool:
+        if not t.startswith("---\n"):
+            return False
+        end = t.find("\n---", 4)
+        head = t[4:end] if end != -1 else ""
+        return bool(re.search(r"^name:", head, re.M) and re.search(r"^description:", head, re.M))
+    nested = [p.relative_to(path).as_posix() for p, t in texts.items()
+              if p.name != "SKILL.md" and has_skill_frontmatter(t)]
+    if nested:
+        out.append(f"WARN: file(s) carrying a whole skill definition: {', '.join(nested[:4])}")
+
+    # 4. Private data in a redistributable skill.
+    private = set()
+    for p, t in texts.items():
+        if re.search(r"claude\.ai/chat/[0-9a-f-]{8,}", t):
+            private.add(f"{p.name}: claude.ai chat URL")
+        if re.search(r"(?:sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16})", t):
+            private.add(f"{p.name}: credential-shaped token")
+    if private:
+        out.append(f"ERROR: private data shipped: {', '.join(sorted(private))}")
+
+    # 5. Changelog and history inside SKILL.md (it belongs in CHANGELOG or git).
+    if re.search(r"^#{1,3} (Changes|Changelog|History|What's new)\b", skill_text, re.M | re.I):
+        out.append("WARN: changelog section inside SKILL.md (move to CHANGELOG.md or git history)")
+
+    # 6. Always-read budget, in bytes, and megalines that defeat line limits.
+    size = len(skill_text.encode("utf-8"))
+    if size > 25_000:
+        out.append(f"WARN: SKILL.md is {size // 1024} KB (always read; keep under 25 KB)")
+    long_lines = sum(1 for line in skill_text.splitlines() if len(line) > 600 and not line.startswith("description:"))
+    if long_lines:
+        out.append(f"WARN: {long_lines} SKILL.md line(s) over 600 chars")
+
+    # 7. Reference versions that disagree with the skill's version.
+    fm = re.match(r"^---\n(.*?)\n---", skill_text, re.S)
+    skill_ver = re.search(r'^\s+version:\s*"?([\d.]+)', fm.group(1), re.M) if fm else None
+    if skill_ver:
+        drift = []
+        for p, t in texts.items():
+            if p.name == "SKILL.md" or not t.startswith("---\n"):
+                continue
+            head = t[4:t.find("\n---", 4)]
+            m = re.search(r'^ver(?:sion)?:\s*"?([\d.]+)', head, re.M)
+            if m and m.group(1) != skill_ver.group(1):
+                drift.append(p.name)
+        if drift:
+            out.append(f"WARN: {len(drift)} reference(s) carry a version other than {skill_ver.group(1)}: {', '.join(drift[:4])}")
+
+    # 8. Dangling symlinks inside the skill.
+    broken = [p.relative_to(path).as_posix() for p in walk if p.is_symlink() and not p.exists()]
+    if broken:
+        out.append(f"WARN: {len(broken)} dangling symlink(s): {', '.join(broken[:4])}")
+    return out
+
+
 def baseline_triggers(root: Path, rel_skill_md: str, ref: str) -> set[str] | None:
     """Quoted triggers of a SKILL.md at git REF, or None when absent there."""
     import subprocess
@@ -322,7 +450,7 @@ def audit(root: Path, threshold: int, baseline: str | None = None) -> dict:
     for path in find_skills(root):
         raw = (path / "SKILL.md").read_bytes()
         text = raw.decode("utf-8", errors="replace").replace("\r\n", "\n")
-        declared = {m.group(1) for m in DISCLOSURE_RE.finditer(text)}
+        declared = {m.group(1) for m in DISCLOSURE_RE.finditer(text) if not PLACEHOLDER_RE.search(m.group(1))}
         missing = sorted(r for r in declared if not (path / r).exists())
         skills[str(path.relative_to(root))] = {
             "triggers": sorted(triggers(description(text))),
@@ -330,6 +458,7 @@ def audit(root: Path, threshold: int, baseline: str | None = None) -> dict:
             "missing_refs": missing,
             "portability": portability(path, raw),
             "unreferenced": shipped_but_unreferenced(path, text),
+            "effectiveness": effectiveness(path, text),
         }
         if baseline:
             rel = str((path / "SKILL.md").relative_to(root))
@@ -374,6 +503,8 @@ def audit(root: Path, threshold: int, baseline: str | None = None) -> dict:
         "baseline": baseline,
         "lost_triggers": lost,
         "unreferenced": {n: s["unreferenced"] for n, s in skills.items() if s["unreferenced"]},
+        "effectiveness": {n: s["effectiveness"] for n, s in skills.items() if s["effectiveness"]},
+        "effectiveness_errors": sorted(n for n, s in skills.items() if any(f.startswith("ERROR") for f in s["effectiveness"])),
     }
 
 
@@ -393,7 +524,8 @@ def main() -> int:
 
     result = audit(root, args.threshold, args.baseline)
 
-    failed = bool(result["collisions"] or result["portability_errors"] or result["lost_triggers"])
+    failed = bool(result["collisions"] or result["portability_errors"] or result["lost_triggers"]
+                  or result["effectiveness_errors"])
     if args.json:
         print(json.dumps(result, indent=2))
         return 1 if failed else 0
@@ -427,6 +559,15 @@ def main() -> int:
     if not port:
         print("  none")
     for n, findings in sorted(port.items()):
+        print(f"  {n}")
+        for f in findings:
+            print(f"      {f}")
+
+    eff = result["effectiveness"]
+    print(f"\n== EFFECTIVENESS ({len(eff)}) ==")
+    if not eff:
+        print("  none")
+    for n, findings in sorted(eff.items()):
         print(f"  {n}")
         for f in findings:
             print(f"      {f}")

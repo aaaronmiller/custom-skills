@@ -100,3 +100,9 @@ It writes `~/.local/state/capacity-watch/dashboard/tasks.csv` and one full redac
 To refresh source snapshots, run `scripts/job-summary-remote.py` on each worker over its configured mesh SSH route, saving stdout locally to `~/.local/state/capacity-watch/tasks/remote-<host>.json`. Then run `python3 -I scripts/dashboard-data.py`. That command writes all six datasets, including tasks.csv. Upload/register the tasks dataset with the Dashboard Artifact through the existing coordinator refresh procedure when publication is authorized. Local refresh does not publish the artifact.
 
 Every CSV must be below 256,000 bytes. An oversized task export fails before writing run pages or replacing tasks.csv rather than silently dropping tasks. Full briefs and available result text remain in Living Documents. The remote summary collector limits result text to 4,000 characters and output names to 60; the dashboard shows the first 20 output names. Workflow completion means all launched agents returned, not independent acceptance of their work. Timing derived from telemetry observation or log modification is marked approximate in the run page.
+
+## Bundled resources
+
+Load or run these when the step they name comes up.
+
+- `scripts/lane-trial.py`: Trial unscored free lanes with `scripts/lane-trial.py` before using them for Living Documents or intent work.

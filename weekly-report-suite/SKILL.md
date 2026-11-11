@@ -282,3 +282,11 @@ The Claude-online source instructions and durable report memory are distilled in
 - [ ] Word counts and file paths verified with real tool output.
 - [ ] In-depth/personal report not modified unless requested.
 - [ ] Self-improvement loop captured next improvements.
+
+## Bundled resources
+
+Load or run these when the step they name comes up.
+
+- `scripts/generate_site_index.py`: Rebuild the dashboard landing page with `scripts/generate_site_index.py` after adding a weekly bundle.
+- `scripts/generate_weekly_bundle.py`: Render a self-contained weekly evidence bundle with `scripts/generate_weekly_bundle.py`, preserving existing dad and personal report text.
+- `scripts/skill_self_audit.py`: Create the self-improvement note with `scripts/skill_self_audit.py --metrics <bundle> --out <note>`.

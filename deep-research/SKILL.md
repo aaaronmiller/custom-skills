@@ -233,3 +233,13 @@ Every execution MUST include:
   apply to qualitative case studies)
 - **Context hoarding**: never hold raw source text across branches — compress to the
   scratchpad or you will exhaust the window mid-run
+
+## Bundled resources
+
+Load or run these when the step they name comes up.
+
+- `references/inference-guide.md`: Read `references/inference-guide.md` when the request is ambiguous to resolve R(W,D,S,V,F) through its decision tree.
+- `references/refinement-patterns.md`: Steer post-delivery follow-up passes with `references/refinement-patterns.md`, using its widen, deepen, saturate, and convergence operations.
+- `references/report-template.md`: Compile the final report from `references/report-template.md`, keeping every [REQUIRED] section.
+- `references/templates/scratchpad_template.md`: Start the working state from `references/templates/scratchpad_template.md` instead of inventing scratchpad fields.
+- `references/verification-strategies.md`: Apply `references/verification-strategies.md` for claim extraction, source-quality ranking, and contradiction handling at V1-V3.

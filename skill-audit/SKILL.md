@@ -5,7 +5,7 @@ license: MIT
 metadata:
   description-reviewed: "2026-11-10"
   author: ice-ninja / Hermes Agent
-  version: "2.3.0"
+  version: "2.4.0"
   updated: "2026-11-10"
   tags: "planning, automation, skills"
 ---
@@ -16,7 +16,7 @@ metadata:
 
 ## Mechanical checks (run these first)
 
-Five checks are arithmetic, not judgement, and none is reliable done by eye.
+Six checks are arithmetic, not judgement, and none is reliable done by eye.
 Run them before any deep read so the judgement work starts from facts.
 
 ```bash
@@ -47,6 +47,16 @@ nested skill copies inside a skill, and cache or session state (`__pycache__`,
 research paper and a Reddit draft as references nothing loaded, and the first
 corpus run found 44 such files across 15 skills. Each orphan is a judgment
 call: reference it from SKILL.md if it is useful, or remove it.
+
+**Effectiveness.** Defects that leave a skill valid but weaker, each one found
+in the 2026-11-10 spec-prep review: dead `file#anchor` links; tools the skill
+tells the agent to run that neither ship nor exist on PATH (ghost tools, the
+phrases "the listed tool" and "bundled helper"); a file carrying a whole second
+skill's frontmatter; private data (claude.ai chat URLs, credential-shaped
+tokens; ERROR); changelog sections inside SKILL.md; an always-read SKILL.md over
+25 KB or lines over 600 characters; reference versions that disagree with the
+skill's version; dangling symlinks. All but private data are WARN: each needs a
+judgment about whether to fix the skill or the reference.
 
 **Portability.** Claude Code parses frontmatter leniently; the claude.ai
 uploader, the Claude API, Codex and Gemini do not. A skill can work locally for
@@ -445,7 +455,6 @@ TIER 3 — Undeployed:        Edge-case skills, manually triggered only
 
 ### Templates:
 - **`references/templates/skill-audit-report.md`** — Blank report template for new audits
-- **`references/templates/individual-skill-assessment.md`** — Per-skill assessment template
 - **`references/templates/description-revision-template.md`** — Template for bulk description revisions
 
 ### Key Reference: Research Findings on Description Mechanics
@@ -468,10 +477,11 @@ understanding description mechanics is essential for authoring skills that fire 
 
 ### Skillshare & Multi-Location Loading:
 
-**`references/skillshare-architecture.md`** — Complete guide to skillshare tool
-architecture, how Hermes discovers skills recursively, and how to fix multi-location
-loading issues (external_dirs double-loading, gstack harness-variant discovery,
-standalone wrapper redundancy, category container duplicates). Includes diagnostic
-commands and design principles. Use this when: skills appear multiple times in
-available_skills, hermes loads skills from unexpected locations, or you need to
-understand how skillshare deploys skills across harnesses.
+skillshare deploys every skill folder wholesale, so anything inside a skill
+folder (caches, packaged zips, nested copies, notes) ships to every harness;
+the shipped-but-unreferenced check exists for that reason. It deploys from a
+staging copy, so after editing an owned skill run `skillshare update <name>`
+before `skillshare sync`, then confirm the deployed `SKILL.md` version. In merge
+mode a real directory already in a target is never overwritten, so a stale
+hand-copied skill stays stale until it is moved aside. Check which harnesses
+receive skills with `skillshare status`.

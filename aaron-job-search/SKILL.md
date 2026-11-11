@@ -134,3 +134,17 @@ Keep `notes/technique.md` live — what sources yield S-tier jobs for Aaron spec
 - `scripts/rank.py` — composite scoring + re-rank (likelihood×1.5, income×1.3)
 - `scripts/site_log.py` — append site scan row with timestamp
 - `scripts/hunt_report.py` — scaffold hunt-N.md from template
+
+## Bundled resources
+
+Load or run these when the step they name comes up.
+
+- `scripts/auth_setup.sh`: Run `scripts/auth_setup.sh` once before hunting login-gated sites to authenticate every job site and persist the browser state.
+- `scripts/check_auth.sh`: Run `scripts/check_auth.sh` before each hunt to verify which sites still hold valid saved auth state.
+- `scripts/customize_resume.py`: Generate a job-specific resume with `scripts/customize_resume.py --job-id N` from the matching fork in `notes/`.
+- `scripts/first_round_analysis.py`: Run `scripts/first_round_analysis.py` over the ranked jobs for ATS keywords, referral needs, and first-round application strategy.
+- `scripts/generate_cover_letter.py`: Draft the cover letter for a shortlisted job with `scripts/generate_cover_letter.py --job-id N --cluster <fork>`.
+- `scripts/login-all.sh`: Run `scripts/login-all.sh` for a one-shot interactive login across every job site; use `scripts/login_sites.sh [site]` to log in to a single site.
+- `scripts/login_sites.sh`: Open each job site for manual login with `scripts/login_sites.sh [site]`, which also covers Workday-only authentication.
+- `scripts/restore_auth.sh`: Restore saved browser auth with `scripts/restore_auth.sh [site]` before re-scraping a login-gated site.
+- `scripts/submission_dashboard.py`: Print the submission status dashboard with `scripts/submission_dashboard.py [--status ...] [--cluster ...]` when reviewing hunt progress.

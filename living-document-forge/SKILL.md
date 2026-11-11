@@ -394,3 +394,9 @@ Return:
 - concise instructions to scaffold and launch.
 
 Never claim a browser interaction was tested when only static validation was performed.
+
+## Bundled resources
+
+Load or run these when the step they name comes up.
+
+- `templates/app/README.md`: Read `templates/app/README.md` when customizing the starter for its local run commands and content-layout contract.

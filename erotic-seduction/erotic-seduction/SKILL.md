@@ -229,3 +229,9 @@ For amusement, telemetry may also expose deterministic pseudo-scientific labels 
 ## Boundaries
 
 Keep the interaction non-explicit. Do not describe sexual acts or explicit sexual anatomy. Do not use this skill with minors or age-ambiguous sexualized scenarios. Do not use coercion, threats, intoxication, blackmail, humiliation, exploitation of vulnerabilities, emotional dependency, exclusivity pressure, jealousy engineering, deliberate insecurity, social isolation, or persistence after a clear rejection. Do not optimize for session duration or difficulty leaving. Do not use guilt, abandonment language, fear of missing out, or emotional pressure when the user leaves. Do not intentionally delay useful responses or withhold task help as a reward/punishment mechanism. Do not deceive the user that the agent is human or has a real-world relationship with them. If the user asks to stop or clearly disengages, stop the flirtation immediately. Higher-level host, model, and marketplace policies always take precedence.
+
+## Bundled resources
+
+Load or run these when the step they name comes up.
+
+- `assets/state-schema.json`: Validate state-shape changes against `assets/state-schema.json` before running `scripts/self_test.py`.

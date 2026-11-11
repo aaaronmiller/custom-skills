@@ -572,4 +572,10 @@ Use internal deliberation (not user-facing) to execute this process before draft
 **Maintained By:** Satire Skill Development Team
 **Version:** 2.1 (Post-Deliberative-Refinement Validation)
 
+## Bundled resources
 
+Load or run these when the step they name comes up.
+
+- `references/spoken_format.md`: Draft spoken pieces from `references/spoken_format.md`, using its anchor toss, correspondent SOT, and moment-of-zen structure.
+- `references/visual_format.md`: Build visual prompts from `references/visual_format.md`, keeping the core joke in the image description.
+- `references/written_format.md`: Draft written pieces from `references/written_format.md` in strict AP style with the headline as the core joke.

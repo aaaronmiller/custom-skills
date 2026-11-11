@@ -547,4 +547,11 @@ Please add steps to your TodoList, if you have such a thing, to make sure you do
 
 Good luck!
 
+## Bundled resources
 
+Load or run these when the step they name comes up.
+
+- `references/output-patterns.md`: Apply `references/output-patterns.md` when the skill needs consistent, high-quality structured output.
+- `references/workflows.md`: Structure multi-step skills with the sequential-workflow patterns in `references/workflows.md`.
+- `scripts/aggregate_benchmark.py`: Aggregate per-run grades with `python -m scripts.aggregate_benchmark <workspace>/iteration-N --skill-name <name>` before the analyst pass.
+- `scripts/init_skill.py`: Scaffold the new skill directory with `scripts/init_skill.py <skill-name> --path <path>` before drafting SKILL.md.
