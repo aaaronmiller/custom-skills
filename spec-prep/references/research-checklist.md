@@ -1,6 +1,6 @@
 ---
 date: 2026-05-18 10:00:00 PDT
-ver: 1.0.0
+ver: 1.1.0
 author: ice-ninja
 model: claude-opus-4-7
 tags: [spec-prep, research, prior-art, checklist]
@@ -8,7 +8,7 @@ tags: [spec-prep, research, prior-art, checklist]
 
 # Prior Art Research Checklist
 
-Mandatory in Phase 2. The minimum is a floor, not a ceiling. Always survey how others approached the problem and extract reusable patterns and documented pitfalls. Findings land in `intent.md` section 10 (Prior art), never in a separate scratch file.
+Mandatory in Phase 2 and enforced by the prior-art gate in SKILL.md, which applies in every intake mode, including existing specs and referenced use. The minimum is a floor, not a ceiling. Always survey how others approached the problem and extract reusable patterns and documented pitfalls. Findings land in `intent.md` section 10 (Prior art). A prior-art record supplied with the intake (for example `sources/prior-art.md`) is preserved as evidence and summarized in section 10, not rewritten or discarded. The survey should happen early, before design work goes deep: its verdict can turn a build into a fork.
 
 ## Step 1: Local workspace scan (always first)
 
@@ -32,7 +32,7 @@ Three to five closest competitors, feature parity, differentiation, pricing, IP 
 
 ## Synthesis
 
-If an existing tool fully solves the problem, stop, surface it with a comparison, and ask the user explicitly whether to proceed and what gap this fills. Do not proceed until confirmed. If it partially solves, document coverage and gaps, adopt its strengths into the design, and define the unique value. If nothing exists, document that the search was thorough and consider why no one has built it.
+Record a verdict for the closest candidates: build new, fork, extend, or use as is. If an existing tool fully solves the problem, stop, surface it with a comparison, and ask the user explicitly whether to proceed and what gap this fills. Do not proceed until confirmed. If it partially solves, document coverage and gaps, adopt its strengths into the design, and define the unique value. If nothing exists, document that the search was thorough and consider why no one has built it.
 
 ## Output
 

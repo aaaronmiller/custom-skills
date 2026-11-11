@@ -7,7 +7,7 @@ description: >-
   spec-audit for post-hoc implementation drift audits.
 license: MIT
 metadata:
-  version: "3.1.0"
+  version: "3.2.0"
   lineage: "create-new-project 1.x + STRATA (renamed spec-prep)"
   author: "ice-ninja"
   conceptual-source: "Kapil Viren Ahuja, Spec-Driven Development Isn't Broken. It will collapse. (2026-05-03)"
@@ -20,7 +20,7 @@ metadata:
   tags: "spec-driven, intent, planning, coding"
 ---
 
-# spec-prep 3.1.0
+# spec-prep 3.2.0
 
 > Separation of Tiers, Retention Across Time, Auditability. From brain dump to
 > build-ready, pivot-resilient, dormancy-proof artifacts.
@@ -54,6 +54,43 @@ upstream version wins. Do not paste Spec Kit internals into this skill to
 Intent is a maintained asset in its own right, alongside requirements and design. Preserve why the user wants the project and its constraints independently of the observable contract and derived technical choices. This makes pivots and recovery reviewable without silently rewriting the brief.
 
 The three-layer framing, human/system craft allocation and Substrate Stack are credited to Kapil Viren Ahuja. The user-supplied originating transcript shows that a Claude assistant, speaking as Sliither, coined STRATA and drafted its article and initial skill as a synthesis requested by ice-ninja, using the existing create-new-project skill and Spec Kit. This generated synthesis is not an independent external evaluation. STRATA is this skill's former name, not an inference engine. Read `references/paradigm.md` for source attribution, authority boundaries and the current interpretation of both articles. Its consolidation table explains which historical claims were retained or qualified.
+
+## Two ways this skill is used
+
+1. **Invoked.** The skill runs its phases and gates below.
+2. **Referenced.** Another task is told to "prepare for spec-prep" or "make
+   this spec-prep ready" without invoking it. The reading model uses this file
+   and `references/artifact-contract.md` as a format contract only: it shapes
+   its deliverables as a compact input handoff (the intent, requirements and
+   design trio, `sources/` with verbatim prompts, a source-disposition map,
+   supporting material as described in the contract) and completes or
+   schedules the prior-art gate below. A referenced use never authors native
+   Spec Kit outputs, never writes a receipt and never claims preparation ran.
+   It records `operation: input-handoff` and leaves specification preparation
+   as the next operation.
+
+In both modes, the listed artifacts are the minimum shape, not the complete
+set. Data, references, corpora and any other project-specific resource are
+expected and preserved (see "Supporting material" in the artifact contract).
+An item is never dropped because its name is not in a table.
+
+## Prior-art gate
+
+Before Phase 4 writes plan or tasks, one of these must be true and recorded
+in the source-disposition map:
+
+- **done**: a prior-art record exists (intent section 10, or a supplied record
+  under `sources/` that section 10 summarizes) with the searches run, the
+  closest projects, and a verdict: build new, fork, extend, or use as is;
+- **directed**: the user or the current task schedules the survey as the next
+  step; preparation may continue through intent and spec, but plan and tasks
+  wait until the record lands;
+- **waived**: the user explicitly waived it, with the reason recorded.
+
+None of the three is a gate failure. The gate applies in every intake mode,
+including Existing-specs and referenced use, because supplied specs routinely
+omit prior art. If the record shows an existing project fully solves the
+problem, stop and surface it as `references/research-checklist.md` describes.
 
 ## Where artifacts live
 
@@ -132,7 +169,8 @@ round) using `references/discovery-questions.md`. Never ask everything at once.
 
 ### Phase 2: Prior art research (mandatory)
 
-*Skip in Existing-specs mode.*
+*In Existing-specs mode, do not redo a survey the pack already contains; run
+the prior-art gate instead, and run this phase when the gate finds no record.*
 
 Follow `references/research-checklist.md`: local workspace, skill registries,
 at least three code searches and two web searches, then synthesis. Survey how
@@ -158,7 +196,7 @@ Use the artifact contract and the installed toolchain's native paths. A skill is
 2. `intent.md` (`references/intent-template.md`): goals, constraints, success/failure conditions, personas, user stories, scope and provenance.
 3. Native `spec.md` (`references/spec-template.md`): requirements and acceptance through Spec Kit, preserving clause/eval IDs and traces. Bind evaluator-only fixtures externally; public acceptance remains available to the implementer.
 4. Native `plan.md` (`references/context-template.md`): system-derived architecture and decisions. Existing design/context files are sources; additional context rationale must not become a competing editable plan.
-5. Conditional supporting artifacts: research, data-model, contracts, quickstart and requirements-quality checklists when required by the domain or installed workflow. For a UI, read `references/experience-template.md`; preserve or prepare UX/mockups and visually verify any new visual claim.
+5. Conditional supporting artifacts: research, data-model, contracts, quickstart and requirements-quality checklists when required by the domain or installed workflow. Preserve supplied supporting material (data, references, analysis resources, project-specific items) under the contract's "Supporting material" rules; when data is a significant share of the work, carry its data section into plan and data-model rather than flattening it into requirements. For a UI, read `references/experience-template.md`; preserve or prepare UX/mockups and visually verify any new visual claim.
 6. Native `tasks.md`: dependencies, target files, requirement/story IDs, observable acceptance gates and recovery when meaningful. Optional reusable plays follow `references/plays-playbook.md`. Tasks remain unchecked until their work supplies evidence. **Producing `tasks.md` ends preparation. It is not permission to implement — in any session, without a new explicit user instruction.**
 7. Provenance/traceability: source disposition and story/clause/eval/plan/task mapping. Keep all material extra inputs, including rejected or deferred ones with reasons. Counts alone do not establish semantic preservation.
 8. Continuity and substrate: use `references/ledger-and-standing.md` and `references/substrate-self-location.md`, or the declared Living Documents integration under its own current authority contract.
@@ -197,12 +235,14 @@ variables from intent or context rather than hard-coding them.
 
 ### Phase 6: Validation and delivery
 
-Run the eight validation checks (separation, eval binding, testability,
-identity, drift, continuity, honesty, authorship) against the artifacts and
-record each verdict. The checks fail on technology in intent or spec,
+Run the nine validation checks (separation, eval binding, testability,
+identity, drift, continuity, honesty, authorship, prior art) against the
+artifacts and record each verdict. The checks fail on technology in intent or spec,
 non-evaluable clause language, an empty specification or duplicate clause IDs,
-unbound or dangling eval tags, an eval store inside the repository, and
-missing ledger/standing/substrate/authorship evidence. A hand-executed pass is
+unbound or dangling eval tags, an eval store inside the repository,
+missing ledger/standing/substrate/authorship evidence, and a prior-art gate
+with no done, directed or waived record. Supporting material missing from the
+source-disposition map is a drift failure, not a reason to delete it. A hand-executed pass is
 weaker than a tool-executed pass — say so in the receipt, and recommend a
 tool-executed re-validation where the user has a host that runs code.
 
@@ -266,7 +306,7 @@ Never spawn the implementation session as a task/subagent of the authoring sessi
 | `references/paradigm.md` | The conceptual model is unclear |
 | `references/confidence-gate.md` | Phase 1 scoring |
 | `references/discovery-questions.md` | Phase 1, Interactive mode |
-| `references/research-checklist.md` | Phase 2 |
+| `references/research-checklist.md` | Phase 2 and the prior-art gate |
 | `references/data-architecture-guide.md` | Phase 3 |
 | `references/intent-template.md` | Phase 4, intent |
 | `references/spec-template.md` | Phase 4, spec and evals |
@@ -279,6 +319,17 @@ Never spawn the implementation session as a task/subagent of the authoring sessi
 | `references/compatibility.md` | Phase 6, toolchain mapping |
 | `references/jev-review.md` | Optional bounded semantic checks |
 | `references/implementing.md` | Phase 7 when `spec-prep-implementing` is not installed |
+
+## Changes in 3.2.0
+
+- Referenced use: the skill doubles as a format contract that other tasks
+  read to shape spec-prep-ready deliverables without invoking it.
+- Supporting material: data, references, analysis resources and any other
+  project-specific resource are explicitly allowed; the artifact lists are a
+  minimum, never an exhaustive whitelist. Data-heavy projects get a
+  recommended data-section shape.
+- Prior-art gate: done, directed or waived must be recorded before plan and
+  tasks, in every intake mode; a ninth validation check enforces it.
 
 ## Changes in 3.1.0
 

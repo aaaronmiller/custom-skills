@@ -1,6 +1,6 @@
 ---
 title: Canonical artifact contract
-version: "2.5.1"
+version: "2.6.0"
 tags: [spec-prep, artifacts, speckit, governance]
 ---
 
@@ -15,6 +15,47 @@ Each workstream has one complete requirements.md (observable behavior/acceptance
 Governance is retained alongside the core trio: `.specify/memory/constitution.md`, build-root AGENTS.md and reset-handoff.md. AGENTS.md must instruct a fresh session to read the constitution and handoff before changes. Add the selected harness's supported project-local adapter, for example CLAUDE.md containing `@AGENTS.md`, when needed. The constitution governs specifications, plan/task decisions and their gates. Verify actual selected-harness loading when claiming reset readiness; a pointer alone is not an observed fresh-session read.
 
 An input handoff includes a concise conversion/read-order guide and source-disposition mapping (an intent appendix is sufficient). A separately requested findings document remains a package-level deliverable. Do not create native tasks, ledgers or pass receipts merely to imitate an executed pipeline. Draft governance can be authored from authorized principles when the CLI is missing, but must not be represented as an executed native workflow. Existing host coordination stays in its canonical host location.
+
+## Supporting material
+
+Every artifact list in this contract is a minimum shape, not a whitelist.
+Deliverables may and often do carry material that informs the project without
+being a functional requirement of it. Preserve all of it; never omit an item
+because its kind is not named here.
+
+| Role | Examples | Typical home |
+| --- | --- | --- |
+| analysis-input | datasets, raw snapshots, measurement tables, corpora | `data/` |
+| reference | papers, vendor docs, benchmark descriptions, competitor notes | `references/` or `sources/` |
+| evidence | prior-art record, interview notes, logs, screenshots | `sources/` |
+| fixture | sample inputs, golden outputs, evaluator-only cases (external store) | `fixtures/` or the eval store |
+| project-specific | anything else this project needs that no role above fits | any declared path |
+
+**Exception clause.** Any other project-specific resource is permitted. The
+only obligation is to declare it: one line in the source-disposition map with
+path, role, and why it matters. An undeclared item is a drift finding to fix
+by declaring it, never a reason to delete it. Edge cases are supported
+explicitly, not denied implicitly.
+
+The input-root entry surface stays the named trio. Supporting directories sit
+beside `inputs/` (for example `data/`, `references/`, `sources/`) and are
+linked from the trio, not promoted to peer entry documents.
+
+**Data section.** When data is a significant share of pre-development work,
+include `data/README.md` as the data section, linked from design.md:
+
+1. Sources: each source, its kind (vendor, independent, aggregator, derived),
+   acquisition method, retrieval date, and known gaps.
+2. Raw layout: immutable raw snapshots with a manifest of hashes; derived
+   stores are rebuildable from raw and need not be committed.
+3. Data dictionary: each table or file, its grain, keys and fields.
+4. Derivation rules: every computed value, its formula and its basis; values
+   with different bases are labelled and never pooled silently.
+5. Quality flags: verification status, sampling caveats, missing coverage.
+
+Data informs requirements but is not one. Behavior over data (what must be
+computed, reported or rejected) belongs in requirements.md; storage and
+derivation mechanics belong in design.md and later plan or data-model.md.
 
 ## Native preparation
 
@@ -66,6 +107,10 @@ The compact input form is:
     "sourceMap": "intent.md#source-disposition",
     "conversionGuide": "README.md",
     "nextOperation": "specification-preparation",
+    "priorArt": {"status": "done", "record": "intent.md#prior-art"},
+    "supporting": [
+      {"path": "../data/README.md", "role": "analysis-input", "why": "data section"}
+    ],
     "governance": {
       "constitution": ".specify/memory/constitution.md",
       "instructions": "AGENTS.md",
@@ -75,6 +120,8 @@ The compact input form is:
   }]
 }
 ```
+
+`priorArt.status` is `done`, `directed` or `waived` (see the prior-art gate in SKILL.md); `record` points at the record, the directive, or the waiver reason. `supporting` lists declared supporting material with its role from the table above; it is optional and never exhaustive of what may be preserved. Both fields are additive: older manifests without them remain valid intake, and the prior-art gate then checks the source-disposition map instead.
 
 buildRoot/inputRoot are package-relative directories; input paths/sourceMap are relative to inputRoot, and conversionGuide/governance paths are relative to buildRoot. `adapter` is optional. Add one entry per workstream with a separate input trio. Each guide maps requirements/intent to specify and generated spec/constitution/design/intent to plan, then tasks/analyze and the stop boundary. Source-map fragments name a real nonempty disposition heading; semantic preservation still requires review. Conversion guides must name the generated spec and constitution in addition to the input trio and preparation stages.
 
