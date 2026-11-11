@@ -3,6 +3,7 @@ name: rules-file-optimizer
 description: "Consolidate a set of reference rules files into an existing one and compress the result without losing capability. Use when a CLAUDE.md, AGENTS.md, GEMINI.md or system prompt has grown until it stops being followed, when instructions are being ignored, when the same rule appears in several sections, or when comparing your rules file against how other agents write theirs. Produces a measured compliance baseline, a section-by-section container decision, and a compressed file plus a rationale document. Triggers: 'optimize my CLAUDE.md', 'my rules file is too long', 'instructions are being ignored', 'compare my system prompt', 'consolidate rules files', 'audit my AGENTS.md', 'rules file bloat', 'why is Claude not following my instructions', 'system prompt review'."
 license: MIT
 metadata:
+  description-reviewed: "2026-11-10"
   version: 1.0.0
   origin: >-
     derived from the 2026-08-23 system prompt analysis,

@@ -1,6 +1,8 @@
 ---
 name: system-checkup
-description: Periodic full checkup of the SPECTRE-16 Windows 11 + WSL2 workstation - Windows Update/servicing health, memory and telemetry, Process Lasso Pro rules, event-log errors and crashes, Bluetooth/input drops, storage and cache reclaim, npm vs pnpm/bun hygiene, outdated software and modernization picks, user-folder organization (living document), and a dark HTML report plus a dry-run removal script. Use when the user asks for a system checkup, health check, "bring the system up to date", monthly maintenance, cleanup/reclaim space, re-audit Process Lasso, or "run the checkup again". Grunt work is delegated to headless omp workers on opencode-go/muse-spark-1.3-contributor.
+description: "Runs a periodic full checkup of the SPECTRE-16 Windows 11 + WSL2 workstation: Windows Update and servicing health, memory and telemetry, Process Lasso Pro rules, event-log errors and crashes, Bluetooth and input drops, storage and cache reclaim, npm vs pnpm/bun hygiene, outdated software and modernization picks, user-folder organization (living document), and a dark HTML report plus a dry-run removal script. Use when the user asks for a system checkup, health check, 'bring the system up to date', monthly maintenance, cleanup/reclaim space, re-audit Process Lasso, or 'run the checkup again'. Grunt work goes to headless workers on the current cheapest capable model."
+metadata:
+  description-reviewed: "2026-11-10"
 ---
 
 # SPECTRE-16 system checkup

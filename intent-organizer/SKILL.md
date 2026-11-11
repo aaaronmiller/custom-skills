@@ -1,8 +1,9 @@
 ---
 name: intent-organizer
-description: Organize cluttered folders (Downloads, Desktop, Documents, home, drive roots, dump folders) by working out each item's INTENT - why it is there, what the owner was doing with it, what they would want done - then hand the owner a short group-level approval page with full undo. Scripts only gather facts; every keep / move / remove / unsure decision is made by an LLM reasoning over those facts, and a second model challenges the risky ones. Removes only what is superseded, duplicated or temporary; everything else is organized by type, purpose and project (clustered by download dates). Use when the user wants to organize or declutter folders, tame a messy Downloads/Desktop, deal with filesystem bloat or structure, sort installers, find what is safe to remove, or make sense of a dump folder. Generic method; owner-specific knowledge lives in references/user-profile.md.
+description: "Organizes cluttered folders (Downloads, Desktop, Documents, home, drive roots, dump folders) by working out each item's intent (why it is there, what the owner was doing with it, what they would want done), then hands the owner a short group-level approval page with full undo. Removes only what is superseded, duplicated or temporary; everything else is organized by type, purpose and project. Use when the user wants to organize or declutter folders, tame a messy Downloads/Desktop, deal with filesystem bloat or structure, sort installers, find what is safe to remove, or make sense of a dump folder."
 license: MIT
 metadata:
+  description-reviewed: "2026-11-10"
   author: Aaron Miller (with Claude)
   version: "0.2.0"
   builds_on: "file-organizer (scope), intent-archaeology (deterministic facts + model verdicts + retrospective loop), cass-cli (intent recovery from agent sessions)"

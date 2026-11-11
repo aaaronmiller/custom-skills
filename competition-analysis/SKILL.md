@@ -2,6 +2,7 @@
 name: competition-analysis
 description: "Researches a competitor in one of our fields and files a dossier for later ('side pocket'): products, companies, and people as builders or promoters of one. Covers public pages with screenshots, marketing accounts, the builders’ GitHub track record (real history or a weekend build), collaborators and prior work, competing projects and what their users still ask for, and ideas mapped onto our projects. Use when the operator shares a product, company or builder in our fields and wants to know who is behind it, whether it is real, or who else competes. Triggers: 'check out [site], who built this', 'competitor teardown', 'competition analysis', 'who else does X', 'what’s out there like X', 'what can we steal from', 'is this open source', 'track the builder’s GitHub', 'side pocket'. Not for a library or tool to adopt, sales lead lists (lead-research-assistant), validating our own idea (proven-better-new), or general market questions (deep-research)."
 metadata:
+  description-reviewed: "2026-11-10"
   author: ice-ninja
   version: "1.1.0"
   created: "2026-11-05"

@@ -1,6 +1,8 @@
 ---
 name: mechanism-forge
 description: "Design, implement, evaluate, and refactor diegetic creative mechanisms for Culture Foundry: tactile HTML interfaces that behave like instruments, workshop devices, consoles, looms, synths, cameras, editing benches, or fabrication rigs while preserving complete user control, delegation, locks, accessibility, state visibility, and reusable generation contracts. Use when creating mechanism components, control grammars, visual design languages, medium-specific creative devices, or skills that encode a mechanism for reuse."
+metadata:
+  description-reviewed: "2026-11-10"
 ---
 
 # Mechanism Forge

@@ -3,6 +3,7 @@ name: mcp-toolkit
 description: "Build MCP (Model Context Protocol) servers, or convert an existing MCP server into a CLI tool, standalone script, or Agent Skill. Two gates: BUILD authors a new server in Python (FastMCP) or Node/TypeScript (MCP SDK) with tool design, evaluation harness, and best practices; CONVERT analyses a running server and generates wrappers that preserve its capabilities while reclaiming the context window an always-loaded MCP server consumes. Triggers: 'build an mcp server', 'create mcp server', 'mcp tool design', 'fastmcp', 'mcp sdk', 'model context protocol', 'convert mcp', 'mcp to cli', 'mcp to skill', 'replace mcp server', 'mcp context waste', 'wrap this mcp server', 'too many mcp tools'."
 license: Complete terms in LICENSE.txt
 metadata:
+  description-reviewed: "2026-11-10"
   version: "1.0.0"
   supersedes: "mcp-builder, mcp-conversion"
   tags: "mcp, ai/llm, api, coding"

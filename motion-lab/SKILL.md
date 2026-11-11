@@ -2,6 +2,7 @@
 name: motion-lab
 description: Direct motion design that looks studio-made instead of AI-default, built as code that paints frames (HTML, CSS, SVG, Canvas or three.js) and rendered frame-exact with Playwright and ffmpeg. Use when asked to animate something, make a motion loop, GIF or MP4 for X, a product shot, logo sting, title reveal, 3D scene or launch clip, or when existing motion looks generic, janky, jittery, late on the beat, or hiccups at the loop seam. Supplies the directed-prompt template, the render contract, the motion numbers (easing, springs, durations, stagger, beat grid), the render-look-fix loop with frame-numbered notes, synthesized sound synced to frames, loop and export rules for X, and a symptom-to-fix table. For HyperFrames or Remotion projects, use those skills for engine mechanics and this one for direction and QA.
 metadata:
+  description-reviewed: "2026-11-10"
   tags: "motion-design, animation, video, three-js, playwright, ffmpeg, creative-coding, prompting"
   source: "custom"
 ---

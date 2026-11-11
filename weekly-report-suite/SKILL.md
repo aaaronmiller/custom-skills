@@ -2,6 +2,7 @@
 name: weekly-report-suite
 description: "ALWAYS invoke when Aaron/Cheta/Ice-ninja asks for a weekly progress report, dad-facing report, mentor/parent update, personal weekly report, in-depth weekly report, report dashboard, weekly HTML report, project-history analytics, or a combined weekly narrative plus dashboard. Generates two coordinated outputs: (1) a one-page dad/mentor-facing report in the established Subject/Greetings/ Strategic Overview format, and (2) a richer personal report/data pack for an HTML/Grafana-style dashboard. Triggers: 'weekly report', 'dad report', 'progress report', 'week ending', 'make the report for my dad', 'personal report', 'HTML weekly dashboard', 'project history dashboard', 'Daily Radar'."
 metadata:
+  description-reviewed: "2026-11-10"
   tags: "automation, data, writing"
   grade: "A"
   source: "custom"

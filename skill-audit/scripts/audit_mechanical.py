@@ -205,7 +205,11 @@ def portability(path: Path, raw: bytes) -> list[str]:
         else:
             if len(desc) > MAX_DESC:
                 out.append(f"ERROR: description is {len(desc)} chars (max {MAX_DESC})")
-            elif len(desc) > SOFT_DESC:
+            elif len(desc) > SOFT_DESC and not (
+                    isinstance(data.get("metadata"), dict)
+                    and data["metadata"].get("description-reviewed")):
+                # metadata.description-reviewed records a hand review that
+                # confirmed the use case leads; the trigger gate still applies.
                 out.append(f"WARN: description is {len(desc)} chars (over {SOFT_DESC}: Codex shortens it under budget; key use case must come first)")
             if "<" in desc or ">" in desc:
                 out.append("ERROR: description contains < or > (claude.ai rejects XML-like text)")

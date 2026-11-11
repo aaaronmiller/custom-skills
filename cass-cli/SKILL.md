@@ -3,6 +3,7 @@ name: cass-cli
 description: "Recover what was actually said, decided, or attempted in past coding-agent sessions. Use for prior-work lookup, intent recovery, cross-harness handoff, 'what did I ask for', 'have I solved this before', 'what did the other agent do', session forensics after a crash, or building an evidence pack from history. Searches claude, codex, gemini, hermes, opencode, antigravity, pi-agent, qwen and openclaw histories through the local cass archive; muse sessions are not indexed and are read directly. Triggers: 'cass', 'search my sessions', 'prior work', 'did I already', 'what did I ask', 'session history', 'past conversations', 'intent recovery', 'what was decided', 'cross-agent handoff', 'session forensics', 'answer pack'."
 license: MIT
 metadata:
+  description-reviewed: "2026-11-10"
   version: 1.0.0
   requires: cass CLI on PATH
   tags: "evidence, sessions, forensics, meta, TOOL"

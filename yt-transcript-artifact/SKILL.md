@@ -1,12 +1,13 @@
 ---
 name: yt-transcript-artifact
-description: "Use this skill to turn spoken-content source material into a high-fidelity Obsidian-ready knowledge artifact. Accepts either a YouTube URL to fetch, or a pasted transcript, caption dump, subtitle text, podcast transcript, lecture transcript, or video notes. Produces YAML frontmatter, YT-Transcription title, Mermaid concept map, deep-dive sections with dual-audience treatment, verbatim extraction with provenance labels, constructed resources, implementation checklist, appendices, and methodology telemetry. Triggers: 'convert this transcript', 'make an Obsidian note', 'knowledge artifact', 'transcript to notes', 'yt transcript', 'organize this transcript', 'create a study note from this', 'extract key points from transcript', 'forensic transcript', 'youtube to obsidian', 'extract this video', 'transcribe this video', 'get the transcript', 'process this youtube video', 'video to notes'."
+description: "Turns spoken-content source material into a high-fidelity Obsidian-ready knowledge artifact. Accepts a YouTube URL to fetch, or a pasted transcript, caption dump, subtitle text, podcast transcript, lecture transcript, or video notes. Produces YAML frontmatter, YT-Transcription title, Mermaid concept map, deep-dive sections with dual-audience treatment, verbatim extraction with provenance labels, constructed resources, implementation checklist, appendices, and methodology telemetry. Triggers: 'convert this transcript', 'make an Obsidian note', 'knowledge artifact', 'transcript to notes', 'yt transcript', 'organize this transcript', 'create a study note from this', 'extract key points from transcript', 'forensic transcript', 'youtube to obsidian', 'extract this video', 'transcribe this video', 'get the transcript', 'process this youtube video', 'video to notes'."
 license: MIT
 compatibility: |-
   Designed for Agent Skills-compatible clients (Claude Code, Codex, Hermes, Gemini, Qwen, KiloCode, OpenCode).
   Optional Python 3.9+ for the bundled fetch, validation, structure detection, and transcript normalization scripts.
   URL fetching additionally needs `youtube-transcript-api` and an OpenRouter key; transform-only use needs neither.
 metadata:
+  description-reviewed: "2026-11-10"
   author: aaaronmiller
   version: "3.0.0"
   category: "knowledge-management"

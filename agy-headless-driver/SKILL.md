@@ -1,8 +1,9 @@
 ---
 name: agy-headless-driver
-description: Plan, prompt, launch and supervise headless Antigravity CLI (agy -p) sessions so Claude Opus, Claude Sonnet, Gemini Pro and Gemini Flash deliver maximum-quality work inside Google's 5-hour and weekly quota windows and the 200k Claude context ceiling. Use this skill whenever you are about to delegate work to agy, write a prompt for an agy headless run, build or fix a driver script that calls agy, split a long task (multi-pass refinement, deliberative councils, spec work, large refactors, research synthesis) across agy sessions, recover from an agy RESOURCE_EXHAUSTED / 429 error, or decide which agy model pool should carry which part of a job, even if the user only says "run this in Antigravity", "hand it to agy" or "use the Google quota".
+description: "Plans, prompts, launches and supervises headless Antigravity CLI (agy -p) sessions so delegated work gets maximum quality inside agy's quota windows and context ceiling. Use when delegating work to agy, writing a prompt for an agy headless run, building or fixing a driver script that calls agy, splitting a long task (multi-pass refinement, deliberative councils, spec work, large refactors, research synthesis) across agy sessions, recovering from an agy RESOURCE_EXHAUSTED or 429 error, or choosing which agy model pool carries which part of a job. Triggers: 'run this in Antigravity', 'hand it to agy', 'use the Google quota'."
 license: MIT
 metadata:
+  description-reviewed: "2026-11-10"
   author: ice-ninja
   version: "1.3.0"
 ---

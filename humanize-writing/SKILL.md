@@ -1,8 +1,9 @@
 ---
 name: humanize-writing
-description: "AUTOMATIC ACTIVATION: Use this skill whenever generating prose, documents, or written content exceeding three paragraphs. Also use when: writing sounds robotic, AI-generated, formulaic, too formal, stiff, awkward, wooden, boring, generic, bland, corporate, doesn't sound like me. Triggers: 'make this sound human', 'sounds like AI', 'humanize this', 'more natural', 'authentic voice', 'less corporate', 'more conversational', 'remove clichés', 'polish my writing', 'edit for voice', 'make it flow', 'too robotic', 'stiff writing', 'doesn’t sound right', 'AI tells', 'passive voice'. Content types: blog posts, emails, marketing copy, essays, documentation, LinkedIn posts, cover letters, articles, reports, proposals, newsletters, social media posts, video scripts, product descriptions. Apply automatically to any substantial written output to ensure human voice."
+description: "Rewrites AI-sounding prose into a natural human voice. AUTOMATIC ACTIVATION: use whenever generating prose, documents, or written content exceeding three paragraphs. Also use when: writing sounds robotic, AI-generated, formulaic, too formal, stiff, awkward, wooden, boring, generic, bland, corporate, doesn't sound like me. Triggers: 'make this sound human', 'sounds like AI', 'humanize this', 'more natural', 'authentic voice', 'less corporate', 'more conversational', 'remove clichés', 'polish my writing', 'edit for voice', 'make it flow', 'too robotic', 'stiff writing', 'doesn’t sound right', 'AI tells', 'passive voice'. Content types: blog posts, emails, marketing copy, essays, documentation, LinkedIn posts, cover letters, articles, reports, proposals, newsletters, social media posts, video scripts, product descriptions. Apply automatically to any substantial written output to ensure human voice."
 license: MIT
 metadata:
+  description-reviewed: "2026-11-10"
   author: ice-ninja
   version: "1.1"
 ---
