@@ -61,7 +61,10 @@ Intent is a maintained asset in its own right, alongside requirements and design
 ## Two ways this skill is used
 
 1. **Invoked.** The skill runs its phases and gates below.
-2. **Referenced.** Another task is told to "prepare for spec-prep" or "make this spec-prep ready" without invoking it. The reading model uses this file and `references/artifact-contract.md#canonical-artifact-contract` as a format contract only: it shapes its deliverables as a compact input handoff (the intent, requirements and design trio, `sources/` with verbatim prompts, a source-disposition map, supporting material, a conversion guide, delivery.json) with the governance set the delivery checker requires (a constitution draft at `.specify/memory/constitution.md`, build-root AGENTS.md, reset-handoff.md, an optional CLAUDE.md adapter), and completes or schedules the prior-art gate.
+2. **Referenced.** Another task is told to "prepare for spec-prep" or "make this spec-prep ready" without invoking it. The reading model uses this file and `references/artifact-contract.md#canonical-artifact-contract` as a format contract only.
+   - Deliverables: a compact input handoff (the intent, requirements and design trio, `sources/` with verbatim prompts, a source-disposition map, supporting material, a conversion guide, delivery.json).
+   - Governance the delivery checker requires: a constitution draft at `.specify/memory/constitution.md`, build-root AGENTS.md, reset-handoff.md, and an optional CLAUDE.md adapter.
+   - It completes or schedules the prior-art gate.
    A referenced use never authors native Spec Kit outputs, never writes a receipt and never claims preparation ran. It records `operation: input-handoff` and leaves specification preparation as the next operation.
 
 Listed artifacts are the minimum shape, not the complete set: data, references, corpora and any other project-specific resource are preserved ("Supporting material" in the artifact contract), never dropped for lacking a table entry.

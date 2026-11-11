@@ -17,9 +17,9 @@ eye.
               names turned out to be a pipeline split rather than a duplicate.
               Only the trigger sets show it.
 
-              The inverse matters as much: a skill quoting NO trigger phrases
-              cannot activate on intent at all. It is a resource in everything
-              but filing. `backtranslation-spec-auditor` sat in that state.
+              A skill quoting NO trigger phrases is listed as undeclared: it
+              may still activate from its prose, but trigger collisions cannot
+              be checked for it.
 
   DISCLOSURE  A skill whose references/, scripts/ or assets/ targets are absent
               is inert no matter how good its prose is. On that same corpus 21
@@ -88,6 +88,15 @@ DISCLOSURE_RE = re.compile(
 # Output-path patterns ("data/reports/YYYY-MM-DD-x.md") name files a run will
 # create, not files the skill ships; they are not broken references.
 PLACEHOLDER_RE = re.compile(r"YYYY|MM-DD|XXXX|\{\{|<[^>]+>|\*")
+# Prefixes that mean "this skill's folder": "${CLAUDE_SKILL_DIR}/scripts/x.py",
+# "$SKILL_ROOT/scripts/x.py" and "./scripts/x.py" all name scripts/x.py.
+SKILL_VARS = {"CLAUDE_SKILL_DIR", "SKILL_ROOT", "SKILL_DIR"}
+SKILL_PREFIX_RE = re.compile(r"\$\{?(?:" + "|".join(SKILL_VARS) + r")\}?/|(?<![\w/.~$-])\./")
+# A path rooted in another tree (a Windows drive, a WSL mount, a home
+# directory). Relative paths that follow one on the same line belong to that
+# tree: system-checkup/SKILL.md names data/annotations.json inside
+# C:\Users\...\downloads-desktop-cleanup.livingdoc, not inside the skill.
+FOREIGN_ROOT_RE = re.compile(r"(?<![\w])(?:[A-Za-z]:[\\/]|/mnt/|~/|\$HOME/|/home/|/Users/)")
 # Double-quoted phrases, or single-quoted ones not touching a letter (so the
 # apostrophes in "user's" or "don't" never pair up into a false trigger).
 # Single quotes matter: Gemini's validator forbids inner double quotes in a
@@ -128,6 +137,117 @@ def find_skills(root: Path) -> list[Path]:
 def frontmatter(text: str) -> str:
     m = re.match(r"^---\n(.*?)\n---", text, re.S)
     return m.group(1) if m else ""
+
+
+def has_skill_frontmatter(t: str) -> bool:
+    """True when a file opens with frontmatter holding both name: and description:."""
+    t = t.lstrip("﻿").replace("\r\n", "\n")
+    if not t.startswith("---\n"):
+        return False
+    end = t.find("\n---", 4)
+    head = t[4:end] if end != -1 else ""
+    return bool(re.search(r"^name:", head, re.M) and re.search(r"^description:", head, re.M))
+
+
+def own_lines(text: str):
+    """Yield each line cut at the first path rooted in another tree, with the
+    skill-folder prefixes (${CLAUDE_SKILL_DIR}/, $SKILL_ROOT/, ./) removed so a
+    prefixed path reads as the skill-relative path it names."""
+    for line in text.splitlines():
+        line = SKILL_PREFIX_RE.sub(" ", line)
+        m = FOREIGN_ROOT_RE.search(line)
+        yield line[:m.start()] if m else line
+
+
+def unfenced(text: str) -> str:
+    """The text with fenced code blocks blanked (line count kept). A heading or
+    link inside a fence is template text, not part of the document."""
+    out, fence = [], None
+    for line in text.splitlines():
+        m = re.match(r"^ {0,3}(`{3,}|~{3,})", line)
+        if fence is None and m:
+            fence = m.group(1)[0] * len(m.group(1))
+            out.append("")
+        elif fence is not None:
+            if line.strip().startswith(fence) and not line.strip().strip(fence[0]).strip():
+                fence = None
+            out.append("")
+        else:
+            out.append(line)
+    return "\n".join(out)
+
+
+# A word that tells the agent to run or load a file. "sh" and "py" never match
+# inside a file name ("install.sh"): the cue may not follow a dot or slash.
+RUN_CUE_RE = re.compile(r"(?<![\w./-])(run|execute|invoke|call|python3?|bash|sh|node|bun|uv run|pwsh)\b", re.I)
+LOAD_CUE_RE = re.compile(r"(?<![\w./-])(see|read|load|open|follow|consult)\b", re.I)
+# Lines that quote an example rather than give an instruction.
+ILLUSTRATION_RE = re.compile(r"\bsays?:|\be\.g\.|\bfor example\b|\bexample:", re.I)
+# Fences holding a file tree, a template or sample prose, not commands.
+EXAMPLE_FENCE_RE = re.compile(r"^ {0,3}(?:`{3,}|~{3,})\s*(?:text|txt|tree|plain|plaintext|markdown|md)\s*$", re.I)
+
+
+def reference_lines(text: str):
+    """Lines of a references/ file that can claim the skill ships a file.
+
+    A references file often describes files in the user's project or files a
+    run will create ("Create one script per operation: scripts/get_item.py").
+    Only a line that tells the agent to run or load something counts, and
+    example fences and quoted illustrations are skipped.
+    """
+    in_example, fence = False, None
+    for line in text.splitlines():
+        m = re.match(r"^ {0,3}(`{3,}|~{3,})", line)
+        if m and fence is None:
+            fence, in_example = m.group(1)[0], bool(EXAMPLE_FENCE_RE.match(line))
+            continue
+        if m and fence and m.group(1)[0] == fence and not line.strip().strip(fence):
+            fence, in_example = None, False
+            continue
+        if in_example or ILLUSTRATION_RE.search(line):
+            continue
+        if RUN_CUE_RE.search(line) or LOAD_CUE_RE.search(line):
+            yield line
+
+
+def declared_refs(path: Path, skill_text: str, skill_names: frozenset = frozenset()) -> dict[str, list[str]]:
+    """Disclosure targets named in SKILL.md and references/**/*.md, mapped to
+    the files that name them when missing (empty list when present).
+
+    SKILL_NAMES are the other skills in the corpus: a path right after one
+    ("the humanize-writing skill's references/x.md") belongs to that skill.
+    """
+    sources = [("SKILL.md", list(own_lines(skill_text)), path)]
+    ref_dir = path / "references"
+    if ref_dir.is_dir():
+        for p in sorted(ref_dir.rglob("*.md")):
+            if p.is_file() and not any(s in p.relative_to(path).parts for s in SKIP_DIRS):
+                t = p.read_text(encoding="utf-8", errors="replace")
+                sources.append((p.relative_to(path).as_posix(),
+                                list(own_lines("\n".join(reference_lines(t)))), p.parent))
+    siblings = sorted(skill_names - {path.name}, key=len, reverse=True)
+    sibling_re = re.compile(r"(?<![\w-])(?:" + "|".join(map(re.escape, siblings)) + r")\W{0,6}$") if siblings else None
+    named_skill_re = re.compile(r"(?<![\w-])([\w-]+)\**\s+skill'?s?\W{0,6}$", re.I)
+
+    def other_skill(before: str) -> bool:
+        m = named_skill_re.search(before)
+        if m and m.group(1).lower() not in {"this", "the", "that", "each", "every", "a", "own", "same", "your", path.name}:
+            return True
+        return bool(sibling_re and sibling_re.search(before))
+
+    out: dict[str, list[str]] = {}
+    for rel, lines, base in sources:
+        for line in lines:
+            for m in DISCLOSURE_RE.finditer(line):
+                ref = m.group(1)
+                if PLACEHOLDER_RE.search(ref) or other_skill(line[:m.start()]):
+                    continue
+                # A reference file may name a sibling relative to itself.
+                if (path / ref).exists() or (base / ref).exists():
+                    out.setdefault(ref, [])
+                else:
+                    out.setdefault(ref, []).append(rel)
+    return out
 
 
 def description(text: str) -> str:
@@ -250,6 +370,70 @@ def portability(path: Path, raw: bytes) -> list[str]:
 
 
 ARCHIVE_SUFFIXES = {".zip", ".skill", ".tar", ".gz", ".tgz"}
+BACKUP_RE = re.compile(r"\.(?:bak|orig|old)$|~$", re.I)
+TEXT_SUFFIXES = {".md", ".txt", ".json", ".yaml", ".yml", ".toml", ".py", ".sh", ".js", ".mjs",
+                 ".cjs", ".ts", ".ps1", ".html"}
+# Files a skill legitimately ships without naming them in prose.
+COMPANIONS = {"readme.md", "changelog.md", "marketplace.json", "package.json",
+              "requirements.txt", "pyproject.toml"}
+LIVE_DIR_COMPANIONS = {"__init__.py", "package-lock.json", "bun.lockb", "pnpm-lock.yaml"}
+
+
+COMPANIONS |= {
+    "skill.md.tmpl",      # source template a build step renders into SKILL.md
+    ".provenance.yaml",   # provenance record of where the skill came from
+    ".provenance.json",   # the same record in JSON
+}
+COMPANION_DIRS = {
+    "tests",  # test suites run by a test runner, not loaded by the agent
+    "evals",  # eval sets run by skill-creator style harnesses
+}
+
+
+def is_companion(p: Path, root: Path | None = None) -> bool:
+    n = p.name.lower()
+    if root is not None and p.relative_to(root).parts[0] in COMPANION_DIRS:
+        return True
+    return n in COMPANIONS or n.startswith(("license", "licence"))
+
+
+IMPORT_RE = re.compile(r"^\s*(?:from\s+\.?([\w.]+)\s+import|import\s+([\w.]+))", re.M)
+
+
+def reach(path: Path, skill_text: str, files: list[Path]) -> tuple[set[Path], set[Path]]:
+    """Files reachable from SKILL.md, and the subset referenced by path.
+
+    A file is reachable when SKILL.md or a reachable text file names it by
+    relative path or basename, or imports it as a Python module. It is
+    referenced by path when the naming text holds its path relative to the
+    skill root or to the naming file's folder.
+    """
+    reachable: set[Path] = set()
+    by_path: set[Path] = set()
+    frontier = [(skill_text, path)]
+    while frontier:
+        text, base = frontier.pop()
+        modules = {part for a, b in IMPORT_RE.findall(text) for part in (a or b).split(".")}
+        for p in files:
+            rel = p.relative_to(path).as_posix()
+            try:
+                rel_here = p.relative_to(base).as_posix()
+            except ValueError:
+                rel_here = rel
+            if ("/" in rel and rel in text) or ("/" in rel_here and rel_here in text):
+                by_path.add(p)
+            if p in reachable:
+                continue
+            if rel in text or p.name in text or (p.suffix == ".py" and p.stem in modules):
+                reachable.add(p)
+                if p.suffix in TEXT_SUFFIXES:
+                    frontier.append((p.read_text(encoding="utf-8", errors="replace"), p.parent))
+    return reachable, by_path
+
+
+def skill_files(path: Path) -> list[Path]:
+    return [p for p in path.rglob("*") if p.is_file() and p != path / "SKILL.md"
+            and not any(s in p.relative_to(path).parts for s in SKIP_DIRS)]
 
 
 def shipped_but_unreferenced(path: Path, skill_text: str) -> list[str]:
@@ -263,40 +447,54 @@ def shipped_but_unreferenced(path: Path, skill_text: str) -> list[str]:
     Reddit draft), plus an 84 KB packaged zip and a nested full copy.
     """
     out: list[str] = []
-    every = [p for d in DISCLOSURE_DIRS if (path / d).is_dir()
-             for p in (path / d).rglob("*") if p.is_file()]
-    junk = [p for p in every if "__pycache__" in p.parts or ".omc" in p.parts
+    # The whole folder ships, so the whole folder is scanned: a SKILL.md.bak at
+    # the root sat unflagged in skill-audit itself while only DISCLOSURE_DIRS
+    # were walked (independent validation, 2026-11-10).
+    every = skill_files(path)
+    junk = [p for p in every if {"__pycache__", ".omc", ".pytest_cache", ".mypy_cache", ".ruff_cache"} & set(p.parts)
             or p.suffix in (".pyc", ".pyo") or p.name == ".DS_Store"]
-    files = [p for p in every if p not in junk]
-    import_re = re.compile(r"^\s*(?:from\s+\.?([\w.]+)\s+import|import\s+([\w.]+))", re.M)
-    reachable: set[Path] = set()
-    frontier = [skill_text]
-    while frontier:
-        text = frontier.pop()
-        modules = {part for a, b in import_re.findall(text) for part in (a or b).split(".")}
-        for p in files:
-            if p in reachable:
-                continue
-            rel = p.relative_to(path).as_posix()
-            if rel in text or p.name in text or (p.suffix == ".py" and p.stem in modules):
-                reachable.add(p)
-                if p.suffix in (".md", ".txt", ".json", ".yaml", ".yml", ".py", ".sh", ".js", ".mjs", ".ts"):
-                    frontier.append(p.read_text(encoding="utf-8", errors="replace"))
-    # Companion files are consumed by tooling, not named in prose: a package
-    # init, a node manifest or a lockfile is live when anything beside it is.
-    companions = {"__init__.py", "package.json", "package-lock.json", "requirements.txt",
-                  "pyproject.toml", "bun.lockb", "pnpm-lock.yaml"}
-    live_dirs = {p.parent for p in reachable}
-    reachable |= {p for p in files if p.name in companions and p.parent in live_dirs}
+    backups = [p for p in every if p not in junk and BACKUP_RE.search(p.name)]
+    root_archives = {p for p in every if p.parent == path and p.suffix.lower() in ARCHIVE_SUFFIXES}
+    files = [p for p in every if p not in junk and p not in backups and p not in root_archives
+             and not is_companion(p, path)]
+    reachable, by_path = reach(path, skill_text, files)
+    # Lockfiles and package inits are consumed by tooling, not named in prose:
+    # each is live when anything beside it is.
+    live_dirs = {p.parent for p in reachable} | {path}
+    reachable |= {p for p in files if p.name in LIVE_DIR_COMPANIONS and p.parent in live_dirs}
     orphans = sorted(p.relative_to(path).as_posix() for p in files if p not in reachable)
     if orphans:
         out.append(f"WARN: {len(orphans)} shipped file(s) nothing references: {', '.join(orphans[:6])}"
                    + (" ..." if len(orphans) > 6 else ""))
+    if backups:
+        names = sorted(p.relative_to(path).as_posix() for p in backups)
+        out.append(f"WARN: {len(names)} stray backup file(s) ship with the skill: {', '.join(names[:6])}"
+                   " (move them out of the skill folder)")
+    # A second skill definition anywhere but references/ (references/ files
+    # are covered by the hidden-skill check in effectiveness()). Companions
+    # are exempt, and so is a non-backup file SKILL.md (or a file it reaches)
+    # names by path: skill-doctor loads `$SKILL_ROOT/scorers/efficiency.md`,
+    # an upstream rubric whose name/description keys are its own (b4886c1).
+    shadow = []
+    for p in every:
+        rel = p.relative_to(path)
+        if p.name == "SKILL.md" or p in junk or is_companion(p, path) or rel.parts[0] == "references" \
+                or (p in by_path and p not in backups):
+            continue
+        try:
+            with p.open("rb") as fh:
+                head = fh.read(4096).decode("utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        if has_skill_frontmatter(head):
+            shadow.append(rel.as_posix())
+    if shadow:
+        out.append(f"WARN: {len(shadow)} file(s) other than SKILL.md carry skill frontmatter "
+                   f"(name + description): {', '.join(sorted(shadow)[:6])}")
     if junk:
         out.append(f"WARN: {len(junk)} cache or session-state file(s) ship with the skill "
                    f"(__pycache__, .omc, .pyc); exclude them")
-    archives = sorted(p.name for p in path.iterdir()
-                      if p.is_file() and p.suffix.lower() in ARCHIVE_SUFFIXES)
+    archives = sorted(p.name for p in root_archives)
     if archives:
         out.append(f"WARN: packaged archive(s) inside the skill: {', '.join(archives)} (build packages outside the skill folder)")
     nested_skills = sorted(p.parent.relative_to(path).as_posix() for p in path.rglob("SKILL.md")
@@ -323,6 +521,75 @@ def gh_slug(heading: str) -> str:
     return re.sub(r"[^\w\- ]", "", heading.strip().lower()).replace(" ", "-")
 
 
+MAX_SKILL_BYTES = 25_000
+
+
+def kb(size: int) -> str:
+    """Decimal KB with one decimal plus the exact count: 25,164 B is 25.2 KB,
+    never a floor-divided "24 KB" that reads like a pass."""
+    return f"{size / 1000:.1f} KB ({size:,} B)"
+
+
+# Credential shapes. Anything containing EXAMPLE (AWS documents
+# AKIAIOSFODNN7EXAMPLE) or an obvious placeholder word is documentation.
+SECRET_RE = re.compile(
+    r"sk-ant-[A-Za-z0-9_-]{20,}|sk-proj-[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9]{20,}"
+    r"|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}"
+    r"|xox[bp]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{35}|AKIA[0-9A-Z]{16}")
+PLACEHOLDER_TOKEN_RE = re.compile(r"example|your|placeholder|redacted|dummy|xxxx", re.I)
+SECRET_SUFFIXES = {".md", ".txt", ".json", ".yaml", ".yml", ".toml", ".py", ".sh", ".js", ".ts", ".env"}
+
+
+def is_secret_scanned(p: Path) -> bool:
+    n = p.name.lower()
+    return p.suffix.lower() in SECRET_SUFFIXES or n == ".env" or n.startswith(".env.")
+
+
+# Files that live in the user's project, not in the skill: a framework entry
+# point ("python manage.py migrate", "node server.js") or any bare name on a
+# line that places it in "your project", "the repo" or the user's code. Such a
+# name is an instruction about someone else's tree, so it is never a ghost.
+PROJECT_ENTRYPOINTS = {"manage.py", "setup.py", "app.py", "main.py", "wsgi.py", "asgi.py",
+                       "conftest.py", "server.js", "server.ts", "index.js", "index.ts", "app.js",
+                       "app.ts", "main.js", "main.ts", "gulpfile.js", "webpack.config.js",
+                       "vite.config.js", "vite.config.ts", "next.config.js", "jest.config.js"}
+PROJECT_CUE_RE = re.compile(
+    r"\b(?:your|the user'?s|their)\s+(?:own\s+)?(?:project|repo|repository|app|application|codebase|code)\b"
+    r"|\bthe\s+(?:repo|repository|project|codebase)\b", re.I)
+
+
+def ghost_tool(path: Path, src: Path, tok: str, line: str, text: str, names: set[str]) -> str | None:
+    """Return the name to report when TOK is a tool the skill runs but does
+    not ship, else None. Skill-root prefixes and disclosure paths resolve
+    against the skill folder; other variables and other trees are skipped."""
+    m = re.match(r"\$\{?(\w+)\}?/", tok)
+    strict = False
+    if m:
+        if m.group(1) not in SKILL_VARS:
+            return None  # $CK/scripts/x.py: a variable naming another tree
+        rel, strict = tok[m.end():], True
+    elif tok.startswith("./"):
+        rel = tok[2:]
+    else:
+        rel = tok
+    if "/" in rel or strict:
+        if "/" in rel and rel.split("/")[0] not in DISCLOSURE_DIRS:
+            return None  # src/server.js: a path in the user's tree
+        if PLACEHOLDER_RE.search(rel) or (path / rel).exists() or (src.parent / rel).exists():
+            return None
+        return rel
+    tok = rel
+    if tok in names or on_path(tok):
+        return None
+    if (tok.endswith(".js") and tok[0].isupper()) \
+            or f"//{tok}" in text or f"{tok}/" in text \
+            or re.match(r"(your|my|example|sample|foo|bar)[_-]|script\.py$", tok, re.I):
+        return None  # product name (Node.js), site (crt.sh), or placeholder
+    if tok.lower() in PROJECT_ENTRYPOINTS or PROJECT_CUE_RE.search(line):
+        return None
+    return tok
+
+
 def effectiveness(path: Path, skill_text: str) -> list[str]:
     """Defects that leave a skill valid but less effective. Each check comes
     from the 2026-11-10 spec-prep review, where every one fired.
@@ -331,67 +598,104 @@ def effectiveness(path: Path, skill_text: str) -> list[str]:
     """
     out: list[str] = []
     texts = {p: p.read_text(encoding="utf-8", errors="replace")
-             for p in path.rglob("*.md") if not any(s in p.parts for s in SKIP_DIRS)}
+             for p in path.rglob("*.md")
+             if p.is_file() and not any(s in p.relative_to(path).parts for s in SKIP_DIRS)}
     texts[path / "SKILL.md"] = skill_text
 
-    # 1. Dead file#anchor links between the skill's own markdown files.
-    heads = {p: {gh_slug(h) for h in re.findall(r"^#{1,6} (.+)$", t, re.M)} for p, t in texts.items()}
+    # 1. Dead links and anchors. A file#anchor target resolves relative to the
+    # file that holds it (or, by convention, to the skill root); (#anchor)
+    # resolves within the same file. Fenced code is template text: neither
+    # its headings nor its links count.
+    heads: dict[Path, set[str]] = {}
+
+    def anchors(p: Path) -> set[str]:
+        key = p.resolve()
+        if key not in heads:
+            t = unfenced(texts.get(p) or p.read_text(encoding="utf-8", errors="replace"))
+            seen: dict[str, int] = {}
+            found = set(re.findall(r"""(?:id|name)=["']([\w-]+)["']|\{#([\w-]+)\}""", t))
+            slugs = {a or b for a, b in found}
+            for h in re.findall(r"^#{1,6}\s+(.+?)\s*#*\s*$", t, re.M):
+                s = gh_slug(h)
+                slugs.add(s if s not in seen else f"{s}-{seen[s]}")
+                seen[s] = seen.get(s, 0) + 1
+            heads[key] = slugs
+        return heads[key]
+
     dead = set()
+    file_anchor = re.compile(r"(?<![\w/~:$\\-])([\w.-]+(?:/[\w.-]+)*\.md)#([\w-]+)")
+    md_names = {q.name for q in texts}
     for p, t in texts.items():
-        for target, anchor in re.findall(r"((?:references|assets|templates)/[\w./-]+\.md)#([\w-]+)", t):
-            tp = path / target
-            if not tp.exists():
-                dead.add(f"{target} (missing file)")
-            elif anchor not in heads.get(tp, set()):
-                dead.add(f"{target}#{anchor}")
+        rel = p.relative_to(path).as_posix()
+        for line in own_lines(unfenced(t)):
+            for target, anchor in file_anchor.findall(line):
+                cands = [c for c in (p.parent / target, path / target) if c.is_file()]
+                if not cands:
+                    # A bare file name found nowhere in the skill names a
+                    # generated or user document ("intent.md#prior-art" in
+                    # spec-prep), not a shipped file. Targets with a
+                    # directory part are still checked.
+                    if "/" in target or target in md_names:
+                        dead.add(f"{target} (missing file)")
+                elif not any(anchor in anchors(c) for c in cands):
+                    dead.add(f"{target}#{anchor}")
+            for anchor in re.findall(r"\]\(#([\w-]+)\)", line):
+                if anchor not in anchors(p):
+                    dead.add(f"{rel}#{anchor}")
     if dead:
         out.append(f"WARN: {len(dead)} dead link(s) or anchor(s): {', '.join(sorted(dead)[:5])}")
 
     # 2. Ghost tools: scripts a skill tells the agent to run that do not exist.
-    walk = [p for p in path.rglob("*") if not any(s in p.parts for s in SKIP_DIRS)]
+    walk = [p for p in path.rglob("*") if not any(s in p.relative_to(path).parts for s in SKIP_DIRS)]
     names = {p.name for p in walk if p.is_file()}
     ghosts = set()
     # Only lines that tell the agent to run something count; naming a file as
     # a source or describing a check is not an instruction to execute it.
-    run_cue = re.compile(r"\b(run|execute|invoke|call|python3?|bash|sh|node|bun|uv run|pwsh)\b", re.I)
-    for t in texts.values():
-        for line in t.splitlines():
-            if not run_cue.search(line):
+    run_cue = RUN_CUE_RE
+    tool_re = re.compile(r"(?<![\w/.~$\\-])((?:\$\{?\w+\}?/|\./)?(?:[\w.-]+/)*[\w-]+\.(?:py|sh|mjs|cjs|js|ts|ps1))\b")
+    for p, t in texts.items():
+        for raw_line in t.splitlines():
+            if not run_cue.search(raw_line):
                 continue
-            for tok in re.findall(r"(?<![\w/.-])([\w-]+\.(?:py|sh|mjs|cjs|js|ts|ps1))\b", line):
-                if tok in names or on_path(tok):
-                    continue
-                if (tok.endswith(".js") and tok[0].isupper()) \
-                        or f"//{tok}" in t or f"{tok}/" in t \
-                        or re.match(r"(your|my|example|sample|foo|bar)[_-]|script\.py$", tok, re.I):
-                    continue  # product name (Node.js), site (crt.sh), or placeholder
-                ghosts.add(tok)
+            cut = FOREIGN_ROOT_RE.search(raw_line)
+            line = raw_line[:cut.start()] if cut else raw_line
+            for tok in tool_re.findall(line):
+                ghost = ghost_tool(path, p, tok, line, t, names)
+                if ghost:
+                    ghosts.add(ghost)
             for phrase in ("the listed tool", "bundled helper"):
                 if phrase in line and f'"{phrase}"' not in line:
                     ghosts.add(f"'{phrase}'")
     if ghosts:
         out.append(f"WARN: {len(ghosts)} tool(s) named but not shipped or on PATH: {', '.join(sorted(ghosts)[:6])}")
 
-    # 3. A second skill hiding inside this one (frontmatter with name+description).
-    def has_skill_frontmatter(t: str) -> bool:
-        if not t.startswith("---\n"):
-            return False
-        end = t.find("\n---", 4)
-        head = t[4:end] if end != -1 else ""
-        return bool(re.search(r"^name:", head, re.M) and re.search(r"^description:", head, re.M))
+    # 3. A second skill hiding in references/ (frontmatter with name+description).
+    # Files elsewhere are reported by shipped_but_unreferenced().
+    # A file SKILL.md (or a file it reaches) loads by path is a rubric or
+    # protocol it uses on purpose, not a hidden skill.
+    _, by_path = reach(path, skill_text, [p for p in texts if p.name != "SKILL.md"])
     nested = [p.relative_to(path).as_posix() for p, t in texts.items()
-              if p.name != "SKILL.md" and "references" in p.relative_to(path).parts
-              and has_skill_frontmatter(t)]  # rubric/agent files elsewhere use the same keys legitimately
+              if p.name != "SKILL.md" and p.relative_to(path).parts[0] == "references"
+              and p not in by_path and has_skill_frontmatter(t)]
     if nested:
         out.append(f"WARN: file(s) carrying a whole skill definition: {', '.join(nested[:4])}")
 
-    # 4. Private data in a redistributable skill.
+    # 4. Private data in a redistributable skill, in every text file it ships.
     private = set()
-    for p, t in texts.items():
+    for p in walk:
+        if not p.is_file() or not is_secret_scanned(p):
+            continue
+        try:
+            if p.stat().st_size > 2_000_000:
+                continue
+            t = texts.get(p) or p.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        rel = p.relative_to(path).as_posix()
         if re.search(r"claude\.ai/chat/[0-9a-f-]{8,}", t):
-            private.add(f"{p.name}: claude.ai chat URL")
-        if re.search(r"(?:sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16})", t):
-            private.add(f"{p.name}: credential-shaped token")
+            private.add(f"{rel}: claude.ai chat URL")
+        if any(not PLACEHOLDER_TOKEN_RE.search(m.group(0)) for m in SECRET_RE.finditer(t)):
+            private.add(f"{rel}: credential-shaped token")
     if private:
         out.append(f"ERROR: private data shipped: {', '.join(sorted(private))}")
 
@@ -404,8 +708,8 @@ def effectiveness(path: Path, skill_text: str) -> list[str]:
 
     # 6. Always-read budget, in bytes, and megalines that defeat line limits.
     size = len(skill_text.encode("utf-8"))
-    if size > 25_000:
-        out.append(f"WARN: SKILL.md is {size // 1024} KB (always read; keep under 25 KB)")
+    if size > MAX_SKILL_BYTES:
+        out.append(f"WARN: SKILL.md is {kb(size)} (always read; keep under {kb(MAX_SKILL_BYTES)})")
     long_lines = sum(1 for line in skill_text.splitlines() if len(line) > 600 and not line.startswith("description:"))
     if long_lines:
         out.append(f"WARN: {long_lines} SKILL.md line(s) over 600 chars")
@@ -416,7 +720,10 @@ def effectiveness(path: Path, skill_text: str) -> list[str]:
     if skill_ver:
         drift = []
         for p, t in texts.items():
-            if p.name == "SKILL.md" or not t.startswith("---\n"):
+            # Frontmatter under assets/ or templates/ versions the document
+            # the skill generates, not the skill.
+            parts = p.relative_to(path).parts
+            if p.name == "SKILL.md" or not t.startswith("---\n") or "assets" in parts or "templates" in parts:
                 continue
             head = t[4:t.find("\n---", 4)]
             m = re.search(r'^ver(?:sion)?:\s*"?([\d.]+)', head, re.M)
@@ -451,11 +758,14 @@ def baseline_triggers(root: Path, rel_skill_md: str, ref: str) -> set[str] | Non
 def audit(root: Path, threshold: int, baseline: str | None = None) -> dict:
     skills: dict[str, dict] = {}
     lost: dict[str, list[str]] = {}
-    for path in find_skills(root):
+    found = find_skills(root)
+    skill_names = frozenset(p.name for p in found)
+    for path in found:
         raw = (path / "SKILL.md").read_bytes()
         text = raw.decode("utf-8", errors="replace").replace("\r\n", "\n")
-        declared = {m.group(1) for m in DISCLOSURE_RE.finditer(text) if not PLACEHOLDER_RE.search(m.group(1))}
-        missing = sorted(r for r in declared if not (path / r).exists())
+        declared = declared_refs(path, text, skill_names)
+        missing = sorted(r if srcs == ["SKILL.md"] else f"{r} (in {', '.join(sorted(set(srcs)))})"
+                         for r, srcs in declared.items() if srcs)
         skills[str(path.relative_to(root))] = {
             "triggers": sorted(triggers(description(text))),
             "declared_refs": len(declared),
@@ -544,7 +854,7 @@ def main() -> int:
         print(f"        shared: {', '.join(c['shared'][:8])}")
 
     print(f"\n== NO DECLARED TRIGGERS ({len(result['undeclared_triggers'])}) ==")
-    print("  These cannot be compared, and may not activate on intent at all.")
+    print("  Each declares no quoted trigger phrases; trigger collisions cannot be checked for it.")
     for n in result["undeclared_triggers"]:
         print(f"    {n}")
 

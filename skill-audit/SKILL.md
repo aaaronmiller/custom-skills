@@ -5,7 +5,7 @@ license: MIT
 metadata:
   description-reviewed: "2026-11-10"
   author: ice-ninja / Hermes Agent
-  version: "2.4.0"
+  version: "2.5.0"
   updated: "2026-11-10"
   tags: "planning, automation, skills"
 ---
@@ -17,7 +17,10 @@ metadata:
 ## Mechanical checks (run these first)
 
 Six checks are arithmetic, not judgement, and none is reliable done by eye.
-Run them before any deep read so the judgement work starts from facts.
+Run them before any deep read so the judgement work starts from facts. Rules,
+heuristics and measured cases: `references/mechanical-checks.md`. Each check
+has a tripping and a healthy fixture in `tests/test_audit_mechanical.py`; run
+`python3 -m unittest discover -s tests -v` from this folder after changing it.
 
 ```bash
 python3 scripts/audit_mechanical.py <skills-root>
@@ -28,56 +31,49 @@ python3 scripts/audit_mechanical.py <skills-root> --json --threshold 50
 the same activation, and which one loads is arbitrary. Name similarity does not
 find this: in the 2026-08-22 audit, `deprecated/strata` and `strata-authoring`
 shared 100% of their quoted triggers while two skills with near-identical names
-turned out to be a pipeline split rather than a duplicate. The inverse matters
-as much - a skill quoting no trigger phrases cannot activate on intent at all,
-and is a resource in everything but filing.
+turned out to be a pipeline split rather than a duplicate. A skill that
+declares no quoted trigger phrases is listed as undeclared: it may still
+activate from its prose, but trigger collisions cannot be checked for it.
 
 **Progressive-disclosure integrity.** A skill whose `references/`, `scripts/`
 or `assets/` targets are missing is inert regardless of how good its prose is.
 On that corpus, 21 of 39 skills had every target missing, silently: a script
 had emptied the directories five weeks earlier and the SKILL.md files were
-untouched, so nothing looked wrong from the index.
+untouched, so nothing looked wrong from the index. Paths come from SKILL.md and
+from run or load instructions in `references/*.md`; `${CLAUDE_SKILL_DIR}/`,
+`$SKILL_ROOT/` and `./` resolve to the skill folder; a path after another
+tree's root (`C:\`, `/mnt/`, `~/`) or another skill's name is skipped.
 
-**Shipped but unreferenced.** The inverse of disclosure integrity: a file under
-`references/`, `scripts/` or `assets/` that SKILL.md never reaches (directly,
-through another reached file, or by a Python import) still ships to every
-harness and every upload. Also flags packaged archives (`.skill`, `.zip`) and
-nested skill copies inside a skill, and cache or session state (`__pycache__`,
-`.omc`). Measured 2026-11-10: spec-prep shipped an entire second skill, a
-research paper and a Reddit draft as references nothing loaded, and the first
-corpus run found 44 such files across 15 skills. Each orphan is a judgment
-call: reference it from SKILL.md if it is useful, or remove it.
+**Shipped but unreferenced.** The whole skill folder ships to every harness and
+upload, so the whole folder is scanned: files SKILL.md never reaches (directly,
+through a reached file, or by a Python import; README, LICENSE, CHANGELOG,
+marketplace.json and package manifests excepted), stray backups (`*.bak`,
+`*.orig`, `*.old`, `*~`), files other than SKILL.md carrying skill frontmatter
+outside `references/`, packaged archives, nested skill copies, and caches
+(`__pycache__`, `.pytest_cache`, `.omc`). Measured 2026-11-10: spec-prep
+shipped an entire second skill, a research paper and a Reddit draft nothing
+loaded. Each orphan is a judgment call: reference it or remove it.
 
-**Effectiveness.** Defects that leave a skill valid but weaker, each one found
-in the 2026-11-10 spec-prep review: dead `file#anchor` links; tools the skill
-tells the agent to run that neither ship nor exist on PATH (ghost tools, the
-phrases "the listed tool" and "bundled helper"); a file carrying a whole second
-skill's frontmatter; private data (claude.ai chat URLs, credential-shaped
-tokens; ERROR); changelog sections inside SKILL.md; an always-read SKILL.md over
-25 KB or lines over 600 characters; reference versions that disagree with the
-skill's version; dangling symlinks. All but private data are WARN: each needs a
-judgment about whether to fix the skill or the reference.
+**Effectiveness.** Defects that leave a skill valid but weaker, each found in
+the 2026-11-10 spec-prep review: dead links (`file#anchor` resolved from the
+file holding it, same-file `(#anchor)`, fenced headings ignored); ghost tools
+the skill tells the agent to run that neither ship nor exist on PATH
+(path-prefixed script paths resolve against the skill; files of the user's
+project such as `manage.py` are skipped); a file in `references/` carrying a
+whole second skill's frontmatter; private data in any text file (claude.ai
+chat URLs, Anthropic, OpenAI, GitHub, Slack, Google and AWS key shapes;
+`EXAMPLE` keys allowed; ERROR); changelog sections inside SKILL.md; an
+always-read SKILL.md over 25,000 bytes (reported as KB and bytes) or lines over
+600 characters; reference versions that disagree with the skill's (`assets/`
+and `templates/` exempt); dangling symlinks. All but private data are WARN.
 
 **Portability.** Claude Code parses frontmatter leniently; the claude.ai
 uploader, the Claude API, Codex and Gemini do not. A skill can work locally for
 months and still fail every upload: `create-viral-content` failed claude.ai with
 "malformed YAML frontmatter in SKILL.md" because its description closed a quoted
-string and continued on an indented line. On 2026-11-10, 48 of 94 skills in
-`custom-skills` failed at least one hard rule, mostly unexpected top-level keys.
-ERROR findings mean a platform rejects the skill; WARN findings mean it degrades.
-
-| Rule | Level | Source |
-|---|---|---|
-| Valid YAML mapping between `---` fences on line 1 | ERROR | quick_validate.py |
-| Top-level keys only `name`, `description`, `license`, `allowed-tools`, `metadata`, `compatibility` (everything else under `metadata`) | ERROR | quick_validate.py, claude.ai |
-| `name` kebab-case, 1-64 chars, no `anthropic` or `claude` | ERROR | quick_validate.py, Anthropic docs |
-| `description` non-empty, at most 1024 chars, no `<` or `>` | ERROR | quick_validate.py |
-| `name` equals the folder name | WARN | agentskills.io, opencode |
-| `description` on one physical line; if double-quoted, no inner `"` (quote triggers with `'`) | WARN | gemini-cli validate_skill.cjs |
-| `metadata` values are strings | WARN | agentskills.io |
-| Body under 500 lines; no nested `SKILL.md`; LF line endings, no BOM | WARN | Anthropic best practices, OpenAI API, opencode |
-| Description over 500 chars (Codex shortens it under budget) | WARN | openai/codex skills loader |
-| Claude Code-only keys (`argument-hint`, `disable-model-invocation`, ...) | WARN | strip when packaging for upload |
+string and continued on an indented line. ERROR findings mean a platform
+rejects the skill; WARN findings mean it degrades. The rule table with sources
+is in `references/mechanical-checks.md`.
 
 A skill that deliberately cannot be portable declares
 `metadata.portability: "local-only"` with a `metadata.portability-reason`;
@@ -92,8 +88,8 @@ activation: `references/description-revision-guide.md`, section
 pleonasm.
 
 Exit status is non-zero when a collision at or above the threshold exists, any
-skill has a portability ERROR, or a trigger was lost against the baseline, so
-this can gate a commit.
+skill has a portability ERROR or ships private data, or a trigger was lost
+against the baseline, so this can gate a commit.
 
 ## Core Audit Framework
 
@@ -130,7 +126,7 @@ Skills created by agent automation before curation existed typically exhibit:
 - External resources / references directory for progressive disclosure
 - Working code examples with proper syntax highlighting
 - Clear "When to Use" section
-- Not overly long: under 300 lines for body, deeper content in references/
+- Not overly long: body under 500 lines, deeper content in references/
 - No TODO/FIXME markers or unchecked checklists (those are project plans, not skills)
 
 ## Quick Start
@@ -184,7 +180,7 @@ Use this for each skill under review:
 - [ ] `name:` and `description:` fields present
 - [ ] Description uses third person with specific triggers
 - [ ] Body uses imperative/infinitive form (not second-person)
-- [ ] Under 300 lines (lean), deeper content in references/
+- [ ] Body under 500 lines (lean), deeper content in references/
 - [ ] References exist if referenced in SKILL.md
 - [ ] No unchecked `- [ ]` checklists (project plan flag)
 - [ ] No `TODO:` or `FIXME:` markers
