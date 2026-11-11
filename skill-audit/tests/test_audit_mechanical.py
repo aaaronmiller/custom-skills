@@ -265,6 +265,42 @@ class Unreferenced(AuditCase):
         self.skill("s", files={"misc/test_widget.py": "x\n"})
         self.assertIn("misc/test_widget.py", " ".join(self.run_audit()["unreferenced"]["s"]))
 
+    def test_directory_reference_covers_its_files(self):
+        self.skill("s", body=HEALTHY_BODY + "\nPhase scripts live in this skill's pipeline/ folder.\n",
+                   files={"pipeline/00-init.py": "x\n", "pipeline/deep/01-step.py": "x\n",
+                          "unrelated/orphan.md": "# Orphan\n"})
+        msg = " ".join(self.run_audit()["unreferenced"]["s"])
+        self.assertNotIn("pipeline/", msg)
+        self.assertIn("unrelated/orphan.md", msg)
+
+    def test_glob_covers_matches(self):
+        self.skill("s", body=HEALTHY_BODY + "\nValidate against `schemas/*.schema.json`.\n",
+                   files={"schemas/a.schema.json": "{}", "schemas/b.schema.json": "{}",
+                          "schemas/notes.txt": "x\n", "other/c.schema.json": "{}"})
+        msg = " ".join(self.run_audit()["unreferenced"]["s"])
+        self.assertNotIn("a.schema.json", msg)
+        self.assertNotIn("b.schema.json", msg)
+        self.assertIn("schemas/notes.txt", msg)
+        self.assertIn("other/c.schema.json", msg)
+
+    def test_range_covers_its_directory(self):
+        body = HEALTHY_BODY + "\nRender `prompts/W1-audit.md` through `prompts/W3-plan.md`.\n"
+        self.skill("s", body=body, files={"prompts/W1-audit.md": "x", "prompts/W2-mid.md": "x",
+                                          "prompts/W3-plan.md": "x", "briefs/W2-mid.md.txt": "x"})
+        msg = " ".join(self.run_audit()["unreferenced"]["s"])
+        self.assertNotIn("prompts/", msg)
+        self.assertIn("briefs/W2-mid.md.txt", msg)
+
+    def test_range_with_missing_endpoint_does_not_cover(self):
+        body = HEALTHY_BODY + "\nRender `prompts/W1-audit.md` through `prompts/W9-gone.md`.\n"
+        self.skill("s", body=body, files={"prompts/W1-audit.md": "x", "prompts/W2-mid.md": "x"})
+        self.assertIn("prompts/W2-mid.md", " ".join(self.run_audit()["unreferenced"]["s"]))
+
+    def test_generic_disclosure_dir_mention_reaches_nothing(self):
+        self.skill("s", body=HEALTHY_BODY + "\nKeep deeper content in references/ and scripts/.\n",
+                   files={"references/unused.md": "# Unused\n"})
+        self.assertIn("references/unused.md", " ".join(self.run_audit()["unreferenced"]["s"]))
+
     def test_healthy_companions_only(self):
         self.skill("s", files={"CHANGELOG.md": "x", "marketplace.json": "{}"})
         self.assertNotIn("s", self.run_audit()["unreferenced"])

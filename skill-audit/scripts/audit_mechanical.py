@@ -63,6 +63,7 @@ this can gate a commit.
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import itertools
 import json
 import os
@@ -407,6 +408,11 @@ def reach(path: Path, skill_text: str, files: list[Path]) -> tuple[set[Path], se
     relative path or basename, or imports it as a Python module. It is
     referenced by path when the naming text holds its path relative to the
     skill root or to the naming file's folder.
+
+    Directories and globs also reach files (see dir_and_glob_hits): a text
+    naming `pipeline/` reaches everything under it, `schemas/*.schema.json`
+    reaches every match, and `prompts/W1-a.md through prompts/W5-e.md`
+    reaches prompts/ when both endpoints exist.
     """
     reachable: set[Path] = set()
     by_path: set[Path] = set()
@@ -414,6 +420,7 @@ def reach(path: Path, skill_text: str, files: list[Path]) -> tuple[set[Path], se
     while frontier:
         text, base = frontier.pop()
         modules = {part for a, b in IMPORT_RE.findall(text) for part in (a or b).split(".")}
+        covered = dir_and_glob_hits(path, base, text, files)
         for p in files:
             rel = p.relative_to(path).as_posix()
             try:
@@ -424,11 +431,78 @@ def reach(path: Path, skill_text: str, files: list[Path]) -> tuple[set[Path], se
                 by_path.add(p)
             if p in reachable:
                 continue
-            if rel in text or p.name in text or (p.suffix == ".py" and p.stem in modules):
+            if rel in text or p.name in text or (p.suffix == ".py" and p.stem in modules) or p in covered:
                 reachable.add(p)
                 if p.suffix in TEXT_SUFFIXES:
                     frontier.append((p.read_text(encoding="utf-8", errors="replace"), p.parent))
     return reachable, by_path
+
+
+# A directory token ("pipeline/", "always_on/") not followed by more path.
+DIR_TOKEN_RE = re.compile(r"(?<![\w.~$/-])((?:[\w.-]+/)+)(?![\w.*-])")
+# A glob with a directory part ("schemas/*.schema.json", "prompts/W*.md").
+GLOB_TOKEN_RE = re.compile(r"(?<![\w.~$/-])((?:[\w.*-]+/)+[\w.*-]*\*[\w.*-]*)")
+# "prompts/W1-a.md through prompts/W5-e.md": a range over one directory.
+RANGE_RE = re.compile(r"(?<![\w.~$/-])((?:[\w.-]+/)+)([\w.-]+)`?\s+through\s+`?\1([\w.-]+)")
+
+
+def dir_and_glob_hits(path: Path, base: Path, text: str, files: list[Path]) -> set[Path]:
+    """Files a text reaches by naming their directory, a glob or a range.
+
+    Tokens resolve against the skill root and the naming file's folder and
+    must stay inside the skill. A bare top-level disclosure directory
+    ("references/", "scripts/") is convention talk ("deeper content in
+    references/"), not a load, so it reaches nothing; deeper directories
+    ("references/templates/") do.
+    """
+    text = SKILL_PREFIX_RE.sub(" ", text)
+    root = path.resolve()
+    dirs: set[Path] = set()
+
+    def inside(d: Path) -> bool:
+        try:
+            d.resolve().relative_to(root)
+            return True
+        except (ValueError, OSError):
+            return False
+
+    def probe(p: Path, kind: str) -> bool:
+        # Base64 blobs and other long runs look like paths; an over-long
+        # name raises OSError instead of returning False.
+        try:
+            return p.is_dir() if kind == "dir" else p.is_file()
+        except OSError:
+            return False
+
+    for tok in DIR_TOKEN_RE.findall(text):
+        parts = [s for s in tok.split("/") if s]
+        if (len(parts) == 1 and parts[0] in DISCLOSURE_DIRS) or any(len(s) > 255 for s in parts):
+            continue
+        for b in (path, base):
+            d = b / tok
+            if probe(d, "dir") and inside(d) and d.resolve() != root:
+                dirs.add(d.resolve())
+    for d_tok, first, last in RANGE_RE.findall(text):
+        for b in (path, base):
+            if probe(b / d_tok / first, "file") and probe(b / d_tok / last, "file") and inside(b / d_tok):
+                dirs.add((b / d_tok).resolve())
+    globs = GLOB_TOKEN_RE.findall(text)
+    hits: set[Path] = set()
+    for p in files:
+        rp = p.resolve()
+        if any(d in rp.parents for d in dirs):
+            hits.add(p)
+            continue
+        for g in globs:
+            gparts = g.split("/")
+            for b in (path, base):
+                try:
+                    rparts = p.relative_to(b).parts
+                except ValueError:
+                    continue
+                if len(rparts) == len(gparts) and all(fnmatch.fnmatchcase(r, s) for r, s in zip(rparts, gparts)):
+                    hits.add(p)
+    return hits
 
 
 def skill_files(path: Path) -> list[Path]:

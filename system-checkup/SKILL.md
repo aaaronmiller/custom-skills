@@ -84,3 +84,9 @@ The user decides per item in `Cleanup-Approvals.html` (by folder, approve/reject
 - The report link and the plan in four windows: now (no restart), maintenance window (agents idle), restart, after restart.
 - Exactly what was changed (should be almost nothing) and what awaits approval (improvement pass, removal script, ISO staging).
 - Anything the auto-mode classifier refused, and why.
+
+## Bundled resources
+
+Load or run these when the step they name comes up.
+
+- `prompts/`: Render the worker briefs from `prompts/W1-wsl-audit.md` through `prompts/W5-insider-upgrade.md` with `scripts/render-briefs.sh` before launching omp workers.

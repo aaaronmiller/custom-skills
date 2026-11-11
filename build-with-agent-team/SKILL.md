@@ -375,3 +375,10 @@ Now read the plan at `$ARGUMENTS[0]` and begin:
 9. When all agents return, run end-to-end validation yourself (start services, use agent-browser for UI testing)
 10. If validation fails, re-spawn the relevant agent with the specific issue
 11. Confirm the build meets the plan's requirements
+
+## Bundled resources
+
+Load or run these when the step they name comes up.
+
+- `AgentTeamsVsSubagents.png`: View `AgentTeamsVsSubagents.png` when deciding whether the build needs an agent team or plain subagents.
+- `example-plan/session-manager-plan.md`: Read `example-plan/session-manager-plan.md` for the plan shape `$ARGUMENTS[0]` should have before determining team structure.

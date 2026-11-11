@@ -397,6 +397,9 @@ Never claim a browser interaction was tested when only static validation was per
 
 ## Bundled resources
 
+- `examples/change-request.example.json`: Read `examples/change-request.example.json` when assembling a handoff payload or change-request export so it matches the change-request contract.
+- `schemas/*.schema.json`: Validate generated manifests and indexes against `schemas/*.schema.json` (e.g. `document.schema.json` for `public/content/index.json`) during scaffold, revision, migration, and packaging.
+
 Load or run these when the step they name comes up.
 
 - `templates/app/README.md`: Read `templates/app/README.md` when customizing the starter for its local run commands and content-layout contract.

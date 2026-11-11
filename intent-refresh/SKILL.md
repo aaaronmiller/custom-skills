@@ -120,3 +120,9 @@ Then commit the changed `intent-*.md` pages in `/home/cheta/LIVING_DOCUMENTS`. P
 ## Tests
 
 `python3 -I -m unittest discover -s /home/cheta/code/custom-skills/intent-refresh/pipeline/tests` holds the MP-08 security regressions. It uses a throwaway database, never the live one. See CHANGELOG.md for release history.
+
+## Bundled resources
+
+Load or run these when the step they name comes up.
+
+- `pipeline/`: Run the phase scripts in `pipeline/` in run order (`07-collect.py` through `12-render.py`, with `04-batch.py`/`05-merge.py` still used by `10-classify.py`) as `python3 -I <absolute path> ...`; every phase is resumable.

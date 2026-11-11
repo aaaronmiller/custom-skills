@@ -62,7 +62,12 @@ is scanned, not only the disclosure directories. Measured miss before 2.5.0:
 root unflagged.
 
 - Orphans: files nothing reaches from SKILL.md, directly, through a reached
-  text file, or by a Python import.
+  text file, or by a Python import. A reached text also reaches every file
+  under a directory it names (`pipeline/`, `always_on/`), every match of a
+  glob with a directory part (`schemas/*.schema.json`), and a directory named
+  as a range (`prompts/W1-a.md through prompts/W5-e.md`) when both endpoints
+  exist. A bare top-level `references/` or `scripts/` is convention talk and
+  reaches nothing.
 - Companions are exempt: `README.md`, `LICENSE*`, `CHANGELOG.md`,
   `marketplace.json`, `package.json`, `requirements.txt`, `pyproject.toml`;
   `__init__.py` and lockfiles beside any reached file. Development companions

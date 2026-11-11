@@ -404,3 +404,9 @@ When the user asks to install the post-commit auto-rebuild hook or wire graphify
 - Always show token cost in the report.
 - Never hide cohesion scores behind symbols - show the raw number.
 - Never run HTML viz on a graph with more than 5,000 nodes without warning the user.
+
+## Bundled resources
+
+Load or run these when the step they name comes up.
+
+- `always_on/`: Copy the matching snippet from `always_on/` into the project's agent config when wiring graphify as always-on (see `references/hooks.md`).
