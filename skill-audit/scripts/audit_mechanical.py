@@ -243,6 +243,63 @@ def portability(path: Path, raw: bytes) -> list[str]:
     return out
 
 
+ARCHIVE_SUFFIXES = {".zip", ".skill", ".tar", ".gz", ".tgz"}
+
+
+def shipped_but_unreferenced(path: Path, skill_text: str) -> list[str]:
+    """Inverse of disclosure integrity: files that ship with the skill but
+    nothing loads, plus packaged copies of skills inside the skill.
+
+    A file counts as reachable when SKILL.md names it (by relative path or
+    basename) or when a reachable text file names it, transitively.
+    Measured case (2026-11-10): spec-prep shipped 3 of 29 reference files
+    that nothing referenced (an entire second skill, a research paper and a
+    Reddit draft), plus an 84 KB packaged zip and a nested full copy.
+    """
+    out: list[str] = []
+    every = [p for d in DISCLOSURE_DIRS if (path / d).is_dir()
+             for p in (path / d).rglob("*") if p.is_file()]
+    junk = [p for p in every if "__pycache__" in p.parts or ".omc" in p.parts
+            or p.suffix in (".pyc", ".pyo") or p.name == ".DS_Store"]
+    files = [p for p in every if p not in junk]
+    import_re = re.compile(r"^\s*(?:from\s+\.?([\w.]+)\s+import|import\s+([\w.]+))", re.M)
+    reachable: set[Path] = set()
+    frontier = [skill_text]
+    while frontier:
+        text = frontier.pop()
+        modules = {part for a, b in import_re.findall(text) for part in (a or b).split(".")}
+        for p in files:
+            if p in reachable:
+                continue
+            rel = p.relative_to(path).as_posix()
+            if rel in text or p.name in text or (p.suffix == ".py" and p.stem in modules):
+                reachable.add(p)
+                if p.suffix in (".md", ".txt", ".json", ".yaml", ".yml", ".py", ".sh", ".js", ".mjs", ".ts"):
+                    frontier.append(p.read_text(encoding="utf-8", errors="replace"))
+    # Companion files are consumed by tooling, not named in prose: a package
+    # init, a node manifest or a lockfile is live when anything beside it is.
+    companions = {"__init__.py", "package.json", "package-lock.json", "requirements.txt",
+                  "pyproject.toml", "bun.lockb", "pnpm-lock.yaml"}
+    live_dirs = {p.parent for p in reachable}
+    reachable |= {p for p in files if p.name in companions and p.parent in live_dirs}
+    orphans = sorted(p.relative_to(path).as_posix() for p in files if p not in reachable)
+    if orphans:
+        out.append(f"WARN: {len(orphans)} shipped file(s) nothing references: {', '.join(orphans[:6])}"
+                   + (" ..." if len(orphans) > 6 else ""))
+    if junk:
+        out.append(f"WARN: {len(junk)} cache or session-state file(s) ship with the skill "
+                   f"(__pycache__, .omc, .pyc); exclude them")
+    archives = sorted(p.name for p in path.iterdir()
+                      if p.is_file() and p.suffix.lower() in ARCHIVE_SUFFIXES)
+    if archives:
+        out.append(f"WARN: packaged archive(s) inside the skill: {', '.join(archives)} (build packages outside the skill folder)")
+    nested_skills = sorted(p.parent.relative_to(path).as_posix() for p in path.rglob("SKILL.md")
+                           if p.parent != path and not any(s in p.parts for s in SKIP_DIRS))
+    if nested_skills:
+        out.append(f"WARN: nested skill copy inside the skill: {', '.join(nested_skills)}")
+    return out
+
+
 def baseline_triggers(root: Path, rel_skill_md: str, ref: str) -> set[str] | None:
     """Quoted triggers of a SKILL.md at git REF, or None when absent there."""
     import subprocess
@@ -272,6 +329,7 @@ def audit(root: Path, threshold: int, baseline: str | None = None) -> dict:
             "declared_refs": len(declared),
             "missing_refs": missing,
             "portability": portability(path, raw),
+            "unreferenced": shipped_but_unreferenced(path, text),
         }
         if baseline:
             rel = str((path / "SKILL.md").relative_to(root))
@@ -315,6 +373,7 @@ def audit(root: Path, threshold: int, baseline: str | None = None) -> dict:
         ),
         "baseline": baseline,
         "lost_triggers": lost,
+        "unreferenced": {n: s["unreferenced"] for n, s in skills.items() if s["unreferenced"]},
     }
 
 
@@ -368,6 +427,15 @@ def main() -> int:
     if not port:
         print("  none")
     for n, findings in sorted(port.items()):
+        print(f"  {n}")
+        for f in findings:
+            print(f"      {f}")
+
+    unref = result["unreferenced"]
+    print(f"\n== SHIPPED BUT UNREFERENCED ({len(unref)}) ==")
+    if not unref:
+        print("  none")
+    for n, findings in sorted(unref.items()):
         print(f"  {n}")
         for f in findings:
             print(f"      {f}")

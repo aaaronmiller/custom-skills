@@ -5,7 +5,7 @@ license: MIT
 metadata:
   description-reviewed: "2026-11-10"
   author: ice-ninja / Hermes Agent
-  version: "2.2.0"
+  version: "2.3.0"
   updated: "2026-11-10"
   tags: "planning, automation, skills"
 ---
@@ -16,7 +16,7 @@ metadata:
 
 ## Mechanical checks (run these first)
 
-Four checks are arithmetic, not judgement, and none is reliable done by eye.
+Five checks are arithmetic, not judgement, and none is reliable done by eye.
 Run them before any deep read so the judgement work starts from facts.
 
 ```bash
@@ -37,6 +37,16 @@ or `assets/` targets are missing is inert regardless of how good its prose is.
 On that corpus, 21 of 39 skills had every target missing, silently: a script
 had emptied the directories five weeks earlier and the SKILL.md files were
 untouched, so nothing looked wrong from the index.
+
+**Shipped but unreferenced.** The inverse of disclosure integrity: a file under
+`references/`, `scripts/` or `assets/` that SKILL.md never reaches (directly,
+through another reached file, or by a Python import) still ships to every
+harness and every upload. Also flags packaged archives (`.skill`, `.zip`) and
+nested skill copies inside a skill, and cache or session state (`__pycache__`,
+`.omc`). Measured 2026-11-10: spec-prep shipped an entire second skill, a
+research paper and a Reddit draft as references nothing loaded, and the first
+corpus run found 44 such files across 15 skills. Each orphan is a judgment
+call: reference it from SKILL.md if it is useful, or remove it.
 
 **Portability.** Claude Code parses frontmatter leniently; the claude.ai
 uploader, the Claude API, Codex and Gemini do not. A skill can work locally for
