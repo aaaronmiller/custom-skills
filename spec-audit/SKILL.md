@@ -4,7 +4,7 @@ description: "Audits spec-driven artifacts by reconstructing intent from a downs
 license: MIT
 metadata:
   version: "1.0.0"
-  lineage: "spec-workflow AUDIT gate (backtranslation-spec-auditor 2.2.0) split out; spec-prep covers CREATE and IMPLEMENT"
+  lineage: "spec-workflow AUDIT gate (backtranslation-spec-auditor 2.2.0) split out; spec-prep covers preparation (it stops before implementation)"
   tags: "spec-driven, audit"
 ---
 

@@ -1,6 +1,5 @@
 ---
 title: Artifact contract
-version: "4.0.0"
 tags: [spec-prep]
 ---
 
@@ -9,22 +8,19 @@ tags: [spec-prep]
 ## Contents
 
 - [Canonical artifact contract](#canonical-artifact-contract)
-- [Compatibility and Handoff](#compatibility-and-handoff)
+- [OpenSpec, Kiro and other toolchains](#openspec-kiro-and-other-toolchains)
 - [Optional default project workbench](#optional-default-project-workbench)
 - [Optional repository bootstrap](#optional-repository-bootstrap)
-- [Project constitution and task gates](#project-constitution-and-task-gates)
 
 ## Canonical artifact contract
 
-*Formerly `#canonical-artifact-contract`, version 2.6.0.*
-
-Read when deciding what to produce from ideation. This consolidates the artifact naming/mapping guidance previously spread across the core table and compatibility reference. Do not add a file merely to reproduce another file's contents.
+Read when deciding what to produce from ideation. Do not add a file merely to reproduce another file's contents.
 
 ### Compact input handoff
 
 Each workstream has one complete requirements.md (observable behavior/acceptance), design.md (mechanisms, data, interfaces and decisions) and intent.md (goals, constraints, stories and source authority). These are the obvious entry point, not three indexes to dozens of missing chapters. Put hardware profiles, decisions and contracts in the owning core document unless a necessary appendix/format justifies separation. Keep the input-root Markdown entry surface to the named trio; linked subordinate appendices belong under appendices/, not as extra mandatory peer documents. Each workstream uses a distinct buildRoot. Existing native packs are intake sources rather than fabricated input-handoff outputs. Preserve original attachments under sources/ and map material needs once. Do not omit source depth to reduce file count or emit every conditional template.
 
-Governance is retained alongside the core trio: `.specify/memory/constitution.md`, build-root AGENTS.md and reset-handoff.md. AGENTS.md must instruct a fresh session to read the constitution and handoff before changes. Add the selected harness's supported project-local adapter, for example CLAUDE.md containing `@AGENTS.md`, when needed. The constitution governs specifications, plan/task decisions and their gates. Verify actual selected-harness loading when claiming reset readiness; a pointer alone is not an observed fresh-session read.
+Governance is retained alongside the core trio: `.specify/memory/constitution.md`, build-root AGENTS.md and reset-handoff.md, wired as `references/intake-and-speckit.md#constitution-and-task-gates` describes. The constitution governs specifications, plan/task decisions and their gates. Verify actual selected-harness loading when claiming reset readiness; a pointer alone is not an observed fresh-session read.
 
 An input handoff includes a concise conversion/read-order guide and source-disposition mapping (an intent appendix is sufficient). A separately requested findings document remains a package-level deliverable. Do not create native tasks, ledgers or pass receipts merely to imitate an executed pipeline. Draft governance can be authored from authorized principles when the CLI is missing, but must not be represented as an executed native workflow. Existing host coordination stays in its canonical host location.
 
@@ -47,7 +43,8 @@ because its kind is not named here.
 only obligation is to declare it: one line in the source-disposition map with
 path, role, and why it matters. An undeclared item is a drift finding to fix
 by declaring it, never a reason to delete it. Edge cases are supported
-explicitly, not denied implicitly.
+explicitly, not denied implicitly. Declaring a directory (for example `data/`)
+declares everything under it.
 
 The input-root entry surface stays the named trio. Supporting directories sit
 beside `inputs/` (for example `data/`, `references/`, `sources/`) and are
@@ -71,7 +68,7 @@ derivation mechanics belong in design.md and later plan or data-model.md.
 
 ### Native preparation
 
-The native contract below preserves 2.4.0's functional paths. Source requirements/design/intent remain preserved input versions, separately identified from generated operational artifacts. Do not maintain two independently editable authorities after conversion. Existing native packs remain valid intake; never rewrite them simply to fit a newer serialization.
+Source requirements/design/intent remain preserved input versions, separately identified from generated operational artifacts. Do not maintain two independently editable authorities after conversion. Existing native packs remain valid intake; never rewrite them simply to fit a newer serialization.
 
 | Role | Default location | Purpose |
 | --- | --- | --- |
@@ -88,13 +85,9 @@ The native contract below preserves 2.4.0's functional paths. Source requirement
 | Fresh-session handoff | reset-handoff.md | Build root, current authority, validated inputs, unresolved items and next authorized task |
 | Continuity | Declared spec-prep ledger/standing or linked Living Documents context | Decisions, outcomes and resumable state under one declared authority |
 
-Existing requirements.md and design.md are accepted inputs or existing naming conventions. For native Spec Kit preparation, their roles resolve to spec.md and plan.md. Context.md is retained only as a source, an alternate standalone plan or additional derivation rationale. Do not create a competing plan.
-
-Specify reads requirements and intent under the constitution. Plan reads generated spec and constitution plus design and intent guidance. Tasks reads spec, plan, governance and relevant contracts. Analyze checks the resulting tree and source traceability. Inspect actual installed command spelling. For a preparation-only request, finish checks and handoff, then STOP: no implementation, launch or extension transition. Record implementation as not authorized and leave tasks unchecked. A reset does not change this authority.
+Existing requirements.md and design.md are accepted inputs or existing naming conventions. For native Spec Kit preparation, their roles resolve to spec.md and plan.md. Context.md is retained only as a source, an alternate standalone plan or additional derivation rationale. The stage order, and what each stage reads, is owned by `references/intake-and-speckit.md#specification-preparation`.
 
 Create conditional supporting artifacts when the domain or installed template requires them: research.md, data-model.md, contracts/, quickstart.md, requirements-quality checklists, experience.md, mockups/screenshots, reusable plays, substrate self-location and evaluator-only held-out fixtures. Preserve already supplied supporting files regardless of whether they match one of these names. Mark unknown or unreadable content explicitly.
-
-AGENTS.md should reference the authoritative constitution and contain the session's enforceable read order and gate procedure. Do not paste a second independently editable constitution into it. Preserve existing instructions; add the project-specific gates narrowly. CLAUDE.md may import AGENTS.md when that is the repository convention; other integrations use their own installed instruction loaders.
 
 Task acceptance gates are procedures that must be executed, not just checkbox text. Verify the installed prerequisite checker and artifact analysis before issuing a preparation pass. Custom requirements-quality checklist marks are reviewer decisions, distinct from implementation completion. A later fresh harness verifies receipt hashes again so artifact changes invalidate stale preparation evidence.
 
@@ -102,7 +95,7 @@ Spec Kit references checked 2026-10-14: https://github.github.com/spec-kit/refer
 
 ### Delivery manifest and gate
 
-Create one package-level delivery.json for an input handoff or native preparation. Verify this interface against the artifact contract; it never launches anything. A missing CLI does not select standalone. If native execution is unavailable, finish the input handoff, mark native preparation incomplete in its handoff/status, and name preparation as the next action. Do not label fallback documents native-complete.
+Create one package-level delivery.json for an input handoff or native preparation, and check it with `scripts/spec-prep-delivery.py` (commands in SKILL.md "How to run the gates"); the checker never launches anything. When native execution is unavailable, SKILL.md Phase 0 applies: finish the input handoff and mark native preparation incomplete. Do not label fallback documents native-complete.
 
 The compact input form is:
 
@@ -133,56 +126,27 @@ The compact input form is:
 }
 ```
 
-`priorArt.status` is `done`, `directed` or `waived` (see the prior-art gate in SKILL.md); `record` points at the record, the directive, or the waiver reason. `supporting` lists declared supporting material with its role from the table above; it is optional and never exhaustive of what may be preserved. Both fields are additive: older manifests without them remain valid intake, and the prior-art gate then checks the source-disposition map instead.
+`priorArt.status` is `done`, `directed` or `waived` (see the prior-art gate in SKILL.md); `record` points at the record, the directive, or the waiver reason. `supporting` lists declared supporting material with its role from the table above; it is optional and never exhaustive of what may be preserved. Each `supporting` path is relative to inputRoot, must resolve inside buildRoot and must appear in the source-disposition map; evaluator-only fixtures in the external store are not listed, because the implementer must not read them. Both fields are additive: older manifests without them remain valid intake, and the prior-art gate then checks the source-disposition map instead.
 
 buildRoot/inputRoot are package-relative directories; input paths/sourceMap are relative to inputRoot, and conversionGuide/governance paths are relative to buildRoot. `adapter` is optional. Add one entry per workstream with a separate input trio. Each guide maps requirements/intent to specify and generated spec/constitution/design/intent to plan, then tasks/analyze and the stop boundary. Source-map fragments name a real nonempty disposition heading; semantic preservation still requires review. Conversion guides must name the generated spec and constitution in addition to the input trio and preparation stages.
 
-For native delivery change operation to native-preparation, add per-workstream featureRoot (`specs/001-report`) and receipt (`preparation.json`), and set nextOperation to await-implementation-authorization. For new native deliveries, preserve input snapshots inside buildRoot (for example inputs/) so their receipt hashes cannot escape the build root. Native intent/spec/plan/tasks and required supporting artifacts must exist without unresolved template placeholders; tasks need identified unchecked work and observable gates; actual required gate evidence, final hashes and the stop boundary must agree. New native receipts contain `skill` with version and SHA-256 of the loaded SKILL.md, plus `implementationAuthorized: false`. The delivery checker compares that digest with its adjacent SKILL.md; inspect older-version receipts through the legacy reader instead of relabeling their identity. Hash the conversion guide, named inputs, instructions/adapters and any existing standing/ledger as consumed artifacts. See references/intake-and-speckit.md#intake-staging-and-spec-kit-preparation for receipt details. Old receipts may be inspected/normalized in memory without pretending they satisfy every new delivery field.
+For native delivery change operation to native-preparation, add per-workstream featureRoot (`specs/001-report`) and receipt (`preparation.json`), and set nextOperation to await-implementation-authorization. For new native deliveries, preserve input snapshots inside buildRoot (for example inputs/) so their receipt hashes cannot escape the build root. Native intent/spec/plan/tasks and required supporting artifacts must exist without unresolved template placeholders; tasks need identified unchecked work and observable gates; actual required gate evidence, final hashes and the stop boundary must agree. New native receipts contain `skill` with version and SHA-256 of the loaded SKILL.md, plus `implementationAuthorized: false`. The delivery checker compares that digest with the SKILL.md beside it; a receipt made under another release fails that comparison and is checked with that release's checker or re-prepared, never relabeled. The checker also reads older list-form receipts through an in-memory normalization that infers roles only from unique filenames. Hash the conversion guide, named inputs, instructions/adapters and any existing standing/ledger as consumed artifacts. See `references/intake-and-speckit.md#specification-preparation` (step 10) for receipt details.
 
-This mechanical delivery gate cannot establish semantic completeness, true evaluator isolation, fresh-harness loading or command execution from prose. Those claims require named evidence. The dependency-free transition reader inspects command fields in standard block-style extensions YAML and project-local Claude settings hooks, not description prose. Known preparation stages/local git commit hooks are accepted; unknown, implementation or multiline/inline hook commands require review or exclusion. Disabled block hooks are skipped. It does not execute hooks or alter configuration. Inert workflow definitions do not execute themselves: their mere presence is not a failure. Do not invoke a full workflow containing implementation as part of preparation. Record any skipped transitions and scope decisions in the normal analysis/handoff evidence; arbitrary custom scripts cannot be proven safe by token matching. Optional Jev does not affect mandatory delivery checks.
+This mechanical gate cannot establish semantic completeness, true evaluator isolation, fresh-harness loading or command execution from prose; those claims require named evidence. The checker inspects the command fields of enabled hooks in `.specify/extensions.yml` and in project-local `.claude/settings.json` and `.claude/settings.local.json`, not description prose. Known Spec Kit preparation stages and its git commit hook pass; any other command, and any prompt or agent hook, fails until it is removed, disabled or reviewed under `references/intake-and-speckit.md#stop-gate`. It does not execute hooks or alter configuration.
 
-The delivery check rejects obvious template stubs and conflicting positive implementation authorization, but cannot establish semantic completeness or authenticity of workflow evidence from bytes alone. Do not treat valid:true as a replacement for required semantic analyze/source review. The raw checkout may retain historical nested source evidence; export only the canonical root files, references, scripts and tests, excluding nested skill copies, caches and earlier archives.
+The checker rejects obvious template stubs and conflicting positive implementation authorization. Do not treat `valid: true` as a replacement for the required semantic analyze and source review. When exporting this skill, ship SKILL.md, references/, scripts/ and tests/, excluding nested skill copies, caches and earlier archives.
 
-## Compatibility and Handoff
+## OpenSpec, Kiro and other toolchains
 
-*Formerly `#compatibility-and-handoff`, version 1.0.0.*
+spec-prep artifacts are plain Markdown. Spec Kit preparation is owned by `references/intake-and-speckit.md#intake-staging-and-spec-kit-preparation`; these mappings cover the other structures SKILL.md Phase 0 detects. Inspect the installed CLI for exact command syntax.
 
-spec-prep artifacts are plain markdown and feed directly into existing spec-driven toolchains. The mapping below also shows what spec-prep adds that those tools do not have.
-
-### SpecKit
-
-For the current preparation pipeline and native artifact paths, read `references/intake-and-speckit.md#intake-staging-and-spec-kit-preparation`. That 2.2 reference supersedes this legacy mapping.
-
-For new native preparation, requirements.md plus intent.md feed specify under the constitution; generated spec.md plus constitution, design.md and intent guidance feed plan. Preserve native stories and scenarios, then generate tasks and analyze. Read references/intake-and-speckit.md#intake-staging-and-spec-kit-preparation for the actual procedure. Do not feed an already-generated spec back into specify as raw intake or duplicate an operational plan. Existing legacy context/design sources remain accepted. The input trio is the compact interface; generated native artifacts and governance are separate outputs.
-
-### OpenSpec
-
-`intent.md` and `spec.md` map to the proposal and `specs/` capabilities, using SHALL and MUST language already present in the spec template. `context.md` maps to `design.md`. Plays map to the change tasks. The ledger and substrate files travel alongside the OpenSpec change directory.
-
-### Kiro
-
-Both `intent.md` and `spec.md` load as Kiro spec input. `context.md` is the technical plan. Kiro's living-specs concept is a partial overlap with the spec-prep ledger; keep the spec-prep ledger as the authoritative continuity record because it is append-only and carries the backward feed into Context Crafting, which living specs do not.
-
-### Cursor and generic agents
-
-All files are self-contained markdown with no tool-specific syntax. Any agent that reads markdown can consume the tree.
-
-### Handoff protocol
-
-A fresh session reads AGENTS.md, the constitution and reset handoff first. Read existing standing/ledger and verify receipt hashes when present, then intent and the applicable native spec/plan/task. An input handoff does not need a fabricated ledger or native pass. Preparation-only status survives reset: stop before implementation until the user explicitly authorizes it. The handoff must supply the context needed without the authoring conversation.
-
-### Next-step commands
-
-Spec Kit: inspect installed syntax/integration and existing tree, initialize safely only when needed, then run constitution/specify/clarify/plan/tasks/analyze with the source mapping above. Finish the reset handoff and stop before implementation for a preparation-only request.
-OpenSpec: `openspec init` then `/opsx:propose` with the intent and spec.
-Kiro: load `intent.md` and `context.md` into the spec workflow.
-Direct: hand the tree to any markdown-reading coding agent and point it at `standing.md` first.
+- **OpenSpec.** `intent.md` and `spec.md` map to the proposal and the `specs/` capabilities, using the SHALL and MUST language of the spec template; `context.md` maps to `design.md`; plays map to the change tasks; the ledger and substrate files travel beside the change directory. Next step: initialize OpenSpec, then propose the change from the intent and spec.
+- **Kiro.** `intent.md` and `spec.md` load as spec input and `context.md` is the technical plan. Kiro's living specs overlap the ledger only partly; keep the spec-prep ledger as the continuity record because it is append-only.
+- **Cursor and generic agents.** Every file is self-contained Markdown with no tool-specific syntax. Hand the tree to any Markdown-reading agent with the read order in SKILL.md Phase 7.
 
 ## Optional default project workbench
 
-*Formerly `#optional-default-project-workbench`, version 2.3.0.*
-
-Use this reference during intake staging or specification preparation unless the user opts out. It adds the workbench integration that 2.2 lacked; it does not replace the intake or preparation contracts.
+Use this during intake staging or specification preparation unless the user opts out. It does not replace the intake or preparation contracts.
 
 ### Default and boundaries
 
@@ -190,19 +154,11 @@ Workbench mode is `auto` by default: create or update a lightweight `workbench.j
 
 `project-intake.json` owns project identity, ideation sources, read order, findings and intake lifecycle. `workbench.json` points to it and records presentation/configuration choices, actual artifact locations and optional integration preferences. The renderer derives displayed state from the intake, prepared artifact files and preparation receipt. Never mirror editable requirements, task statuses or a second lifecycle field into the workbench.
 
-The default artifact set is intent, native specification, native plan, gated tasks, project constitution, agent instructions, traceability/provenance and reset handoff with preparation evidence. Requirements/design files supplied by ideation remain preserved inputs. Do not generate requirements.md beside spec.md, or design.md beside plan.md, with duplicate independently editable content. Context rationale, UX, data models, contracts, research, quality checklists and playbooks are additional roles when they add value or the selected toolchain requires them.
+### Write and check
 
-### Generate and check
+Once the intake manifest is valid, write `workbench.json` beside it. `references/workbench.schema.json` is the contract; follow every required key in it, including `additionalFiles` and `integrations.livingDocuments.mode`, rather than a paraphrase. List each existing recognized artifact (the roles in the native preparation table above, plus any other role that exists) with its role, scope (`intake` or `build`), path and use (`source` or `operational`). Intake paths are relative and stay inside the intake folder. Build pointers require an explicitly resolved `buildRoot`, so add them only after the real build root is resolved. Never create a pretend spec, change task state or generate a preparation receipt to fill a pointer. Preserve custom configuration and valid existing mappings; repair an invalid existing workbench rather than silently overwriting it. Never add secrets, raw eval contents or credentials.
 
-After establishing a valid intake manifest, run the bundled helper:
-
-```bash
-Write the workbench pointers for the intake folder (mode auto), then check them.
-```
-
-When the real build root has been resolved, repeat `write` with `--build-root <actual-build-root>`. The helper lists existing recognized artifacts as source or operational pointers. It never creates a pretend spec, changes task state or generates a successful preparation receipt. It preserves custom configuration and existing valid artifact mappings. An invalid existing workbench requires repair rather than silent overwrite.
-
-The schema is `references/workbench.schema.json`. It uses schemaVersion 1, kind `spec-prep-workbench`, intake `project-intake.json`, a mode, optional buildRoot, an artifacts array and a Living Documents mode. Artifact entries declare role, scope (`intake` or `build`), path and use (`source` or `operational`). Intake paths are relative and remain inside their intake folder. Build pointers require an explicitly resolved buildRoot. Never add secrets, raw eval contents or credentials.
+Check the file against the schema with a JSON Schema validator the host already has, or by hand: every required key present, every enum value allowed, and every pointer path existing.
 
 ### Additional files
 
@@ -210,7 +166,7 @@ Discover additional visible files dynamically. Preserve transcripts, screenshots
 
 Exclude version-control internals, dependency caches, machine secrets and external symlink traversal from automatic discovery. Archives are inert until the explicit safe staging extraction operation. Held-out evaluation payloads remain external and only a handling pointer appears in the workbench.
 
-Workbench configuration is independent of a renderer. The assignment catalog is one adapter: it reads the manifest and presents artifact pointers alongside its live folder inventory. A source pointer in an existing spec pack is not proof that the project has completed native Spec Kit preparation.
+Workbench configuration is independent of a renderer. A source pointer in an existing spec pack is not proof that the project has completed native Spec Kit preparation.
 
 ### Optional integration
 
@@ -218,13 +174,11 @@ Keep Living Documents mode in the workbench as `auto`, `on` or `off`. Read `refe
 
 ## Optional repository bootstrap
 
-*Formerly `#optional-repository-bootstrap`, version 2.2.0.*
-
 When preparing specifications, inspect the selected build directory before creating anything. Skip each item already completed. A supplied repository is the target; never create a second repository just because it lacks one optional file.
 
 Resolve project name, description, local build path, license, ignore rules and hosting separately. Derive the name and description from explicit intake metadata when clear. If the user requested repository setup and the directory is not in a Git repository, initialize locally with git init --initial-branch=main <build-path>. Detect parent repositories first; do not create an unintended nested repository. Preserve existing branch and remote settings. Do not commit, push or rewrite history as an incidental setup step.
 
-For a new local repository, record its human-readable description in .git/description and its project name and purpose in README.md. Preserve an existing README and existing meaningful description; add only missing information. Local repository naming comes from the chosen directory. Do not rename a preexisting directory to match a inferred label.
+For a new local repository, record its human-readable description in .git/description and its project name and purpose in README.md. Preserve an existing README and existing meaningful description; add only missing information. Local repository naming comes from the chosen directory. Do not rename a preexisting directory to match an inferred label.
 
 If LICENSE already exists, inspect and retain it. If an explicit SPDX license choice exists, obtain the standard license text from its official source and use the authorized copyright holder and year. If ownership or license choice is ambiguous, ask a targeted question; the safe default is no licensing declaration. Do not silently choose a permissive license, or copy another project's license. A request to stage intake does not require answering license questions yet.
 
@@ -233,17 +187,3 @@ Generate or extend .gitignore using the derived stack and current primary templa
 Remote hosting is optional and separate from local initialization. If requested, resolve provider, account/organization, repository name, description, visibility and license before creation. A remote repository creation or first push is a publishing action: the current request must authorize its exact target. Ask only when that target or visibility is ambiguous. Never infer a public repository or transmit source code from local setup authority.
 
 Record completed/skipped choices and local verification in the preparation handoff. Repository creation does not initiate implementation.
-
-## Project constitution and task gates
-
-*Formerly `#project-constitution-and-task-gates`, version 2.2.0.*
-
-This 2.2 procedure supersedes the bundled 2.1 instruction to never create a constitution. The current user authorized spec-prep to create a project-local constitution through Spec Kit during specification preparation.
-
-Resolve governance from the existing `.specify/memory/constitution.md`, a declared project constitution, or an explicitly supplied `$spec-prep_CONSTITUTION`. Preserve project-owned principles. Another project's constitution is reference material only; do not automatically inherit its technology choices or policy.
-
-If absent, run the installed Spec Kit constitution workflow using the source's explicit principles and authorized project constraints. Resolve material ambiguities through targeted questions when they block preparation. The authoritative file is `.specify/memory/constitution.md`; other locations point to it rather than creating editable copies.
-
-The constitution and session instructions require each task to cite its requirement/story, state its dependencies, name its acceptance gate and supply evidence before completion. Meaningful risky changes include recovery. Unresolved critical analysis findings prevent initiation. Producing specs or tasks does not authorize implementation.
-
-Extend existing scoped AGENTS.md/CLAUDE.md/AGENT.md files narrowly and preserve operator work. Point fresh harnesses at the real build root and reset-handoff.md. Consult references/intake-and-speckit.md#intake-staging-and-spec-kit-preparation and references/handoff-and-implementation.md#terminal-agnostic-fresh-session-initiation for the named gates and receipt format.

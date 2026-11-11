@@ -1,6 +1,5 @@
 ---
 title: Intake checklists
-version: "4.0.0"
 tags: [spec-prep]
 ---
 
@@ -13,8 +12,6 @@ tags: [spec-prep]
 - [Prior Art Research Checklist](#prior-art-research-checklist)
 
 ## Confidence Gate
-
-*Formerly `#confidence-gate`, version 1.0.0.*
 
 Use the dimensions to identify missing information. A weighted score is advisory, not an empirical probability or an approval gate. Sufficient information for the next authorized action controls progress; no score changes the output mode.
 
@@ -36,8 +33,6 @@ Ask only about material missing inputs that block their dependent action; contin
 The two spec-prep-specific dimensions matter most. Layer-separation integrity below 50% means the user is speaking in fused layers and the artifacts will inherit the fusion unless intake separates it first. Continuity readiness below 50% means the project cannot seed a ledger and will be born without the spine.
 
 ## Discovery Questions (Interactive mode)
-
-*Formerly `#discovery-questions-interactive-mode`, version 1.0.0.*
 
 Do not ask all of these at once. Proceed by category, 2 to 4 questions per round, reassessing the Confidence Gate after each. Use the structured-question tool when available so the user taps rather than types. As answers arrive, tag each one as intent, spec, or implementation; the separation begins in the interview, not in the artifacts.
 
@@ -70,17 +65,15 @@ Problem space: articulate the problem to a stranger in 2 sentences. Solution vis
 
 ## Prior Art Research Checklist
 
-*Formerly `#prior-art-research-checklist`, version 1.1.0.*
-
-Mandatory in Phase 2 and enforced by the prior-art gate in SKILL.md, which applies in every intake mode, including existing specs and referenced use. The minimum is a floor, not a ceiling. Always survey how others approached the problem and extract reusable patterns and documented pitfalls. Findings land in `intent.md` section 10 (Prior art). A prior-art record supplied with the intake (for example `sources/prior-art.md`) is preserved as evidence and summarized in section 10, not rewritten or discarded. The survey should happen early, before design work goes deep: its verdict can turn a build into a fork.
+Mandatory in Phase 2 and enforced by the prior-art gate in SKILL.md, which applies in every intake mode, including existing specs and referenced use. The minimum is a floor, not a ceiling. Always survey how others approached the problem and extract reusable patterns and documented pitfalls. A prior-art record supplied with the intake (for example `sources/prior-art.md`) is preserved as evidence and summarized in section 10, not rewritten or discarded. The survey should happen early, before design work goes deep: its verdict can turn a build into a fork.
 
 ### Step 1: Local workspace scan (always first)
 
-Check for existing agent configs and related projects that already solve or partially solve the problem: `.claude/`, `.cursor/`, `.agents/`, `skills/`, `.skillshare/`, `.kiro/`, `.windsurf/`, `.openclaw/`, `~/.config/hermes/`, `.specify/`, `openspec/`, and any existing `spec-prep/` tree (an existing tree means this skill does not apply).
+Check for existing agent configs and related projects that already solve or partially solve the problem: `.claude/`, `.cursor/`, `.agents/`, `skills/`, `.skillshare/`, `.kiro/`, `.windsurf/`, `.openclaw/`, `~/.config/hermes/`, `.specify/`, `openspec/`, and any existing `spec-prep/` tree (consume it as existing-specs intake; never overwrite or reject it).
 
 ### Step 2: Skill registries (minimum 2 searches)
 
-`skills.sh`, `agentskills.io`, `npx antigravity-awesome-skills`, `mcpmarket.com/tools/skills`.
+https://skills.sh, https://agentskills.io, the antigravity-awesome-skills catalog and https://mcpmarket.com/tools/skills. Browse or query a registry's listing; do not execute a package merely to search it.
 
 ### Step 3: Code search (minimum 3 searches)
 

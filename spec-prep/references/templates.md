@@ -1,6 +1,5 @@
 ---
 title: Templates
-version: "4.0.0"
 tags: [spec-prep]
 ---
 
@@ -12,12 +11,9 @@ tags: [spec-prep]
 - [Spec Template (`spec.md`)](#spec-template-specmd)
 - [Context Template (`context.md`)](#context-template-contextmd)
 - [Experience Template (`experience.md`)](#experience-template-experiencemd)
-- [Data Architecture Decision Guide](#data-architecture-decision-guide)
 - [Plays Playbook (`plays/`)](#plays-playbook-plays)
 
 ## Intent Template (`intent.md`)
-
-*Formerly `#intent-template-intentmd`, version 1.0.0.*
 
 Authoritative owner: the user; an agent may draft with provenance. Layer: Intent. Maintain this asset separately from requirements and design. Goal changes start here; behavior, architecture and workflow corrections start at their owning layer and reconcile affected dependents. Preserve explicitly required technologies with their source and justified layer exception; do not promote agent proposals into constraints.
 
@@ -69,7 +65,7 @@ tags: [{{TAGS}}]
 | Solution | Strength | Weakness | Gap this fills |
 |----------|----------|----------|----------------|
 | ... | ... | ... | ... |
-[Patterns adopted and patterns deliberately avoided, with reasoning. Keep the user-facing comparison here and link implementation research in research.md or plan.md. Naming products here is expected; the validator exempts any section titled "Prior art" from the separation check.]
+[Patterns adopted and patterns deliberately avoided, with reasoning. Keep the user-facing comparison here and link implementation research in research.md or plan.md. Naming products here is expected: the separation check exempts any section whose heading contains "Prior art" (SKILL.md rule 1).]
 
 ## 11. Assumptions and dependencies
 [Assumptions about users and environment. External dependencies as capabilities, not products.]
@@ -84,9 +80,7 @@ Record explicit deployment constraints in section 3 and distinguish them from ar
 
 ## Spec Template (`spec.md`)
 
-*Formerly `#spec-template-specmd`, version 1.0.0.*
-
-Layer: Specification. Preserve the source authority of each requirement: direct user instruction, accepted decision or explicit proposal/inference. Authorized preparation can derive provisional observable clauses without creating implementation authority. Keep mechanisms in plan and retain genuine source-constrained platform/interface acceptance with cited layer exceptions. Write evaluable clauses and preserve native user scenarios; intent remains the source for goals/stories, not a reason to delete native template content.
+Layer: Specification. **Standalone and input-handoff template.** In native Spec Kit mode the installed spec template is the structure and its FR identifiers stand; apply only the litmus, eval binding and EARS rules below, binding evals through traceability.md where the template has no tag. Preserve the source authority of each requirement: direct user instruction, accepted decision or explicit proposal/inference. Authorized preparation can derive provisional observable clauses without creating implementation authority. Keep mechanisms in plan and retain genuine source-constrained platform/interface acceptance with cited layer exceptions. Write evaluable clauses and preserve native user scenarios; intent remains the source for goals/stories, not a reason to delete native template content.
 
 ### The single litmus
 
@@ -94,7 +88,7 @@ Every clause must be convertible into an evaluation that returns pass or fail. I
 
 ### Eval binding
 
-Every clause carries an `EVAL-ID` linked to a defined evaluation. Retain the external evaluation-definition store expected by the validator (default `~/.spec-prep/evals/<slug>/evals.md`); this storage convention does not establish held-out isolation. Public acceptance criteria and development tests remain available to the implementer. Use evaluator-only tests when appropriate and claim held-out evaluation only with actual file/tool access separation. An unbound clause fails validation; a bound identifier alone does not prove a useful test.
+Every clause carries an `EVAL-ID` linked to a defined evaluation in the external evaluation store (SKILL.md rule 3, which also governs isolation; default `~/.spec-prep/evals/<slug>/evals.md`). In `evals.md`, each definition is a line that starts with its EVAL-ID (as a heading, list item or table row) followed by what the evaluation asserts and its pass/fail condition; a bare ID, or one marked removed, TBD or undefined, defines nothing. An `evals.json` store maps each EVAL-ID key, or an `id` field, to a nonempty definition. Public acceptance criteria and development tests remain available to the implementer; use evaluator-only tests when appropriate. An unbound clause fails validation; a bound identifier alone does not prove a useful test.
 
 ### EARS-style phrasing
 
@@ -142,9 +136,7 @@ Keep derived mechanisms in design/plan. Preserve explicit source-mandated platfo
 
 ## Context Template (`context.md`)
 
-*Formerly `#context-template-contextmd`, version 1.0.0.*
-
-Author: the system derives mechanisms from source requirements, intent and explicit user constraints. Layer: Implementation. Record user-selected constraints as such; distinguish derived proposals and source decisions instead of pretending every choice was inferred. Native plan.md is the operational plan when Spec Kit is selected; context.md is then source/rationale, not a competing editable plan.
+Author: the system derives mechanisms from source requirements, intent and explicit user constraints. Layer: Implementation. Record user-selected constraints as such; distinguish derived proposals and source decisions instead of pretending every choice was inferred. **Standalone template.** Native plan.md, in the installed Spec Kit template's structure, is the operational plan when Spec Kit is selected; context.md is then source/rationale, not a competing editable plan. In native mode the derivation inputs and the empty-ledger rule below still govern plan.md.
 
 ### Derivation inputs, in order
 
@@ -188,7 +180,7 @@ tags: [{{TAGS}}]
 - Trade-offs accepted: [what is given up]
 
 ## 4. Data model
-[Schema with concrete types, access patterns, migration strategy. Per #data-architecture-decision-guide.]
+[Schema with concrete types, access patterns, migration strategy. Each storage choice cites the intent constraint and, where it exists, the ledger entry that drove it.]
 
 ## 5. Component specifications
 [Per component: responsibility, interface, dependencies, failure surfacing.]
@@ -197,7 +189,7 @@ tags: [{{TAGS}}]
 [Derived from the deployment constraint in intent section 3. If that constraint changes, this section is regenerated and the delta is appended to the ledger.]
 
 ## 7. Security
-[Threat model, auth, data protection, supply-chain audit strategy.]
+[Threat model, auth, data protection, supply-chain audit strategy. Baseline: TLS in transit, encryption at rest for personal data, least-privilege credentials, input validation before storage, secrets in the environment never the repository, tested backup restore, and an audit trail for sensitive mutation; each cites the intent or spec identifier it satisfies.]
 
 ## 8. Build phases
 [Phase and step notation only, no dates. Each phase validates specific SPEC-IDs.]
@@ -211,8 +203,6 @@ tags: [{{TAGS}}]
 Every decision cites its intent input. Every decision states its memory source or admits it has none. The deployment section is downstream of the intent constraint; on a pivot it is regenerated, not patched, and the delta goes to the ledger. No requirement appears here that is not present in intent or spec. Phases use phase and step notation, never dates.
 
 ## Experience Template (`experience.md`)
-
-*Formerly `#experience-template-experiencemd`, version 2.1.0.*
 
 Author: the system. Layer: derived (declare `layer: derived` in its frontmatter). Required whenever the project has a user interface; omit it for libraries, services and CLIs with no designed surface.
 
@@ -264,45 +254,17 @@ tags: [{{TAGS}}]
 
 No requirement appears here that is not in intent or spec. Every token and component traces to a story or clause. Screenshots or it did not happen.
 
-## Data Architecture Decision Guide
-
-*Formerly `#data-architecture-decision-guide`, version 1.0.0.*
-
-Reference for Phase 3. These decisions are derived by the system into `context.md`, each cited back to an `intent.md` constraint and, where it exists, a ledger entry. They are never authored by the human.
-
-### Storage type decision
-
-Does the system persist data at all. If no, client-side or in-memory only; stop. If yes, is it primarily relational. If relational and over 10GB or concurrent multi-user writes, a server relational store; otherwise single-file relational. If not relational: key-value or document shaped goes to a document or key-value store depending on schema variability; graph-structured goes to a graph store or relational with recursive queries if the graph is secondary; similarity-searched goes to a vector store; time-series goes to a partitioned or time-series store; otherwise simple file storage.
-
-### Schema principles
-
-Relational: normalize to third normal form first, denormalize only when a recorded read pattern demands it, document every denormalization. Standard elements: sortable non-leaking id, created and updated timestamps, soft delete unless hard delete is an intent requirement. Index columns used in filtering, joining, and ordering; composite indexes put equality columns before range columns; partial indexes for filtered queries. Document stores: embed when accessed together and small and rarely updated, reference otherwise; keep nesting shallow. Key-value: namespaced keys, TTL on all ephemeral data.
-
-### Access pattern classification
-
-Read-heavy favors caching and materialized views. Write-heavy favors write-optimized storage and batched async writes. Append-only favors partitioned time-indexed storage. Search-heavy favors a dedicated search or vector index. Each entity's pattern is recorded as a derivation input in `context.md` section 3.
-
-### Hosting derivation
-
-The deployment target is an `intent.md` constraint, not a choice made here. This guide derives the data and infrastructure that satisfy that constraint. Edge and cost-sensitive and static-or-API workloads suit edge isolates with their paired edge data stores. Background jobs and long-running and SSR suit a serverless or always-on host with its paired managed stores. Full control, GPU, or strict privacy suits self-hosting. When the intent constraint changes, this entire derivation is rerun and the delta is appended to the ledger; it is never patched in place.
-
-### Security baseline
-
-TLS in transit always, encryption at rest when storing personal data, least-privilege credentials, input validation before storage, secrets in environment never in repo, automated backups with tested restore, audit trail for sensitive mutation. Each appears in `context.md` section 7 with the intent or spec identifier it satisfies.
-
 ## Plays Playbook (`plays/`)
-
-*Formerly `#plays-playbook-plays`, version 1.0.0.*
 
 Author: the system. Layer: Prompt. Plays are reusable, intent-encoded interaction patterns that make procedure and inputs explicit; they do not make model reasoning deterministic. They are not a one-shot task list. A task list is the thing that detonates on an upstream pivot, because every task baked in the assumption that changed. A play never bakes in the assumption. It reads the assumption from `intent.md` at execution time.
 
 ### The coupling rule
 
-A play must never name a target it could instead read. Wrong: "deploy to Cloudflare Workers." Right: "deploy according to the deployment constraint in intent.md section 3." When only the constraint value changes, the play need not change because it reads that value. When the workflow or variable contract itself changes, update the play and its dependents. It only knew where to read it. This is the entire reason plays survive pivots and tasks do not.
+A play must never name a target it could instead read. Wrong: "deploy to Cloudflare Workers." Right: "deploy according to the deployment constraint in intent.md section 3." When only the constraint value changes, the play need not change because it reads that value. When the workflow or variable contract itself changes, update the play and its dependents. This is why plays survive pivots and tasks do not.
 
-### The maturity-gap honesty
+### When to write a play
 
-The source describes plays as scaffolding that may thin as models become more capable; that is a proposed direction, not a guaranteed forecast. Use plays where reusable procedure, coordination or a fragile operation benefits from explicit inputs, checks and halts. Let the agent resolve ordinary mechanisms within the accepted contract instead of encoding every coding step. Preserve governance and evaluation even when detailed procedural scaffolding is unnecessary. State actual fixed and live decisions in substrate.md rather than assigning maturity from a model name.
+Write a play only where a reusable procedure, coordination or a fragile operation benefits from explicit inputs, checks and halts. Let the agent resolve ordinary mechanisms within the accepted contract instead of encoding every coding step, and state actual fixed and live decisions in substrate.md.
 
 ### Play file structure
 
@@ -329,7 +291,7 @@ tags: [{{TAGS}}]
 [Ordered, deterministic. Each step references SPEC-IDs it advances.]
 
 ## Halt conditions
-[When the play must stop and surface to a human rather than guess. The Klarna failure was a play with no halt condition: technically correct, intent-blind. Every play has one.]
+[When the play must stop and surface to a human rather than guess. Every play has one.]
 
 ## Ledger emission
 [What this play appends to ledger/ledger.md on completion: decision made, outcome observed.]
@@ -341,4 +303,4 @@ Do not generate this full set by default or run implementation/publication actio
 
 ### Rules
 
-Plays read from intent, they do not store intent. Every play has a halt condition. Every play emits to the ledger. No play names a target it could read. Plays are bridges, declared as bridges in `substrate.md`.
+Plays read from intent; they do not store it. Every play has a halt condition and a ledger emission. Declare plays as bridges in `substrate.md`.

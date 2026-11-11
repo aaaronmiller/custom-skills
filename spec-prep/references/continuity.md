@@ -1,6 +1,5 @@
 ---
 title: Continuity
-version: "4.0.0"
 tags: [spec-prep]
 ---
 
@@ -13,8 +12,6 @@ tags: [spec-prep]
 - [Optional Living Documents integration](#optional-living-documents-integration)
 
 ## Continuity: Ledger and Standing (`ledger/`)
-
-*Formerly `#continuity-ledger-and-standing-ledger`, version 1.0.0.*
 
 Author: the system records material evidence and decisions. Layer: Continuity. The ledger and standing snapshot make history and current resumable state explicit; their usefulness depends on accuracy and read-back against live state, not a promised recovery time or exclusive ownership of the idea.
 
@@ -29,7 +26,7 @@ Author: the system records material evidence and decisions. Layer: Continuity. T
 ```markdown
 ## [SEQ] [phase.step] [decision | outcome | pivot | refinement]
 - What: [the decision or observation, one or two sentences]
-- Why: [the intent input, spec clause, or council finding that drove it]
+- Why: [the intent input, spec clause, or review finding that drove it]
 - Effect: [what changed in which artifact; on a pivot, the context.md delta]
 - Outcome: [observed result if known, or "pending"]
 ```
@@ -71,31 +68,19 @@ Resume by reading `standing.md` and the relevant tail of `ledger.md` before chan
 
 ### The backward feed
 
-Recorded outcomes may inform later architecture when their evidence and context are relevant and access is authorized. Separate an observation from a proposed causal lesson and from accepted reusable policy. An empty ledger supplies no empirical precedent. Ledger accumulation alone neither implements a learning engine nor establishes that an earlier architecture generalizes.
+Recorded outcomes may inform later architecture when their evidence and context are relevant and access is authorized. Separate an observation from a proposed causal lesson and from accepted reusable policy. The empty-ledger disclosure rule is owned by `references/templates.md#the-empty-ledger-honesty-rule`. Ledger accumulation alone neither implements a learning engine nor establishes that an earlier architecture generalizes.
 
 ### Rules
 
-Append-only and monotonic. Record material decisions, outcomes, pivots, refinements and task-state changes. Refresh standing.md when resumable state changes, before final receipt hashing; do not rewrite it for every prompt/tool call. Keep nested ledger/ files by default; existing flat aliases are accepted only when they do not conflict. The revive protocol reads standing and the ledger tail before code. A project with no ledger or no `standing.md` fails validation; continuity is not optional.
+Append-only and monotonic. Record material decisions, outcomes, pivots, refinements and task-state changes. Refresh standing.md when resumable state changes, before final receipt hashing; do not rewrite it for every prompt/tool call. Keep nested ledger/ files by default; existing flat aliases are accepted only when they do not conflict. In standalone and native preparation, a project with no ledger or no `standing.md` fails the continuity check; continuity is not optional there. An input handoff carries none, and a declared Living Documents continuity replaces both (see the integration section below).
 
 ## Substrate Self-Location (`substrate.md`)
 
-*Formerly `#substrate-self-location-substratemd`, version 1.0.0.*
+Author: the agent drafts substrate.md; the human owns the declared level. This file declares which substrate level the project actually operates at and which decisions are pre-locked at preparation time versus resolved live at implementation time. You do not get to claim a level you have not earned.
 
-Author: the human. This file turns the closing question of the autopsy, are you being honest with yourself, into a required field. You declare which substrate level the project actually operates at and which decisions are pre-locked at preparation time versus resolved live at implementation time. You do not get to claim a level you have not earned.
+### Level labels
 
-### Source taxonomies and legacy compatibility
-
-Ahuja's **Substrate Stack** in the supplied article has five numbered levels:
-
-1. Vibe: model and coding interface, without the proposed persistent intent/contract substrate.
-2. Spec-driven: structured specification tooling.
-3. Intent-driven: separated layers, the four crafts, plays and an empirical knowledge base.
-4. Autonomous: shared guardrails and reasoning across plays. The author explicitly describes this as not yet lived.
-5. Dark Factory: live resolution within a largely autonomous methodology. The author explicitly treats the implementation as unresolved.
-
-These are Ahuja's proposed substrate categories, not a benchmark or a capability certification. His article locates his own implementation around 2.5-2.75, not fully at 3. It credits Dan Shapiro for the Dark Factory term and autonomy-model influence; it does not make the two taxonomies numerically interchangeable.
-
-**Existing STRATA labels S0-S5 are retained as legacy file/validator syntax.** They describe the local operating arrangement, not an exact Shapiro scale or a renumbering of Ahuja's five levels:
+**S0-S5 are the declared-level labels the honesty check reads.** They describe the local operating arrangement, not an exact Shapiro scale or a renumbering of Ahuja's five-level Substrate Stack; if either framework is cited, label it separately and imply no numeric equivalence:
 
 - S0: human implementation with autocomplete.
 - S1: discrete agent tasks with human review.
@@ -120,7 +105,7 @@ tags: [{{TAGS}}]
 # Substrate Self-Location
 
 ## Declared level
-[Legacy STRATA label S0 through S5 for compatibility, followed by the actual operating arrangement and evidence. If also discussing Ahuja's Levels 1-5, label that framework separately; do not imply numeric equivalence.]
+[A level S0 through S5 at the start of a line, then the actual operating arrangement and evidence. The human owns this level. If another framework is cited, label it separately.]
 
 ## Pre-locked decisions
 [Decisions fixed at preparation time, their source authority, and why they are fixed. Distinguish required user constraints from provisional agent choices. Do not infer a maturity rank from timing alone.]
@@ -137,13 +122,11 @@ tags: [{{TAGS}}]
 
 ### Why this is required, not optional
 
-The declaration makes pre-locking, missing evidence and unproven autonomy visible. The validator checks the presence of a legacy level label, not whether the claimed capabilities exist. Validate material capabilities separately; neither a label nor this file enforces evaluator isolation or certifies autonomy.
+The declaration makes pre-locking, missing evidence and unproven autonomy visible. The honesty check (`scripts/spec-prep-validate.py`) confirms only that a level S0-S5 is declared under `## Declared level`, not that the claimed capabilities exist. Validate material capabilities separately; neither a label nor this file enforces evaluator isolation or certifies autonomy.
 
 ## Optional Living Documents integration
 
-*Formerly `#optional-living-documents-integration`, version 2.3.0.*
-
-Read this reference only when the user requests Living Documents, an existing dossier/configuration declares it, the `ld` command is available, or host instructions require it. This supersedes the inline Living Documents setup procedure in spec-prep 2.2. Host instructions remain authoritative.
+Read this reference only when the user requests Living Documents, an existing dossier/configuration declares it, the `ld` command is available, or host instructions require it. Host instructions remain authoritative.
 
 ### Resolve the setup choice
 
@@ -161,8 +144,8 @@ Register links to the intake, workbench, repository constitution, native spec/pl
 
 ### Continuity
 
-Use the existing system's history, start-here, handoff and continuity hook for material milestones. If the chosen standalone spec-prep continuity files still apply, declare their role and avoid duplicate independent decision logs. Use the installed validator/adapter for the declared canonical continuity paths; do not fabricate a ledger merely to satisfy a mechanical gate.
+Use the existing system's history, start-here, handoff and continuity hook for material milestones. If the chosen standalone spec-prep continuity files still apply, declare their role and avoid duplicate independent decision logs. When the dossier owns continuity, run the validator with `--continuity external` so the continuity check records `not_run`, and cite the dossier evidence in the receipt; do not fabricate a ledger merely to satisfy a mechanical gate.
 
-A fresh implementation harness reads the real build root's AGENTS.md, the canonical constitution, prepared task gates and reset handoff, then the linked dossier context when present. Verify required preparation before initiation. A renderer receipt or dossier entry is not permission to launch, publish or spend.
+A fresh implementation harness follows the read order in SKILL.md Phase 7, then reads the linked dossier context when present. Verify required preparation before initiation. A renderer receipt or dossier entry is not permission to launch, publish or spend.
 
 Store the integration preference and optional dossier locator in `workbench.json`. Only an identified existing or created dossier may supply that locator. Do not invent a path or manufacture a setup-complete label.
