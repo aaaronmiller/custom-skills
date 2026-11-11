@@ -1,14 +1,18 @@
 ---
-title: Intake staging and Spec Kit preparation
-version: "2.5.1"
-tags: [spec-prep, intake, speckit, preparation]
+title: Intake and Spec Kit
+version: "4.0.0"
+tags: [spec-prep]
 ---
 
-# Intake staging and Spec Kit preparation
+# Intake and Spec Kit
 
-This reference supersedes the Spec Kit subsection of compatibility.md for preparation. OpenSpec and Kiro mappings remain available when the user chooses them.
+## Intake staging and Spec Kit preparation
 
-## Intake staging
+*Formerly `#intake-staging-and-spec-kit-preparation`, version 2.5.1.*
+
+This reference supersedes the Spec Kit subsection of references/artifact-contract.md#compatibility-and-handoff for preparation. OpenSpec and Kiro mappings remain available when the user chooses them.
+
+### Intake staging
 
 Read project-intake.json first when supplied. It declares schemaVersion 1, projectId, title, summary, lifecycle, assignment, nextOperation, readOrder, sources, issues, relatedProjects and externalResources. Sources carry a relative path, format, role and optional sha256. Read order contains relative paths within the folder. Validate the manifest: every listed source exists, roles are assigned, and the read order resolves.
 
@@ -18,14 +22,14 @@ Group only sources for the same project. A shared topic or linked system does no
 
 Held-out evaluation payloads belong outside the prospective build root. The intake records their location and handling constraints, never their answers. A path outside the repository does not prove evaluator isolation.
 
-Create or refresh the optional default workbench using `project-workbench.md`. Keep any additional input files discoverable; name unsupported extraction and source dispositions rather than silently dropping them. Read `living-documents-setup.md` only when its integration applies.
+Create or refresh the optional default workbench using `references/artifact-contract.md#optional-default-project-workbench`. Keep any additional input files discoverable; name unsupported extraction and source dispositions rather than silently dropping them. Read `references/continuity.md#optional-living-documents-integration` only when its integration applies.
 
 The staging acceptance gate verifies source existence, hashes, safe paths and read order. It does not run the final spec validator against a transcript, or label a raw source pack build-ready. Stop after staging when that is the requested operation.
 
-## Specification preparation
+### Specification preparation
 
 1. Consume the manifest and source files. Preserve requirements, constraints, design details, rejected choices and provenance. Audit existing packs rather than rejecting them as ongoing work. Record conversion findings and an explicit source-to-artifact disposition map.
-2. Resolve the actual build directory and existing Git/Spec Kit/instruction files. Apply references/repository-bootstrap.md if repository setup is requested or unresolved. Detect installed Specify syntax with specify version and specify init --help. Inspect the integration's installed commands or skills before naming slash commands: dot and hyphen forms vary by integration/version.
+2. Resolve the actual build directory and existing Git/Spec Kit/instruction files. Apply references/artifact-contract.md#canonical-artifact-contract if repository setup is requested or unresolved. Detect installed Specify syntax with specify version and specify init --help. Inspect the integration's installed commands or skills before naming slash commands: dot and hyphen forms vary by integration/version.
 3. If Spec Kit is absent, initialize a clean project directory with its installed CLI and the chosen integration. Checkpoint and review merges into a populated directory; never blindly use --force. Do not initialize Spec Kit in the intake evidence folder unless the user explicitly makes it the build root.
 4. Run the constitution workflow first. Its authoritative location is .specify/memory/constitution.md. Use principles in the input and authorized project constraints. If licensing, policy or another material principle is unspecified, record the exact unknown and ask only where it blocks preparation. Every implementation task requires a named acceptance gate; meaningful risky changes require recovery; evidence is necessary for completion. Preserve existing governance and instruction files. AGENTS.md loads the canonical constitution and specifies task/session gates; it does not contain a second editable constitution. Do not inherit an unrelated project's stack or copy its constitution wholesale.
 5. Run specify with requirements.md plus intent.md under the constitution, then clarify using unresolved material source needs. Read the full inputs; filenames alone are not evidence of incorporation. Preserve native user stories, scenarios, acceptance and provenance. Keep native specs/<feature>/spec.md as the operational contract. Preserve SPEC/EVAL identifiers through a traceability mapping when Spec Kit emits FR identifiers. Put genuine user technology constraints in explicit cited constraints; do not erase them to satisfy a heuristic.
@@ -35,13 +39,13 @@ The staging acceptance gate verifies source existence, hashes, safe paths and re
 9. Run spec-prep separation, traceability and eval checks on the prepared artifact tree, adapted to its declared canonical paths. Never weaken a failed gate to obtain a pass. External eval payloads stay with the evaluator. Disclose isolation that has not been established. An eight-clause heuristic is not permission to invent requirements for a small project.
 10. Write reset-handoff.md with the real build root, canonical spec/plan/tasks/constitution paths, repository status, input provenance, preparation command results, unresolved material items, next task, and scope of initiation authority. Write preparation.json with schemaVersion 1, lifecycle specification-prepared, relative artifact paths, sha256 hashes, and four gate records: constitution, prerequisites, analysis, traceability. Each records its actual status (passed, failed, incomplete or not_run), command or named agent workflow, observedAt and a nonempty build-root-relative evidence file (or list of files). Use lifecycle specification-prepared only when all required preparation gates pass; otherwise specification-reviewed-incomplete. New receipts use a role-keyed artifacts object for spec, plan, tasks, constitution and handoff, each with path and sha256; include intent, final continuity and all other consumed material files as additional roles or artifactInventory entries with hashes. Include skill.version and skill.sha256 identifying the loaded SKILL.md, plus implementationAuthorized:false for preparation-only delivery. The skill digest identifies the instruction source; it is not a workflow-execution proof. Legacy artifact/gate arrays remain readable through unambiguous normalization; never guess roles by list position or rewrite old packs silently. The evidence must be a captured command result or a referenced reviewer finding, never an invented pass. Refresh workbench.json with the resolved build root and actual artifact pointers; workbench state remains derived from its canonical intake and evidence.
 
-Do not deliver template stubs as preparation. The scaffold only creates authoring templates and cannot pass the final gate. A completed tasks file is not implementation authority. Use fresh-session-initiation.md only when project initiation is explicitly included.
+Do not deliver template stubs as preparation. The scaffold only creates authoring templates and cannot pass the final gate. A completed tasks file is not implementation authority. Use references/handoff-and-implementation.md#terminal-agnostic-fresh-session-initiation only when project initiation is explicitly included.
 
 Primary references checked 2026-10-13: https://github.com/github/spec-kit/blob/main/docs/quickstart.md and https://github.github.com/spec-kit/reference/agentic-sdd.html. Local CLI inspection takes precedence for exact installed syntax.
 
-## Input handoff, governance and stop gate
+### Input handoff, governance and stop gate
 
-Use artifact-contract.md's three-document interface and delivery.json schema. Preserve source inputs separately from native outputs. Inspect the installed integration and extension hooks before execution; a preparation-only request forbids any automatic implement/launch transition. Do not change global hook configuration to make preparation work. After tasks/analyze/checks, write the handoff and stop. AGENTS.md requires the fresh session to read constitution, handoff and relevant artifacts; add the selected harness adapter where needed. Spec Kit's own specify/plan workflows also read the constitution: preserve this existing behavior rather than inventing a new setup prerequisite.
+Use references/artifact-contract.md#canonical-artifact-contract's three-document interface and delivery.json schema. Preserve source inputs separately from native outputs. Inspect the installed integration and extension hooks before execution; a preparation-only request forbids any automatic implement/launch transition. Do not change global hook configuration to make preparation work. After tasks/analyze/checks, write the handoff and stop. AGENTS.md requires the fresh session to read constitution, handoff and relevant artifacts; add the selected harness adapter where needed. Spec Kit's own specify/plan workflows also read the constitution: preserve this existing behavior rather than inventing a new setup prerequisite.
 
 Check the package against the delivery contract. If tooling is unavailable, complete the input-handoff operation with explicit native-incomplete status and next preparation step. Never call a scattered standalone pack native-prepared or direct its next session straight into implementation. Runtime/hardware tests belong to their implementation tasks; required evaluation definitions and source preservation remain preparation checks.
 
