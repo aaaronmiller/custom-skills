@@ -1,35 +1,12 @@
 ---
 name: skill-audit
-description: >
-  Audit skill ecosystems for quality, redundancy, structural integrity, and
-  description quality.
-
-  CRITICAL: The description field is the SKILL ACTIVATION MECHANISM — it tells
-  the model when to load the skill. Do not strip "Use when:" or trigger phrases.
-  Descriptions need TRIGGER COVERAGE, not brevity.
-
-  Use when: reviewing skills for junk/keep decisions, evaluating SKILL.md
-  quality, checking description trigger coverage, reducing always-loaded token
-  waste (without removing triggers), identifying single-use "pre-curate" skills,
-  comparing against S-tier reference skills, generating removal recommendations,
-  assessing description trigger quality and token efficiency, checking for
-  duplicates/redundant task clusters, running quarterly maintenance sweeps, or
-  onboarding skills from new sources.
-
-  Triggers: "audit skills", "find junk skills", "clean up skills", "skill
-  review", "which skills should I keep", "are my skills good", "skill quality
-  check", "remove useless skills", "evaluate description", "check trigger
-  coverage".
+description: "Audit skill ecosystems for quality, redundancy, structural integrity, description trigger coverage and cross-platform portability. Use when reviewing skills for keep or junk decisions, evaluating SKILL.md quality, checking that a skill uploads to claude.ai, the Claude API, Codex, Gemini or opencode, fixing 'malformed YAML frontmatter' or 'unexpected key' upload errors, reducing always-loaded token waste without removing triggers, finding single-use pre-curate skills, checking duplicate task clusters, running quarterly sweeps, or onboarding skills from new sources. The description is the activation mechanism: never strip Use when or trigger phrases. Triggers: 'audit skills', 'find junk skills', 'clean up skills', 'skill review', 'which skills should I keep', 'are my skills good', 'skill quality check', 'evaluate description', 'check trigger coverage', 'validate skill', 'skill upload error', 'malformed YAML frontmatter'."
 license: MIT
 metadata:
   author: ice-ninja / Hermes Agent
-  version: '2.0'
-tags:
-  - planning
-  - automation
-  - DOMAIN
-grade: A
-source: custom
+  version: "2.1.0"
+  updated: "2026-11-10"
+  tags: "planning, automation, skills"
 ---
 
 # Skill Audit
@@ -38,7 +15,7 @@ source: custom
 
 ## Mechanical checks (run these first)
 
-Two checks are arithmetic, not judgement, and neither is reliable done by eye.
+Three checks are arithmetic, not judgement, and none is reliable done by eye.
 Run them before any deep read so the judgement work starts from facts.
 
 ```bash
@@ -60,8 +37,27 @@ On that corpus, 21 of 39 skills had every target missing, silently: a script
 had emptied the directories five weeks earlier and the SKILL.md files were
 untouched, so nothing looked wrong from the index.
 
-Exit status is non-zero when a collision at or above the threshold exists, so
-this can gate a commit.
+**Portability.** Claude Code parses frontmatter leniently; the claude.ai
+uploader, the Claude API, Codex and Gemini do not. A skill can work locally for
+months and still fail every upload: `create-viral-content` failed claude.ai with
+"malformed YAML frontmatter in SKILL.md" because its description closed a quoted
+string and continued on an indented line. On 2026-11-10, 48 of 94 skills in
+`custom-skills` failed at least one hard rule, mostly unexpected top-level keys.
+ERROR findings mean a platform rejects the skill; WARN findings mean it degrades.
+
+| Rule | Level | Source |
+|---|---|---|
+| Valid YAML mapping between `---` fences on line 1 | ERROR | quick_validate.py |
+| Top-level keys only `name`, `description`, `license`, `allowed-tools`, `metadata`, `compatibility` (everything else under `metadata`) | ERROR | quick_validate.py, claude.ai |
+| `name` kebab-case, 1-64 chars, no `anthropic` or `claude` | ERROR | quick_validate.py, Anthropic docs |
+| `description` non-empty, at most 1024 chars, no `<` or `>` | ERROR | quick_validate.py |
+| `name` equals the folder name | WARN | agentskills.io, opencode |
+| `description` on one physical line; if double-quoted, no inner `"` (quote triggers with `'`) | WARN | gemini-cli validate_skill.cjs |
+| `metadata` values are strings | WARN | agentskills.io |
+| Body under 500 lines; no nested `SKILL.md`; LF line endings, no BOM | WARN | Anthropic best practices, OpenAI API, opencode |
+
+Exit status is non-zero when a collision at or above the threshold exists or
+any skill has a portability ERROR, so this can gate a commit.
 
 ## Core Audit Framework
 
