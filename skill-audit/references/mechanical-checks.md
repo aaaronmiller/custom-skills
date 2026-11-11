@@ -14,14 +14,16 @@ failed at least one hard rule, mostly unexpected top-level keys.
 | Rule | Level | Source |
 |---|---|---|
 | Valid YAML mapping between `---` fences on line 1 | ERROR | quick_validate.py |
+| No UTF-8 BOM before the opening `---` | ERROR | claude.ai uploader rejects it |
 | Top-level keys only `name`, `description`, `license`, `allowed-tools`, `metadata`, `compatibility` (everything else under `metadata`) | ERROR | quick_validate.py, claude.ai |
 | `name` kebab-case, 1-64 chars, no `anthropic` or `claude` | ERROR | quick_validate.py, Anthropic docs |
 | `description` non-empty, at most 1024 chars, no `<` or `>` | ERROR | quick_validate.py |
+| `compatibility`, when present, at most 500 chars | ERROR | agentskills.io |
 | `name` equals the folder name | WARN | agentskills.io, opencode |
-| `description` on one physical line; if double-quoted, no inner `"` (quote triggers with `'`) | WARN | gemini-cli validate_skill.cjs |
+| `description` on one physical line: a block scalar (`>`, `\|`) or a value that continues onto a following line (a quoted string closed there, a hand-wrapped plain scalar) is reported; if double-quoted, no inner `"` (quote triggers with `'`) | WARN | gemini-cli validate_skill.cjs |
 | `metadata` values are strings | WARN | agentskills.io |
-| Body under 500 lines; no nested `SKILL.md`; LF line endings, no BOM | WARN | Anthropic best practices, OpenAI API, opencode |
-| Description over 500 chars (Codex shortens it under budget) | WARN | openai/codex skills loader |
+| Body under 500 lines; no nested `SKILL.md`; LF line endings | WARN | Anthropic best practices, OpenAI API, opencode |
+| Description over 500 chars (Codex shortens it under budget); `metadata.description-reviewed` (a review date) silences it, recording a hand review that the key use case leads, and the trigger-loss gate still applies | WARN | openai/codex skills loader |
 | Claude Code-only keys (`argument-hint`, `disable-model-invocation`, ...) | WARN | strip when packaging for upload |
 
 The 500-line body limit is the one limit this skill uses everywhere
@@ -48,6 +50,15 @@ The 500-line body limit is the one limit this skill uses everywhere
   `references/ai-vocabulary-list.md`") belongs to that skill.
 - A references file may name a sibling relative to itself; either resolution
   counts as present.
+- Ghost tools: a script on a run line that the skill does not ship. A path
+  with a directory outside the disclosure directories (`helpers/x.py`) counts
+  too, unless its first directory is a user-tree or run-output directory
+  (`src/`, `lib/`, `app/`, `public/`, `out/`, `tmp/` and the rest of
+  `USER_TREE_DIRS`), its first segment is a host without a scheme
+  (`bun.sh/install.ps1`), its file name is a product (`React/Next.js`) or a
+  placeholder (`tests/test_foo.py`), or the line places it in the user's tree.
+  Measured false alarms behind each exemption (2.5.1 corpus run): aaron-job-search,
+  damage-control, project-archive's recorded `out/evidence/tools/*.py`, graphify.
 - Ghost tools skip framework entry points that live in the user's project
   (`manage.py`, `setup.py`, `server.js`, `index.js`, `app.py` and similar) and
   any bare name on a line that places it in "your project", "the repo" or the
@@ -62,7 +73,9 @@ is scanned, not only the disclosure directories. Measured miss before 2.5.0:
 root unflagged.
 
 - Orphans: files nothing reaches from SKILL.md, directly, through a reached
-  text file, or by a Python import. A reached text also reaches every file
+  text file, or by a Python import. Names match as whole path segments:
+  `notes.md` is reached by `./notes.md`, `refs/notes.md` or a sentence-final
+  `notes.md.`, never by `release-notes.md` or `notes.md.bak`. A reached text also reaches every file
   under a directory it names (`pipeline/`, `always_on/`), every match of a
   glob with a directory part (`schemas/*.schema.json`), and a directory named
   as a range (`prompts/W1-a.md through prompts/W5-e.md`) when both endpoints
@@ -93,7 +106,9 @@ root unflagged.
   A missing bare file name with no directory part (`intent.md#prior-art`) that
   exists nowhere in the skill names a generated or user document and is
   skipped; a missing target with a directory (`references/<file>.md#<anchor>`)
-  is dead.
+  is dead. A plain link with no anchor (`[x](references/<file>.md)`) follows
+  the same resolution and bare-name rule, in SKILL.md and in every reference
+  file, whatever words surround it.
 - Private data (ERROR): claude.ai chat URLs and key shapes `sk-ant-`,
   `sk-proj-`, `sk-`, `ghp_`/`gho_`/`ghs_`/`ghu_`/`ghr_`, `github_pat_`,
   `xoxb-`/`xoxp-`, `AIza`, `AKIA`. Scanned in every md, txt, json, yaml, yml,

@@ -47,19 +47,19 @@ Shorthand: `L(8/3, T1, W1, J:agent, S:durable)`. Defaults `L(8/3, T1, G-, W1, J:
 - **REFINE** (input provided): score it, diagnose it, revise it. The default.
 - **CREATE** (no input): generate v0 fast, then enter the loop. Expect v0 to be mediocre; say so.
 - **JUDGE** (verdict only): return the scored rubric with quoted evidence, no revision.
-- **HARDEN** (long session): REFINE with `S:durable` — scratchpad, gated phases, constitution. See [session-durability.md](session-durability.md).
+- **HARDEN** (long session): REFINE with `S:durable` — scratchpad, gated phases, constitution. See [session-durability.md](references/session-durability.md).
 
 ## Choosing the critic
 
-Match the judge to the stakes. Same-model self-critique catches surface flaws. A hostile persona in a separate turn (`role`) breaks average-first-pass bias. A separate agent session (`agent`, the AI Search pattern) adds independence. A different model family (`family`) neutralizes self-preference and is the choice for anything expensive. Details and prompt fragments: [critic-patterns.md](critic-patterns.md).
+Match the judge to the stakes. Same-model self-critique catches surface flaws. A hostile persona in a separate turn (`role`) breaks average-first-pass bias. A separate agent session (`agent`, the AI Search pattern) adds independence. A different model family (`family`) neutralizes self-preference and is the choice for anything expensive. Details and prompt fragments: [critic-patterns.md](references/critic-patterns.md).
 
 ## Choosing the rubric
 
-One 0–10 overall score plus 3–6 named dimensions, each with a one-line pass description. The critic reasons first, quotes evidence, then scores; revisions address the ranked fix list top-down. How to write rubrics that actually discriminate: [evaluation-rubrics.md](evaluation-rubrics.md).
+One 0–10 overall score plus 3–6 named dimensions, each with a one-line pass description. The critic reasons first, quotes evidence, then scores; revisions address the ranked fix list top-down. How to write rubrics that actually discriminate: [evaluation-rubrics.md](references/evaluation-rubrics.md).
 
 ## Model notes
 
-Reasoning-effort models (GPT-6 Astra, Claude Fable 5.1) change loop economics: calibrate effort per role (cheap builder, strong critic), keep histories append-only, use XML boundaries and docs-first ordering. Per-model specifics: [model-notes.md](model-notes.md).
+Reasoning-effort models (GPT-6 Astra, Claude Fable 5.1) change loop economics: calibrate effort per role (cheap builder, strong critic), keep histories append-only, use XML boundaries and docs-first ordering. Per-model specifics: [model-notes.md](references/model-notes.md).
 
 ## Stop conditions
 

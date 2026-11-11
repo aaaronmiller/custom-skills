@@ -5,7 +5,7 @@ license: MIT
 metadata:
   description-reviewed: "2026-11-10"
   author: ice-ninja / Hermes Agent
-  version: "2.5.0"
+  version: "2.5.1"
   updated: "2026-11-10"
   tags: "planning, automation, skills"
 ---

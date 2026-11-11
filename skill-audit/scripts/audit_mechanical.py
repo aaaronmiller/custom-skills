@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Mechanical skill-ecosystem checks: collision, disclosure and portability.
+"""Mechanical skill-ecosystem checks: collision, disclosure, portability,
+trigger loss, shipped-but-unreferenced files and effectiveness defects.
 
 The rest of this skill is judgement work - is a description good, is a skill
-junk, does it earn its slot. These two checks are not judgement. They are
-arithmetic over the corpus, they are the two that found every real defect in
-the 2026-08-22 audit of ~/code/custom-skills, and neither is reliable done by
-eye.
+junk, does it earn its slot. These checks are not judgement. They are
+arithmetic over the corpus; COLLISION and DISCLOSURE found every real defect
+in the 2026-08-22 audit of ~/code/custom-skills, and none is reliable done by
+eye. Rules, heuristics and measured cases: references/mechanical-checks.md.
 
   COLLISION   Two skills that quote the same trigger phrases compete for the
               same activation. Which one loads is arbitrary. Measured on that
@@ -38,6 +39,19 @@ eye.
               anthropics/skills quick_validate.py, gemini-cli validate_skill.cjs
               and the agentskills.io spec, checked 2026-11-10.
 
+              ERROR: invalid YAML or no --- fences on line 1; a UTF-8 BOM
+              before the opening --- (the claude.ai uploader rejects it);
+              top-level keys outside name, description, license,
+              allowed-tools, metadata and compatibility; a name that is not
+              kebab-case 1-64 chars or holds anthropic/claude; a description
+              missing, over 1024 chars or holding < or >; compatibility over
+              500 chars. WARN: name differs from the folder; description not on
+              one physical line (block scalar, or a value continuing onto a
+              following line) or double-quoted with an inner "; description
+              over 500 chars unless metadata.description-reviewed is set;
+              non-string metadata values; CRLF; body over 500 lines; nested
+              SKILL.md files.
+
               Claude Code-only keys (argument-hint, disable-model-invocation and
               the rest of CLAUDE_CODE_KEYS) are WARN: they work in Claude Code
               and must be stripped only when packaging for upload. A skill that
@@ -52,12 +66,27 @@ eye.
               mechanism, so shortening it must not silently drop a trigger.
               A SKILL.md absent at REF (new, moved or renamed) is skipped.
 
+  UNREFERENCED  The whole folder ships, so the whole folder is scanned: files
+              nothing reaches from SKILL.md (names match as whole path
+              segments, directories, globs and ranges reach their files),
+              stray backups, skill frontmatter outside SKILL.md, caches,
+              packaged archives and nested skill copies. All WARN.
+
+  EFFECTIVENESS Dead links and anchors (file.md#anchor, (#anchor), and plain
+              [x](dir/file.md) links); ghost tools (scripts a run line names
+              that the skill does not ship, including paths outside the
+              disclosure directories); a whole skill hidden in references/;
+              changelog sections in SKILL.md; SKILL.md over 25,000 bytes or
+              lines over 600 chars; reference versions that disagree with the
+              skill's; dangling symlinks. All WARN, except private data
+              (claude.ai chat URLs, credential-shaped tokens), which is ERROR.
+
 Usage:
     python3 audit_mechanical.py <skills-root> [--json] [--threshold 50] [--baseline REF]
 
 Exit status is non-zero when a collision at or above the threshold exists, any
-skill has a portability ERROR, or (with --baseline) any trigger was lost, so
-this can gate a commit.
+skill has a portability or effectiveness ERROR, or (with --baseline) any
+trigger was lost, so this can gate a commit.
 """
 
 from __future__ import annotations
@@ -278,6 +307,23 @@ def triggers(desc: str) -> set[str]:
     return {(a or b).strip().lower().replace("’", "'") for a, b in QUOTED_RE.findall(desc)}
 
 
+TOP_KEY_RE = re.compile(r"[A-Za-z_][\w-]*[ \t]*:(?:[ \t]|$)")
+
+
+def continues_past_line(fm_text: str, end: int) -> bool:
+    """True when the scalar on the line ending at END runs onto a later line.
+
+    After blank lines, the next line must open a new top-level key or be a
+    comment; an indented line or any other text continues the value, as in a
+    quoted string closed on the next line or a plain scalar wrapped by hand.
+    """
+    for nxt in fm_text[end:].split("\n")[1:]:
+        if not nxt.strip():
+            continue
+        return not (TOP_KEY_RE.match(nxt) or nxt.startswith("#"))
+    return False
+
+
 def portability(path: Path, raw: bytes) -> list[str]:
     """Return 'ERROR: ...' and 'WARN: ...' findings for one skill folder.
 
@@ -351,8 +397,10 @@ def portability(path: Path, raw: bytes) -> list[str]:
     # Gemini's validator reads the description line with a regex, not YAML:
     # it must be one physical line, and a double-quoted value may not contain ".
     line = re.search(r'^description:[ \t]*(.*)$', fm_text, re.M)
-    if not line or not line.group(1).strip() or line.group(1).strip()[0] in "|>":
-        out.append("WARN: description is not a single-line string (Gemini CLI validator rejects block scalars)")
+    if not line or not line.group(1).strip() or line.group(1).strip()[0] in "|>" \
+            or continues_past_line(fm_text, line.end()):
+        out.append("WARN: description is not a single-line string (Gemini CLI validator reads only the "
+                   "description line: block scalars and values wrapped onto a following line fail)")
     else:
         v = line.group(1).strip()
         if v.startswith('"') and '"' in v[1:-1]:
@@ -399,6 +447,18 @@ def is_companion(p: Path, root: Path | None = None) -> bool:
 
 
 IMPORT_RE = re.compile(r"^\s*(?:from\s+\.?([\w.]+)\s+import|import\s+([\w.]+))", re.M)
+_NAME_RES: dict[str, re.Pattern] = {}
+
+
+def names(token: str, text: str) -> bool:
+    """True when TEXT names TOKEN (a basename or relative path) as whole path
+    segments: `notes.md` is not named by `release-notes.md` or `notes.md.bak`,
+    while `./notes.md`, `refs/notes.md` and a sentence-final `notes.md.` are."""
+    if token not in text:
+        return False
+    if token not in _NAME_RES:
+        _NAME_RES[token] = re.compile(r"(?<![\w.-])" + re.escape(token) + r"(?![\w-])(?!\.\w)")
+    return bool(_NAME_RES[token].search(text))
 
 
 def reach(path: Path, skill_text: str, files: list[Path]) -> tuple[set[Path], set[Path]]:
@@ -427,11 +487,12 @@ def reach(path: Path, skill_text: str, files: list[Path]) -> tuple[set[Path], se
                 rel_here = p.relative_to(base).as_posix()
             except ValueError:
                 rel_here = rel
-            if ("/" in rel and rel in text) or ("/" in rel_here and rel_here in text):
+            if ("/" in rel and names(rel, text)) or ("/" in rel_here and names(rel_here, text)):
                 by_path.add(p)
             if p in reachable:
                 continue
-            if rel in text or p.name in text or (p.suffix == ".py" and p.stem in modules) or p in covered:
+            if names(rel, text) or names(p.name, text) or (p.suffix == ".py" and p.stem in modules) \
+                    or p in covered:
                 reachable.add(p)
                 if p.suffix in TEXT_SUFFIXES:
                     frontier.append((p.read_text(encoding="utf-8", errors="replace"), p.parent))
@@ -630,6 +691,12 @@ PROJECT_ENTRYPOINTS = {"manage.py", "setup.py", "app.py", "main.py", "wsgi.py", 
 PROJECT_CUE_RE = re.compile(
     r"\b(?:your|the user'?s|their)\s+(?:own\s+)?(?:project|repo|repository|app|application|codebase|code)\b"
     r"|\bthe\s+(?:repo|repository|project|codebase)\b", re.I)
+# Top-level directories that conventionally belong to the user's project or
+# hold what a run writes (project-archive's method.md records the tools a run
+# wrote under out/evidence/tools/).
+USER_TREE_DIRS = {"src", "lib", "app", "apps", "packages", "public", "dist", "build", "node_modules",
+                  "vendor", "test", "spec", "cmd", "pkg", "internal", "server", "client", "frontend",
+                  "backend", "web", "api", "out", "output", "outputs", "tmp"}
 
 
 def ghost_tool(path: Path, src: Path, tok: str, line: str, text: str, names: set[str]) -> str | None:
@@ -647,10 +714,21 @@ def ghost_tool(path: Path, src: Path, tok: str, line: str, text: str, names: set
     else:
         rel = tok
     if "/" in rel or strict:
-        if "/" in rel and rel.split("/")[0] not in DISCLOSURE_DIRS:
-            return None  # src/server.js: a path in the user's tree
         if PLACEHOLDER_RE.search(rel) or (path / rel).exists() or (src.parent / rel).exists():
             return None
+        first, base_name = rel.split("/")[0], rel.rsplit("/", 1)[-1]
+        if "/" in rel and first not in DISCLOSURE_DIRS:
+            # helpers/x.py on a run line is the skill's own tool unless the
+            # line or the path places it elsewhere: the user's tree or a run's
+            # output (src/server.js, out/tools/x.py, "in your project", a
+            # framework entry point), a host without its scheme
+            # (bun.sh/install.ps1), a product name (React/Next.js) or a
+            # placeholder (tests/test_foo.py).
+            if first in USER_TREE_DIRS or base_name.lower() in PROJECT_ENTRYPOINTS \
+                    or PROJECT_CUE_RE.search(line) or re.fullmatch(r"[\w-]+(?:\.[\w-]+)+", first) \
+                    or (base_name.endswith(".js") and base_name[0].isupper()) \
+                    or re.search(r"(?:^|[_-])(?:your|my|example|sample|foo|bar|baz)(?=[_.-])", base_name, re.I):
+                return None
         return rel
     tok = rel
     if tok in names or on_path(tok):
@@ -699,6 +777,7 @@ def effectiveness(path: Path, skill_text: str) -> list[str]:
     dead = set()
     file_anchor = re.compile(r"(?<![\w/~:$\\-])([\w.-]+(?:/[\w.-]+)*\.md)#([\w-]+)")
     md_names = {q.name for q in texts}
+    plain_link = re.compile(r"\]\((?![/~])([\w.-]+(?:/[\w.-]+)*\.md)\)")
     for p, t in texts.items():
         rel = p.relative_to(path).as_posix()
         for line in own_lines(unfenced(t)):
@@ -716,6 +795,12 @@ def effectiveness(path: Path, skill_text: str) -> list[str]:
             for anchor in re.findall(r"\]\(#([\w-]+)\)", line):
                 if anchor not in anchors(p):
                     dead.add(f"{rel}#{anchor}")
+            # A plain link with no anchor, [x](references/missing.md): the
+            # same resolution and the same bare-name rule as above.
+            for target in plain_link.findall(line):
+                if not any(c.is_file() for c in (p.parent / target, path / target)) \
+                        and ("/" in target or target in md_names):
+                    dead.add(f"{target} (missing file)")
     if dead:
         out.append(f"WARN: {len(dead)} dead link(s) or anchor(s): {', '.join(sorted(dead)[:5])}")
 

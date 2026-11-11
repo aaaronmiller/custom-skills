@@ -206,6 +206,48 @@ class Portability(AuditCase):
                 self.assertTrue(any(f.startswith("WARN") and needle in f for f in out), out)
                 self.assertFalse(any(f.startswith("ERROR") for f in out), out)
 
+    def test_description_wrapped_onto_next_line_warns(self):
+        # Valid YAML, but Gemini reads only the description line.
+        base = HEALTHY_FM.format(name="s")
+        cases = {
+            "quoted string closed on the next line": base.replace(
+                "misbehaves. ", "misbehaves.\n  "),
+            "plain scalar wrapped by hand": "---\nname: s\ndescription: Checks widgets for faults.\n"
+                                            "  Use when a widget misbehaves.\nlicense: MIT\n---\n",
+            "single-quoted string wrapped": "---\nname: s\ndescription: 'Checks widgets for faults.\n"
+                                            "  Use when a widget misbehaves.'\nlicense: MIT\n---\n",
+        }
+        for needle, fm in cases.items():
+            with self.subTest(needle):
+                path = self.root / needle.replace(" ", "-") / "s"
+                path.mkdir(parents=True)
+                (path / "SKILL.md").write_text(fm + HEALTHY_BODY, encoding="utf-8")
+                out = am.portability(path, (path / "SKILL.md").read_bytes())
+                self.assertTrue(any(f.startswith("WARN") and "not a single-line string" in f for f in out), out)
+
+    def test_single_line_description_before_blank_line_and_comment_is_healthy(self):
+        fm = HEALTHY_FM.format(name="s").replace("license: MIT\n", "\n# licence follows\nlicense: MIT\n")
+        self.assertFalse(any("single-line" in f for f in self.port(fm=fm)))
+
+    def test_bom_is_error(self):
+        # The claude.ai uploader rejects a BOM before the opening ---.
+        path = self.skill("s")
+        out = am.portability(path, b"\xef\xbb\xbf" + (path / "SKILL.md").read_bytes())
+        self.assertIn("ERROR: UTF-8 BOM before the opening ---", out)
+        self.assertNotIn("s", self.run_audit()["portability_errors"])
+        (path / "SKILL.md").write_bytes(b"\xef\xbb\xbf" + (path / "SKILL.md").read_bytes())
+        self.assertIn("s", self.run_audit()["portability_errors"])
+
+    def test_compatibility_over_500_is_error_and_reviewed_description_is_quiet(self):
+        fm = HEALTHY_FM.format(name="s").replace("license: MIT\n", "license: MIT\ncompatibility: " + "x" * 501 + "\n")
+        self.assertIn("ERROR: compatibility longer than 500 chars", self.port(fm=fm))
+        long = HEALTHY_FM.format(name="s").replace("Checks widgets", "Checks widgets " + "x" * 520).replace(
+            "metadata:\n", "metadata:\n  description-reviewed: \"2026-11-10\"\n")
+        path = self.root / "reviewed" / "s"
+        path.mkdir(parents=True)
+        (path / "SKILL.md").write_text(long + HEALTHY_BODY, encoding="utf-8")
+        self.assertFalse(any("over 500" in f for f in am.portability(path, (path / "SKILL.md").read_bytes())))
+
     def test_crlf_long_body_nested(self):
         path = self.skill("s", body=HEALTHY_BODY + "line\n" * 501,
                           files={"copy/SKILL.md": HEALTHY_FM.format(name="copy")})
@@ -301,6 +343,23 @@ class Unreferenced(AuditCase):
                    files={"references/unused.md": "# Unused\n"})
         self.assertIn("references/unused.md", " ".join(self.run_audit()["unreferenced"]["s"]))
 
+    def test_basename_inside_a_longer_name_does_not_reach(self):
+        # notes.md is not named by release-notes.md, nor lint.py by lint.py.txt.
+        self.skill("s", body=HEALTHY_BODY + "\nRead `references/release-notes.md` and `tools/lint.py.txt`.\n",
+                   files={"references/notes.md": "# Notes\n", "references/release-notes.md": "# Release\n",
+                          "tools/lint.py": "x\n", "tools/lint.py.txt": "x\n"})
+        msg = " ".join(self.run_audit()["unreferenced"]["s"])
+        self.assertIn("references/notes.md", msg)
+        self.assertIn("tools/lint.py,", msg + ",")
+        self.assertNotIn("release-notes.md", msg)
+        self.assertNotIn("lint.py.txt", msg)
+
+    def test_whole_segment_names_still_reach(self):
+        body = HEALTHY_BODY + "\nSee ./notes.md, then `docs/extra/plan.md`. Last: tips.md.\n"
+        self.skill("s", body=body, files={"notes.md": "# N\n", "docs/extra/plan.md": "# P\n",
+                                          "references/tips.md": "# T\n"})
+        self.assertNotIn("s", self.run_audit()["unreferenced"])
+
     def test_healthy_companions_only(self):
         self.skill("s", files={"CHANGELOG.md": "x", "marketplace.json": "{}"})
         self.assertNotIn("s", self.run_audit()["unreferenced"])
@@ -353,6 +412,28 @@ class Effectiveness(AuditCase):
         files = {"references/workflow.md": "# Flow\n\nRun python3 scripts/migrate.py now.\n"}
         r = self.eff(body=HEALTHY_BODY + "\nFollow `references/workflow.md`.\n", files=files)
         self.assertIn("scripts/migrate.py", self.msg(r))
+
+    def test_ghost_tool_outside_disclosure_dirs(self):
+        r = self.eff(body=HEALTHY_BODY + "\nRun `python3 helpers/x.py` to merge.\n")
+        self.assertIn("helpers/x.py", self.msg(r))
+
+    def test_present_tool_outside_disclosure_dirs_is_healthy(self):
+        r = self.eff(body=HEALTHY_BODY + "\nRun `python3 helpers/x.py` to merge.\n",
+                     files={"helpers/x.py": "print('x')\n"})
+        self.assertNotIn("s", r["effectiveness"])
+
+    def test_plain_link_to_missing_file_is_dead(self):
+        files = {"references/guide.md": "# Guide\n\n## Steps\n\nMore in [the detail](detail.md) and "
+                                        "[the guide](guide.md).\n"}
+        r = self.eff(body=HEALTHY_BODY + "\nAlso [the extras](references/missing.md).\n", files=files)
+        self.assertIn("references/missing.md (missing file)", self.msg(r))
+        # detail.md exists nowhere in the skill: a generated document, skipped.
+        self.assertNotIn("detail.md", self.msg(r))
+        self.assertNotIn("guide.md (missing", self.msg(r))
+
+    def test_plain_link_with_bare_name_at_wrong_level_is_dead(self):
+        r = self.eff(body=HEALTHY_BODY + "\nSee [the guide](guide.md).\n")
+        self.assertIn("guide.md (missing file)", self.msg(r))
 
     def test_hidden_skill_in_references(self):
         # Not loaded by path from anywhere: a second skill riding along.
@@ -427,6 +508,19 @@ class RegressionFalseAlarms(AuditCase):
             "\nRun `python manage.py migrate` in your project.\n"
             "Then run `node server.js`.\n"
             "In the repo, run `python tools/seed_db.py` and `bash build_all.sh`.\n")
+        self.skill("s", body=body)
+        self.assertNotIn("s", self.run_audit()["effectiveness"])
+
+    def test_paths_outside_disclosure_dirs_that_are_not_skill_tools(self):
+        # Corpus false alarms found when directory paths outside DISCLOSURE_DIRS
+        # became ghost candidates (2.5.1): a product name, a scheme-less host, a
+        # run's output, a placeholder example and a user-tree path.
+        body = HEALTHY_BODY + (
+            "\nRun the React/Next.js stack checks.\n"
+            "Run `powershell -c \"irm bun.sh/install.ps1 | iex\"`.\n"
+            "Run `python3 -I out/evidence/tools/inventory.py in out`.\n"
+            "Run graphify; e.g. `tests/test_foo.py` becomes `tests_test_foo`.\n"
+            "Run `node src/server.js` and `python3 lib/tools/seed.py`.\n")
         self.skill("s", body=body)
         self.assertNotIn("s", self.run_audit()["effectiveness"])
 

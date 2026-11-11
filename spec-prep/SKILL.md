@@ -4,7 +4,7 @@ description: "Prepares and refines project intent, requirements, design, and nat
 license: MIT
 metadata:
   description-reviewed: "2026-11-10"
-  version: "4.1.0"
+  version: "4.1.1"
   author: "ice-ninja"
   tags: "spec-driven, intent, planning, coding"
 ---
@@ -14,7 +14,7 @@ metadata:
 > Separation of Tiers, Retention Across Time, Auditability. From brain dump to
 > build-ready, pivot-resilient, dormancy-proof artifacts.
 
-This skill stages ideation outputs and prepares specifications with Spec Kit. It stops before implementation unless the current request explicitly includes project initiation. Read the terminology below before choosing an operation, and `references/intake-and-speckit.md#intake-staging-and-spec-kit-preparation` when consuming a staged folder.
+This skill stages ideation outputs and prepares specifications with Spec Kit. It stops before implementation unless the current request explicitly includes project initiation, which always starts in a fresh session (Phase 7). Read the terminology below before choosing an operation, and `references/intake-and-speckit.md#intake-staging-and-spec-kit-preparation` when consuming a staged folder.
 
 Routine debugging, code review and maintenance use their existing workflows. Supplied spec-prep packs remain valid preparation inputs.
 
@@ -45,7 +45,7 @@ python3 -m unittest discover -s tests -v
 
 The first runs the nine validation checks on one artifact directory (native: the feature root); OPERATION is `standalone`, `native-preparation` or `input-handoff`, and `--help` lists the rest, such as `--continuity external`. The second measures supplied specs for layer fusion. The third checks `delivery.json`, a native receipt and the stop boundary. The fourth, run from the skill directory, shows each check failing on a constructed fixture.
 
-A non-zero exit is a hard gate failure. For native preparation record the command, exit status and per-check results as the receipt's `validation` gate (`references/intake-and-speckit.md#specification-preparation`, step 10). Without code execution, apply `references/validation-and-refinement.md#the-nine-validation-checks` by hand in order, record every verdict, and label the pass hand-executed (weaker: recommend tool re-validation where possible).
+A non-zero exit is a hard gate failure. For native preparation record the command, exit status and per-check results as the receipt's `validation` gate (`references/intake-and-speckit.md#specification-preparation`, step 10). Without code execution, apply `references/validation-and-refinement.md#the-nine-validation-checks` by hand in order, record every verdict, and label the pass hand-executed (weaker; recommend tool re-validation).
 Never claim a gate passed without listing each check and its outcome, or claim Spec Kit operations ran when only prose was written. A check that visible text cannot settle (a hash, for example) is `not_run` with the reason; run the rest.
 
 ## Spec Kit source policy (no vendored toolchain)
@@ -63,7 +63,7 @@ Intent is a maintained asset in its own right, alongside requirements and design
 1. **Invoked.** The skill runs its phases and gates below.
 2. **Referenced.** Another task is told to "prepare for spec-prep" or "make this spec-prep ready" without invoking it. The reading model uses this file and `references/artifact-contract.md#canonical-artifact-contract` as a format contract only.
    - Deliverables: a compact input handoff (the intent, requirements and design trio, `sources/` with verbatim prompts, a source-disposition map, supporting material, a conversion guide, delivery.json).
-   - Governance the delivery checker requires: a constitution draft at `.specify/memory/constitution.md`, build-root AGENTS.md, reset-handoff.md, and an optional CLAUDE.md adapter.
+   - Governance and gates: `references/artifact-contract.md#referenced-use-checklist` lists what both checkers require (constitution draft, AGENTS.md, reset-handoff.md, optional CLAUDE.md, eval store).
    - It completes or schedules the prior-art gate.
    A referenced use never authors native Spec Kit outputs, never writes a receipt and never claims preparation ran. It records `operation: input-handoff` and leaves specification preparation as the next operation.
 
@@ -120,7 +120,7 @@ An input handoff authors the three core documents and governance directly under 
 
 *Skip in Existing-specs mode.* Extract problem statements, solutions, personas, success and failure conditions, constraints, scale and quality expectations, implied entities, integrations and workflows. **Tag every extracted signal as intent, spec or implementation**, because the user will have fused them; separation starts here. In Interactive mode, proceed category by category with `references/intake-checklists.md#discovery-questions-interactive-mode`; never ask everything at once.
 
-### Phase 2: Prior art research (mandatory)
+### Phase 2: Prior art research (required unless the gate records directed or waived)
 
 *In Existing-specs mode, do not redo a survey the pack already contains; run the prior-art gate, and this phase only when it finds no record.* Follow `references/intake-checklists.md#prior-art-research-checklist` and its minimum searches. **If an existing tool fully solves the problem, stop and surface it.** Record findings in intent section 10 (`references/templates.md#intent-template-intentmd`) and keep a source list for the delivery summary.
 
@@ -163,7 +163,7 @@ Required preparation gates must pass before claiming native preparation; evidenc
 
 Deliver the verified preparation receipt and reset handoff. Specification preparation ends here unless the user requested implementation; never infer implementation authority from "create tasks", "stage" or "prepare".
 
-**The reboot rule.** Preparation and implementation are separate authorities in separate sessions. The authoring session NEVER implements, even when the user says "then build it" in the same breath: finish preparation, write the reset handoff, and STOP. Implementation begins only in a session with no parent linkage to the authoring session: one the user starts, or an explicitly authorized launcher starts, that does not inherit the authoring session's conversation, context or agent tree (`references/handoff.md#what-counts-as-a-fresh-session` lists what counts and what does not).
+**The reboot rule.** Preparation and implementation are separate authorities in separate sessions. The authoring session NEVER implements, even when the user says "then build it" in the same breath: finish preparation, write the reset handoff, and STOP. Implementation begins only in a session with no parent linkage to the authoring session: one the user starts, or an explicitly authorized launcher starts, that does not inherit the authoring session's conversation, context or agent tree (`references/handoff.md#what-counts-as-a-fresh-session`).
 On hosts with terminal launch, that machinery runs only on explicit launch authority: a named project plus a direct "launch/spawn/start it now" instruction, which a combined "prepare then implement" request supplies only AFTER preparation is finished, committed and gate-verified; otherwise produce the pasteable resume prompt (handoff contents, next task) and stop.
 A spawned task or subagent of the authoring session is NOT a fresh session. "Implement via new session", "activate after restart" or "I will restart" name the user-launched path. The constitution binds at session start and a continuing session cannot re-bind it; only the session boundary fixes that, so this rule is load-bearing.
 
