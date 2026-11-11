@@ -7,9 +7,20 @@ tags: [spec-prep]
 
 ## Contents
 
+- [Input modes](#input-modes)
 - [Confidence Gate](#confidence-gate)
 - [Discovery Questions (Interactive mode)](#discovery-questions-interactive-mode)
 - [Prior Art Research Checklist](#prior-art-research-checklist)
+
+## Input modes
+
+SKILL.md Phase 0 picks one after choosing the operation. Phases named here are SKILL.md phases.
+
+- **Interactive**: a verbal description or "I want to build X".
+- **Transcript**: files, transcripts or notes. Mixed: transcript first, then interactive gap-fill.
+- **Fast Track**: problem, solution, users, data, constraints and scope all covered; check the advisory rubric, then go to Phase 2 when grounded.
+- **Existing specs**: `requirements.md` and `design.md`, judged by source coverage, not size. Skip Phases 1 and 2, re-separate layers in Phase 3, and still run the validation checks (`--audit` first: external specs routinely fuse layers). Refining an existing package uses SKILL.md Phase 5's affected-layer workflow, not a new brief; its mixed and assistant-authored material is source evidence (SKILL.md rule 2).
+- **Recovery**: nobody can say what the project was for, or two specs disagree. Reconstruct intent first: run the `intent-archaeology` skill on its session logs and spec versions when available; otherwise read commit history, READMEs, issue threads and every spec version, tagging each recovered statement with its source. Mark inferred statements as inferred; they stay proposals until accepted (SKILL.md rule 2), and only dependent actions wait for a required decision.
 
 ## Confidence Gate
 
@@ -93,4 +104,4 @@ Record a verdict for the closest candidates: build new, fork, extend, or use as 
 
 ### Output
 
-Comparison table, patterns adopted, and patterns avoided go into `intent.md` section 10. Process notes go nowhere. If a known project is later found to have been missed, append a ledger entry recording what was missed, when it surfaced, and why it matters, then update `intent.md`.
+Comparison table, patterns adopted, and patterns avoided go into `intent.md` section 10. Process notes go nowhere. If a known project is later found to have been missed, record what was missed, when it surfaced, and why it matters as a refinement finding (`references/validation-and-refinement.md#refinement-passes` says where), then update `intent.md`.

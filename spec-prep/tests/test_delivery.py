@@ -100,16 +100,43 @@ class DeliveryFixture(unittest.TestCase):
                      "specs/001-report/intent.md", "AGENTS.md", "README.md"):
             artifacts[path] = {"path": path, "sha256": sha(build / path)}
         gates = {}
-        for name in ("constitution", "prerequisites", "analysis", "traceability"):
+        for name in ("constitution", "prerequisites", "analysis", "traceability", "validation"):
             evidence = f"evidence/{name}.md"
             self.write(f"report/{evidence}", "# Synthetic fixture\nGate result for checker tests only.\n")
             gates[name] = {"status": "passed", "command": "fixture-only", "observedAt": "2026-11-10",
                            "evidence": evidence}
+        gates["validation"].update(
+            command="python3 scripts/spec-prep-validate.py specs/001-report --operation native-preparation "
+                    "--build-root . --json", exitStatus=0,
+            checks={name: "passed" for name in d.VALIDATION_CHECKS})
         receipt = {"schemaVersion": 1, "lifecycle": "specification-prepared", "implementationAuthorized": False,
-                   "skill": {"version": "4.0.0", "sha256": sha(SKILL_DIR / "SKILL.md")},
+                   "skill": {"version": "4.1.0", "sha256": sha(SKILL_DIR / "SKILL.md")},
                    "artifacts": artifacts, "gates": gates}
         self.write("report/preparation.json", json.dumps(receipt))
         return receipt
+
+    def rewrite_receipt(self, receipt):
+        self.write("report/preparation.json", json.dumps(receipt))
+
+
+NUMBERED_INTENT = """# Report Intent v1.0
+
+## 1. Goal
+Operators receive complete reports.
+
+## 10. Prior art
+| Solution | Strength | Weakness | Gap this fills |
+|---|---|---|---|
+| Manual collation | Familiar | Slow | Repeatable report |
+
+## 12. Open intent questions
+- [NEEDS CLARIFICATION: is the reporting month the calendar month or the fiscal month?]
+
+## Source disposition
+- USER-1: preserved in section 1.
+- ../data/README.md: analysis-input, preserved.
+- prior-art: done; section 10.
+"""
 
 
 class Passing(DeliveryFixture):
@@ -136,6 +163,59 @@ class Passing(DeliveryFixture):
                    "hooks:\n  after_tasks:\n    - extension: git\n      command: speckit.git.commit\n"
                    "  after_analyze:\n    - command: speckit.implement\n      enabled: false\n")
         self.assertEqual(self.errors(), [])
+
+    def test_numbered_template_headings_resolve_unnumbered_fragments(self):
+        # A2: the intent template's '## 10. Prior art' answers '#prior-art' and '#10-prior-art'.
+        self.write("report/inputs/intent.md", NUMBERED_INTENT)
+        self.assertEqual(self.errors(), [])
+        self.stream["priorArt"]["record"] = "intent.md#10-prior-art"
+        self.assertEqual(self.errors(), [])
+
+    def test_listed_clarification_markers_pass_in_inputs_and_native_outputs(self):
+        # A1: Spec Kit form '[NEEDS CLARIFICATION: question]' is a listed open item, not a stub.
+        self.write("report/inputs/intent.md", NUMBERED_INTENT)
+        self.native()
+        self.write("report/specs/001-report/spec.md", "# Spec\n- **FR-001**: System MUST return every record "
+                                                      "[NEEDS CLARIFICATION: fiscal or calendar month?].\n")
+        receipt = json.loads((self.root / "report/preparation.json").read_text())
+        receipt["artifacts"]["spec"]["sha256"] = sha(self.root / "report/specs/001-report/spec.md")
+        self.rewrite_receipt(receipt)
+        self.assertEqual(self.errors(), [])
+
+    def test_reviewed_hook_passes(self):
+        # A3: a reviewed command listed in reviewedHooks passes.
+        self.write("report/.specify/extensions.yml",
+                   "hooks:\n  after_tasks:\n    - command: npx prettier --write specs\n")
+        self.stream["reviewedHooks"] = [{"command": "npx prettier --write specs",
+                                         "review": "formats Markdown only; launches nothing"}]
+        self.assertEqual(self.errors(), [])
+
+    def test_reviewed_prompt_hook_passes(self):
+        self.write("report/.claude/settings.json", json.dumps(
+            {"hooks": {"Stop": [{"hooks": [{"type": "prompt", "prompt": "Summarize the diff."}]}]}}))
+        self.stream["reviewedHooks"] = [{"command": "Summarize the diff.", "review": "read-only summary"}]
+        self.assertEqual(self.errors(), [])
+
+    def test_prior_art_record_under_build_root_passes(self):
+        # L2: the record may be a package file named relative to the build root.
+        self.write("report/sources/prior-art.md", "# Prior art\nSearches, closest projects; verdict: build new.\n")
+        self.stream["priorArt"]["record"] = "sources/prior-art.md"
+        self.assertEqual(self.errors(), [])
+
+    def test_readme_conversion_guide_inside_input_root_passes(self):
+        # L3: a README.md guide beside the trio is not a competing entry document.
+        guide = (self.root / "report/README.md").read_text()
+        (self.root / "report/README.md").unlink()
+        self.write("report/inputs/README.md", guide)
+        self.stream["conversionGuide"] = "inputs/README.md"
+        self.assertEqual(self.errors(), [])
+
+    def test_validation_checks_match_the_validator(self):
+        # A8: the receipt gate names the same nine checks the validator reports.
+        spec = importlib.util.spec_from_file_location("spv", SKILL_DIR / "scripts" / "spec-prep-validate.py")
+        validator = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(validator)
+        self.assertEqual(list(d.VALIDATION_CHECKS), validator.CHECKS)
 
     def test_legacy_receipt_normalizes_without_mutation(self):
         receipt = self.native()
@@ -244,6 +324,82 @@ class Rejected(DeliveryFixture):
         self.stream["supporting"].append({"path": "../references/vendor-guide.md", "role": "reference",
                                           "why": "integration limits"})
         self.assertRejected("not declared")
+
+    def test_bare_clarification_marker_is_a_stub(self):
+        # A1: a marker with no question is still template content.
+        self.write("report/inputs/intent.md", NUMBERED_INTENT.replace(
+            "[NEEDS CLARIFICATION: is the reporting month the calendar month or the fiscal month?]",
+            "[NEEDS CLARIFICATION]"))
+        self.assertRejected("unresolved template content")
+
+    def test_other_template_stub_still_rejected(self):
+        # A1: accepting clarification markers does not admit other stubs.
+        self.write("report/inputs/requirements.md", "# Requirements for [FEATURE NAME]\nFR-001: MUST return records.\n")
+        self.assertRejected("unresolved template content")
+
+    def test_numbered_heading_fragment_must_still_exist(self):
+        # A2: normalized matching is not a wildcard.
+        self.write("report/inputs/intent.md", NUMBERED_INTENT)
+        self.stream["priorArt"]["record"] = "intent.md#11-prior-art-survey"
+        self.assertRejected("priorArt.record heading not found")
+
+    def test_unreviewed_hook_rejected(self):
+        # A3: a command that is neither a known stage nor reviewed fails.
+        self.write("report/.specify/extensions.yml",
+                   "hooks:\n  after_tasks:\n    - command: npx prettier --write specs\n")
+        self.assertRejected("needs review")
+
+    def test_reviewed_hook_without_note_rejected(self):
+        self.write("report/.specify/extensions.yml",
+                   "hooks:\n  after_tasks:\n    - command: npx prettier --write specs\n")
+        self.stream["reviewedHooks"] = [{"command": "npx prettier --write specs", "review": ""}]
+        self.assertRejected("one-line review note")
+
+    def test_review_cannot_admit_an_implement_hook(self):
+        self.write("report/.specify/extensions.yml", "hooks:\n  after_tasks:\n    - command: speckit.implement\n")
+        self.stream["reviewedHooks"] = [{"command": "speckit.implement", "review": "we trust it"}]
+        self.assertRejected("removed or disabled")
+
+    def test_native_receipt_without_validation_gate(self):
+        # A8: a run that skipped spec-prep-validate.py fails the delivery check.
+        receipt = self.native()
+        del receipt["gates"]["validation"]
+        self.rewrite_receipt(receipt)
+        self.assertRejected("missing passed gate evidence: validation")
+
+    def test_validation_gate_with_a_failed_check(self):
+        receipt = self.native()
+        receipt["gates"]["validation"]["checks"]["drift"] = "failed"
+        self.rewrite_receipt(receipt)
+        self.assertRejected("did not pass: drift")
+
+    def test_validation_gate_with_nonzero_exit(self):
+        receipt = self.native()
+        receipt["gates"]["validation"]["exitStatus"] = 1
+        self.rewrite_receipt(receipt)
+        self.assertRejected("exitStatus 0")
+
+    def test_validation_gate_missing_a_check(self):
+        receipt = self.native()
+        del receipt["gates"]["validation"]["checks"]["prior-art"]
+        self.rewrite_receipt(receipt)
+        self.assertRejected("lacks per-check results: prior-art")
+
+    def test_validation_gate_not_from_the_validator(self):
+        receipt = self.native()
+        receipt["gates"]["validation"]["command"] = "fixture-only"
+        self.rewrite_receipt(receipt)
+        self.assertRejected("spec-prep-validate.py")
+
+    def test_prior_art_record_escaping_the_build_root(self):
+        # L2: a record path may not leave the package.
+        self.write("outside.md", "# Prior art\nNot part of the package.\n")
+        self.stream["priorArt"]["record"] = "../../outside.md"
+        self.assertRejected("escapes the build root")
+
+    def test_prior_art_record_file_missing(self):
+        self.stream["priorArt"]["record"] = "sources/prior-art.md"
+        self.assertRejected("missing file")
 
     def test_supporting_role_outside_the_role_table(self):
         self.stream["supporting"][0]["role"] = "misc"

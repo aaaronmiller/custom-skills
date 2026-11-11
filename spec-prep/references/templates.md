@@ -71,16 +71,19 @@ tags: [{{TAGS}}]
 [Assumptions about users and environment. External dependencies as capabilities, not products.]
 
 ## 12. Open intent questions
-[Preserve all material unresolved needs. Use the installed native template's clarification-marker convention; move overflow into a linked issue list rather than losing source needs. Block only actions dependent on an unavailable decision.]
+[Preserve all material unresolved needs. Use the installed native template's clarification-marker convention, which for Spec Kit is `[NEEDS CLARIFICATION: <question>]` with the question stated; move overflow into a linked issue list rather than losing source needs. Block only actions dependent on an unavailable decision. Listed markers may remain in a delivered input handoff and native outputs (the delivery checker accepts them; a bare marker with no question is a template stub) and the delivery summary lists each one.]
+
+## Source disposition
+[One line per material source and supporting path: path or source ID, role, disposition (preserved, incorporated, changed with reason, deferred, rejected, unavailable, superseded, duplicate or unresolved) and destination. Include the prior-art status line, `prior-art: <done|directed|waived>; <record location, directive or reason>`. In an input handoff, refinement findings are recorded here or in a linked appendix (`references/validation-and-refinement.md#refinement-passes`).]
 ```
 
 ### Rules
 
-Record explicit deployment constraints in section 3 and distinguish them from architecture proposals. Derive observable platform and non-functional acceptance in requirements/spec, with mechanisms in design/plan. Preserve failure outcomes and public acceptance. Do not erase user-named technology constraints to satisfy a token heuristic: cite their source and allowed exception. Goal changes begin in intent; corrections in behavior, architecture or workflow enter their owning layer and propagate to affected dependents. Preserve source prompts once and include or link the material source-disposition map.
+Record explicit deployment constraints in section 3 and distinguish them from architecture proposals. Derive observable platform and non-functional acceptance in requirements/spec, with mechanisms in design/plan. Preserve failure outcomes and public acceptance. Do not erase user-named technology constraints to satisfy a token heuristic: cite their source and allowed exception. Goal changes begin in intent; corrections in behavior, architecture or workflow enter their owning layer and propagate to affected dependents. Preserve source prompts once and include or link the material source-disposition map. Heading links such as `intent.md#prior-art` and `intent.md#source-disposition` resolve against these numbered headings: both checkers match a fragment to a heading's GitHub slug with any leading section number ignored.
 
 ## Spec Template (`spec.md`)
 
-Layer: Specification. **Standalone and input-handoff template.** In native Spec Kit mode the installed spec template is the structure and its FR identifiers stand; apply only the litmus, eval binding and EARS rules below, binding evals through traceability.md where the template has no tag. Preserve the source authority of each requirement: direct user instruction, accepted decision or explicit proposal/inference. Authorized preparation can derive provisional observable clauses without creating implementation authority. Keep mechanisms in plan and retain genuine source-constrained platform/interface acceptance with cited layer exceptions. Write evaluable clauses and preserve native user scenarios; intent remains the source for goals/stories, not a reason to delete native template content.
+Layer: Specification. **Standalone and input-handoff template** (an input handoff's requirements.md follows it); native mode uses the installed Spec Kit spec template. In native Spec Kit mode the installed spec template is the structure and its FR identifiers stand; apply only the litmus, eval binding and EARS rules below, binding evals through traceability.md where the template has no tag. Preserve the source authority of each requirement: direct user instruction, accepted decision or explicit proposal/inference. Authorized preparation can derive provisional observable clauses without creating implementation authority. Keep mechanisms in plan and retain genuine source-constrained platform/interface acceptance with cited layer exceptions. Write evaluable clauses and preserve native user scenarios; intent remains the source for goals/stories, not a reason to delete native template content.
 
 ### The single litmus
 
@@ -136,7 +139,7 @@ Keep derived mechanisms in design/plan. Preserve explicit source-mandated platfo
 
 ## Context Template (`context.md`)
 
-Author: the system derives mechanisms from source requirements, intent and explicit user constraints. Layer: Implementation. Record user-selected constraints as such; distinguish derived proposals and source decisions instead of pretending every choice was inferred. **Standalone template.** Native plan.md, in the installed Spec Kit template's structure, is the operational plan when Spec Kit is selected; context.md is then source/rationale, not a competing editable plan. In native mode the derivation inputs and the empty-ledger rule below still govern plan.md.
+Author: the system derives mechanisms from source requirements, intent and explicit user constraints. Layer: Implementation. Record user-selected constraints as such; distinguish derived proposals and source decisions instead of pretending every choice was inferred. **Standalone and input-handoff template** (an input handoff's design.md follows it); native mode uses the installed Spec Kit plan template. Native plan.md, in the installed Spec Kit template's structure, is the operational plan when Spec Kit is selected; context.md is then source/rationale, not a competing editable plan. In native mode the derivation inputs and the empty-ledger rule below still govern plan.md.
 
 ### Derivation inputs, in order
 

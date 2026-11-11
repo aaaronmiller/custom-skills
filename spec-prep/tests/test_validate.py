@@ -8,6 +8,8 @@ import contextlib
 import importlib.util
 import io
 import json
+import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -148,6 +150,63 @@ class PassingFixtures(Fixture):
         self.edit("intent.md", "| Manual spreadsheet collation |", "| A React dashboard on Firebase |")
         self.assertFails([])
 
+    def test_req_clause_prefix_is_accepted(self):
+        # L1: REQ- clause IDs count as clauses and as citations.
+        self.edit("spec.md", "**SPEC-001**", "**REQ-001**")
+        self.edit("spec.md", "**SPEC-002**", "**REQ-002**")
+        self.edit("context.md", "SPEC-001 and SPEC-002", "REQ-001 and REQ-002")
+        self.assertFails([])
+
+    def test_numbered_source_disposition_heading_resolves_unnumbered_fragment(self):
+        # A2: --source-map FILE#fragment matches like the delivery checker.
+        self.edit("intent.md", "## Source disposition", "## 13. Source disposition")
+        self.assertFails([], source_map="intent.md#source-disposition")
+        self.assertFails([], source_map="intent.md#13-source-disposition")
+
+    def test_default_eval_store_slug_is_the_project_directory(self):
+        # A11: for inputs/ the slug is the parent (project) name, not "inputs".
+        inputs = self.root / "inputs"
+        inputs.mkdir()
+        for name in ("intent.md", "spec.md", "context.md"):
+            (self.root / name).rename(inputs / name)
+        (self.root / "sources").rename(inputs / "sources")
+        home = self.base / "home"
+        store = home / ".spec-prep" / "evals" / "project" / "evals.md"
+        store.parent.mkdir(parents=True)
+        store.write_text(EVALS)
+        env = {k: v for k, v in os.environ.items() if k != "SPECPREP_EVALS"}
+        env["HOME"] = str(home)
+        old = dict(os.environ)
+        try:
+            os.environ.clear()
+            os.environ.update(env)
+            result, *_ = v.validate(inputs, "input-handoff")
+        finally:
+            os.environ.clear()
+            os.environ.update(old)
+        self.assertEqual(result.failed, [], json.dumps(result.findings, indent=1))
+        self.assertEqual(v.project_slug(inputs, None), "project")
+        self.assertEqual(v.project_slug(self.root / "specs" / "001-x", None), "project")
+        self.assertEqual(v.project_slug(inputs, self.base / "elsewhere"), "elsewhere")
+
+    def test_layer_inference_matches_whole_path_segments(self):
+        # A11: 'explanation.md' is not a plan; 'plays/deploy.md' is derived.
+        self.assertEqual(v.infer_layer("explanation.md"), "unknown")
+        self.assertEqual(v.infer_layer("plays/deploy.md"), "derived")
+        self.assertEqual(v.infer_layer("001-plan.md"), "derived")
+        self.assertEqual(v.infer_layer("001-plan-export/spec.md"), "human")
+        self.write("explanation.md", "# Explanation\nThe operator view is called `Zephyr9`.\n")
+        self.edit("intent.md", "without manual collation", "through the Zephyr9 view")
+        self.assertFails([])
+
+    def test_derived_layer_list_matches_skill_rule_one(self):
+        # A11: DERIVED_LAYER is exactly the list SKILL.md rule 1 names.
+        skill = (SCRIPT.parents[1] / "SKILL.md").read_text()
+        m = re.search(r"the derived layer uses \(([^)]*?) files, or frontmatter", skill)
+        self.assertIsNotNone(m, "rule 1 derived-layer list not found in SKILL.md")
+        words = {w.strip() for w in re.split(r",| and ", m.group(1)) if w.strip()}
+        self.assertEqual(words, set(v.DERIVED_LAYER))
+
     def test_directed_prior_art_passes_before_plan_and_tasks(self):
         self.edit("intent.md", "| Manual spreadsheet collation | Familiar | Error-prone and slow | Repeatable complete report |\n\nVerdict: build new.\n", "")
         self.edit("intent.md", "- prior-art: done; section 10.", "- prior-art: directed; the user scheduled the survey as the next step.")
@@ -180,6 +239,40 @@ class EachCheckFails(Fixture):
     def test_eval_binding_store_inside_build_root(self):
         inside = self.write("evals.md", EVALS)
         self.assertFails(["eval-binding"], evals=str(inside))
+
+    def test_eval_binding_store_inside_inferred_build_root(self):
+        # A11: no --build-root and no .git, but delivery.json names the build root.
+        handoff = self.root / "handoff"
+        handoff.mkdir()
+        for name in ("intent.md", "spec.md", "context.md"):
+            (self.root / name).rename(handoff / name)
+        (self.root / "sources").rename(handoff / "sources")
+        inside = self.write("evals/evals.md", EVALS)
+        (self.base / "delivery.json").write_text(json.dumps(
+            {"schemaVersion": 1, "workstreams": [{"id": "project", "buildRoot": "project"}]}))
+        result, *_ = v.validate(handoff, "input-handoff", evals=str(inside))
+        self.assertEqual(result.failed, ["eval-binding"], json.dumps(result.findings, indent=1))
+        self.assertIn("inside the build root", " ".join(result.findings["eval-binding"]))
+
+    def test_eval_binding_store_beside_inputs_without_any_marker(self):
+        # A11: inputs/ alone implies its parent is the build root.
+        inputs = self.root / "inputs"
+        inputs.mkdir()
+        for name in ("intent.md", "spec.md", "context.md"):
+            (self.root / name).rename(inputs / name)
+        (self.root / "sources").rename(inputs / "sources")
+        inside = self.write("evals/evals.md", EVALS)
+        result, *_ = v.validate(inputs, "input-handoff", evals=str(inside))
+        self.assertEqual(result.failed, ["eval-binding"], json.dumps(result.findings, indent=1))
+
+    def test_separation_token_from_a_play(self):
+        # A11: plays/ files are derived by their directory segment and arm separation.
+        self.write("plays/deploy.md", "# Play: deploy\nPublish through `Zephyr9`.\n")
+        self.edit("intent.md", "without manual collation", "through the Zephyr9 view")
+        self.assertFails(["separation"])
+
+    def test_authorship_source_map_fragment_absent(self):
+        self.assertFails(["authorship", "drift"], source_map="intent.md#no-such-heading")
 
     def test_eval_binding_missing_store(self):
         self.assertFails(["eval-binding"], evals=str(self.base / "absent" / "evals.md"))

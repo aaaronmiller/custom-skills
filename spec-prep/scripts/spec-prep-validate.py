@@ -19,12 +19,20 @@ pass the feature root (specs/<feature>) and --build-root.
               handoff carries no ledger or substrate.
 --build-root  The implementation checkout. The eval store must sit outside it,
               and ledger, standing and substrate are also looked up there.
+              Without it the boundary is the buildRoot of the delivery.json
+              workstream containing ARTIFACT_DIR, else the Git top level, else
+              the nearest .specify/ or AGENTS.md+specs/ project, else
+              ARTIFACT_DIR (its parent when ARTIFACT_DIR is inputs/).
 --evals       Eval store (evals.md or evals.json). Default: $SPECPREP_EVALS, then
-              ../evals/evals.md, ../evals/evals.json, ../<dir-name>-evals.md,
-              ~/.spec-prep/evals/<dir-name>/evals.md and evals.json.
---source-map  Source-disposition map. Default: the intent.md section whose
-              heading contains "source disposition", else traceability.md, else
-              source-disposition.md in ARTIFACT_DIR.
+              ../evals/evals.md, ../evals/evals.json, ../<slug>-evals.md,
+              ~/.spec-prep/evals/<slug>/evals.md and evals.json. <slug> is the
+              project directory name: the build root's name, else the parent of
+              inputs/ or of specs/<feature>, else ARTIFACT_DIR's name.
+--source-map  Source-disposition map, FILE or FILE#fragment. Default: the
+              intent.md section whose heading contains "source disposition",
+              else traceability.md, else source-disposition.md in ARTIFACT_DIR.
+              A fragment matches a heading's GitHub slug, ignoring a leading
+              section number ('#prior-art' names '## 10. Prior art').
 --continuity external
               Continuity lives in an external system (for example a Living
               Documents dossier); the continuity check records not_run and the
@@ -40,7 +48,8 @@ Checks (a failed check exits 1; not_run never fails; usage errors exit 2):
   eval-binding  every clause carries an EVAL-ID defined in an eval store that
                 sits outside the build root
   testability   no clause uses non-evaluable language
-  identity      the specification declares at least one clause; IDs are unique
+  identity      the specification declares at least one clause; IDs are unique.
+                Accepted clause prefixes: SPEC-, REQ-, FR-, NFR- (then digits).
   drift         derived layer cites every clause and no undeclared one; every
                 supporting file is declared in the source-disposition map
   continuity    ledger and standing exist, carry content, and aliases agree
@@ -122,7 +131,7 @@ ALLOW_TOKENS = {
 }
 
 # Identifiers that look technical but are spec-prep or Spec Kit vocabulary.
-VOCAB_RE = re.compile(r"^(?:SPEC|FR|NFR|EVAL|CTX|US|SC|WP|OI|S[0-5])(?:-\d+)?$|^US\d+$")
+VOCAB_RE = re.compile(r"^(?:SPEC|REQ|FR|NFR|EVAL|CTX|US|SC|WP|OI|S[0-5])(?:-\d+)?$|^US\d+$")
 
 # Phrases that cannot become a pass/fail evaluation.
 NON_EVALUABLE = [
@@ -133,11 +142,14 @@ NON_EVALUABLE = [
     "best practice", "industry standard", "properly", "correctly handle",
 ]
 
-# SPEC- is the spec-prep form; FR-/NFR- are what Spec Kit, OpenSpec and Kiro emit.
-SPEC_CLAUSE_RE = re.compile(r"^[ \t]*(?:[-*|][ \t]*)?\**((?:SPEC|FR|NFR)-\d+)\b", re.M)
+# Accepted clause prefixes. SPEC- is the spec-prep form; REQ- is a common requirements.md
+# form; FR-/NFR- are what Spec Kit, OpenSpec and Kiro emit.
+CLAUSE_PREFIXES = ("SPEC", "REQ", "FR", "NFR")
+_CLAUSE_ID = r"((?:" + "|".join(CLAUSE_PREFIXES) + r")-\d+)"
+SPEC_CLAUSE_RE = re.compile(r"^[ \t]*(?:[-*|][ \t]*)?\**" + _CLAUSE_ID + r"\b", re.M)
 EVAL_TAG_RE = re.compile(r"\[(EVAL-[A-Za-z0-9_-]+)\]")
 EVAL_ID_RE = re.compile(r"\bEVAL-[A-Za-z0-9_-]+")
-CITATION_RE = re.compile(r"\b((?:SPEC|FR|NFR)-\d+)\b")
+CITATION_RE = re.compile(r"\b" + _CLAUSE_ID + r"\b")
 LEVEL_RE = re.compile(r"^[ \t]*(?:[-*][ \t]*)?\**S[0-5]\b", re.M)
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$", re.M)
 FRONTMATTER_RE = re.compile(r"\A---\s*\n.*?\n---[ \t]*\n?", re.S)
@@ -151,9 +163,12 @@ PRIOR_ART_STATUS_RE = re.compile(
     r"(done|directed|waived)\b[*`]*[ \t]*[|:;,.)-]*[ \t]*(.*)$")
 SUPPORTING_DIRS = ("data", "references", "sources", "fixtures", "appendices")
 
-HUMAN_LAYER = ("intent", "spec", "requirements", "prd", "srs")
-DERIVED_LAYER = ("context", "design", "plan", "architecture", "adr", "research",
-                 "data-model", "quickstart", "tasks", "pipeline", "plays", "experience")
+# Layer by name: a whole path segment (the file stem or a directory such as plays/) that
+# equals one of these words or starts or ends with it at a '-', '_' or '.' boundary.
+# DERIVED_LAYER is the list in SKILL.md rule 1; any other file declares `layer: derived`.
+HUMAN_LAYER = ("intent", "spec", "specification", "requirements", "prd", "srs")
+DERIVED_LAYER = ("context", "plan", "design", "research", "data-model", "quickstart",
+                 "tasks", "experience", "plays")
 
 
 def read(path: Path) -> str:
@@ -235,15 +250,25 @@ def declared_layer(text: str) -> str | None:
     return m.group(1).lower() if m else None
 
 
+def _segment_has(segment: str, words) -> bool:
+    return any(re.search(r"(?:^|[-_.])" + re.escape(w) + r"(?:$|[-_.])", segment) for w in words)
+
+
 def infer_layer(name: str, text: str = "") -> str:
+    """Layer of a file from its frontmatter, else from whole path segments of name (a
+    relative label such as 'plan.md' or 'plays/deploy.md'), never substrings. The file stem
+    decides first; directory segments decide only when the stem names no layer."""
     explicit = declared_layer(text) if text else None
     if explicit:
         return explicit
-    stem = name.lower().removesuffix(".md")
-    if any(k in stem for k in DERIVED_LAYER):
-        return "derived"
-    if any(k in stem for k in HUMAN_LAYER):
-        return "human"
+    parts = [p.lower() for p in Path(name).parts]
+    if not parts:
+        return "unknown"
+    for segment in (parts[-1].removesuffix(".md"), *reversed(parts[:-1])):
+        if _segment_has(segment, DERIVED_LAYER):
+            return "derived"
+        if _segment_has(segment, HUMAN_LAYER):
+            return "human"
     return "unknown"
 
 
@@ -272,14 +297,22 @@ def harvest_tokens(texts, allow) -> list[str]:
     return sorted(found)
 
 
-def harvest_for(paths, allow, enabled: bool) -> list[str]:
+def layer_label(path: Path, base: Path | None = None) -> str:
+    """Path of a file relative to base (default: its parent directory and name), for
+    whole-segment layer inference."""
+    if base is not None and path.is_relative_to(base):
+        return path.relative_to(base).as_posix()
+    return f"{path.parent.name}/{path.name}" if path.parent.name else path.name
+
+
+def harvest_for(paths, allow, enabled: bool, base: Path | None = None) -> list[str]:
     if not enabled:
         return []
     texts = []
     for f in paths:
         if f.is_file():
             t = read(f)
-            if infer_layer(f.name, t) == "derived":
+            if infer_layer(layer_label(f, base), t) == "derived":
                 texts.append(t)
     return harvest_tokens(texts, allow)
 
@@ -290,12 +323,22 @@ def gh_slug(heading: str) -> str:
     return re.sub(r"[^\w\- ]", "", heading.strip().lower()).replace(" ", "-")
 
 
+def heading_matches(heading: str, fragment: str) -> bool:
+    """A link fragment names a heading by its GitHub slug, ignoring a leading section number
+    on either side: '#prior-art' and '#10-prior-art' both name '## 10. Prior art'.
+    spec-prep-delivery.py uses the same rule."""
+    frag = fragment.strip().lower()
+    unnumbered = re.sub(r"^\d+(?:\.\d+)*\.?\s+", "", heading.strip())
+    return frag in (gh_slug(heading), gh_slug(unnumbered)) or \
+        re.sub(r"^\d+-", "", frag) == gh_slug(unnumbered)
+
+
 def section(text: str, pattern: str | None = None, slug: str | None = None) -> str | None:
-    """Body of the first heading matching pattern (or GitHub slug), up to the next heading
-    of equal or higher level."""
+    """Body of the first heading matching pattern (or link fragment, see heading_matches),
+    up to the next heading of equal or higher level."""
     heads = list(HEADING_RE.finditer(text))
     for i, m in enumerate(heads):
-        hit = gh_slug(m.group(2)) == slug if slug is not None else re.search(pattern, m.group(2), re.I)
+        hit = heading_matches(m.group(2), slug) if slug is not None else re.search(pattern, m.group(2), re.I)
         if hit:
             level = len(m.group(1))
             end = next((h.start() for h in heads[i + 1:] if len(h.group(1)) <= level), len(text))
@@ -395,7 +438,7 @@ def check_identity(clauses, label, result: Result):
     for cid in sorted({c for c in ids if ids.count(c) > 1}):
         result.fail("identity", f"duplicate clause ID {cid} in {label}")
     if not clauses:
-        result.fail("identity", f"{label} declares no SPEC-, FR- or NFR- clause")
+        result.fail("identity", f"{label} declares no {', '.join(p + '-' for p in CLAUSE_PREFIXES)} clause")
 
 
 def git_toplevel(path: Path) -> Path | None:
@@ -405,16 +448,51 @@ def git_toplevel(path: Path) -> Path | None:
     return None
 
 
-def find_eval_store(root: Path, override: str | None) -> Path | None:
+def delivery_build_root(root: Path) -> Path | None:
+    """The buildRoot of the delivery.json workstream (in root or an ancestor) containing root."""
+    root = root.resolve()
+    for d in (root, *root.parents):
+        manifest = d / "delivery.json"
+        if not manifest.is_file():
+            continue
+        try:
+            streams = json.loads(read(manifest)).get("workstreams", [])
+        except (json.JSONDecodeError, AttributeError):
+            return None
+        for stream in streams if isinstance(streams, list) else []:
+            build = stream.get("buildRoot") if isinstance(stream, dict) else None
+            if isinstance(build, str) and build and not Path(build).is_absolute():
+                candidate = (d / build).resolve()
+                if root.is_relative_to(candidate):
+                    return candidate
+        return None
+    return None
+
+
+def project_slug(root: Path, build_root: Path | None) -> str:
+    """The project directory name: the build root's name, else the parent of inputs/ or of
+    specs/<feature>, else the artifact directory's own name."""
+    root = root.resolve()
+    if build_root is not None:
+        return build_root.resolve().name
+    if root.name == "inputs":
+        return root.parent.name
+    if root.parent.name == "specs":
+        return root.parent.parent.name
+    return root.name
+
+
+def find_eval_store(root: Path, override: str | None, build_root: Path | None = None) -> Path | None:
     raw = override or os.environ.get("SPECPREP_EVALS")
     if raw:
         p = Path(raw).expanduser()
         cands = [p] if p.suffix in (".md", ".json") else [p / "evals.md", p / "evals.json"]
         return next((c.resolve() for c in cands if c.is_file()), None)
+    slug = project_slug(root, build_root)
     cands = [root.parent / "evals" / "evals.md", root.parent / "evals" / "evals.json",
-             root.parent / f"{root.name}-evals.md",
-             Path.home() / ".spec-prep" / "evals" / root.name / "evals.md",
-             Path.home() / ".spec-prep" / "evals" / root.name / "evals.json"]
+             root.parent / f"{slug}-evals.md",
+             Path.home() / ".spec-prep" / "evals" / slug / "evals.md",
+             Path.home() / ".spec-prep" / "evals" / slug / "evals.json"]
     return next((c.resolve() for c in cands if c.is_file()), None)
 
 
@@ -472,21 +550,26 @@ def check_eval_binding(clauses, label, root, build_root, override, trace_text, r
             result.fail("eval-binding", f"{cid} in {label} has no [EVAL-...] tag and no traceability mapping")
     if not tagged:
         return
-    store = find_eval_store(root, override)
+    inferred = build_root.resolve() if build_root else delivery_build_root(root)
+    store = find_eval_store(root, override, inferred)
     if store is None:
         inside = root / "evals"
         extra = f"; an evals directory exists inside the tree at {inside}" if inside.is_dir() else ""
+        slug = project_slug(root, inferred)
         result.fail("eval-binding", f"{len(tagged)} clause(s) carry eval IDs but no eval store was found "
-                                    f"(pass --evals, set SPECPREP_EVALS, or use ~/.spec-prep/evals/{root.name}/evals.md){extra}")
+                                    f"(pass --evals, set SPECPREP_EVALS, or use ~/.spec-prep/evals/{slug}/evals.md){extra}")
         return
     if build_root is not None and not root.resolve().is_relative_to(build_root.resolve()):
         result.fail("eval-binding", "artifact directory is outside the declared build root")
         return
-    repo = build_root.resolve() if build_root else git_toplevel(root.resolve())
+    # Build-root boundary: --build-root, else the delivery.json workstream, else Git, else
+    # the nearest Spec Kit or AGENTS.md project, else the artifact directory.
+    repo = inferred or git_toplevel(root.resolve())
     if repo is None:
         repo = next((p for p in (root.resolve(), *root.resolve().parents)
                      if (p / ".specify").is_dir() or
-                     ((p / "AGENTS.md").is_file() and (p / "specs").is_dir())), root.resolve())
+                     ((p / "AGENTS.md").is_file() and (p / "specs").is_dir())),
+                    root.resolve().parent if root.name == "inputs" else root.resolve())
     if repo in [store, *store.parents]:
         result.fail("eval-binding", f"eval store {store} is inside the build root {repo}; "
                                     "move it outside, then establish evaluator isolation separately")
@@ -645,7 +728,7 @@ def validate(root: Path, operation="standalone", build_root=None, evals=None, so
     allow = load_allow([root, root.parent], result)
     tokens = TECH_TOKENS + load_extra_tokens([root, root.parent])
     derived_files = sorted(root.glob("*.md")) + sorted((root / "plays").glob("*.md"))
-    harvested = harvest_for(derived_files, allow, harvest)
+    harvested = harvest_for(derived_files, allow, harvest, root)
     if harvest:
         result.note("separation", f"{len(harvested)} token(s) harvested from the derived layer")
 
@@ -724,7 +807,7 @@ def audit(paths, harvest=True):
     harvested = harvest_for(siblings, allow, harvest)
     for f in files:
         text = read(f)
-        layer = infer_layer(f.name, text)
+        layer = infer_layer(layer_label(f), text)
         if layer == "human":
             check_separation(text, f.name, tokens, harvested, allow, result)
         else:

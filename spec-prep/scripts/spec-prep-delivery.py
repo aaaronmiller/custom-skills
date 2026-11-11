@@ -3,11 +3,18 @@
 
 Usage: python3 spec-prep-delivery.py PACKAGE_ROOT [--manifest delivery.json]
 
-The manifest names each workstream, its input trio, governance, optional priorArt
-and supporting entries, and its next operation (schema: references/artifact-contract.md,
-section "Delivery manifest and gate"). For native-preparation it also verifies the
-preparation receipt: lifecycle, the four passed gates with nonempty evidence, the
-artifact hashes and the loaded SKILL.md digest. Output is JSON; exit 1 on any error.
+The manifest names each workstream, its input trio, governance, optional priorArt,
+supporting and reviewedHooks entries, and its next operation (schema:
+references/artifact-contract.md, section "Delivery manifest and gate"). For
+native-preparation it also verifies the preparation receipt: lifecycle, the five passed
+gates with nonempty evidence (the validation gate also records the spec-prep-validate
+command, exit status 0 and all nine per-check results), the artifact hashes and the
+loaded SKILL.md digest. Output is JSON; exit 1 on any error.
+
+Heading fragments (sourceMap, priorArt.record) match a heading's GitHub slug, ignoring a
+leading section number, the same rule spec-prep-validate.py uses: '#prior-art' names
+'## 10. Prior art'. Listed '[NEEDS CLARIFICATION: <question>]' markers are allowed in
+inputs and native outputs; other template stubs, and a bare marker with no question, fail.
 
 This checks structure, pointers, hashes and the stop boundary. It does not prove
 workflow execution, semantic completeness, evidence authenticity or that a fresh
@@ -27,9 +34,14 @@ SAFE_TRANSITIONS = {"speckit.constitution", "speckit.specify", "speckit.clarify"
 SUPPORTING_ROLES = {"analysis-input", "reference", "evidence", "fixture", "project-specific"}
 PRIOR_ART_STATUSES = {"done", "directed", "waived"}
 RECEIPT_ROLES = ("spec", "plan", "tasks", "constitution", "handoff")
-RECEIPT_GATES = ("constitution", "prerequisites", "analysis", "traceability")
+RECEIPT_GATES = ("constitution", "prerequisites", "analysis", "traceability", "validation")
+# The nine spec-prep-validate.py checks; the validation gate records each one's result.
+VALIDATION_CHECKS = ("separation", "eval-binding", "testability", "identity", "drift",
+                     "continuity", "honesty", "authorship", "prior-art")
+# Template stubs. A clarification marker that states its question is a listed open item,
+# not a stub; only the bare '[NEEDS CLARIFICATION]' with nothing after it is.
 TEMPLATE_RE = re.compile(r"\[(?:[A-Z][A-Z0-9]*_[A-Z0-9_]+|PROJECT NAME|FEATURE NAME|FEATURE BRANCH|DATE|"
-                         r"NEEDS CLARIFICATION[^\]]*)\]|\bTXXX\b")
+                         r"NEEDS CLARIFICATION\s*:?\s*)\]|\bTXXX\b")
 
 
 def read(path):
@@ -40,10 +52,17 @@ def gh_slug(heading):
     return re.sub(r"[^\w\- ]", "", heading.strip().lower()).replace(" ", "-")
 
 
+def heading_matches(heading, fragment):
+    """Same rule as spec-prep-validate.py: GitHub slug, leading section number ignored."""
+    frag = fragment.strip().lower()
+    unnumbered = re.sub(r"^\d+(?:\.\d+)*\.?\s+", "", heading.strip())
+    return frag in (gh_slug(heading), gh_slug(unnumbered)) or re.sub(r"^\d+-", "", frag) == gh_slug(unnumbered)
+
+
 def heading_section(text, fragment):
-    heads = list(re.finditer(r"^(#{1,6})\s+(.+?)\s*#*$", text, re.M))
+    heads = list(re.finditer(r"^(#{1,6})\s+(.+?)\s*#*\s*$", text, re.M))
     for i, m in enumerate(heads):
-        if gh_slug(m.group(2)) == fragment:
+        if heading_matches(m.group(2), fragment):
             end = next((h.start() for h in heads[i + 1:] if len(h.group(1)) <= len(m.group(1))), len(text))
             return text[m.end():end]
     return None
@@ -85,6 +104,26 @@ def within(base, name, boundary):
     if not path.exists():
         raise ValueError(f"missing supporting path: {name}")
     return path
+
+
+def package_file(inputs, build, name):
+    """A file named relative to inputRoot, else to buildRoot, that stays inside buildRoot."""
+    if not isinstance(name, str) or not name or Path(name).is_absolute():
+        raise ValueError(f"expected a relative path: {name!r}")
+    escaped = False
+    for base in (inputs, build):
+        path = (base / name).resolve()
+        if not path.is_relative_to(build.resolve()):
+            escaped = True
+            continue
+        if path.is_file():
+            if any(c.is_symlink() for c in (base / name, *(base / name).parents) if c.is_relative_to(build)
+                   and c != build):
+                raise ValueError(f"unsafe symlinked path: {name}")
+            if not read(path).strip():
+                raise ValueError(f"empty file: {name}")
+            return path
+    raise ValueError(f"path escapes the build root: {name}" if escaped else f"missing file: {name}")
 
 
 # ---------- receipts ----------
@@ -165,17 +204,61 @@ def verify_receipt(repo, data):
         for item in (evidence if isinstance(evidence, list) else [x.strip() for x in evidence.split(";")]):
             if not read(checked_file(repo, item)).strip():
                 raise ValueError(f"empty gate evidence: {item}")
+    verify_validation_gate(gates["validation"])
+
+
+def verify_validation_gate(gate):
+    """The nine-check result: the spec-prep-validate command, exit status 0, every check."""
+    command = str(gate.get("command", ""))
+    if "spec-prep-validate" not in command or "native-preparation" not in command:
+        raise ValueError("validation gate command must be the spec-prep-validate.py run with "
+                         "--operation native-preparation")
+    if gate.get("exitStatus") != 0:
+        raise ValueError("validation gate requires exitStatus 0 from spec-prep-validate.py")
+    checks = gate.get("checks")
+    if isinstance(checks, list):
+        checks = {c.get("name"): c.get("status") for c in checks if isinstance(c, dict)}
+    if not isinstance(checks, dict):
+        raise ValueError("validation gate requires per-check results (checks)")
+    missing = [n for n in VALIDATION_CHECKS if n not in checks]
+    if missing:
+        raise ValueError("validation gate lacks per-check results: " + ", ".join(missing))
+    bad = [n for n in VALIDATION_CHECKS if checks[n] not in ("passed", "not_run")]
+    if bad:
+        raise ValueError("validation gate records a check that did not pass: " + ", ".join(bad))
 
 
 # ---------- automatic transitions ----------
 
-def check_transition(command):
+def reviewed_hooks(stream):
+    """Commands a reviewer accepted for this build root: [{command, review}] in delivery.json."""
+    entries = stream.get("reviewedHooks", [])
+    if not isinstance(entries, list):
+        raise ValueError("reviewedHooks must be an array")
+    reviewed = set()
+    for item in entries:
+        if not isinstance(item, dict) or not isinstance(item.get("command"), str) or not item["command"].strip():
+            raise ValueError("each reviewedHooks entry needs the hook's command text")
+        note = item.get("review")
+        if not isinstance(note, str) or not re.search(r"\w{2,}", note) or "\n" in note.strip():
+            raise ValueError(f"reviewedHooks entry needs a one-line review note: {item['command']!r}")
+        reviewed.add(item["command"].strip())
+    return reviewed
+
+
+def check_transition(command, reviewed=frozenset()):
     command = str(command).strip().strip("\"'")
-    if command.lstrip("/").replace("-", ".") not in SAFE_TRANSITIONS:
-        raise ValueError(f"automatic transition needs review or exclusion before preparation: {command}")
+    if command.lstrip("/").replace("-", ".") in SAFE_TRANSITIONS:
+        return
+    if re.search(r"(?i)implement", command):
+        raise ValueError(f"automatic transition to implementation must be removed or disabled during "
+                         f"preparation; review cannot admit it: {command}")
+    if command not in reviewed:
+        raise ValueError(f"automatic transition needs review (reviewedHooks) or exclusion before "
+                         f"preparation: {command}")
 
 
-def inspect_transitions(build):
+def inspect_transitions(build, reviewed=frozenset()):
     """Inspect executable command fields, never descriptions or inert workflow definitions."""
     for extension in ("extensions.yml", "extensions.yaml"):
         if (build / ".specify" / extension).is_file():
@@ -195,7 +278,7 @@ def inspect_transitions(build):
                         return
                     for key in ("command", "workflow"):
                         if key in value and isinstance(value[key], (str, int, float)):
-                            check_transition(value[key])
+                            check_transition(value[key], reviewed)
                     for item in value.values():
                         visit(item)
                 elif isinstance(value, list):
@@ -211,11 +294,14 @@ def inspect_transitions(build):
             def visit_hooks(value):
                 if isinstance(value, dict):
                     if "type" in value and value["type"] != "command":
-                        raise ValueError("prompt or agent automatic transitions require review")
+                        text = value.get("prompt") or value.get("agent") or ""
+                        if not isinstance(text, str) or text.strip() not in reviewed:
+                            raise ValueError("prompt or agent automatic transitions require review "
+                                             "(list the prompt text in reviewedHooks)")
                     if "command" in value:
                         if not isinstance(value["command"], str):
                             raise ValueError("harness transition command must be a string")
-                        check_transition(value["command"])
+                        check_transition(value["command"], reviewed)
                     for item in value.values():
                         visit_hooks(item)
                 elif isinstance(value, list):
@@ -226,7 +312,7 @@ def inspect_transitions(build):
 
 # ---------- additive fields ----------
 
-def check_prior_art(stream, inputs, operation):
+def check_prior_art(stream, inputs, build, operation):
     prior = stream.get("priorArt")
     if prior is None:
         return
@@ -240,7 +326,7 @@ def check_prior_art(stream, inputs, operation):
     if prior["status"] == "done":
         path, _, fragment = record.partition("#")
         if re.search(r"\.(?:md|json|txt)$", path):
-            target = local(inputs, path)
+            target = package_file(inputs, build, path)
             if fragment and heading_section(read(target), fragment) is None:
                 raise ValueError(f"priorArt.record heading not found: {record}")
 
@@ -290,7 +376,9 @@ def check_stream(root, stream, operation, ids, input_roots, build_roots):
         if path != role + ".md":
             raise ValueError(f"core {role} must be the complete {role}.md entry document")
         ready_text(local(inputs, path))
-    extras = [p.name for p in inputs.iterdir() if p.is_file() and p.suffix == ".md" and p.name not in roles.values()]
+    # A README.md conversion or read-order guide may sit beside the trio; it is not an entry document.
+    extras = [p.name for p in inputs.iterdir() if p.is_file() and p.suffix == ".md"
+              and p.name not in roles.values() and p.name != "README.md"]
     if extras:
         raise ValueError("compact input root has fragmented extra Markdown; use a linked appendix: " + ", ".join(extras))
     if inputs.resolve() != build.resolve():
@@ -343,9 +431,9 @@ def check_stream(root, stream, operation, ids, input_roots, build_roots):
             raise ValueError("CLAUDE.md adapter requires an actual @AGENTS.md import")
         if "AGENTS.md" not in adapter:
             raise ValueError("harness adapter must load AGENTS.md")
-    check_prior_art(stream, inputs, operation)
+    check_prior_art(stream, inputs, build, operation)
     check_supporting(stream, inputs, build, selected)
-    inspect_transitions(build)
+    inspect_transitions(build, reviewed_hooks(stream))
     expected_next = "specification-preparation" if operation == "input-handoff" else "await-implementation-authorization"
     if stream.get("nextOperation") != expected_next:
         raise ValueError(f"nextOperation must be {expected_next}")

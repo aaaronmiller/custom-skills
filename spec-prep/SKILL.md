@@ -4,7 +4,7 @@ description: "Prepares and refines project intent, requirements, design, and nat
 license: MIT
 metadata:
   description-reviewed: "2026-11-10"
-  version: "4.0.0"
+  version: "4.1.0"
   author: "ice-ninja"
   tags: "spec-driven, intent, planning, coding"
 ---
@@ -45,14 +45,14 @@ python3 -m unittest discover -s tests -v
 
 The first runs the nine validation checks on one artifact directory (native: the feature root); OPERATION is `standalone`, `native-preparation` or `input-handoff`, and `--help` lists the rest, such as `--continuity external`. The second measures supplied specs for layer fusion. The third checks `delivery.json`, a native receipt and the stop boundary. The fourth, run from the skill directory, shows each check failing on a constructed fixture.
 
-A non-zero exit is a hard gate failure; record the command, exit status and output in the receipt. Without code execution, apply `references/validation-and-refinement.md#the-nine-validation-checks` by hand in order, record every verdict, and label the pass hand-executed (weaker: recommend tool re-validation where possible).
+A non-zero exit is a hard gate failure. For native preparation record the command, exit status and per-check results as the receipt's `validation` gate (`references/intake-and-speckit.md#specification-preparation`, step 10). Without code execution, apply `references/validation-and-refinement.md#the-nine-validation-checks` by hand in order, record every verdict, and label the pass hand-executed (weaker: recommend tool re-validation where possible).
 Never claim a gate passed without listing each check and its outcome, or claim Spec Kit operations ran when only prose was written. A check that visible text cannot settle (a hash, for example) is `not_run` with the reason; run the rest.
 
 ## Spec Kit source policy (no vendored toolchain)
 
 This skill bundles no Spec Kit. Its native paths (`specs/<feature>/`, `.specify/memory/constitution.md`, `specify`/`clarify`/`plan`/`tasks`/`analyze`) resolve from the installed toolchain or the upstream repository, which win over anything quoted in `references/`. Never paste Spec Kit internals here to "make it self-contained"; that creates a stale fork.
 
-In native mode the installed spec and plan templates are the structure of spec.md and plan.md. spec-prep's spec and context templates are standalone-only; in native mode only their rules apply (clause litmus, eval binding and EARS phrasing; derivation inputs and empty-ledger disclosure).
+spec-prep's spec and context templates serve standalone and input-handoff; native mode uses the installed Spec Kit templates for spec.md and plan.md, and only the spec-prep rules apply (clause litmus, eval binding and EARS phrasing; derivation inputs and empty-ledger disclosure).
 
 ## Why this exists
 
@@ -61,7 +61,7 @@ Intent is a maintained asset in its own right, alongside requirements and design
 ## Two ways this skill is used
 
 1. **Invoked.** The skill runs its phases and gates below.
-2. **Referenced.** Another task is told to "prepare for spec-prep" or "make this spec-prep ready" without invoking it. The reading model uses this file and `references/artifact-contract.md#canonical-artifact-contract` as a format contract only: it shapes its deliverables as a compact input handoff (the intent, requirements and design trio, `sources/` with verbatim prompts, a source-disposition map, supporting material) and completes or schedules the prior-art gate.
+2. **Referenced.** Another task is told to "prepare for spec-prep" or "make this spec-prep ready" without invoking it. The reading model uses this file and `references/artifact-contract.md#canonical-artifact-contract` as a format contract only: it shapes its deliverables as a compact input handoff (the intent, requirements and design trio, `sources/` with verbatim prompts, a source-disposition map, supporting material, a conversion guide, delivery.json) with the governance set the delivery checker requires (a constitution draft at `.specify/memory/constitution.md`, build-root AGENTS.md, reset-handoff.md, an optional CLAUDE.md adapter), and completes or schedules the prior-art gate.
    A referenced use never authors native Spec Kit outputs, never writes a receipt and never claims preparation ran. It records `operation: input-handoff` and leaves specification preparation as the next operation.
 
 Listed artifacts are the minimum shape, not the complete set: data, references, corpora and any other project-specific resource are preserved ("Supporting material" in the artifact contract), never dropped for lacking a table entry.
@@ -89,7 +89,7 @@ Choose outputs with `references/artifact-contract.md#canonical-artifact-contract
 1. **Separation.** A technology, framework or library token in intent or spec is a defect, and so is a spec clause that cannot become a pass/fail evaluation. Tokens are: `TECH_TOKENS` in `scripts/spec-prep-validate.py`; each line of a `tech-tokens.txt`; and each backtick identifier, CamelCase name or capitalized name with a digit that the derived layer uses (context, plan, design, research, data-model, quickstart, tasks, experience and plays files, or frontmatter `layer: derived`). Match whole words, ignoring case.
    Exempt: frontmatter, any section whose heading contains "Prior art", the H1 title's words, the platform and format names in `ALLOW_TOKENS`, and `layer-allow.txt` entries. Keep an explicit user constraint with a justified `layer-allow.txt` entry instead of deleting it: one token per line followed by `# <source and reason>`, for example `postgres  # intent section 3: user mandates the existing cluster`. Both token files sit in the checked directory or its parent; an unjustified entry fails the check.
 2. **Authorship and provenance.** Preserve direct user instructions and accepted decisions; distinguish assistant proposals, inherited assumptions and observed results (an uploaded assistant draft does not ratify every line). Authorized reversible preparation continues with explicit provisional defaults. Ask only where a material missing decision blocks its dependent action; never ask the user to reapprove their own instructions or infer authority from silence. Keep full source prompts once under sources/ and map material needs to their destination.
-3. **Eval binding.** Every spec clause carries an `EVAL-ID` defined in the external eval store (default `~/.spec-prep/evals/<slug>/evals.md`; format in `references/templates.md#eval-binding`), outside the build root even without Git. An external directory is not an access-control boundary: held-out evaluation needs an evaluator context whose files and tools the implementing agent cannot reach. Keep public acceptance visible, call tests held-out only when that isolation exists, and disclose isolation not yet established.
+3. **Eval binding.** Every spec clause carries an `EVAL-ID` defined in the external eval store (default `~/.spec-prep/evals/<slug>/evals.md`, `<slug>` being the project directory name; format in `references/templates.md#eval-binding`), outside the build root even without Git. An external directory is not an access-control boundary: held-out evaluation needs an evaluator context whose files and tools the implementing agent cannot reach. Keep public acceptance visible, call tests held-out only when that isolation exists, and disclose isolation not yet established.
 4. **Change propagation.** Goal changes begin in intent; behavior corrections belong in spec, architecture corrections in plan, workflow defects in the skill or governance. Reconcile affected contracts, tasks, acceptance, traceability and receipts. Never invent a product requirement to justify a tooling correction.
 5. **Continuity.** In standalone and native preparation, append material decisions, outcomes and task-state changes to the ledger and refresh `standing.md` when resumable state changes, so a dormant project resumes without days of archaeology. An input handoff carries no ledger.
 6. **Honesty.** `substrate.md` states the real substrate level and the real pre-lock versus live-resolve boundary; the agent drafts it and the human owns the declared level. Record no certainty the project has not earned.
@@ -108,13 +108,7 @@ Choose the requested operation (Terminology) before authoring anything. **Propor
 
 Requested filenames do not select standalone mode, and missing tooling does not change the operation: if native execution is unavailable, deliver the complete input handoff, record native preparation as incomplete and name the next preparation step, not a build step.
 
-Input modes:
-
-- **Interactive**: a verbal description or "I want to build X".
-- **Transcript**: files, transcripts or notes. Mixed: transcript first, then interactive gap-fill.
-- **Fast Track**: problem, solution, users, data, constraints and scope all covered; check the advisory rubric, then go to Phase 2 when grounded.
-- **Existing specs**: `requirements.md` and `design.md`, judged by source coverage, not size. Skip Phases 1 and 2, re-separate layers in Phase 3, and still run the validation checks (`--audit` first: external specs routinely fuse layers). Refining an existing package uses Phase 5's affected-layer workflow, not a new brief; its mixed and assistant-authored material is source evidence (rule 2).
-- **Recovery**: nobody can say what the project was for, or two specs disagree. Reconstruct intent first: run the `intent-archaeology` skill on its session logs and spec versions when available; otherwise read commit history, READMEs, issue threads and every spec version, tagging each recovered statement with its source. Mark inferred statements as inferred; they stay proposals until accepted (rule 2), and only dependent actions wait for a required decision.
+The input mode (Interactive, Transcript, Fast Track, Existing specs or Recovery) decides which phases run: `references/intake-checklists.md#input-modes`.
 
 Read user preferences and memory for stack, design language, hosting and formatting; they inform context and experience, never intent or spec. Check for an existing spec-prep tree (a supplied pack is existing-specs intake), Spec Kit, OpenSpec or Kiro structures (`references/artifact-contract.md#openspec-kiro-and-other-toolchains`), a constitution (`references/intake-and-speckit.md#constitution-and-task-gates`) and session instruction files.
 An input handoff authors the three core documents and governance directly under the declared roots; native preparation uses the installed Spec Kit workflow and paths. Templates are not completed specifications.
@@ -136,9 +130,9 @@ Derive architecture from intent with the derivation inputs in `references/templa
 Use the artifact contract and the installed toolchain's native paths. For Spec Kit, follow `references/intake-and-speckit.md#intake-staging-and-spec-kit-preparation`; never draft a second independent spec tree and duplicate it into Spec Kit. Read the matching reference before each role:
 
 1. Governance (`references/intake-and-speckit.md#constitution-and-task-gates`): retain or create the authoritative constitution through Spec Kit from authorized principles, and wire AGENTS.md to it, the task gates and the reset handoff as that section describes.
-2. `intent.md` (`references/templates.md#intent-template-intentmd`): goals, constraints, success/failure conditions, personas, user stories, scope and provenance.
-3. Native `spec.md` through the installed template, applying the clause rules of `references/templates.md#spec-template-specmd` (standalone uses that template whole). Preserve clause/eval IDs and traces; evaluator-only fixtures stay external, public acceptance stays visible.
-4. Native `plan.md` through the installed template, with the derivation inputs of `references/templates.md#context-template-contextmd` (standalone context.md uses that template whole). Existing design/context files are sources, never a competing editable plan.
+2. `intent.md` at `specs/<feature>/intent.md` (`references/templates.md#intent-template-intentmd`): goals, constraints, success/failure conditions, personas, user stories, scope and provenance.
+3. Native `spec.md` through the installed template, applying the clause rules of `references/templates.md#spec-template-specmd` (standalone and input-handoff use that template whole). Preserve clause/eval IDs and traces; evaluator-only fixtures stay external, public acceptance stays visible.
+4. Native `plan.md` through the installed template, with the derivation inputs of `references/templates.md#context-template-contextmd` (standalone and input-handoff use that template whole). Existing design/context files are sources, never a competing editable plan.
 5. Conditional supporting artifacts (research, data-model, contracts, quickstart, requirements-quality checklists) when the domain or installed workflow requires them; supplied material and any data section follow the contract's "Supporting material" rules. For a UI, read `references/templates.md#experience-template-experiencemd` and visually verify any new visual claim.
 6. Native `tasks.md`: dependencies, target files, requirement/story IDs, observable acceptance gates and recovery when meaningful; optional plays follow `references/templates.md#plays-playbook-plays`. Tasks stay unchecked until their work supplies evidence. **Producing `tasks.md` ends preparation. It is not permission to implement, in any session, without a new explicit user instruction.**
 7. Provenance/traceability: source disposition, the prior-art status line, and story/clause/eval/plan/task mapping, keeping rejected or deferred inputs with reasons.
@@ -157,7 +151,7 @@ Run the refinement passes, semantic preservation review and cross-validation in 
 
 Run the nine validation checks (separation, eval binding, testability, identity, drift, continuity, honesty, authorship, prior art) as "How to run the gates" describes and record each verdict; `references/validation-and-refinement.md#the-nine-validation-checks` owns each pass/fail criterion. Supporting material missing from the source-disposition map is a drift failure, never a reason to delete it.
 
-**Adjudicate divergences; do not just report them.** Preserve the first blind pass, then record for each divergence whether it stands, falls or needs a user decision, with the reason, and log in the ledger what stopped each pass.
+**Adjudicate divergences; do not just report them.** Preserve the first blind pass, then record for each divergence whether it stands, falls or needs a user decision, with the reason, and record what stopped each pass where `references/validation-and-refinement.md#refinement-passes` puts refinement findings.
 
 Deliver the tree (zipped if the user wants a package) and a summary: confidence score and sub-threshold dimensions, declared substrate level, key derived decisions, remaining `[NEEDS CLARIFICATION]` markers, prior-art findings with sources, refinement and depth results, validation output, each core input or native artifact path, and the operation actually completed.
 Required preparation gates must pass before claiming native preparation; evidence meanings follow `references/validation-and-refinement.md#evidence-and-source-preservation`. State the handoff path and its read order (Phase 7).
@@ -166,7 +160,7 @@ Required preparation gates must pass before claiming native preparation; evidenc
 
 Deliver the verified preparation receipt and reset handoff. Specification preparation ends here unless the user requested implementation; never infer implementation authority from "create tasks", "stage" or "prepare".
 
-**The reboot rule.** Preparation and implementation are separate authorities in separate sessions. The authoring session NEVER implements, even when the user says "then build it" in the same breath: finish preparation, write the reset handoff, and STOP. Implementation begins only in a session with no parent linkage to the authoring session.
+**The reboot rule.** Preparation and implementation are separate authorities in separate sessions. The authoring session NEVER implements, even when the user says "then build it" in the same breath: finish preparation, write the reset handoff, and STOP. Implementation begins only in a session with no parent linkage to the authoring session: one the user starts, or an explicitly authorized launcher starts, that does not inherit the authoring session's conversation, context or agent tree (`references/handoff.md#what-counts-as-a-fresh-session` lists what counts and what does not).
 On hosts with terminal launch, that machinery runs only on explicit launch authority: a named project plus a direct "launch/spawn/start it now" instruction, which a combined "prepare then implement" request supplies only AFTER preparation is finished, committed and gate-verified; otherwise produce the pasteable resume prompt (handoff contents, next task) and stop.
 A spawned task or subagent of the authoring session is NOT a fresh session. "Implement via new session", "activate after restart" or "I will restart" name the user-launched path. The constitution binds at session start and a continuing session cannot re-bind it; only the session boundary fixes that, so this rule is load-bearing.
 
@@ -182,10 +176,10 @@ When project initiation is expressly authorized, follow `references/handoff.md#f
 |------|-----------|
 | `references/artifact-contract.md` | Outputs, supporting material, delivery.json, workbench, repository, other toolchains |
 | `references/intake-and-speckit.md` | Intake, native preparation, constitution, stop gate |
-| `references/intake-checklists.md` | Phases 1 and 2, the prior-art gate |
+| `references/intake-checklists.md` | Phase 0 input modes, Phases 1 and 2, the prior-art gate |
 | `references/templates.md` | Phases 2 to 4: intent, spec, context, experience, plays |
 | `references/continuity.md` | Ledger, standing, substrate; Living Documents when it applies |
 | `references/validation-and-refinement.md` | Phases 5 and 6, evidence meanings, optional Jev |
-| `references/handoff.md` | Phase 7, when initiation is expressly authorized |
+| `references/handoff.md` | Phase 7: what counts as a fresh session; initiation when expressly authorized |
 | `references/workbench.schema.json` | Writing or checking workbench.json |
 | `scripts/spec-prep-validate.py`, `scripts/spec-prep-delivery.py` | Running the gates |

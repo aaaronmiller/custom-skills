@@ -19,7 +19,7 @@ Author: the system records material evidence and decisions. Layer: Continuity. T
 
 `ledger/ledger.md` is an append-only record. Never edited, never reordered, never pruned. Every entry is one decision and, when known, its outcome. The ledger is how drift becomes loud instead of silent: nothing changes without an entry, so a diverged project shows its divergence in the log rather than hiding it in the code.
 
-`ledger/standing.md` is a single overwritten file that answers one question in plain language: where is this system standing right now, and how did it get here. It is the first thing a revived session reads. It is not a status badge; it is sentences a human or an agent can act on without archaeology.
+`ledger/standing.md` is a single overwritten file that answers one question in plain language: where is this system standing right now, and how did it get here. A revived session reads it right after AGENTS.md, the constitution and reset-handoff.md, the read order SKILL.md Phase 7 owns. It is not a status badge; it is sentences a human or an agent can act on without archaeology.
 
 ### Ledger entry format
 
@@ -64,7 +64,7 @@ tags: [{{TAGS}}]
 
 ### The revive protocol
 
-Resume by reading `standing.md` and the relevant tail of `ledger.md` before changing code, then verify against live task/artifact state to reconstruct it. If the records are missing or stale, consult history and sources, record the gap and reconcile the evidence; never invent an uninterrupted history.
+Resume by reading, after the Phase 7 governance files, `standing.md` and the relevant tail of `ledger.md` before changing code, then verify against live task/artifact state to reconstruct it. If the records are missing or stale, consult history and sources, record the gap and reconcile the evidence; never invent an uninterrupted history.
 
 ### The backward feed
 
