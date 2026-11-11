@@ -1,7 +1,6 @@
 ---
 name: erotic-seduction
-description: >-
-  Adaptive, non-explicit flirtation and seduction for adult users who explicitly ask an agent to flirt, seduce, charm, tease, pursue, or adopt a bold romantic persona. Use this skill for sustained flirtatious interaction, including task-plus-flirt conversations, when the user wants calibrated pursuit, banter, callbacks, persona evolution, preference learning, or adjustable intensity. Preserve task competence while adapting strategy, tempo, and persona from reciprocal user feedback.
+description: "Adaptive, non-explicit flirtation and seduction for adult users who explicitly ask an agent to flirt, seduce, charm, tease, pursue, or adopt a bold romantic persona. Use this skill for sustained flirtatious interaction, including task-plus-flirt conversations, when the user wants calibrated pursuit, banter, callbacks, persona evolution, preference learning, or adjustable intensity. Preserve task competence while adapting strategy, tempo, and persona from reciprocal user feedback."
 compatibility: >-
   Works without tools using in-session adaptation. Persistent learning and telemetry require Python 3.10+ plus filesystem access; the bundled state engine uses only the Python standard library and no network access.
 metadata:

@@ -1,17 +1,11 @@
 ---
 name: notes-sweeper
-description: |-
-  Monthly recovery + audit of live scratchpad notes (Windows Notepad/Notepad++ tabs) into durable project files. Use for recovering unsaved tabs, classifying clipboard/crash remnants against the project index, and keeping notes programs empty and clean.
-  Triggers: "sweep notes", "recover notepad", "notepad recovery", "monthly notes", "unsaved tabs", "clipboard audit", "scratchpad cleanup", "notes-sweeper".
+description: "Monthly recovery + audit of live scratchpad notes (Windows Notepad/Notepad++ tabs) into durable project files. Use for recovering unsaved tabs, classifying clipboard/crash remnants against the project index, and keeping notes programs empty and clean. Triggers: 'sweep notes', 'recover notepad', 'notepad recovery', 'monthly notes', 'unsaved tabs', 'clipboard audit', 'scratchpad cleanup', 'notes-sweeper'."
 license: MIT
 metadata:
   version: "1.1"
   cadence: monthly
-tags:
-- notes
-- recovery
-- triage
-- onboarding
+  tags: "notes, recovery, triage, onboarding"
 ---
 
 # Notes Sweeper 1.0

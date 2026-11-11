@@ -4,7 +4,7 @@ description: "Audit skill ecosystems for quality, redundancy, structural integri
 license: MIT
 metadata:
   author: ice-ninja / Hermes Agent
-  version: "2.1.0"
+  version: "2.2.0"
   updated: "2026-11-10"
   tags: "planning, automation, skills"
 ---
@@ -15,7 +15,7 @@ metadata:
 
 ## Mechanical checks (run these first)
 
-Three checks are arithmetic, not judgement, and none is reliable done by eye.
+Four checks are arithmetic, not judgement, and none is reliable done by eye.
 Run them before any deep read so the judgement work starts from facts.
 
 ```bash
@@ -55,16 +55,31 @@ ERROR findings mean a platform rejects the skill; WARN findings mean it degrades
 | `description` on one physical line; if double-quoted, no inner `"` (quote triggers with `'`) | WARN | gemini-cli validate_skill.cjs |
 | `metadata` values are strings | WARN | agentskills.io |
 | Body under 500 lines; no nested `SKILL.md`; LF line endings, no BOM | WARN | Anthropic best practices, OpenAI API, opencode |
+| Description over 500 chars (Codex shortens it under budget) | WARN | openai/codex skills loader |
+| Claude Code-only keys (`argument-hint`, `disable-model-invocation`, ...) | WARN | strip when packaging for upload |
 
-Exit status is non-zero when a collision at or above the threshold exists or
-any skill has a portability ERROR, so this can gate a commit.
+A skill that deliberately cannot be portable declares
+`metadata.portability: "local-only"` with a `metadata.portability-reason`;
+its errors then report as warnings. Reference copies under `sources/` are not
+audited.
+
+**Trigger loss.** `--baseline HEAD` (or any git ref) compares each skill's
+quoted triggers with that ref and fails on any phrase that disappeared. Run it
+on every description rewrite. How to rewrite a description without losing
+activation: `references/description-revision-guide.md`, section
+"Careful-Touch Rules". The short version: cut prose pleonasm, keep trigger
+pleonasm.
+
+Exit status is non-zero when a collision at or above the threshold exists, any
+skill has a portability ERROR, or a trigger was lost against the baseline, so
+this can gate a commit.
 
 ## Core Audit Framework
 
 ### The 5 FAIL Criteria (Binary — PASS or FAIL)
 A skill is **BROKEN** if ANY ONE of these is true:
 
-1. **BROKEN** — SKILL.md missing, malformed YAML frontmatter, references files promised but absent, tools referenced don't exist in current context
+1. **BROKEN** — SKILL.md missing, malformed YAML frontmatter (any PORTABILITY ERROR from `scripts/audit_mechanical.py`), references files promised but absent, tools referenced don't exist in current context
 2. **DANGEROUS** — Contains destructive commands without safeguards, prompt injection vectors, data exfiltration patterns
 3. **OUTDATED** — References deprecated APIs, tools, or workflows that no longer work
 4. **DUPLICATE** — Same topic covered better elsewhere, multiple skills doing identical job
@@ -143,7 +158,8 @@ KEEP: Everything else
 
 Use this for each skill under review:
 
-- [ ] SKILL.md exists with valid YAML frontmatter
+- [ ] SKILL.md exists and `scripts/audit_mechanical.py` reports no PORTABILITY ERROR for it
+- [ ] Any description rewrite passes `--baseline HEAD` with no lost triggers
 - [ ] `name:` and `description:` fields present
 - [ ] Description uses third person with specific triggers
 - [ ] Body uses imperative/infinitive form (not second-person)

@@ -1,20 +1,12 @@
 ---
 name: is-it-funny-refinement
-description: Evaluate comedic content quality using 10/3/1 ISO deliberative-refinement
-  with comedy expert council
-inputs:
-- name: comedic_content
-  description: Comedic content to evaluate and refine
-  pointer_type: parameter
-outputs:
-- name: refinement_report
-  description: Quality evaluation and refinement suggestions
-  pointer_type: output_file
-tags:
-- fun
-- social
-grade: B
-source: custom
+description: "Evaluate comedic content quality using 10/3/1 ISO deliberative-refinement with comedy expert council"
+metadata:
+  inputs: "[{\"name\":\"comedic_content\",\"description\":\"Comedic content to evaluate and refine\",\"pointer_type\":\"parameter\"}]"
+  outputs: "[{\"name\":\"refinement_report\",\"description\":\"Quality evaluation and refinement suggestions\",\"pointer_type\":\"output_file\"}]"
+  tags: "fun, social"
+  grade: "B"
+  source: "custom"
 ---
 
 # Is It Funny Refinement Skill

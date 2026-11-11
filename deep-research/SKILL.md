@@ -1,18 +1,13 @@
 ---
 name: deep-research
-description: 'Investigates questions on the web across many sources and synthesizes a cited report. Use for competitive intel, market analysis, due diligence, technology evaluation, or any question needing 3+ sources and 6+ searches, with scope control from quick survey to exhaustive. For material already in hand — a folder of documents, PDFs, a corpus — use examine-documents instead.
-  Do NOT use for simple factual lookups, single-source summaries, or creative writing.
-  '
+description: "Investigates questions on the web across many sources and synthesizes a cited report. Use for competitive intel, market analysis, due diligence, technology evaluation, or any question needing 3+ sources and 6+ searches, with scope control from quick survey to exhaustive. For material already in hand — a folder of documents, PDFs, a corpus — use examine-documents instead. Do NOT use for simple factual lookups, single-source summaries, or creative writing."
 license: MIT
 metadata:
   author: ice-ninja
   version: 4.1.0
-tags:
-- research
-- academic
-- ai/llm
-grade: A
-source: custom-skills
+  tags: "research, academic, ai/llm"
+  grade: "A"
+  source: "custom-skills"
 ---
 
 # Deep Research

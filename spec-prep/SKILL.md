@@ -1,10 +1,6 @@
 ---
 name: spec-prep
-description: >-
-  Prepare and refine project intent, requirements, design, and native Spec Kit
-  specifications, plans, and tasks. Use for project intake, existing spec-package
-  updates, intent recovery, or explicitly requested project initiation. Use
-  spec-audit for post-hoc implementation drift audits.
+description: "Prepare and refine project intent, requirements, design, and native Spec Kit specifications, plans, and tasks. Use for project intake, existing spec-package updates, intent recovery, or explicitly requested project initiation. Use spec-audit for post-hoc implementation drift audits."
 license: MIT
 metadata:
   version: "3.2.0"

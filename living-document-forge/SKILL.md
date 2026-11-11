@@ -1,13 +1,6 @@
 ---
 name: living-document-forge
-description: >-
-  Create, redesign, maintain, validate, and package browser-native living
-  documents: addressable review surfaces for asynchronous human-agent
-  collaboration, with external Markdown sections, annotations, proposals,
-  history, changelog, themes, microinteractions, immutable worklogs, and
-  controlled agent handoffs. Use for evolving concepts, research dossiers,
-  specifications, prompt laboratories, or any document that must remain
-  editable, auditable, navigable, and reviewable at human speed.
+description: "Create, redesign, maintain, validate, and package browser-native living documents: addressable review surfaces for asynchronous human-agent collaboration, with external Markdown sections, annotations, proposals, history, changelog, themes, microinteractions, immutable worklogs, and controlled agent handoffs. Use for evolving concepts, research dossiers, specifications, prompt laboratories, or any document that must remain editable, auditable, navigable, and reviewable at human speed."
 license: MIT
 ---
 

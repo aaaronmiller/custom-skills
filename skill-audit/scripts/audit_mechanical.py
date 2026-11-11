@@ -38,11 +38,26 @@ eye.
               anthropics/skills quick_validate.py, gemini-cli validate_skill.cjs
               and the agentskills.io spec, checked 2026-11-10.
 
-Usage:
-    python3 audit_mechanical.py <skills-root> [--json] [--threshold 50]
+              Claude Code-only keys (argument-hint, disable-model-invocation and
+              the rest of CLAUDE_CODE_KEYS) are WARN: they work in Claude Code
+              and must be stripped only when packaging for upload. A skill that
+              is deliberately not portable declares `metadata.portability:
+              "local-only"` (with a reason in `metadata.portability-reason`);
+              its ERRORs are then reported as WARN.
 
-Exit status is non-zero when a collision at or above the threshold exists or
-any skill has a portability ERROR, so this can gate a commit.
+  TRIGGER LOSS  With --baseline REF, each skill's quoted trigger phrases are
+              compared with the same SKILL.md at git REF. A phrase present at
+              REF and absent now is an ERROR. This is the gate for any
+              description rewrite: the description is the activation
+              mechanism, so shortening it must not silently drop a trigger.
+              A SKILL.md absent at REF (new, moved or renamed) is skipped.
+
+Usage:
+    python3 audit_mechanical.py <skills-root> [--json] [--threshold 50] [--baseline REF]
+
+Exit status is non-zero when a collision at or above the threshold exists, any
+skill has a portability ERROR, or (with --baseline) any trigger was lost, so
+this can gate a commit.
 """
 
 from __future__ import annotations
@@ -55,8 +70,11 @@ import re
 import sys
 from pathlib import Path
 
-# Directories that hold other skills rather than being one.
-SKIP_DIRS = {".git", "staged-for-deletion", "archive", "inactive", "deprecated", "node_modules"}
+# Directories that hold other skills rather than being one. `sources` holds
+# upstream reference copies (evidence, not deployed skills); counting them
+# inflated the 2026-11-10 run from 54 live skills to 94.
+SKIP_DIRS = {".git", "staged-for-deletion", "archive", "inactive", "deprecated",
+             "node_modules", "sources", ".omc"}
 
 # Progressive-disclosure roots, by convention across every skill format seen.
 DISCLOSURE_DIRS = ("references", "reference", "scripts", "assets", "templates", "data", "bin")
@@ -72,9 +90,17 @@ QUOTED_RE = re.compile(r'"([^"]{3,60})"|(?<![A-Za-z])\'([^\']{3,60})\'(?![A-Za-z
 
 # Portability rules (sources in the module docstring).
 ALLOWED_KEYS = {"name", "description", "license", "allowed-tools", "metadata", "compatibility"}
+# Functional in Claude Code (code.claude.com skills docs, checked 2026-11-10);
+# rejected by claude.ai and the Claude API, so strip them when packaging.
+CLAUDE_CODE_KEYS = {"argument-hint", "arguments", "disable-model-invocation", "user-invocable",
+                    "when_to_use", "disallowed-tools", "model", "effort", "context", "agent",
+                    "background", "hooks", "paths", "shell"}
 NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 RESERVED_NAME_WORDS = ("anthropic", "claude")
 MAX_BODY_LINES = 500
+MAX_DESC = 1024        # hard limit: Anthropic, agentskills.io, Codex interface
+SOFT_DESC = 500        # Codex shortens long descriptions first when its skill
+                       # list exceeds its budget; front-load the key use case
 
 try:  # PyYAML is optional; without it the YAML parse is reported as unchecked.
     import yaml  # type: ignore
@@ -101,7 +127,14 @@ def frontmatter(text: str) -> str:
 def description(text: str) -> str:
     fm = frontmatter(text)
     m = re.search(r"^description:\s*(.+?)(?=\n[a-zA-Z_-]+:|\Z)", fm, re.S | re.M)
-    return " ".join(m.group(1).split()) if m else ""
+    if not m:
+        return ""
+    value = " ".join(m.group(1).split())
+    # Strip the YAML scalar's own outer quotes, or a short quoted description
+    # would be read as one giant trigger phrase.
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+        value = value[1:-1]
+    return value
 
 
 def triggers(desc: str) -> set[str]:
@@ -112,7 +145,10 @@ def triggers(desc: str) -> set[str]:
     'undeclared' rather than as a collision candidate. Treating prose as
     triggers produced false pairs on common words in early versions.
     """
-    return {(a or b).strip().lower() for a, b in QUOTED_RE.findall(desc)}
+    # Fold the typographic apostrophe: portable descriptions write "what’s" so
+    # the apostrophe cannot close a single-quoted trigger, and the baseline
+    # must still recognise it as the same phrase as an older "what's".
+    return {(a or b).strip().lower().replace("’", "'") for a, b in QUOTED_RE.findall(desc)}
 
 
 def portability(path: Path, raw: bytes) -> list[str]:
@@ -148,9 +184,13 @@ def portability(path: Path, raw: bytes) -> list[str]:
             return out + ["ERROR: frontmatter is not a YAML mapping"]
 
     if data is not None:
-        extra = sorted(set(data) - ALLOWED_KEYS)
-        if extra:
-            out.append(f"ERROR: unexpected top-level key(s) {extra}; claude.ai and the Claude API reject them (move under metadata)")
+        extra = set(data) - ALLOWED_KEYS
+        cc_only = sorted(extra & CLAUDE_CODE_KEYS)
+        foreign = sorted(extra - CLAUDE_CODE_KEYS)
+        if foreign:
+            out.append(f"ERROR: unexpected top-level key(s) {foreign}; claude.ai and the Claude API reject them (move under metadata)")
+        if cc_only:
+            out.append(f"WARN: Claude Code-only key(s) {cc_only}; keep for Claude Code, strip when packaging for claude.ai or the API")
         name = data.get("name")
         if not isinstance(name, str) or not NAME_RE.match(name) or len(name) > 64:
             out.append(f"ERROR: name {name!r} must be kebab-case, 1-64 chars")
@@ -163,8 +203,10 @@ def portability(path: Path, raw: bytes) -> list[str]:
         if not isinstance(desc, str) or not desc.strip():
             out.append("ERROR: description missing or not a string")
         else:
-            if len(desc) > 1024:
-                out.append(f"ERROR: description is {len(desc)} chars (max 1024)")
+            if len(desc) > MAX_DESC:
+                out.append(f"ERROR: description is {len(desc)} chars (max {MAX_DESC})")
+            elif len(desc) > SOFT_DESC:
+                out.append(f"WARN: description is {len(desc)} chars (over {SOFT_DESC}: Codex shortens it under budget; key use case must come first)")
             if "<" in desc or ">" in desc:
                 out.append("ERROR: description contains < or > (claude.ai rejects XML-like text)")
         meta = data.get("metadata")
@@ -191,11 +233,31 @@ def portability(path: Path, raw: bytes) -> list[str]:
               and p.parent != path and not any(s in p.parts for s in SKIP_DIRS)]
     if nested:
         out.append(f"WARN: {len(nested)} nested SKILL.md file(s); the OpenAI API rejects the bundle and opencode registers each as a skill")
+    meta = (data or {}).get("metadata") if isinstance(data, dict) else None
+    if isinstance(meta, dict) and str(meta.get("portability", "")).strip() == "local-only":
+        out = [("WARN (local-only): " + f[len("ERROR: "):]) if f.startswith("ERROR") else f for f in out]
     return out
 
 
-def audit(root: Path, threshold: int) -> dict:
+def baseline_triggers(root: Path, rel_skill_md: str, ref: str) -> set[str] | None:
+    """Quoted triggers of a SKILL.md at git REF, or None when absent there."""
+    import subprocess
+    top = subprocess.run(["git", "-C", str(root), "rev-parse", "--show-toplevel"],
+                         capture_output=True, text=True)
+    if top.returncode != 0:
+        return None
+    repo = Path(top.stdout.strip())
+    path_in_repo = (root / rel_skill_md).resolve().relative_to(repo.resolve()).as_posix()
+    shown = subprocess.run(["git", "-C", str(repo), "show", f"{ref}:{path_in_repo}"],
+                           capture_output=True, text=True)
+    if shown.returncode != 0:
+        return None
+    return triggers(description(shown.stdout.replace("\r\n", "\n")))
+
+
+def audit(root: Path, threshold: int, baseline: str | None = None) -> dict:
     skills: dict[str, dict] = {}
+    lost: dict[str, list[str]] = {}
     for path in find_skills(root):
         raw = (path / "SKILL.md").read_bytes()
         text = raw.decode("utf-8", errors="replace").replace("\r\n", "\n")
@@ -207,6 +269,13 @@ def audit(root: Path, threshold: int) -> dict:
             "missing_refs": missing,
             "portability": portability(path, raw),
         }
+        if baseline:
+            rel = str((path / "SKILL.md").relative_to(root))
+            before = baseline_triggers(root, rel, baseline)
+            if before:
+                gone = sorted(before - set(skills[str(path.relative_to(root))]["triggers"]))
+                if gone:
+                    lost[str(path.relative_to(root))] = gone
 
     collisions = []
     names = sorted(skills)
@@ -240,6 +309,8 @@ def audit(root: Path, threshold: int) -> dict:
         "portability_errors": sorted(
             n for n, s in skills.items() if any(f.startswith("ERROR") for f in s["portability"])
         ),
+        "baseline": baseline,
+        "lost_triggers": lost,
     }
 
 
@@ -248,6 +319,8 @@ def main() -> int:
     ap.add_argument("root")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--threshold", type=int, default=50)
+    ap.add_argument("--baseline", metavar="REF",
+                    help="git ref to compare quoted triggers against (lost trigger = ERROR)")
     args = ap.parse_args()
 
     root = Path(args.root).expanduser().resolve()
@@ -255,9 +328,9 @@ def main() -> int:
         print(f"no such directory: {root}", file=sys.stderr)
         return 2
 
-    result = audit(root, args.threshold)
+    result = audit(root, args.threshold, args.baseline)
 
-    failed = bool(result["collisions"] or result["portability_errors"])
+    failed = bool(result["collisions"] or result["portability_errors"] or result["lost_triggers"])
     if args.json:
         print(json.dumps(result, indent=2))
         return 1 if failed else 0
@@ -294,6 +367,13 @@ def main() -> int:
         print(f"  {n}")
         for f in findings:
             print(f"      {f}")
+
+    if args.baseline:
+        print(f"\n== TRIGGERS LOST since {args.baseline} ({len(result['lost_triggers'])}) ==")
+        if not result["lost_triggers"]:
+            print("  none")
+        for n, gone in sorted(result["lost_triggers"].items()):
+            print(f"  {n}: {', '.join(gone)}")
 
     return 1 if failed else 0
 

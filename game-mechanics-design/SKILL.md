@@ -1,24 +1,15 @@
 ---
 name: game-mechanics-design
-description: Expert knowledge for designing fun, balanced, interesting, and interactive
-  game mechanics across all game types—synthesizing Magic The Gathering design, D&D,
-  RPG, video game, and sports design principles
-category: skill
-tags:
-- game
-- design
-dependencies: []
-version: 1.0.0
-inputs:
-- name: game_concept
-  description: Game concept or mechanics to design
-  pointer_type: parameter
-outputs:
-- name: game_design_doc
-  description: Game mechanics design document
-  pointer_type: output_file
-grade: A
-source: custom
+description: "Expert knowledge for designing fun, balanced, interesting, and interactive game mechanics across all game types—synthesizing Magic The Gathering design, D&D, RPG, video game, and sports design principles"
+metadata:
+  category: "skill"
+  tags: "game, design"
+  dependencies: ""
+  version: "1.0.0"
+  inputs: "[{\"name\":\"game_concept\",\"description\":\"Game concept or mechanics to design\",\"pointer_type\":\"parameter\"}]"
+  outputs: "[{\"name\":\"game_design_doc\",\"description\":\"Game mechanics design document\",\"pointer_type\":\"output_file\"}]"
+  grade: "A"
+  source: "custom"
 ---
 
 # Creating Great Game Mechanics

@@ -1,14 +1,12 @@
 ---
 name: research-macbook
 description: "Run research-focused eBay searches for Apple Silicon MacBook logic boards with MDM lock detection, separate from the macbook-analyzer-pipeline cron skill."
-category: research
-always_invoke: true for cron job execution of macbook-analyzer-pipeline
-tags:
-- research
-- hardware
-- data
-grade: C
-source: custom
+metadata:
+  category: "research"
+  always_invoke: "true for cron job execution of macbook-analyzer-pipeline"
+  tags: "research, hardware, data"
+  grade: "C"
+  source: "custom"
 ---
 
 # MacBook Analyzer Pipeline

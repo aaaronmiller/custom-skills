@@ -68,3 +68,75 @@ Safe trimming (no trigger removal) saves at most ~400-800 tokens.
 
 **Under 10K is achievable. Under 5K requires architecture changes.**
 Do not trim triggers to force a lower budget.
+
+## Careful-Touch Rules (2026-11)
+
+The description decides whether the skill loads at all. Edit it by hand, one
+skill at a time, never in bulk and never with a low-capability model. Every
+rewrite passes the trigger-loss gate before it ships:
+
+```bash
+python3 scripts/audit_mechanical.py <skills-root> --baseline HEAD
+```
+
+### The core rule: cut prose pleonasm, keep trigger pleonasm
+
+A pleonasm is a redundant expression: "in order to", "join together",
+"end result", "this skill should be used when". Redundancy has two kinds in a
+description, and they are treated in opposite ways.
+
+| Kind | Example | Treatment |
+|---|---|---|
+| Prose pleonasm | "This skill is designed to help you in order to create..." | Cut first. It costs characters and carries no matching signal. |
+| Trigger pleonasm | "go viral", "make this viral", "shareable", "spread" | Keep. Each synonym catches a different phrasing; the redundancy is the recall. |
+
+Only after all prose pleonasm is gone may a trigger be merged, and then only
+when two phrases are the same words in another order or differ by an
+inflection the model already generalizes ("audit skill" / "audit skills").
+
+### Hard and soft limits (checked 2026-11-10)
+
+| Limit | Value | Source | Audit level |
+|---|---|---|---|
+| Maximum length | 1024 chars | Anthropic quick_validate.py, agentskills.io, Codex | ERROR |
+| Codex budget shortening | over 500 chars is shortened first when the skill list exceeds 2% of context (8,000 chars default) | openai/codex skills loader | WARN |
+| Claude Code listing | description plus `when_to_use` truncated at 1,536 chars; rarely used skills dropped first under the 1% budget | Claude Code skills docs | covered by 1024 |
+| claude.ai help center | 200 chars | Anthropic help center, enforcement unverified | not enforced |
+| Characters | no `<` or `>` | quick_validate.py, claude.ai | ERROR |
+| Format | one physical line; double-quoted with triggers in single quotes | gemini-cli validate_skill.cjs | WARN |
+
+Codex also reads an optional `metadata.short-description` for compact
+listings. Add one (under 100 chars) when the full description runs long.
+
+### Order of content
+
+1. **Key use case first, in third person:** "Audits skill ecosystems for...",
+   not "I can help" or "You can use". Truncation cuts from the end, so the
+   first sentence must stand alone.
+2. **"Use when ..."** situations, most frequent first.
+3. **"Triggers:"** quoted phrases (single quotes inside the double-quoted
+   value), the user's own words rather than the skill's vocabulary.
+4. Content-type lists and edge cases last.
+
+### Trim order when over a limit
+
+1. Prose pleonasm and boilerplate ("This skill", "designed to", "in order to").
+2. Version strings, URLs, author names (they belong in metadata or the body).
+3. Restated words: a noun already in the name, a "Use when" item that repeats
+   a trigger verbatim.
+4. Content-type lists, longest first.
+5. Never: quoted triggers, the first sentence's use case, an "AUTOMATIC
+   ACTIVATION" instruction the skill depends on.
+
+If a description cannot fit without step 5, the skill is doing too much:
+split it, or move the overflow into `when_to_use` (Claude Code only) and
+record why.
+
+### Rewrite checklist
+
+- [ ] Prose pleonasm removed; trigger synonyms intact.
+- [ ] First sentence states the use case in third person.
+- [ ] Every quoted trigger from the baseline still present (`--baseline` reports none lost).
+- [ ] At most 1024 chars; under 500 or front-loaded so a Codex cut keeps the use case.
+- [ ] One physical line, double-quoted, no inner `"`, no `<` or `>`.
+- [ ] Read the old and new versions side by side once, aloud, before shipping.

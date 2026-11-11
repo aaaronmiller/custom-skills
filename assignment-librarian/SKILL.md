@@ -1,16 +1,10 @@
 ---
 name: assignment-librarian
-description: |-
-  Keeps the new_assignments library indexed, onboarded and spec-prep-ready. Use for folder discovery scans, onboarding ideation drops into project-intake.json manifests, readiness triage, spec-prep handoffs, and periodic rescans that keep the catalog index current.
-  Triggers: "new assignment", "new folder", "scan assignments", "onboard project", "intake review", "missing manifest", "ready for spec-prep", "update the index", "rescan", "assignment librarian", "triage assignments".
+description: "Keeps the new_assignments library indexed, onboarded and spec-prep-ready. Use for folder discovery scans, onboarding ideation drops into project-intake.json manifests, readiness triage, spec-prep handoffs, and periodic rescans that keep the catalog index current. Triggers: 'new assignment', 'new folder', 'scan assignments', 'onboard project', 'intake review', 'missing manifest', 'ready for spec-prep', 'update the index', 'rescan', 'assignment librarian', 'triage assignments'."
 license: MIT
 metadata:
   version: "1.0"
-tags:
-- intake
-- catalog
-- onboarding
-- triage
+  tags: "intake, catalog, onboarding, triage"
 ---
 
 # Assignment Librarian 1.0

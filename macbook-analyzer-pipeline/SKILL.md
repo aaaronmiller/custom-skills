@@ -1,21 +1,12 @@
 ---
 name: macbook-analyzer-pipeline
-description: Daily eBay search for Apple Silicon MacBook logic boards with MDM lock,
-  fee-aware profit analysis, and markdown reporting
-inputs:
-- name: search_params
-  description: eBay search parameters for Apple Silicon MacBook logic boards
-  pointer_type: parameter
-outputs:
-- name: analysis_report
-  description: Profit analysis report for MacBook logic board listings
-  pointer_type: output_file
-tags:
-- research
-- hardware
-- macbook
-grade: C
-source: custom
+description: "Daily eBay search for Apple Silicon MacBook logic boards with MDM lock, fee-aware profit analysis, and markdown reporting"
+metadata:
+  inputs: "[{\"name\":\"search_params\",\"description\":\"eBay search parameters for Apple Silicon MacBook logic boards\",\"pointer_type\":\"parameter\"}]"
+  outputs: "[{\"name\":\"analysis_report\",\"description\":\"Profit analysis report for MacBook logic board listings\",\"pointer_type\":\"output_file\"}]"
+  tags: "research, hardware, macbook"
+  grade: "C"
+  source: "custom"
 ---
 
 # eBay Logic Board Search Skill

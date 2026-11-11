@@ -1,21 +1,11 @@
 ---
 name: casr
-description: >-
-  Cross Agent Session Resumer. Convert a session from one coding agent into
-  another and resume it there: omp, pi-agent, ante, muse, codex, gemini, kiro
-  or claude-code history into Claude Code, Codex, Gemini, Antigravity, OpenCode
-  and others. Use when asked to open, resume, continue, hand off, or move a
-  session across harnesses. Triggers: "casr", "open this omp session in
-  claude", "resume in codex", "move session to", "cross-agent resume".
+description: "Cross Agent Session Resumer. Convert a session from one coding agent into another and resume it there: omp, pi-agent, ante, muse, codex, gemini, kiro or claude-code history into Claude Code, Codex, Gemini, Antigravity, OpenCode and others. Use when asked to open, resume, continue, hand off, or move a session across harnesses. Triggers: 'casr', 'open this omp session in claude', 'resume in codex', 'move session to', 'cross-agent resume'."
 license: MIT
 metadata:
   version: 1.3.0
   requires: casr CLI on PATH, built from the private fork at /home/cheta/code/cross_agent_session_resumer
-tags:
-  - sessions
-  - handoff
-  - meta
-  - TOOL
+  tags: "sessions, handoff, meta, TOOL"
 ---
 
 # casr: Cross Agent Session Resumer

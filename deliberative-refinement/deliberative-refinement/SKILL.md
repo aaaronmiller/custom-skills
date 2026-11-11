@@ -1,7 +1,6 @@
 ---
 name: deliberative-refinement
-description: |
-  Use when: thinking through complex problems, making decisions, validating claims, exploring alternatives, uncertain how to proceed, need multiple perspectives, high-stakes choices, comparing options, weighing pros and cons, want second opinion, sanity check. Triggers: "help me decide", "which should I", "think through", "evaluate", "validate this", "is this right", "not sure", "explore alternatives", "figure out", "bulletproof", "compare", "pros and cons", "tradeoffs", "best approach", "recommend", "advise", "I can't decide", "stuck on", "confused", "code review", "architecture decision", "design review", ambiguous requests, contested decisions, strategic planning.
+description: "Use when: thinking through complex problems, making decisions, validating claims, exploring alternatives, uncertain how to proceed, need multiple perspectives, high-stakes choices, comparing options, weighing pros and cons, want second opinion, sanity check. Triggers: 'help me decide', 'which should I', 'think through', 'evaluate', 'validate this', 'is this right', 'not sure', 'explore alternatives', 'figure out', 'bulletproof', 'compare', 'pros and cons', 'tradeoffs', 'best approach', 'recommend', 'advise', 'I can’t decide', 'stuck on', 'confused', 'code review', 'architecture decision', 'design review', ambiguous requests, contested decisions, strategic planning."
 license: MIT
 metadata:
   author: ice-ninja

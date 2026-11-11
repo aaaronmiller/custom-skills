@@ -1,7 +1,6 @@
 ---
 name: refinement-loop
-description: |
-  Use when: anything should get better through repeated passes instead of one shot — improving a prompt, plan, document, design, codebase, strategy, or deliverable; evaluating work against a rubric and iterating to a score threshold; running generate-critique-revise cycles; adding a judge, critic, or evaluator role to a workflow; making long sessions cohere (scratchpad, gated phases, durable rules). Triggers: "refine this", "iterate until", "evaluate and improve", "score this", "critic loop", "self-improve", "revise until it passes", "make this better in rounds", "assessment loop", "improvement loop", "add a rubric", "judge this work", "run it again with feedback", "polish loop", "quality gate", "threshold".
+description: "Use when: anything should get better through repeated passes instead of one shot — improving a prompt, plan, document, design, codebase, strategy, or deliverable; evaluating work against a rubric and iterating to a score threshold; running generate-critique-revise cycles; adding a judge, critic, or evaluator role to a workflow; making long sessions cohere (scratchpad, gated phases, durable rules). Triggers: 'refine this', 'iterate until', 'evaluate and improve', 'score this', 'critic loop', 'self-improve', 'revise until it passes', 'make this better in rounds', 'assessment loop', 'improvement loop', 'add a rubric', 'judge this work', 'run it again with feedback', 'polish loop', 'quality gate', 'threshold'."
 license: MIT
 metadata:
   author: cheta

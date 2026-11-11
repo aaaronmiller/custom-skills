@@ -1,15 +1,11 @@
 ---
 name: spec-audit
-description: |-
-  Audits spec-driven artifacts by reconstructing intent from a downstream artifact and comparing it to its upstream source; divergence is the signal. Use for spec drift checks, decomposition audits, requirements/design reviews, backtranslation, cold review, and "does the code match the spec".
-  Triggers: "audit the spec", "spec drift", "backtranslation", "does the code match the spec", "cold review", "decomposition audit", "audit requirements", "drift check".
+description: "Audits spec-driven artifacts by reconstructing intent from a downstream artifact and comparing it to its upstream source; divergence is the signal. Use for spec drift checks, decomposition audits, requirements/design reviews, backtranslation, cold review, and 'does the code match the spec'. Triggers: 'audit the spec', 'spec drift', 'backtranslation', 'does the code match the spec', 'cold review', 'decomposition audit', 'audit requirements', 'drift check'."
 license: MIT
 metadata:
   version: "1.0.0"
   lineage: "spec-workflow AUDIT gate (backtranslation-spec-auditor 2.2.0) split out; spec-prep covers CREATE and IMPLEMENT"
-tags:
-- spec-driven
-- audit
+  tags: "spec-driven, audit"
 ---
 
 # Spec Audit

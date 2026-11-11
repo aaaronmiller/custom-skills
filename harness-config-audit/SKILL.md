@@ -1,31 +1,10 @@
 ---
 name: harness-config-audit
-description: >-
-  Audit an agent harness's configuration against its current documentation, so
-  that features shipped in an update are actually switched on. An updated binary
-  keeps the old config file, and a feature gated behind a key you have never set
-  stays dark with no error and no warning — jcode's memory subsystem sat inert
-  behind two unset keys, and ante's model router was disabled by an empty
-  modelPool. Checks the harness is current, upgrades it when not, enumerates
-  every option the build accepts, reports which are unset, and recommends a
-  value for each.
-
-  Also owns the model assignment policy: which provider and model to use for
-  each role, what they cost, and what to fall back to when a rate limit is hit.
-
-  Use when: auditing a config file, after upgrading a harness, when a documented
-  feature "does not work", when adding a new harness, when choosing a model for
-  delegated or subagent work, or when a worker hits a per-minute quota.
-
-  Triggers: "audit the config", "check my harness config", "is my config up to
-  date", "why isn't this feature working", "config drift", "which model should I
-  use", "model assignment", "rate limited", "pick a model for subagents",
-  "harness settings", "config.toml", "settings.json".
+description: "Audits an agent harness’s configuration against its current documentation so features shipped in an update are actually switched on: an upgraded binary keeps the old config, and a feature gated behind an unset key stays dark with no error. Checks the harness is current and upgrades it, enumerates every option the build accepts, reports which are unset, and recommends values. Also owns the model assignment policy: provider and model per role, cost, and fallbacks when a rate limit hits. Use when auditing a config file, after upgrading a harness, when a documented feature 'does not work', when adding a harness, when choosing a model for delegated or subagent work, or when a worker hits a per-minute quota. Triggers: 'audit the config', 'check my harness config', 'is my config up to date', 'why isn’t this feature working', 'config drift', 'which model should I use', 'model assignment', 'rate limited', 'pick a model for subagents', 'harness settings', 'config.toml', 'settings.json'."
 license: MIT
 metadata:
   version: 1.0.0
-tags:
-  - TOOL
+  tags: "TOOL"
 ---
 
 # Harness config audit

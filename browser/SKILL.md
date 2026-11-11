@@ -3,21 +3,12 @@ name: browser
 description: Web scraping and browser automation through local CLIs, routed by how hard the site fights back. Obscura for cheap fetches, Camoufox for bot-protected pages, Interceptor (real Chrome plus extension) for the hardest walls and interactive flows, agent-browser for ordinary interactive pages. Use for web scraping, reading a page, searching a site, checking stock or prices, filling forms, or any site interaction task.
 disable-model-invocation: true
 allowed-tools: Bash(obscura *), Bash(camoufox-fetch *), Bash(interceptor *), Bash(interceptor-browser *), Bash(agent-browser *)
-inputs:
-- name: url_or_action
-  description: URL to visit or action to perform on a webpage
-  pointer_type: parameter
-outputs:
-- name: extracted_content
-  description: Extracted text or data from the webpage
-  pointer_type: output_file
-tags:
-- web
-- scraping
-- automation
-- anti-bot
-grade: B
-source: custom
+metadata:
+  inputs: "[{\"name\":\"url_or_action\",\"description\":\"URL to visit or action to perform on a webpage\",\"pointer_type\":\"parameter\"}]"
+  outputs: "[{\"name\":\"extracted_content\",\"description\":\"Extracted text or data from the webpage\",\"pointer_type\":\"output_file\"}]"
+  tags: "web, scraping, automation, anti-bot"
+  grade: "B"
+  source: "custom"
 ---
 
 # Browser: scraping and site interaction

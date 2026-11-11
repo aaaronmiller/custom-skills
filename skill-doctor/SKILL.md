@@ -1,17 +1,15 @@
 ---
 name: "skill-doctor"
 description: "Grades agent skills by scoring recent local agent conversations for efficiency, code quality, procedure compliance, and verbosity, then drafts concrete skill edits and a local report. Works from any harness. Use when the user wants their agent setup graded from real conversation history, asks which installed skills are actually working, or asks why a skill did not fire."
-version: "1.0.0-local.1"
-source: adapted
-upstream: "https://github.com/warpdotdev/common-skills/tree/8792394ff1b655e0af451b8fabb68ef0cfcbd208/.agents/skills/skill-doctor"
-upstream_commit: "8792394ff1b655e0af451b8fabb68ef0cfcbd208"
-attribution: "Original skill-doctor by Warp (Denver Technologies, Inc.), MIT License; full notice in LICENSE.upstream. Collector is upstream and unmodified; render_report.py hardened (http(s)-only cta_url, <>& escaped in embedded JSON); scorers unmodified except one widened example of rule files in procedure-compliance.md."
 license: MIT
-adapted: "2026-11-08: harness-agnostic startup, extra session sources (omp, cass export), canonical-source edit targets, no vendor call to action. See references/local-setup.md."
-tags:
-- skills
-- evaluation
-- retrospective
+metadata:
+  version: "1.0.0-local.1"
+  source: "adapted"
+  upstream: "https://github.com/warpdotdev/common-skills/tree/8792394ff1b655e0af451b8fabb68ef0cfcbd208/.agents/skills/skill-doctor"
+  upstream_commit: "8792394ff1b655e0af451b8fabb68ef0cfcbd208"
+  attribution: "Original skill-doctor by Warp (Denver Technologies, Inc.), MIT License; full notice in LICENSE.upstream. Collector is upstream and unmodified; render_report.py hardened (http(s)-only cta_url, <>& escaped in embedded JSON); scorers unmodified except one widened example of rule files in procedure-compliance.md."
+  adapted: "2026-11-08: harness-agnostic startup, extra session sources (omp, cass export), canonical-source edit targets, no vendor call to action. See references/local-setup.md."
+  tags: "skills, evaluation, retrospective"
 ---
 # skill-doctor
 

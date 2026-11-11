@@ -1,19 +1,18 @@
 ---
 name: competition-analysis
-description: Research a competitor in one of our fields and file a dossier we can pull out later ("side pocket"). Targets are products, companies, and people in their role as builder or promoter of one. Covers the product's public pages with screenshots, its marketing and promoting account, the builders' GitHub track record (real history or a weekend build), their public collaborators and prior work, the competing projects in the field and what their users still ask for, and ideas mapped onto our own projects. Use when the operator shares a product, company or builder in one of our fields and wants to know who is behind it, whether it is real, or who else competes. Examples are "check out <site>, who built this", "competitor teardown", "competition analysis", "who else does X", "what's out there like X", "what can we steal from", "is this open source", "track the builder's GitHub", "side pocket". Do not use it for a library or tool we would adopt, sales lead lists (lead-research-assistant), validating our own idea (proven-better-new), or general market questions (deep-research).
-tags: [research, competitive-intel, osint, github, market, marketing]
-source: custom-skills
+description: "Researches a competitor in one of our fields and files a dossier for later ('side pocket'): products, companies, and people as builders or promoters of one. Covers public pages with screenshots, marketing accounts, the builders’ GitHub track record (real history or a weekend build), collaborators and prior work, competing projects and what their users still ask for, and ideas mapped onto our projects. Use when the operator shares a product, company or builder in our fields and wants to know who is behind it, whether it is real, or who else competes. Triggers: 'check out [site], who built this', 'competitor teardown', 'competition analysis', 'who else does X', 'what’s out there like X', 'what can we steal from', 'is this open source', 'track the builder’s GitHub', 'side pocket'. Not for a library or tool to adopt, sales lead lists (lead-research-assistant), validating our own idea (proven-better-new), or general market questions (deep-research)."
 metadata:
   author: ice-ninja
   version: "1.1.0"
-  created: 2026-11-05
+  created: "2026-11-05"
   revised: "2026-11-05: three adversarial audits applied (value and fit, safety and privacy, executability); 40 of 42 findings at confidence 60 or more"
-  history:
-    - "2026-11-07: 1.1.0, feedback from the bench.is worked example applied ($MASTERPLAN/research/competition/bench-is/skill-feedback-2026-11-07.md): degraded mode, wall fallbacks, redirect fallbacks, source independence, section confidence, API-first field sweep"
+  history: "2026-11-07: 1.1.0, feedback from the bench.is worked example applied ($MASTERPLAN/research/competition/bench-is/skill-feedback-2026-11-07.md): degraded mode, wall fallbacks, redirect fallbacks, source independence, section confidence, API-first field sweep"
   paths: "$MASTERPLAN is the masterplan repository (~/code/masterplan); $LIVING_DOCUMENTS is ~/LIVING_DOCUMENTS"
   first-worked-example: $MASTERPLAN/research/competition/bench-is/teardown-2026-11-05.md
   requires: "gstack browse ($B headless), gh CLI with GraphQL, web search; delegates to domain-intel, the github-searcher agent, deep-research and last30days when installed; runs in degraded mode with only a web fetcher and search"
   writes: "$MASTERPLAN/research/competition/ and the owning dossier's tasks and questions pages"
+  tags: "research, competitive-intel, osint, github, market, marketing"
+  source: "custom-skills"
 ---
 
 # competition-analysis

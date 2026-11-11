@@ -1,13 +1,9 @@
 ---
 name: skillranker
 description: Use sr (skillranker) to ask which installed skill fits the next step of the current session. Use when unsure which skill applies, when many skills could apply, or to check why an expected skill was not suggested. Recommendations come from TypeSafe Jev, are advisory, and are never run automatically.
-tags:
-- skills
-- skill-selection
-- routing
-- jev
-- cli
-source: custom
+metadata:
+  tags: "skills, skill-selection, routing, jev, cli"
+  source: "custom"
 ---
 
 # skillranker (`sr`)

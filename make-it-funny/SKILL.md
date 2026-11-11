@@ -1,21 +1,12 @@
 ---
 name: make-it-funny
-description: Generate high-quality satirical and comedic content in visual, written,
-  and spoken formats with institutional critique focus
-inputs:
-- name: topic
-  description: Topic or institution to satirize
-  pointer_type: parameter
-outputs:
-- name: satirical_content
-  description: Generated satirical and comedic content
-  pointer_type: output_file
-tags:
-- fun
-- social
-- writing
-grade: A
-source: custom
+description: "Generate high-quality satirical and comedic content in visual, written, and spoken formats with institutional critique focus"
+metadata:
+  inputs: "[{\"name\":\"topic\",\"description\":\"Topic or institution to satirize\",\"pointer_type\":\"parameter\"}]"
+  outputs: "[{\"name\":\"satirical_content\",\"description\":\"Generated satirical and comedic content\",\"pointer_type\":\"output_file\"}]"
+  tags: "fun, social, writing"
+  grade: "A"
+  source: "custom"
 ---
 
 # Make It Funny
