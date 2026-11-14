@@ -1,6 +1,6 @@
 ---
 name: harness-config-audit
-description: "Audits an agent harness’s configuration against its current documentation so features shipped in an update are actually switched on: an upgraded binary keeps the old config, and a feature gated behind an unset key stays dark with no error. Checks the harness is current and upgrades it, enumerates every option the build accepts, reports which are unset, and recommends values. Also owns the model assignment policy: provider and model per role, cost, and fallbacks when a rate limit hits. Use when auditing a config file, after upgrading a harness, when a documented feature 'does not work', when adding a harness, when choosing a model for delegated or subagent work, or when a worker hits a per-minute quota. Triggers: 'audit the config', 'check my harness config', 'is my config up to date', 'why isn’t this feature working', 'config drift', 'which model should I use', 'model assignment', 'rate limited', 'pick a model for subagents', 'harness settings', 'config.toml', 'settings.json'."
+description: "Checks an agent harness's config against its current build so features added in updates are actually switched on, and holds the model-assignment policy. Use after upgrading a harness or when a documented feature does nothing."
 license: MIT
 metadata:
   description-reviewed: "2026-11-10"

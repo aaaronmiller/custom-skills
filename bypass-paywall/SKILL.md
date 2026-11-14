@@ -1,6 +1,6 @@
 ---
 name: bypass-paywall
-description: Retrieve and verify readable copies of web articles when normal browsing returns a paywall, preview, or extraction failure. Use author access links, existing archives, reader services, or an available authenticated browser. Also handles requests for archive.today or alternate article access. Does not promise recovery of unavailable text.
+description: "Finds a complete, readable copy of a paywalled or failed article through author links, archives and reader services, and checks it is whole before using it."
 license: MIT
 metadata:
   version: "1.0.0"

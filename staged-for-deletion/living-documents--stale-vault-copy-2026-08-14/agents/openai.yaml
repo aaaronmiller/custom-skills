@@ -1,4 +1,0 @@
-interface:
-  display_name: "Living Documents"
-  short_description: "Maintain canonical project planning context"
-  default_prompt: "Use $living-documents to locate or update the canonical project plan and record verified progress."

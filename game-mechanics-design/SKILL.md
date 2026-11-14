@@ -1,6 +1,6 @@
 ---
 name: game-mechanics-design
-description: "Expert knowledge for designing fun, balanced, interesting, and interactive game mechanics across all game types—synthesizing Magic The Gathering design, D&D, RPG, video game, and sports design principles"
+description: "A twelve-pillar framework for designing fun, balanced game mechanics, drawn from Magic: The Gathering, tabletop RPGs, video games and sports. Use when designing or reviewing game rules and systems."
 metadata:
   category: "skill"
   tags: "game, design"

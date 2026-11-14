@@ -1,6 +1,6 @@
 ---
 name: intent-refresh
-description: Refresh the intent record from agent sessions. Collects the operator's prompts from every harness since the last run, fixes their spelling and grammar and organizes large block prompts (originals kept), correlates every session with a project (sysadmin and unclassified as fallbacks), summarizes in cycles (prompt, session, project), derives intents into the archaeology database that intent-find reads, and writes each project's intent pages in its Living Documents dossier. Use when the intent-refresh cron job summons an agent, or when asked to "refresh intent archaeology", "update the intent database", "intent-find says stale", "clean up my prompts", "correlate sessions with projects" or "update the archaeology pages".
+description: "Brings the intent record current: collects operator prompts from every harness since the last run, cleans them, ties sessions to projects, derives intents for intent-find and writes each dossier's intent pages. Runs weekly from cron."
 metadata:
   description-reviewed: "2026-11-10"
   author: ice-ninja

@@ -1,6 +1,6 @@
 ---
 name: cli-tui-styling
-description: "Create visually stunning CLI and TUI applications. Use when: building command-line tools that POP visually, designing terminal user interfaces, adding icons/colors to CLI output, creating tables/borders in terminal, or making tools that don't look like a rainbow vomited on screen."
+description: "Makes terminal output look good: colour roles, hierarchy, tables, borders, icons and the right library per language. Use when building or styling a CLI or TUI."
 metadata:
   inputs: "[{\"name\":\"application_code\",\"description\":\"CLI/TUI application code to style\",\"pointer_type\":\"parameter\"}]"
   outputs: "[{\"name\":\"styled_code\",\"description\":\"Visually enhanced CLI/TUI code\",\"pointer_type\":\"output_file\"}]"

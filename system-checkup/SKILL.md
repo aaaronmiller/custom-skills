@@ -1,6 +1,6 @@
 ---
 name: system-checkup
-description: "Runs a periodic full checkup of the SPECTRE-16 Windows 11 + WSL2 workstation: Windows Update and servicing health, memory and telemetry, Process Lasso Pro rules, event-log errors and crashes, Bluetooth and input drops, storage and cache reclaim, npm vs pnpm/bun hygiene, outdated software and modernization picks, user-folder organization (living document), and a dark HTML report plus a dry-run removal script. Use when the user asks for a system checkup, health check, 'bring the system up to date', monthly maintenance, cleanup/reclaim space, re-audit Process Lasso, or 'run the checkup again'. Grunt work goes to headless workers on the current cheapest capable model."
+description: "Runs the periodic full checkup of this Windows 11 and WSL2 workstation (updates, memory, crashes, storage, outdated software) and produces a cleanup plan with an approval page."
 metadata:
   description-reviewed: "2026-11-10"
 ---

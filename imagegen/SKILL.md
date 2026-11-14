@@ -1,6 +1,6 @@
 ---
 name: imagegen
-description: Generate or edit images from the terminal with no API keys, using an authorized CLI agent's own account. Use when asked to generate an image, icon, banner, texture, illustration, sprite, or placeholder art headlessly or in a script. Default backend is Codex ($imagegen, gpt-image-2, ChatGPT plan). The agy backend runs the Antigravity CLI headless and uses its built-in image tool; use it when Codex is out of quota.
+description: "Generates or edits images headlessly with no API keys, through Codex's image tool or the Antigravity CLI. Use for icons, banners, illustrations and placeholder art."
 license: MIT
 metadata:
   version: "2.1.0"

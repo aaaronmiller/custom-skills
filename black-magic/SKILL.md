@@ -1,6 +1,6 @@
 ---
 name: black-magic
-description: Use when organizing any project folder under ~/code or ~/code2, working a punchlist, or about to report something as blocked. Runs the intent-first loop - organize the folder, make the intent record current, then answer questions from the record instead of escalating. Searches the whole cross-project pool, never one dossier.
+description: "The intent-first loop for project work: tidy the folder, bring its intent record current, then answer open questions from the record across all projects before calling anything blocked. Use when working a punchlist or about to report a blocker."
 ---
 
 # black magic

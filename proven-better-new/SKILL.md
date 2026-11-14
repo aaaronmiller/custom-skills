@@ -1,6 +1,6 @@
 ---
 name: proven-better-new
-description: Use when you have an app, product, or business idea and wants it validated — "is this a good idea", "should I build this", "validate this", a pitch, or a concept description. Also use when someone claims "nothing like this exists," is excited about an idea, or has sunk time into it.
+description: "Tests an app, product or business idea against what already exists, with mandatory prior-art research, and returns a validation card. Use when asked whether an idea is worth building."
 ---
 
 # Proven-Better-New Idea Filter

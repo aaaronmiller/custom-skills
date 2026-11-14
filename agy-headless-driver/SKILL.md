@@ -1,6 +1,6 @@
 ---
 name: agy-headless-driver
-description: "Plans, prompts, launches and supervises headless Antigravity CLI (agy -p) sessions so delegated work gets maximum quality inside agy's quota windows and context ceiling. Use when delegating work to agy, writing a prompt for an agy headless run, building or fixing a driver script that calls agy, splitting a long task (multi-pass refinement, deliberative councils, spec work, large refactors, research synthesis) across agy sessions, recovering from an agy RESOURCE_EXHAUSTED or 429 error, or choosing which agy model pool carries which part of a job. Triggers: 'run this in Antigravity', 'hand it to agy', 'use the Google quota'."
+description: "Delegates judgment-heavy work to headless Antigravity CLI sessions: splits it into units, builds a context pack and prompt for each, launches and paces them against agy's quota, then verifies the output."
 license: MIT
 metadata:
   description-reviewed: "2026-11-10"

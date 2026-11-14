@@ -1,6 +1,6 @@
 ---
 name: project-archive
-description: "Archives a project folder safely: mine, index, move, link, with a consumer check, seven move artifacts and a tested recovery. Use when asked to archive a folder, retire an old project version, move a project folder, or check what breaks if a folder moves."
+description: "Archives a project folder safely: mines and indexes it, checks what depends on it, moves and links it, and tests recovery."
 license: MIT
 metadata:
   version: "1.0.0"

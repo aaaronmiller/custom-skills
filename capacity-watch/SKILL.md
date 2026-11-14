@@ -1,6 +1,6 @@
 ---
 name: capacity-watch
-description: Read the remaining quota of every paid and free model pool, grade the free and contributor models we can reach, project each pool to its reset, schedule the open masterplan work on AI-era estimates, and refine the method itself twice a day. Use when asked how much quota is left, where the next agent should run, which free models are good enough, when the masterplan lands, or whether an estimate is realistic.
+description: "Reads the remaining quota of every paid and free model pool, grades the free models we can reach, and says where the next agent should run."
 metadata:
   version: "1.0.0"
   tags: "quota, capacity, scheduling, estimation, free-models, masterplan, cron"

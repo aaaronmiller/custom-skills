@@ -1,6 +1,6 @@
 ---
 name: session-cleanup
-description: Close out a long agent session cleanly after a break or before context compacts, or survey every running session across harnesses (claude, codex, omp, agy) with handoffs and git state. Finishes minor loose ends directly, organizes big unfinished work into handoff docs for a fresh session, and verifies every touched repo is committed, pushed, and documented. Run when returning after time away, when the context window is getting full, or whenever asked to wrap up, audit session status, or prepare handoffs.
+description: "Closes out a long agent session: finishes small loose ends, writes handoff docs for big ones, and checks every touched repo is committed and pushed. Also surveys all running sessions."
 metadata:
   description-reviewed: "2026-11-10"
 ---

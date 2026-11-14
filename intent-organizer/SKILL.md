@@ -1,6 +1,6 @@
 ---
 name: intent-organizer
-description: "Organizes cluttered folders (Downloads, Desktop, Documents, home, drive roots, dump folders) by working out each item's intent (why it is there, what the owner was doing with it, what they would want done), then hands the owner a short group-level approval page with full undo. Removes only what is superseded, duplicated or temporary; everything else is organized by type, purpose and project. Use when the user wants to organize or declutter folders, tame a messy Downloads/Desktop, deal with filesystem bloat or structure, sort installers, find what is safe to remove, or make sense of a dump folder."
+description: "Declutters folders such as Downloads or Desktop by working out why each item is there, then gives the owner a short approval page with full undo. Removes only superseded, duplicate or temporary items."
 license: MIT
 metadata:
   description-reviewed: "2026-11-10"

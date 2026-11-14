@@ -1,6 +1,6 @@
 ---
 name: deep-research
-description: "Investigates questions on the web across many sources and synthesizes a cited report. Use for competitive intel, market analysis, due diligence, technology evaluation, or any question needing 3+ sources and 6+ searches, with scope control from quick survey to exhaustive. For material already in hand — a folder of documents, PDFs, a corpus — use examine-documents instead. Do NOT use for simple factual lookups, single-source summaries, or creative writing."
+description: "Researches a question across many web sources and writes a cited report, from a quick survey to an exhaustive one. Use when an answer needs several sources and searches."
 license: MIT
 metadata:
   author: ice-ninja

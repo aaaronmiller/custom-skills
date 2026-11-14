@@ -1,6 +1,6 @@
 ---
 name: aaron-job-search
-description: Run Aaron's structured Seattle job hunt — small startups first. Use when the user asks for Seattle jobs, startup jobs, Wellfound/AngelList searches, agentic engineering roles, or says "aaron job search" / "find me jobs". Triggers on any request to find, filter, rank, or log Seattle-area positions with fit/income/likelihood scoring.
+description: "Runs Aaron's Seattle job hunt, small startups first: searches the job boards, scores each role on fit, income and odds, and logs it to the submission tracker. Use when asked to find, rank or log jobs."
 metadata:
   tags: "jobs, career, seattle, startups"
   grade: "A"

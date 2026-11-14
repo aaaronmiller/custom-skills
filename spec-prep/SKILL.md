@@ -1,6 +1,6 @@
 ---
 name: spec-prep
-description: "Prepares and refines project intent, requirements, design, and native Spec Kit specifications, plans, and tasks, stopping before implementation. Use for project intake, existing spec-package updates, intent recovery, explicitly requested project initiation, or when another task must produce spec-prep-ready deliverables (intent, requirements and design inputs, verbatim sources, a data section, a prior-art record). Use spec-audit for post-hoc implementation drift audits. Triggers: 'spec-prep', 'make this spec-prep ready', 'prepare the specs', 'write the requirements', 'turn this into a spec', 'spec kit', 'requirements and design', 'intent document', 'project intake', 'recover the intent', 'prior art check'."
+description: "Prepares project intent, requirements, design and Spec Kit specs, plans and tasks, stopping before implementation. Use for project intake, spec updates or intent recovery."
 license: MIT
 metadata:
   description-reviewed: "2026-11-10"

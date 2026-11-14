@@ -1,6 +1,6 @@
 ---
 name: skill-audit
-description: "Audit skill ecosystems for quality, redundancy, structural integrity, description trigger coverage and cross-platform portability. Use when reviewing skills for keep or junk decisions, evaluating SKILL.md quality, checking that a skill uploads to claude.ai, the Claude API, Codex, Gemini or opencode, fixing 'malformed YAML frontmatter' or 'unexpected key' upload errors, reducing always-loaded token waste without removing triggers, finding single-use pre-curate skills, checking duplicate task clusters, running quarterly sweeps, or onboarding skills from new sources. The description is the activation mechanism: never strip Use when or trigger phrases. Triggers: 'audit skills', 'find junk skills', 'clean up skills', 'skill review', 'which skills should I keep', 'are my skills good', 'skill quality check', 'evaluate description', 'check trigger coverage', 'validate skill', 'skill upload error', 'malformed YAML frontmatter'."
+description: "Audits skills for structure, duplicates, broken references, description quality and cross-platform portability, and fixes what it finds. Use when reviewing, cleaning up or uploading skills."
 license: MIT
 metadata:
   description-reviewed: "2026-11-10"

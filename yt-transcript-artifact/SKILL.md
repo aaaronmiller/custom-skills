@@ -1,6 +1,6 @@
 ---
 name: yt-transcript-artifact
-description: "Turns spoken-content source material into a high-fidelity Obsidian-ready knowledge artifact. Accepts a YouTube URL to fetch, or a pasted transcript, caption dump, subtitle text, podcast transcript, lecture transcript, or video notes. Produces YAML frontmatter, YT-Transcription title, Mermaid concept map, deep-dive sections with dual-audience treatment, verbatim extraction with provenance labels, constructed resources, implementation checklist, appendices, and methodology telemetry. Triggers: 'convert this transcript', 'make an Obsidian note', 'knowledge artifact', 'transcript to notes', 'yt transcript', 'organize this transcript', 'create a study note from this', 'extract key points from transcript', 'forensic transcript', 'youtube to obsidian', 'extract this video', 'transcribe this video', 'get the transcript', 'process this youtube video', 'video to notes'."
+description: "Turns a YouTube video or transcript into a structured Obsidian note with forensic extraction and analysis."
 license: MIT
 compatibility: |-
   Designed for Agent Skills-compatible clients (Claude Code, Codex, Hermes, Gemini, Qwen, KiloCode, OpenCode).

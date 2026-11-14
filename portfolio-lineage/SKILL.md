@@ -1,6 +1,6 @@
 ---
 name: portfolio-lineage
-description: "Compares a project's old versions clause by clause against its successor, marks each clause covered, partial or unique, and blocks archiving while a unique clause has no destination. Use when asked which version is canonical, what an old attempt has that the new one lacks, or whether a folder is safe to archive."
+description: "Compares an old project version clause by clause against its successor and blocks archiving while anything unique has no new home. Use to pick the canonical version or check a folder is safe to archive."
 license: MIT
 metadata:
   version: "1.0.0"

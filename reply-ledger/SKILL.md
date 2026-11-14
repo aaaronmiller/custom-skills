@@ -1,6 +1,6 @@
 ---
 name: reply-ledger
-description: Keep every reply the operator saw in a Claude Code session as structured, navigable HTML in Living Documents, captured by a Stop hook with no model calls. Use when asked to find, reread, review or link past session replies, to backfill a session's replies, or to check that reply capture is working.
+description: "Captures every Claude Code reply into navigable HTML pages in Living Documents through a Stop hook. Use to find, reread or backfill past replies."
 metadata:
   version: "1.0.0"
   tags: "living-documents, sessions, replies, hooks, html, observability"

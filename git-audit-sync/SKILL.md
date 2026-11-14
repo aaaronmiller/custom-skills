@@ -1,6 +1,6 @@
 ---
 name: git-audit-sync
-description: Audit every git repo in a directory tree and make each one current with its cloud remote. The script performs only operations that cannot break a repo or lose work (fast-forward pull, push to a remote you own); everything needing judgment — commits, merges, rebases, conflicts, missing or foreign push destinations — is flagged for the agent to resolve. Use when asked to sync git repos, audit code folders, push all projects to the cloud, check for uncommitted work, or prepare a machine's git state.
+description: "Audits every git repo under a folder and brings each current with its remote, doing only safe fast-forwards and pushes itself and flagging the rest. Use to sync many repos or find uncommitted work."
 metadata:
   description-reviewed: "2026-11-10"
 ---

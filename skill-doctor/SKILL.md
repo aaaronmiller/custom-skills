@@ -1,6 +1,6 @@
 ---
 name: "skill-doctor"
-description: "Grades agent skills by scoring recent local agent conversations for efficiency, code quality, procedure compliance, and verbosity, then drafts concrete skill edits and a local report. Works from any harness. Use when the user wants their agent setup graded from real conversation history, asks which installed skills are actually working, or asks why a skill did not fire."
+description: "Grades skills from real conversation history (efficiency, code quality, procedure compliance, verbosity) and drafts concrete edits. Use to see which skills work and why one did not fire."
 license: MIT
 metadata:
   version: "1.0.0-local.1"

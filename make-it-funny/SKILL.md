@@ -1,6 +1,6 @@
 ---
 name: make-it-funny
-description: "Generate high-quality satirical and comedic content in visual, written, and spoken formats with institutional critique focus"
+description: "Writes satire and comedy (cartoon panels, articles, jokes, video scripts) aimed at institutions, and scores whether a piece lands with a comedy-expert council."
 metadata:
   inputs: "[{\"name\":\"topic\",\"description\":\"Topic or institution to satirize\",\"pointer_type\":\"parameter\"}]"
   outputs: "[{\"name\":\"satirical_content\",\"description\":\"Generated satirical and comedic content\",\"pointer_type\":\"output_file\"}]"
@@ -560,9 +560,7 @@ Use internal deliberation (not user-facing) to execute this process before draft
 ---
 
 ## Related Skills
-- `is-it-funny-refinement` — Evaluate comedy quality using deliberative-refinement
 - `deliberative-refinement` — 10/3/1 ISO council validation
-- `refine-satire-iteratively` — Workflow for continuous skill improvement
 - `humanize-writing` — Post-process to remove AI tells from polished output
 - `create-viral-content` — Platform optimization hooks/titles (apply after generation)
 
@@ -579,3 +577,4 @@ Load or run these when the step they name comes up.
 - `references/spoken_format.md`: Draft spoken pieces from `references/spoken_format.md`, using its anchor toss, correspondent SOT, and moment-of-zen structure.
 - `references/visual_format.md`: Build visual prompts from `references/visual_format.md`, keeping the core joke in the image description.
 - `references/written_format.md`: Draft written pieces from `references/written_format.md` in strict AP style with the headline as the core joke.
+- `references/evaluate.md`: Score a finished piece with the comedy council (10 evaluators, 3 rounds) and turn the failure modes into revisions.
