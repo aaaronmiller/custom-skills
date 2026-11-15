@@ -1,0 +1,84 @@
+restored	build-with-agent-team	build-with-agent-team	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+skip-present	create-viral-content	create-viral-content/SKILL.md	5a603bb
+restored	damage-control	damage-control	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+skip-present	deliberative-refinement	deliberative-refinement/SKILL.md	5a603bb
+restored	deep-research	dist/deep-research.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	humanize-writing	dist/humanize-writing.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	is-it-funny-refinement	dist/is-it-funny-refinement.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	make-it-funny	dist/make-it-funny.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	spec-prep-2.4.0	dist/spec-prep-2.4.0.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	examine-documents	examine-documents	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+skip-present	humanize-writing	humanize-writing/SKILL.md	5a603bb
+restored	auditing-ui-ux	inactive/SKILL files/auditing-ui-ux.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	backtranslation-spec-auditor-v2.2.0	inactive/SKILL files/backtranslation-spec-auditor-v2.2.0.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	backtranslation-spec-auditor	inactive/SKILL files/backtranslation-spec-auditor.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	cli-tui-styling	inactive/SKILL files/cli-tui-styling.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	create-new-project	inactive/SKILL files/create-new-project.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	create-viral-content	inactive/SKILL files/create-viral-content.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	deep-research	inactive/SKILL files/deep-research.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	deliberative-refinement	inactive/SKILL files/deliberative-refinement.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	examine-documents	inactive/SKILL files/examine-documents.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	frontend-design-masterclass	inactive/SKILL files/frontend-design-masterclass.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	game-mechanics-design	inactive/SKILL files/game-mechanics-design.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	generate-images-with-gemini	inactive/SKILL files/generate-images-with-gemini.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	humanize-writing	inactive/SKILL files/humanize-writing.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	intent-archaeology	inactive/SKILL files/intent-archaeology.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	is-it-funny-refinement	inactive/SKILL files/is-it-funny-refinement.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	make-it-funny	inactive/SKILL files/make-it-funny.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	mcp-builder	inactive/SKILL files/mcp-builder.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	mcp-conversion	inactive/SKILL files/mcp-conversion.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	multi-transcript-synthesis	inactive/SKILL files/multi-transcript-synthesis.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	satirical-media-generator	inactive/SKILL files/satirical-media-generator.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	skill-audit	inactive/SKILL files/skill-audit.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	spec-prep	inactive/SKILL files/spec-prep.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	speckit-autonomous-run	inactive/SKILL files/speckit-autonomous-run.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	weekly-report-suite	inactive/SKILL files/weekly-report-suite.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	youtube-transcript-extraction	inactive/SKILL files/youtube-transcript-extraction.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	frontend-design-masterclass	inactive/frontend-design-masterclass.SKILL	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	living-document-forge	inactive/living-document-forge.skill	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	intent-archaeology	intent-archaeology	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	is-it-funny-refinement	is-it-funny-refinement	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	living-document-forge	living-document-forge	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	macbook-analyzer-pipeline	macbook-analyzer-pipeline	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	mechanism-forge	mechanism-forge	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	multi-transcript-synthesis	multi-transcript-synthesis	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	graphify	recovered-orphans/graphify	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	gstack-connect-chrome	recovered-orphans/gstack-connect-chrome	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	research-macbook	research-macbook	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	skill-creator	skill-creator	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	backtranslation-spec-auditor--v2.1.0-superseded-by-v2.2.0	staged-for-deletion/backtranslation-spec-auditor--v2.1.0-superseded-by-v2.2.0	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	backtranslation-spec-auditor-v2.2.0--merged-into-spec-workflow	staged-for-deletion/backtranslation-spec-auditor-v2.2.0--merged-into-spec-workflow	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	create_new_spec_design_project--merged-into-spec-workflow	staged-for-deletion/create_new_spec_design_project--merged-into-spec-workflow	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	deprecated-spec-prep--100pct-trigger-dupe-of-spec-prep-authoring	staged-for-deletion/deprecated-spec-prep--100pct-trigger-dupe-of-spec-prep-authoring	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	intent-archaeology--old-96line-pipeline	staged-for-deletion/intent-archaeology--old-96line-pipeline	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	living-documents--stale-vault-copy-2026-08-14	staged-for-deletion/living-documents--stale-vault-copy-2026-08-14	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	mcp-builder--merged-into-mcp-toolkit	staged-for-deletion/mcp-builder--merged-into-mcp-toolkit	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	mcp-conversion--merged-into-mcp-toolkit	staged-for-deletion/mcp-conversion--merged-into-mcp-toolkit	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	skill-audit-skill--now-sourced-from-quartermaster	staged-for-deletion/skill-audit-skill--now-sourced-from-quartermaster	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	spec-prep-implementing--merged-into-spec-prep	staged-for-deletion/spec-prep-implementing--merged-into-spec-prep	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	spec-workflow--superseded-by-spec-prep-2.4.0	staged-for-deletion/spec-workflow--superseded-by-spec-prep-2.4.0	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	speckit-autonomous-run--merged-into-spec-workflow	staged-for-deletion/speckit-autonomous-run--merged-into-spec-workflow	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	userprompt-mine-skill--payload-folded-into-intent-archaeology	staged-for-deletion/userprompt-mine-skill--payload-folded-into-intent-archaeology	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+skip-covered	mine	staged-for-deletion/userprompt-mine-skill--payload-folded-into-intent-archaeology/skills/mine/SKILL.md	5a603bb
+restored	youtube-transcript-extraction--merged-into-yt-transcript-artifact	staged-for-deletion/youtube-transcript-extraction--merged-into-yt-transcript-artifact	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	yt-transcript-obsidian-artifact--merged-into-yt-transcript-artifact	staged-for-deletion/yt-transcript-obsidian-artifact--merged-into-yt-transcript-artifact	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+restored	strata	strata/strata.SKILL	5a603bb	2026-11-14	Cull: 55 skill folders to 45 skills; every description cut to one to three sentences
+skip-present	ui-ux-doctor	ui-ux-doctor/SKILL.md	5a603bb
+skip-present	deliberative-refinement	deliberative-refinement/deliberative-refinement/SKILL.md	272fcb6
+restored	living-document-forge	git-audit-sync/living-document-forge	272fcb6	2026-11-10	spec-prep consolidation (iteration 1) + corpus junk cleanup
+restored	spec-prep	spec-prep/spec-prep.SKILL	272fcb6	2026-11-10	spec-prep consolidation (iteration 1) + corpus junk cleanup
+restored	deliberative-refinement	deliberative-refinement/deliberative-refinement.skill	706e6b9	2026-10-30	Remove stale deliberative-refinement.skill 7z (skillshare distributes live files)
+skip-present	spec-prep	spec-prep/spec-prep/SKILL.md	ae7ec6b
+skip-present	frontend-design-masterclass	frontend-design-masterclass/SKILL.md	c63458b
+skip-present	erotic-seduction	erotic-seduction/erotic-seduction/SKILL.md	2f0bc18
+restored	intent-archaeology-v1.2.1	intent-archaeology-v1.2.1	1fa3155	2026-08-22	consolidate colliding skills: 39 active -> 30
+restored	generate-images-with-gemini	generate-images-with-gemini	9774c14	2026-07-19	chore: publish current custom skills checkpoint
+restored	spec-audit-skill	spec-audit-skill	9774c14	2026-07-19	chore: publish current custom skills checkpoint
+restored	spec-audit-skill	web_skill_files/spec-audit-skill.skill	9774c14	2026-07-19	chore: publish current custom skills checkpoint
+restored	spec-audit-skill-v2	web_skill_files/spec-audit-skill-v2.skill	b39875b	2026-06-21	chore: auto-sync local skill changes
+restored	spec-audit-skill-v3	web_skill_files/spec-audit-skill-v3.skill	b39875b	2026-06-21	chore: auto-sync local skill changes
+restored	satirical-media-generator	satirical-media-generator	a1e7457	2026-06-21	chore: pending skill updates
+restored	karpathy-wiki	karpathy-wiki	d92b8d2	2026-06-20	Consolidate spec-audit skills, remove karpathy stub, fix dangling refs
+skip-covered	skill	karpathy-wiki/karpathy-wiki/skill/SKILL.md	d92b8d2
+restored	spec-audit-skill-v2	spec-audit-skill-v2	d92b8d2	2026-06-20	Consolidate spec-audit skills, remove karpathy stub, fix dangling refs
+restored	spec-audit-skill-v3	spec-audit-skill-v3	d92b8d2	2026-06-20	Consolidate spec-audit skills, remove karpathy stub, fix dangling refs

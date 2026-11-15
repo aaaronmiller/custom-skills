@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# prompt-mine-search — Search the prompt-mine database
+# Usage: prompt-mine-search "query" [--provider P] [--project P] [--limit N]
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PYTHON="${PYTHON:-python3}"
+
+exec "$PYTHON" "$SCRIPT_DIR/../skills/mine/scripts/rag_pipeline.py" --search "$@"

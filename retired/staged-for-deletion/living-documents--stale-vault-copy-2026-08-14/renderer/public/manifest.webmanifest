@@ -1,0 +1,13 @@
+{
+  "_meta": {
+    "file": "manifest.webmanifest",
+    "purpose": "Installable metadata for the shared Living Documents renderer."
+  },
+  "name": "Living Documents",
+  "short_name": "Living Docs",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0b1114",
+  "theme_color": "#0b1114",
+  "icons": []
+}

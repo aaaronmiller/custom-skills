@@ -1,0 +1,18 @@
+{
+  "_meta": {
+    "file": "data/annotations.json",
+    "schema": "living-document-annotations-1.0.0"
+  },
+  "annotations": [
+    {
+      "id": "A-001",
+      "targetId": "purpose-and-boundary",
+      "kind": "question",
+      "text": "What concrete decision, implementation, or body of knowledge must this document make easier to maintain?",
+      "tags": ["initialization", "scope"],
+      "status": "open",
+      "author": "Living Document Forge",
+      "createdAt": "2026-07-09T17:30:00Z"
+    }
+  ]
+}

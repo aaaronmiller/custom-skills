@@ -1,0 +1,48 @@
+# Closed-vocabulary tags for wiki frontmatter.
+# See references/frontmatter_schema.md.
+# Adding a tag requires updating this file and bumping taxonomy_version.
+
+taxonomy_version: "1.0"
+
+domain_tags:
+  - auth
+  - api
+  - ui
+  - data
+  - infra
+  - ml
+  - cli
+  - docs
+  - tests
+  - build
+  - deploy
+  - observability
+  - security
+  - perf
+  - refactor
+
+maturity_tags:
+  - experimental
+  - prototype
+  - alpha
+  - beta
+  - stable
+  - maintenance
+  - deprecated
+  - abandoned
+
+activity_tags:
+  - active
+  - idle
+  - dormant
+  - revival
+
+structural_tags:
+  - monorepo
+  - subproject
+  - meta-project
+  - single-file
+  - library
+  - service
+  - batch
+  - tool

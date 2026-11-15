@@ -1,0 +1,59 @@
+{
+  "name": "karpathy-wiki",
+  "description": "Karpathy-style LLM Knowledge Base v3 — persistent, self-maintaining wiki with sleep-time compute (Letta-style) and auto skill creation (Hermes-style GEPA loop).",
+  "version": "3.0.0",
+  "author": "pi-user",
+  "license": "MIT",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat ~/.local/share/ai-wiki/pages/index.md 2>/dev/null | head -60",
+            "timeout": 5,
+            "description": "Inject wiki index into session context"
+          },
+          {
+            "type": "command",
+            "command": "cat ~/.local/share/ai-wiki/.meta/skills/*.md 2>/dev/null | head -40 || true",
+            "timeout": 5,
+            "description": "Inject auto-generated skill references"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/code/skills-USER/karpathy-wiki/dream/dream_agent.py --quiet --idle 60 2>/dev/null || true",
+            "timeout": 30,
+            "description": "Save session knowledge before context compaction (sleep-time compute)"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'python3 ~/code/skills-USER/karpathy-wiki/dream/dream_agent.py --quiet 2>/dev/null' &",
+            "timeout": 2,
+            "description": "Fire-and-forget end-of-session dream cycle"
+          }
+        ]
+      }
+    ]
+  },
+  "skills": ["skills/karpathy-wiki/SKILL.md"],
+  "agentConfig": {
+    "target": "~/.pi/agent/AGENTS.md",
+    "injectAt": "end"
+  }
+}

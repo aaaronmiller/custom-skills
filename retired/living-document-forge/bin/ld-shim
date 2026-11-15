@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Preserve the system linker. Only the explicit living-document command surface
+# is routed to Living Document Forge.
+case "${1-}" in
+  ""|ensure|status|--scope|--project|--home|--month|--title|--dry-run)
+    target="${LD_COMMAND_TARGET:-$HOME/code/custom-skills/living-document-forge/bin/ld}"
+    exec python3 "$target" "$@"
+    ;;
+  *)
+    exec /usr/bin/ld "$@"
+    ;;
+esac

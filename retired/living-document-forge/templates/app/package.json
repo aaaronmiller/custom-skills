@@ -1,0 +1,18 @@
+{
+  "_meta": {
+    "file": "package.json",
+    "purpose": "Dependency-free scripts for serving and validating a living document."
+  },
+  "name": "living-document-workbench",
+  "private": true,
+  "version": "1.3.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node serve.mjs",
+    "start": "node serve.mjs",
+    "validate": "node validate.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

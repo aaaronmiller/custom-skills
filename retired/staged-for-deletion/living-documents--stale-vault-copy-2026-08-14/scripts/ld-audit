@@ -1,0 +1,206 @@
+#!/usr/bin/env python3
+"""Audit a Living Documents corpus for pages that exist but do not participate.
+
+Two failures happened on 2026-08-01, and both were silent:
+
+  ORPHAN     Twenty prompt-corpus pages were written directly to disk instead of
+             through `ld add-page`. They were never added to their dossier
+             index, so `ld sync` never projected them. On disk they looked
+             finished; in the reader they did not exist. Nothing warned.
+
+  BAD-LINK   One page carried `related: [intent-archaeology-source-adjudication]`
+             in a dossier that had no such page. `ld sync` aborts the *entire*
+             run on a single unknown reference, so all twenty pages stayed
+             unprojected because of one bad link in one of them. The only signal
+             was a line on stderr that is easy to miss.
+
+The shared property is that a page can be present and inert. Disk presence is
+not participation. This checks the three ways a page can fail to participate and
+can repair the two that are mechanically repairable.
+
+    ld-audit                     report
+    ld-audit --fix               register orphans, drop unresolvable links
+    ld-audit --project <id>      limit to one dossier
+
+Exit status is non-zero when unrepaired problems remain, so it can gate a
+commit or run from a hook.
+"""
+
+from __future__ import annotations
+
+import argparse
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+LD_HOME = Path.home() / "LIVING_DOCUMENTS"
+PROJECTS = LD_HOME / "projects"
+
+INDEX_START = "<!-- living-documents:index:start -->"
+INDEX_END = "<!-- living-documents:index:end -->"
+
+# Pages the scaffold creates that are deliberately absent from the index block.
+# `index` is the index itself; `project` is dossier metadata, not a reading page.
+STRUCTURAL = {"index", "project"}
+
+
+def frontmatter(path: Path) -> dict[str, str]:
+    text = path.read_text(encoding="utf-8", errors="replace")
+    if not text.startswith("---"):
+        return {}
+    end = text.find("\n---", 3)
+    if end == -1:
+        return {}
+    out: dict[str, str] = {}
+    for line in text[3:end].splitlines():
+        if ":" in line:
+            k, v = line.split(":", 1)
+            out[k.strip()] = v.strip()
+    return out
+
+
+def related_ids(raw: str) -> list[str]:
+    return re.findall(r'"([^"]+)"', raw or "")
+
+
+def indexed_ids(project: Path) -> set[str]:
+    index = project / "index.md"
+    if not index.is_file():
+        return set()
+    text = index.read_text(encoding="utf-8", errors="replace")
+    if INDEX_START not in text:
+        return set()
+    block = text.split(INDEX_START, 1)[1].split(INDEX_END, 1)[0]
+    return {m.group(1) for m in re.finditer(r"\]\(([^)]+)\.md\)", block)}
+
+
+def audit_project(project: Path) -> dict:
+    # Pages may be nested, e.g. `concepts/renderer-contract.md`. A top-level
+    # glob misses those and then reports every reference to them as a dead
+    # link, which would delete valid links on --fix. Index them by both bare
+    # stem and dossier-relative path.
+    pages: dict[str, Path] = {}
+    for f in project.rglob("*.md"):
+        rel = f.relative_to(project).with_suffix("")
+        pages[str(rel)] = f
+        pages.setdefault(f.stem, f)
+    listed = indexed_ids(project)
+
+    # Only top-level pages are expected in the index block; nested pages are
+    # reached through their parent, so they are not orphans.
+    orphans = sorted(
+        pid for pid, path in pages.items()
+        if path.parent == project
+        and pid not in listed and pid not in STRUCTURAL
+        and pid == path.stem
+    )
+    ghosts = sorted(listed - set(pages))
+
+    bad_links: list[tuple[str, str]] = []
+    for pid, path in sorted(pages.items()):
+        fm = frontmatter(path)
+        for target in related_ids(fm.get("related", "")):
+            if target not in pages:
+                bad_links.append((pid, target))
+
+    return {"project": project.name, "orphans": orphans,
+            "ghosts": ghosts, "bad_links": bad_links, "pages": len(pages)}
+
+
+def repair(project: Path, result: dict) -> list[str]:
+    actions: list[str] = []
+
+    # Orphans: re-register through the sanctioned path, preserving content.
+    for pid in result["orphans"]:
+        path = project / f"{pid}.md"
+        content = path.read_text(encoding="utf-8", errors="replace")
+        fm = frontmatter(path)
+        title = fm.get("title") or pid.replace("-", " ").capitalize()
+        ptype = fm.get("type") or "evidence"
+        path.unlink()
+        proc = subprocess.run(
+            ["ld", "add-page", "--project", project.name, "--id", pid,
+             "--title", title, "--type", ptype, "--parent", "index"],
+            capture_output=True, text=True, timeout=120,
+        )
+        path.write_text(content, encoding="utf-8")
+        if proc.returncode == 0:
+            actions.append(f"registered orphan {pid}")
+        else:
+            actions.append(f"FAILED to register {pid}: {proc.stderr.strip()[:60]}")
+
+    # Bad links: drop only the unresolvable targets, keep the rest.
+    by_page: dict[str, set[str]] = {}
+    for pid, target in result["bad_links"]:
+        by_page.setdefault(pid, set()).add(target)
+    for pid, dead in by_page.items():
+        path = project / f"{pid}.md"
+        text = path.read_text(encoding="utf-8", errors="replace")
+        m = re.search(r"^related: \[(.*?)\]$", text, re.M)
+        if not m:
+            continue
+        keep = [t for t in related_ids(m.group(0)) if t not in dead]
+        new = "related: [" + ", ".join(f'"{t}"' for t in keep) + "]"
+        path.write_text(text[: m.start()] + new + text[m.end():], encoding="utf-8")
+        actions.append(f"dropped {len(dead)} dead link(s) from {pid}")
+
+    return actions
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(prog="ld-audit", description=__doc__)
+    ap.add_argument("--fix", action="store_true")
+    ap.add_argument("--project")
+    args = ap.parse_args()
+
+    if not PROJECTS.is_dir():
+        print(f"no corpus at {PROJECTS}", file=sys.stderr)
+        return 2
+
+    targets = [PROJECTS / args.project] if args.project else sorted(
+        p for p in PROJECTS.iterdir() if p.is_dir())
+
+    total = {"orphans": 0, "ghosts": 0, "bad_links": 0}
+    repaired: list[str] = []
+
+    for project in targets:
+        if not project.is_dir():
+            continue
+        r = audit_project(project)
+        if not (r["orphans"] or r["ghosts"] or r["bad_links"]):
+            continue
+
+        print(f"\n## {r['project']}  ({r['pages']} pages)")
+        for pid in r["orphans"]:
+            print(f"  ORPHAN    {pid}  — on disk, absent from index, never projected")
+        for pid in r["ghosts"]:
+            print(f"  GHOST     {pid}  — listed in index, file missing")
+        for pid, target in r["bad_links"]:
+            print(f"  BAD-LINK  {pid} -> {target}  — aborts the whole sync")
+
+        total["orphans"] += len(r["orphans"])
+        total["ghosts"] += len(r["ghosts"])
+        total["bad_links"] += len(r["bad_links"])
+
+        if args.fix:
+            for line in repair(project, r):
+                print(f"  FIXED     {line}")
+                repaired.append(line)
+
+    print(f"\norphans {total['orphans']}, ghosts {total['ghosts']}, "
+          f"bad links {total['bad_links']}")
+
+    if args.fix:
+        subprocess.run(["ld", "sync"], capture_output=True, timeout=300)
+        print(f"repaired {len(repaired)} item(s); ran ld sync")
+        # Ghosts are never auto-repaired: an index entry with no file means
+        # either the file was lost or the entry is stale, and guessing which
+        # would either resurrect a deleted page or hide a real loss.
+        return 1 if total["ghosts"] else 0
+
+    return 1 if any(total.values()) else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

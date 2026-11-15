@@ -1,0 +1,31 @@
+{
+  "_meta": {
+    "file": "change-request.schema.json",
+    "purpose": "Validate exported local edits and bounded agent handoffs."
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://living-document-forge.local/schemas/change-request.schema.json",
+  "title": "Living Document Change Request",
+  "type": "object",
+  "required": ["requestId", "document", "createdAt", "scope", "drafts", "proposalDecisions", "constraints", "expectedOutputs"],
+  "properties": {
+    "requestId": { "type": "string" },
+    "document": {
+      "type": "object",
+      "required": ["documentId", "version", "formatVersion"],
+      "properties": {
+        "documentId": { "type": "string" },
+        "version": { "type": "string" },
+        "formatVersion": { "type": "string" }
+      }
+    },
+    "createdAt": { "type": "string" },
+    "scope": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "drafts": { "type": "array", "items": { "type": "object" } },
+    "proposalDecisions": { "type": "array", "items": { "type": "object" } },
+    "constraints": { "type": "array", "items": { "type": "string" } },
+    "annotations": { "type": "array", "items": { "type": "object" } },
+    "expectedOutputs": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": true
+}

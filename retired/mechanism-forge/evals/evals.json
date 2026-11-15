@@ -1,0 +1,20 @@
+{
+  "skill": "mechanism-forge",
+  "cases": [
+    {
+      "name": "editable word drums",
+      "prompt": "Create a three-stage story mechanism with editable word drums, generated banks, lock scopes, reroll, regenerate-bank, and recast-category actions.",
+      "success": ["Operations are distinct", "Custom values survive", "Locks have scopes", "State serializes", "Keyboard control works"]
+    },
+    {
+      "name": "culture reskin",
+      "prompt": "Reskin an existing mechanism from carved wood to glazed ceramic without changing semantics or saved state.",
+      "success": ["Component IDs remain stable", "Compiler output is unchanged", "Skin tokens change", "Accessibility remains intact"]
+    },
+    {
+      "name": "multimodal collective",
+      "prompt": "Create a collective mechanism linking visual, music, and video modules through a shared three-act intent graph.",
+      "success": ["Shared and medium-specific controls are separated", "Routing is visible", "Provider adapters are isolated", "Provenance captures each module"]
+    }
+  ]
+}

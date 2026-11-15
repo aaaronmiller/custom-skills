@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+"""Write one explicit, portable Living Documents handoff.
+
+This is intentionally a command invoked by an agent at a material milestone,
+never a lifecycle hook. It creates an atomic, mode-0600 JSON handoff pack and
+an append-only, browser-visible history entry for the canonical project.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import subprocess
+import tempfile
+from datetime import datetime, timezone
+from pathlib import Path
+
+HOME = Path.home()
+CORPUS = HOME / "LIVING_DOCUMENTS" / "projects"
+STATE = HOME / ".local" / "state" / "living-documents" / "handoffs"
+
+
+def safe_id(value: str, label: str) -> str:
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,79}", value):
+        raise ValueError(f"{label} must be kebab-case, 1-80 characters")
+    return value
+
+
+def atomic_json(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+    try:
+        os.fchmod(fd, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            json.dump(payload, stream, indent=2, ensure_ascii=False)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def append_history(history: Path, pack: dict) -> None:
+    timestamp = pack["updated_at"]
+    sessions = ", ".join(f"`{item}`" for item in pack["sessions"]) or "none recorded"
+    evidence = "\n".join(f"- Evidence: `{item}`" for item in pack["evidence"]) or "- Evidence: none recorded"
+    blocker = f"\n- Blocker: {pack['blocker']}" if pack["blocker"] else ""
+    text = (
+        f"\n\n## {timestamp}: handoff {pack['work_id']}\n\n"
+        f"- Status: `{pack['status']}`\n"
+        f"- Sessions: {sessions}\n"
+        f"- Summary: {pack['summary']}\n"
+        f"- Next safe action: {pack['next_action']}"
+        f"{blocker}\n{evidence}\n"
+        f"- Portable pack: `{pack['path']}`\n"
+    )
+    with history.open("a", encoding="utf-8") as stream:
+        stream.write(text)
+        stream.flush()
+        os.fsync(stream.fileno())
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Create an explicit Living Documents handoff.")
+    parser.add_argument("--project", required=True)
+    parser.add_argument("--work-id", required=True)
+    parser.add_argument("--status", required=True, choices=["active", "blocked", "interrupted", "complete"])
+    parser.add_argument("--next-action", required=True)
+    parser.add_argument("--summary", required=True)
+    parser.add_argument("--session", action="append", default=[])
+    parser.add_argument("--evidence", action="append", default=[])
+    parser.add_argument("--blocker", default="")
+    args = parser.parse_args()
+    try:
+        project = safe_id(args.project, "project")
+        work_id = safe_id(args.work_id, "work ID")
+        root = CORPUS / project
+        history = root / "history.md"
+        if not history.is_file():
+            raise ValueError(f"unknown canonical project: {project}")
+        updated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+        destination = STATE / project / f"{work_id}.json"
+        pack = {
+            "schema": "living-documents-handoff/v1",
+            "project": project,
+            "work_id": work_id,
+            "status": args.status,
+            "summary": args.summary.strip(),
+            "next_action": args.next_action.strip(),
+            "blocker": args.blocker.strip(),
+            "sessions": args.session,
+            "evidence": args.evidence,
+            "updated_at": updated_at,
+            "path": str(destination),
+        }
+        if not pack["summary"] or not pack["next_action"]:
+            raise ValueError("summary and next action must not be blank")
+        atomic_json(destination, pack)
+        append_history(history, pack)
+        completed = subprocess.run(["ld", "sync", "--project", project], check=False, text=True, capture_output=True)
+        if completed.returncode:
+            raise ValueError(f"handoff persisted but projection sync failed: {(completed.stderr or completed.stdout).strip()}")
+        print(json.dumps(pack, indent=2, ensure_ascii=False))
+        return 0
+    except (OSError, ValueError) as error:
+        print(f"ld-handoff: {error}", file=os.sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

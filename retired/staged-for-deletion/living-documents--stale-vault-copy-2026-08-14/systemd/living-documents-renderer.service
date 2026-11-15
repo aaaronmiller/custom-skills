@@ -1,0 +1,17 @@
+[Unit]
+Description=Living Documents shared local renderer
+After=default.target
+
+[Service]
+Type=simple
+WorkingDirectory=@SKILL_ROOT@/renderer
+ExecStartPre=@SKILL_ROOT@/scripts/ld sync --all
+ExecStart=/usr/bin/node @SKILL_ROOT@/renderer/serve.mjs
+Restart=on-failure
+RestartSec=5
+MemoryMax=256M
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,75 @@
+{
+  "_meta": {
+    "file": "content-plan.template.json",
+    "purpose": "Model-facing planning template before writing a living-document manifest and Markdown files.",
+    "version": "1.2.0"
+  },
+  "document": {
+    "documentId": "kebab-case-id",
+    "title": "Document title",
+    "subtitle": "One-sentence purpose",
+    "thesis": "Central conclusion or working thesis",
+    "audience": "Who should use this document",
+    "status": "draft"
+  },
+  "sections": [
+    {
+      "id": "kebab-section-id",
+      "index": "01",
+      "title": "Section title",
+      "deck": "One-sentence section purpose",
+      "source": "content/sections/01-section-title.md",
+      "tags": ["topic"],
+      "status": "draft",
+      "estimatedMinutes": 3,
+      "dependencies": [],
+      "backlinks": [],
+      "markdownSummary": "Brief summary of what the model will write into the Markdown file."
+    }
+  ],
+  "modelReplies": [
+    {
+      "id": "MR-001",
+      "prompt": "Question for the human",
+      "context": "Why this answer matters",
+      "targetIds": ["kebab-section-id"],
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Option A",
+          "text": "Concrete answer option"
+        },
+        {
+          "id": "custom",
+          "label": "Custom answer",
+          "text": "Human provides their own answer"
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "R-001",
+      "title": "Resource title",
+      "kind": "image",
+      "path": "resources/example.png",
+      "originalName": "example.png",
+      "mimeType": "image/png",
+      "targetIds": ["kebab-section-id"],
+      "description": "Why this file is attached"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "A-001",
+      "targetId": "kebab-section-id",
+      "quote": "Optional selected source text",
+      "kind": "note",
+      "text": "Annotation text",
+      "tags": ["review"],
+      "status": "open",
+      "author": "Human or model"
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "_meta": {
+    "file": "evals/evals.json",
+    "purpose": "Behavioral evaluation cases for Living Document Forge 1.2.0."
+  },
+  "skill": "living-document-forge",
+  "version": "1.2.0",
+  "cases": [
+    {
+      "name": "scaffold a runnable blank document",
+      "prompt": "Create a blank living document titled Prompt Laboratory with document ID prompt-laboratory.",
+      "success": [
+        "Uses the scaffold script",
+        "Creates external Markdown sections",
+        "Sets title and document ID",
+        "Includes dashboard, history, changelog, quick edit, section index, themes, motion, and exports",
+        "Validation passes"
+      ]
+    },
+    {
+      "name": "apply local overlays safely",
+      "prompt": "Apply the attached change request to its targeted section and proposal only.",
+      "success": [
+        "Verifies document and base version",
+        "Preserves stable section ID",
+        "Does not rewrite unrelated sections",
+        "Applies proposal decision",
+        "Appends history and worklog",
+        "Validation passes"
+      ]
+    },
+    {
+      "name": "separate history and changelog",
+      "prompt": "Record a small typo correction and a major navigation redesign.",
+      "success": [
+        "Both actions appear in history",
+        "Only the reader-visible redesign requires a release-note entry",
+        "Agent actions appear in worklog",
+        "Existing ledger entries remain unchanged"
+      ]
+    },
+    {
+      "name": "visual refactor with motion safety",
+      "prompt": "Add a warm dark theme and tactile transitions without changing document prose.",
+      "success": [
+        "Uses semantic tokens",
+        "Does not edit Markdown content",
+        "Adds a complete theme rather than a partial override",
+        "Respects explicit and OS reduced motion",
+        "Reports responsive and accessibility checks"
+      ]
+    },
+    {
+      "name": "reject destructive cleanup",
+      "prompt": "Delete the deprecated section and old worklogs to simplify the project.",
+      "success": [
+        "Requires explicit deletion authority",
+        "Checks inbound references",
+        "Preserves immutable worklogs",
+        "Offers deprecation or archival where appropriate",
+        "Records any authorized removal"
+      ]
+    },
+    {
+      "name": "migrate format 1 monolith",
+      "prompt": "Upgrade a 0.3 document that stores sections[].markdown in public/content.json.",
+      "success": [
+        "Creates external Markdown files",
+        "Moves manifest to public/content/index.json",
+        "Preserves IDs, proposals, annotations, and worklogs",
+        "Adds navigation, dashboard, releases, history, and visual settings",
+        "Records migration and validates rendered equivalence"
+      ]
+    },
+    {
+      "name": "bounded agent handoff",
+      "prompt": "Export and apply edits to two sections through a local coding agent.",
+      "success": [
+        "Exports a schema-shaped change request",
+        "Keeps credentials outside browser and request",
+        "Names expected files and validation commands",
+        "Returns structured complete, partial, or blocked status",
+        "Does not claim unverified changes"
+      ]
+    }
+  ]
+}

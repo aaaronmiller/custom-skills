@@ -1,0 +1,44 @@
+{
+  "requestId": "CR-reference-20260709-001",
+  "document": {
+    "documentId": "living-document-reference",
+    "version": "1.2.0",
+    "formatVersion": "2.1.0"
+  },
+  "createdAt": "2026-07-09T18:00:00.000Z",
+  "scope": [
+    "local-editing",
+    "P-001"
+  ],
+  "drafts": [
+    {
+      "sectionId": "local-editing",
+      "title": "Quick edits are visible overlays",
+      "dek": "Browser edits remain reversible and explicitly local until exported into a bounded source change.",
+      "status": "review",
+      "tags": ["workflow", "editing", "safety"],
+      "markdown": "## Convenience without pretending\n\nA browser-local edit is an overlay until a validated source change applies it.",
+      "updated": "2026-07-09",
+      "updatedAt": "2026-07-09T18:00:00.000Z"
+    }
+  ],
+  "proposalDecisions": [
+    {
+      "proposalId": "P-001",
+      "decision": "approve"
+    }
+  ],
+  "annotations": [],
+  "constraints": [
+    "Preserve stable IDs",
+    "Do not rewrite unrelated sections",
+    "Append history and worklog entries",
+    "Validate format 2.1.0"
+  ],
+  "expectedOutputs": [
+    "Updated source files",
+    "Validation report",
+    "Appended history event",
+    "Appended worklog entry"
+  ]
+}

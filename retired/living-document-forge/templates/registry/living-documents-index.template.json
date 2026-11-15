@@ -1,0 +1,38 @@
+{
+  "_meta": {
+    "file": "living-documents-index.template.json",
+    "purpose": "Central registry for locating and migrating living documents in a workspace or organization.",
+    "schema": "living-documents-index-1.0.0"
+  },
+  "registry": {
+    "id": "workspace-living-documents",
+    "title": "Living Documents Registry",
+    "updated": "2026-07-09",
+    "owner": "Document steward",
+    "targetFormatVersion": "2.1.0",
+    "targetSkillVersion": "1.2.1"
+  },
+  "documents": [
+    {
+      "documentId": "example-document",
+      "title": "Example Document",
+      "root": "./example-document.livingdoc",
+      "entry": "./example-document.livingdoc/READER_START_HERE.html",
+      "modelEntry": "./example-document.livingdoc/MODEL_START_HERE.md",
+      "manifest": "./example-document.livingdoc/public/content/index.json",
+      "contentVersion": "1.0.0",
+      "formatVersion": "2.1.0",
+      "skillRange": {
+        "min": "1.2.0",
+        "max": "2.0.0"
+      },
+      "status": "active",
+      "owner": "Document steward",
+      "tags": ["example"],
+      "lastValidatedAt": null,
+      "lastValidation": "unvalidated",
+      "lastMigration": null,
+      "notes": "Replace this entry with real living documents."
+    }
+  ]
+}
