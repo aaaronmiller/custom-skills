@@ -79,7 +79,10 @@ eye. Rules, heuristics and measured cases: references/mechanical-checks.md.
               changelog sections in SKILL.md; SKILL.md over 25,000 bytes or
               lines over 600 chars; reference versions that disagree with the
               skill's; dangling symlinks. All WARN, except private data
-              (claude.ai chat URLs, credential-shaped tokens), which is ERROR.
+              (claude.ai chat URLs, credential-shaped tokens) and symlinks
+              whose real path leaves the skill folder, which are ERROR. Such
+              a link is reported with its target and is never read, listed as
+              a shipped file or descended into by any check.
 
 Usage:
     python3 audit_mechanical.py <skills-root> [--json] [--threshold 50] [--baseline REF]
@@ -162,6 +165,80 @@ def find_skills(root: Path) -> list[Path]:
             out.append(Path(dirpath))
             dirnames[:] = []  # a skill does not contain another skill
     return sorted(out)
+
+
+# A skill is audited as a unit that ships: nothing outside its folder is part
+# of it. A symlink whose real path leaves the folder is therefore never opened,
+# listed as a file, descended into or hashed; it is reported once (effectiveness
+# check 9) with where it points. Everything that reads skill content goes
+# through read_bytes_inside / read_text_inside, and everything that lists a
+# skill's files goes through walk_skill, so no scan can be handed such a link.
+
+def within(target: str | Path, root: Path) -> bool:
+    """True when TARGET is ROOT or lies below it. Both must be real paths."""
+    t = Path(target)
+    return t == root or root in t.parents
+
+
+def real_inside(p: Path, root: Path) -> bool:
+    """True when P stays inside ROOT with every symlink in it resolved, chains
+    included. A dangling link counts by where it points."""
+    try:
+        return within(os.path.realpath(p), Path(os.path.realpath(root)))
+    except (OSError, ValueError):
+        return False
+
+
+def open_inside(p: Path, root: Path, binary: bool):
+    """Open P for reading, or None when its real path leaves ROOT.
+
+    The real path is the one opened, with O_NOFOLLOW, so a link swapped in
+    after the check fails the open instead of being followed. Text mode
+    matches Path.read_text(encoding="utf-8", errors="replace")."""
+    rp = os.path.realpath(p)
+    if not within(rp, Path(os.path.realpath(root))):
+        return None
+    fd = os.open(rp, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_BINARY", 0))
+    return os.fdopen(fd, "rb") if binary else os.fdopen(fd, "r", encoding="utf-8", errors="replace")
+
+
+def read_bytes_inside(p: Path, root: Path, limit: int | None = None) -> bytes | None:
+    """At most LIMIT bytes of P (all when None), or None when P leaves ROOT."""
+    fh = open_inside(p, root, True)
+    if fh is None:
+        return None
+    with fh:
+        return fh.read() if limit is None else fh.read(limit)
+
+
+def read_text_inside(p: Path, root: Path) -> str | None:
+    """The text of P, or None when P leaves ROOT."""
+    fh = open_inside(p, root, False)
+    if fh is None:
+        return None
+    with fh:
+        return fh.read()
+
+
+def walk_skill(top: Path, skill: Path | None = None) -> tuple[list[Path], dict[Path, str]]:
+    """Every entry under TOP that rglob("*") lists, split into the entries
+    that stay inside the skill (SKILL, default TOP) and the symlinks that leave
+    it, each mapped to its real target with chains resolved. Directory symlinks
+    are listed, never descended into, as before; TOP itself is followed, so the
+    caller checks it first when it is not the skill folder."""
+    root = Path(os.path.realpath(skill or top))
+    kept: list[Path] = []
+    leaving: dict[Path, str] = {}
+    for dirpath, dirnames, filenames in os.walk(top):
+        for name in dirnames + filenames:
+            p = Path(dirpath, name)
+            if p.is_symlink():
+                target = os.path.realpath(p)
+                if not within(target, root):
+                    leaving[p] = target
+                    continue
+            kept.append(p)
+    return kept, leaving
 
 
 def frontmatter(text: str) -> str:
@@ -249,12 +326,16 @@ def declared_refs(path: Path, skill_text: str, skill_names: frozenset = frozense
     """
     sources = [("SKILL.md", list(own_lines(skill_text)), path)]
     ref_dir = path / "references"
-    if ref_dir.is_dir():
-        for p in sorted(ref_dir.rglob("*.md")):
+    # A references/ that is itself a link leaving the skill is not walked (it
+    # is reported by effectiveness); one linking to a folder inside still is.
+    # read_text_inside is the second door for every file below it.
+    if ref_dir.is_dir() and real_inside(ref_dir, path):
+        for p in sorted(q for q in walk_skill(ref_dir, path)[0] if q.name.endswith(".md")):
             if p.is_file() and not any(s in p.relative_to(path).parts for s in SKIP_DIRS):
-                t = p.read_text(encoding="utf-8", errors="replace")
-                sources.append((p.relative_to(path).as_posix(),
-                                list(own_lines("\n".join(reference_lines(t)))), p.parent))
+                t = read_text_inside(p, path)
+                if t is not None:
+                    sources.append((p.relative_to(path).as_posix(),
+                                    list(own_lines("\n".join(reference_lines(t)))), p.parent))
     siblings = sorted(skill_names - {path.name}, key=len, reverse=True)
     sibling_re = re.compile(r"(?<![\w-])(?:" + "|".join(map(re.escape, siblings)) + r")\W{0,6}$") if siblings else None
     named_skill_re = re.compile(r"(?<![\w-])([\w-]+)\**\s+skill'?s?\W{0,6}$", re.I)
@@ -408,7 +489,7 @@ def portability(path: Path, raw: bytes) -> list[str]:
 
     if body_lines > MAX_BODY_LINES:
         out.append(f"WARN: body is {body_lines} lines (keep under {MAX_BODY_LINES})")
-    nested = [p for p in path.rglob("*") if p.name.lower() == "skill.md"
+    nested = [p for p in walk_skill(path)[0] if p.name.lower() == "skill.md"
               and p.parent != path and not any(s in p.parts for s in SKIP_DIRS)]
     if nested:
         out.append(f"WARN: {len(nested)} nested SKILL.md file(s); the OpenAI API rejects the bundle and opencode registers each as a skill")
@@ -495,7 +576,9 @@ def reach(path: Path, skill_text: str, files: list[Path]) -> tuple[set[Path], se
                     or p in covered:
                 reachable.add(p)
                 if p.suffix in TEXT_SUFFIXES:
-                    frontier.append((p.read_text(encoding="utf-8", errors="replace"), p.parent))
+                    t = read_text_inside(p, path)
+                    if t is not None:
+                        frontier.append((t, p.parent))
     return reachable, by_path
 
 
@@ -524,7 +607,7 @@ def dir_and_glob_hits(path: Path, base: Path, text: str, files: list[Path]) -> s
         try:
             d.resolve().relative_to(root)
             return True
-        except (ValueError, OSError):
+        except (ValueError, OSError, RuntimeError):  # RuntimeError: symlink loop before Python 3.13
             return False
 
     def probe(p: Path, kind: str) -> bool:
@@ -541,11 +624,11 @@ def dir_and_glob_hits(path: Path, base: Path, text: str, files: list[Path]) -> s
             continue
         for b in (path, base):
             d = b / tok
-            if probe(d, "dir") and inside(d) and d.resolve() != root:
+            if inside(d) and probe(d, "dir") and d.resolve() != root:
                 dirs.add(d.resolve())
     for d_tok, first, last in RANGE_RE.findall(text):
         for b in (path, base):
-            if probe(b / d_tok / first, "file") and probe(b / d_tok / last, "file") and inside(b / d_tok):
+            if inside(b / d_tok) and probe(b / d_tok / first, "file") and probe(b / d_tok / last, "file"):
                 dirs.add((b / d_tok).resolve())
     globs = GLOB_TOKEN_RE.findall(text)
     hits: set[Path] = set()
@@ -567,7 +650,7 @@ def dir_and_glob_hits(path: Path, base: Path, text: str, files: list[Path]) -> s
 
 
 def skill_files(path: Path) -> list[Path]:
-    return [p for p in path.rglob("*") if p.is_file() and p != path / "SKILL.md"
+    return [p for p in walk_skill(path)[0] if p.is_file() and p != path / "SKILL.md"
             and not any(s in p.relative_to(path).parts for s in SKIP_DIRS)]
 
 
@@ -617,11 +700,11 @@ def shipped_but_unreferenced(path: Path, skill_text: str) -> list[str]:
                 or (p in by_path and p not in backups):
             continue
         try:
-            with p.open("rb") as fh:
-                head = fh.read(4096).decode("utf-8")
+            raw_head = read_bytes_inside(p, path, 4096)
+            head = None if raw_head is None else raw_head.decode("utf-8")
         except (OSError, UnicodeDecodeError):
             continue
-        if has_skill_frontmatter(head):
+        if head is not None and has_skill_frontmatter(head):
             shadow.append(rel.as_posix())
     if shadow:
         out.append(f"WARN: {len(shadow)} file(s) other than SKILL.md carry skill frontmatter "
@@ -632,8 +715,9 @@ def shipped_but_unreferenced(path: Path, skill_text: str) -> list[str]:
     archives = sorted(p.name for p in root_archives)
     if archives:
         out.append(f"WARN: packaged archive(s) inside the skill: {', '.join(archives)} (build packages outside the skill folder)")
-    nested_skills = sorted(p.parent.relative_to(path).as_posix() for p in path.rglob("SKILL.md")
-                           if p.parent != path and not any(s in p.parts for s in SKIP_DIRS))
+    nested_skills = sorted(p.parent.relative_to(path).as_posix() for p in walk_skill(path)[0]
+                           if p.name == "SKILL.md" and p.parent != path
+                           and not any(s in p.parts for s in SKIP_DIRS))
     if nested_skills:
         out.append(f"WARN: nested skill copy inside the skill: {', '.join(nested_skills)}")
     return out
@@ -746,12 +830,17 @@ def effectiveness(path: Path, skill_text: str) -> list[str]:
     """Defects that leave a skill valid but less effective. Each check comes
     from the 2026-11-10 spec-prep review, where every one fired.
 
-    ERROR: shipped private data. WARN: everything else.
+    ERROR: shipped private data, and symlinks that leave the skill (check 9).
+    WARN: everything else.
     """
     out: list[str] = []
-    texts = {p: p.read_text(encoding="utf-8", errors="replace")
-             for p in path.rglob("*.md")
-             if p.is_file() and not any(s in p.relative_to(path).parts for s in SKIP_DIRS)}
+    tree, leaving = walk_skill(path)  # symlinks that leave the skill are never read below
+    texts = {}
+    for p in tree:
+        if p.name.endswith(".md") and p.is_file() and not any(s in p.relative_to(path).parts for s in SKIP_DIRS):
+            t = read_text_inside(p, path)
+            if t is not None:
+                texts[p] = t
     texts[path / "SKILL.md"] = skill_text
 
     # 1. Dead links and anchors. A file#anchor target resolves relative to the
@@ -763,7 +852,9 @@ def effectiveness(path: Path, skill_text: str) -> list[str]:
     def anchors(p: Path) -> set[str]:
         key = p.resolve()
         if key not in heads:
-            t = unfenced(texts.get(p) or p.read_text(encoding="utf-8", errors="replace"))
+            # A link target outside the skill ("../x.md#a", or a symlink that
+            # leaves it) is not read: it has no anchors here.
+            t = unfenced(texts.get(p) or read_text_inside(p, path) or "")
             seen: dict[str, int] = {}
             found = set(re.findall(r"""(?:id|name)=["']([\w-]+)["']|\{#([\w-]+)\}""", t))
             slugs = {a or b for a, b in found}
@@ -805,7 +896,7 @@ def effectiveness(path: Path, skill_text: str) -> list[str]:
         out.append(f"WARN: {len(dead)} dead link(s) or anchor(s): {', '.join(sorted(dead)[:5])}")
 
     # 2. Ghost tools: scripts a skill tells the agent to run that do not exist.
-    walk = [p for p in path.rglob("*") if not any(s in p.relative_to(path).parts for s in SKIP_DIRS)]
+    walk = [p for p in tree if not any(s in p.relative_to(path).parts for s in SKIP_DIRS)]
     names = {p.name for p in walk if p.is_file()}
     ghosts = set()
     # Only lines that tell the agent to run something count; naming a file as
@@ -847,8 +938,10 @@ def effectiveness(path: Path, skill_text: str) -> list[str]:
         try:
             if p.stat().st_size > 2_000_000:
                 continue
-            t = texts.get(p) or p.read_text(encoding="utf-8", errors="replace")
+            t = texts.get(p) or read_text_inside(p, path)
         except OSError:
+            continue
+        if t is None:
             continue
         rel = p.relative_to(path).as_posix()
         if re.search(r"claude\.ai/chat/[0-9a-f-]{8,}", t):
@@ -895,6 +988,18 @@ def effectiveness(path: Path, skill_text: str) -> list[str]:
     broken = [p.relative_to(path).as_posix() for p in walk if p.is_symlink() and not p.exists()]
     if broken:
         out.append(f"WARN: {len(broken)} dangling symlink(s): {', '.join(broken[:4])}")
+
+    # 9. Symlinks whose real path leaves the skill. They are not read, scanned,
+    # listed as shipped files or descended into (a secret behind one would
+    # otherwise be reported as the skill's, or its reference graph widened by a
+    # file the skill does not own). ERROR: the scans cannot vouch for what such
+    # a link exposes, and a packager that dereferences it ships the target.
+    out_of_root = sorted((p.relative_to(path).as_posix(), target) for p, target in leaving.items()
+                         if not any(s in p.relative_to(path).parts for s in SKIP_DIRS))
+    if out_of_root:
+        out.append(f"ERROR: {len(out_of_root)} symlink(s) leave the skill root and were not read or followed: "
+                   + ", ".join(f"{rel} -> {target}" for rel, target in out_of_root[:4])
+                   + (" ..." if len(out_of_root) > 4 else ""))
     return out
 
 
@@ -934,7 +1039,15 @@ def audit(root: Path, threshold: int, baseline: str | None = None) -> dict:
     found = find_skills(root)
     skill_names = frozenset(p.name for p in found)
     for path in found:
-        raw = (path / "SKILL.md").read_bytes()
+        raw = read_bytes_inside(path / "SKILL.md", path)
+        if raw is None:
+            # SKILL.md is itself a link out of the skill: nothing in it is read,
+            # so no check built on its text can run. The link is the finding.
+            skills[str(path.relative_to(root))] = {
+                "triggers": [], "declared_refs": 0, "missing_refs": [], "portability": [],
+                "unreferenced": [], "effectiveness": effectiveness(path, ""),
+            }
+            continue
         text = raw.decode("utf-8", errors="replace").replace("\r\n", "\n")
         declared = declared_refs(path, text, skill_names)
         missing = sorted(r if srcs == ["SKILL.md"] else f"{r} (in {', '.join(sorted(set(srcs)))})"

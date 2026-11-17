@@ -115,6 +115,18 @@ root unflagged.
   toml, py, sh, js, ts and `.env` file. A match containing `EXAMPLE` (AWS
   documents `AKIAIOSFODNN7EXAMPLE`) or a placeholder word (your, placeholder,
   redacted, dummy, xxxx) is documentation and is allowed.
+- Symlinks that leave the skill (ERROR, check 9): a link whose real path is not
+  inside the skill folder, whether one hop, a chain, a relative `../` or a link
+  to a directory (a `references/` that is itself such a link included), is
+  never opened, listed as a shipped file or descended into, so no scan reads
+  through it. The finding names each link and its real target
+  (`references/x.md -> /home/u/notes/x.md`). A link into a sibling skill leaves
+  this one too. Links whose real path stays inside the folder are read as any
+  file. Every content read goes through `read_text_inside` /
+  `read_bytes_inside` and every file listing through `walk_skill`; a new check
+  must use them. A markdown anchor link that climbs out of the skill with `..`
+  is not read either and reports as dead. `.git`, `node_modules` and the other
+  skipped directories are not audited, so links in them are not reported.
 - Budget: SKILL.md over 25,000 bytes is reported in decimal KB with one
   decimal and the exact byte count, so 25,164 B prints as `25.2 KB (25,164 B)`.
 - Version drift: frontmatter `ver:` or `version:` under `assets/` or

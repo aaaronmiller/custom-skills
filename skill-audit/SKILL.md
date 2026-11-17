@@ -65,7 +65,9 @@ chat URLs, Anthropic, OpenAI, GitHub, Slack, Google and AWS key shapes;
 `EXAMPLE` keys allowed; ERROR); changelog sections inside SKILL.md; an
 always-read SKILL.md over 25,000 bytes (reported as KB and bytes) or lines over
 600 characters; reference versions that disagree with the skill's (`assets/`
-and `templates/` exempt); dangling symlinks. All but private data are WARN.
+and `templates/` exempt); dangling symlinks; symlinks whose real path leaves the
+skill folder (never read or followed; ERROR naming link and target). All but
+private data and those links are WARN.
 
 **Portability.** Claude Code parses frontmatter leniently; the claude.ai
 uploader, the Claude API, Codex and Gemini do not. A skill can work locally for
@@ -88,7 +90,8 @@ activation: `references/description-revision-guide.md`, section
 pleonasm.
 
 Exit status is non-zero when a collision at or above the threshold exists, any
-skill has a portability ERROR or ships private data, or a trigger was lost
+skill has a portability ERROR, ships private data or an out-of-folder symlink,
+or a trigger was lost
 against the baseline, so this can gate a commit.
 
 ## Core Audit Framework
