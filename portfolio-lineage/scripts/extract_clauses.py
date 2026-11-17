@@ -40,7 +40,10 @@ NUM_RE = re.compile(r"^\s*(\d+)[.)]\s+")
 
 
 def strip_md(s):
-    s = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", s)
+    # Bounded: [^\]]* ran to the end of the text from every '[', so a long run of '[' was
+    # quadratic (40,000 characters took 4 s, a megabyte would take most of an hour). Link
+    # text over 500 characters, or a target over 1000, is left as written.
+    s = re.sub(r"\[([^\]]{0,500})\]\([^)]{0,1000}\)", r"\1", s)
     s = s.replace("**", "").replace("__", "")
     return re.sub(r"\s+", " ", s).strip()
 
