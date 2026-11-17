@@ -18,7 +18,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.dont_write_bytecode = True
-sys.path.insert(0, '/home/cheta/code/custom-skills/project-archive/scripts')
+# redact() lives in the sibling skill. Find it beside this checkout first; the cheta-host
+# path stays as the fallback for a copy that is not installed next to project-archive.
+_HERE = Path(__file__).resolve()
+for _root in (*_HERE.parents[2:3], Path('/home/cheta/code/custom-skills')):
+    if (_root / 'project-archive/scripts/_lib.py').is_file():
+        sys.path.insert(0, str(_root / 'project-archive/scripts'))
+        break
 from _lib import redact
 
 STATE = Path.home() / '.local/state/capacity-watch'
