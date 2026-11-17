@@ -290,6 +290,34 @@ class Rejected(DeliveryFixture):
         self.write("report/inputs/requirements.md", "# Requirements\nChanged behavior.\n")
         self.assertRejected("hash mismatch")
 
+    def test_receipt_gate_has_the_same_strictness_as_the_manifest_gate(self):
+        # B083: the manifest gate rejects anything but implementationAuthorized: false. The receipt
+        # gate read the older initiationAuthorized name only when the current one was absent, so
+        # the two keys could disagree and the receipt still passed.
+        for current, alias in ((False, True), (True, False), (True, True), (False, "false"), (False, None)):
+            receipt = self.native()
+            receipt["implementationAuthorized"], receipt["initiationAuthorized"] = current, alias
+            self.rewrite_receipt(receipt)
+            self.assertRejected("forbid implementation")
+        receipt = self.native()
+        del receipt["implementationAuthorized"]
+        receipt["initiationAuthorized"] = True
+        self.rewrite_receipt(receipt)
+        self.assertRejected("forbid implementation")
+        receipt = self.native()
+        del receipt["implementationAuthorized"]
+        self.rewrite_receipt(receipt)
+        self.assertRejected("forbid implementation")  # neither key: not explicit
+
+    def test_forbids_implementation_unit(self):
+        f = d.forbids_implementation
+        self.assertTrue(f({"implementationAuthorized": False}))
+        self.assertTrue(f({"initiationAuthorized": False}))  # legacy receipts keep passing
+        self.assertTrue(f({"implementationAuthorized": False, "initiationAuthorized": False}))
+        self.assertFalse(f({}))
+        self.assertFalse(f({"implementationAuthorized": False, "initiationAuthorized": True}))
+        self.assertFalse(f({"implementationAuthorized": 0}))
+
     def test_receipt_from_another_skill_release(self):
         receipt = self.native()
         receipt["skill"]["sha256"] = "0" * 64

@@ -178,6 +178,20 @@ def normalize_receipt(data):
     return result
 
 
+AUTHORIZATION_KEYS = ("implementationAuthorized", "initiationAuthorized")
+
+
+def forbids_implementation(receipt):
+    """True only when at least one authorization key is present and every one present is exactly
+    False. The older initiationAuthorized name is still read, but it can no more contradict the
+    current key than a second claim of True can sit beside it: the manifest gate (validate) is
+    strict on one key, and this receipt gate now agrees. The old fallback, `.get(current,
+    .get(alias))`, ignored the alias whenever the current key was present, so a receipt with
+    implementationAuthorized: false and initiationAuthorized: true passed."""
+    present = [receipt[key] for key in AUTHORIZATION_KEYS if key in receipt]
+    return bool(present) and all(value is False for value in present)
+
+
 def verify_receipt(repo, data):
     if data.get("schemaVersion") != 1 or data.get("lifecycle") != "specification-prepared":
         raise ValueError("receipt must declare schemaVersion 1 and lifecycle specification-prepared")
@@ -456,7 +470,7 @@ def check_native(stream, build, inputs, roles, governance, handoff_path, mapping
         raise ValueError("native tasks require identified unchecked work and observable acceptance gates")
     receipt_path = local(build, stream.get("receipt"))
     receipt = normalize_receipt(json.loads(read(receipt_path)))
-    if receipt.get("implementationAuthorized", receipt.get("initiationAuthorized")) is not False:
+    if not forbids_implementation(receipt):
         raise ValueError("receipt must explicitly forbid implementation at this handoff")
     skill = receipt.get("skill", {})
     if not isinstance(skill, dict) or not isinstance(skill.get("version"), str) or \
