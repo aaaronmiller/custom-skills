@@ -898,15 +898,27 @@ def effectiveness(path: Path, skill_text: str) -> list[str]:
     return out
 
 
+def valid_ref(ref: str) -> bool:
+    """A git revision that is safe to put before ':path' in `git show`. A leading '-' would be read
+    as an option (`--output=/some/file` makes git write there), and no ref holds whitespace or
+    control characters."""
+    return bool(ref) and not ref.startswith("-") and not any(c.isspace() or ord(c) < 32 or ord(c) == 127 for c in ref)
+
+
 def baseline_triggers(root: Path, rel_skill_md: str, ref: str) -> set[str] | None:
     """Quoted triggers of a SKILL.md at git REF, or None when absent there."""
     import subprocess
+    if not valid_ref(ref):
+        raise ValueError(f"--baseline REF must be a git revision, not {ref!r}")
     top = subprocess.run(["git", "-C", str(root), "rev-parse", "--show-toplevel"],
                          capture_output=True, text=True)
     if top.returncode != 0:
         return None
     repo = Path(top.stdout.strip())
-    path_in_repo = (root / rel_skill_md).resolve().relative_to(repo.resolve()).as_posix()
+    try:
+        path_in_repo = (root / rel_skill_md).resolve().relative_to(repo.resolve()).as_posix()
+    except ValueError:
+        return None  # a SKILL.md symlinked to somewhere outside the repository has no version at REF
     shown = subprocess.run(["git", "-C", str(repo), "show", f"{ref}:{path_in_repo}"],
                            capture_output=True, text=True)
     if shown.returncode != 0:
@@ -915,6 +927,8 @@ def baseline_triggers(root: Path, rel_skill_md: str, ref: str) -> set[str] | Non
 
 
 def audit(root: Path, threshold: int, baseline: str | None = None) -> dict:
+    if baseline is not None and not valid_ref(baseline):
+        raise ValueError(f"--baseline REF must be a git revision, not {baseline!r}")
     skills: dict[str, dict] = {}
     lost: dict[str, list[str]] = {}
     found = find_skills(root)
@@ -995,6 +1009,9 @@ def main() -> int:
         print(f"no such directory: {root}", file=sys.stderr)
         return 2
 
+    if args.baseline is not None and not valid_ref(args.baseline):
+        print(f"--baseline REF must be a git revision, not {args.baseline!r}", file=sys.stderr)
+        return 2
     result = audit(root, args.threshold, args.baseline)
 
     failed = bool(result["collisions"] or result["portability_errors"] or result["lost_triggers"]

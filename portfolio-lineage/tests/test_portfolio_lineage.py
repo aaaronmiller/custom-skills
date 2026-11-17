@@ -192,6 +192,30 @@ class Gate(Base):
         self.assertEqual(rc, 0, so)
 
 
+class StripMd(unittest.TestCase):
+    """B066 review: the link regex was quadratic on a long run of '['."""
+
+    @classmethod
+    def setUpClass(cls):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("extract_clauses_t", os.path.join(S, "extract_clauses.py"))
+        cls.mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.mod)
+
+    def test_links_and_emphasis_are_still_stripped(self):
+        f = self.mod.strip_md
+        self.assertEqual(f("see [the notes](#notes) and [x](http://e.example/a_b) now"), "see the notes and x now")
+        self.assertEqual(f("**bold** __also__   spaced"), "bold also spaced")
+        self.assertEqual(f("[multi\nline](u) ok"), "multi line ok")
+
+    def test_a_long_run_of_open_brackets_is_linear_not_quadratic(self):
+        import time
+        for hostile in ("[" * 100000, "[a" * 50000, "[x](" * 25000):
+            t = time.perf_counter()
+            self.mod.strip_md(hostile)
+            self.assertLess(time.perf_counter() - t, 5.0, repr(hostile[:12]))  # the old pattern needed about 25 s for the first
+
+
 class Contract(unittest.TestCase):
     def test_contract_program_passes(self):
         with tempfile.TemporaryDirectory(dir=TMP) as td:
