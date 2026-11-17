@@ -577,5 +577,55 @@ class RegressionFalseAlarms(AuditCase):
         self.assertNotIn("s", self.run_audit()["broken_disclosure"])
 
 
+class BaselineSafety(AuditCase):
+    """--baseline REF is put into `git show REF:path` (BACKLOG B080, B081)."""
+
+    def git(self, *args):
+        subprocess.run(["git", "-C", str(self.root), "-c", "user.email=t@example.invalid", "-c", "user.name=t",
+                        "-c", "commit.gpgsign=false", *args], check=True, capture_output=True)
+
+    def committed_repo(self):
+        self.skill("widget-check")
+        self.git("init", "-q")
+        self.git("add", "-A")
+        self.git("commit", "-q", "-m", "x")
+
+    def test_valid_ref_accepts_revisions_and_refuses_options_and_junk(self):
+        for ok in ("HEAD", "main", "v1.0", "HEAD~3", "abc1234", "refs/tags/x", "origin/main^"):
+            self.assertTrue(am.valid_ref(ok), ok)
+        for bad in ("", "--output=/x", "-p", "--exec-path=/x", "a b", "a\nb", "x\x00", "x\x7f", " HEAD"):
+            self.assertFalse(am.valid_ref(bad), repr(bad))
+
+    def test_a_ref_that_is_an_option_is_refused_and_writes_nothing(self):
+        # Before: `git show --output=PATH:skill/SKILL.md` made git write the commit to that path.
+        self.committed_repo()
+        target = Path(self._tmp.name) / "pwned"
+        with self.assertRaises(ValueError):
+            am.audit(self.root, 50, f"--output={target}")
+        self.assertEqual([p.name for p in Path(self._tmp.name).iterdir() if p.name.startswith("pwned")], [])
+
+    def test_a_good_baseline_still_works(self):
+        self.committed_repo()
+        result = am.audit(self.root, 50, "HEAD")
+        self.assertEqual(result["lost_triggers"], {})
+
+    def test_a_skill_md_symlinked_outside_the_repository_is_not_a_crash(self):
+        self.committed_repo()
+        outside = Path(self._tmp.name) / "outside"
+        outside.mkdir()
+        (outside / "SKILL.md").write_text(HEALTHY_FM.format(name="linked") + HEALTHY_BODY, encoding="utf-8")
+        (self.root / "linked").mkdir()
+        os.symlink(outside / "SKILL.md", self.root / "linked" / "SKILL.md")
+        result = am.audit(self.root, 50, "HEAD")  # raised ValueError from relative_to before
+        self.assertEqual(result["skill_count"], 2)
+
+    def test_command_line_refuses_an_option_ref_with_exit_2(self):
+        self.committed_repo()
+        r = subprocess.run([sys.executable, "-I", "-B", str(SCRIPT), str(self.root), "--baseline=--output=/tmp/x"],
+                           capture_output=True, text=True)
+        self.assertEqual(r.returncode, 2, r.stderr)
+        self.assertIn("git revision", r.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()
