@@ -24,6 +24,7 @@ from collect_sessions import (
     parse_zcode_session,
     resolve_hermes_home,
     session_matches_repos,
+    transcript_filename,
 )
 
 PREVIOUS_FILE_LIMIT = 8 * 1024 * 1024
@@ -904,6 +905,37 @@ class HermesCollectorTests(unittest.TestCase):
                     os.environ["HERMES_HOME"] = old_hermes_home
 
             self.assertEqual(resolved, dot_hermes.resolve())
+
+
+class TranscriptFilenameTests(unittest.TestCase):
+    """Session ids come from the session files, so they must not steer the output path."""
+
+    def test_plain_ids_are_kept(self):
+        self.assertEqual(transcript_filename("claude", "abc-123_x.y"), "claude-abc-123_x.y.md")
+
+    def test_hostile_ids_stay_one_path_component(self):
+        hostile = ["../../x", "a/b", "/abs/path", "x/../../../escape", "a\x00b", "a\\b", "", "..", "\n#x"]
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "transcripts"
+            out.mkdir()
+            names = set()
+            for sid in hostile:
+                name = transcript_filename("claude", sid)
+                self.assertNotIn("/", name, sid)
+                self.assertNotIn("\x00", name, sid)
+                self.assertLessEqual(len(name), 200, sid)
+                path = out / name
+                self.assertEqual(path.parent, out, sid)
+                path.write_text("x")  # must not raise: no missing directory, no NUL
+                names.add(name)
+            self.assertEqual(len(names), len(hostile))  # no two ids share a file
+            self.assertEqual({p.parent for p in Path(tmp).rglob("*.md")}, {out})
+
+    def test_changed_ids_do_not_collide_with_a_plain_lookalike(self):
+        self.assertNotEqual(transcript_filename("claude", "a/b"), transcript_filename("claude", "a_b"))
+
+    def test_long_ids_are_capped(self):
+        self.assertLessEqual(len(transcript_filename("codex", "x" * 5000)), 140)
 
 
 if __name__ == "__main__":

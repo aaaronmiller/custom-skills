@@ -6,11 +6,13 @@ from pathlib import Path
 from unittest.mock import patch
 
 from render_report import (
+    DEFAULT_CTA_URL,
     embedded_diffs_script,
     format_generated_at,
     open_report,
     parse_args,
     render_page,
+    safe_url,
 )
 
 
@@ -85,6 +87,42 @@ class ReportRendererTests(unittest.TestCase):
         })
         self.assertIn("Procedure Compliance", page)
         self.assertIn("Verbosity", page)
+
+    SCORES = {"efficiency": 1.0, "code_quality": 1.0, "skill_coverage": 1.0, "overall": 1.0}
+
+    def test_cta_url_only_allows_http_and_https(self):
+        self.assertEqual(safe_url("javascript:alert(1)"), DEFAULT_CTA_URL)
+        self.assertEqual(safe_url("data:text/html,<script>alert(1)</script>"), DEFAULT_CTA_URL)
+        self.assertEqual(safe_url("  JaVaScRiPt:alert(1)"), DEFAULT_CTA_URL)
+        self.assertEqual(safe_url(None), DEFAULT_CTA_URL)
+        self.assertEqual(safe_url(" https://example.com/a?b=c "), "https://example.com/a?b=c")
+        page = render_page({"scores": self.SCORES, "cta_url": "javascript:alert(1)"})
+        self.assertNotIn('href="javascript:', page)
+        self.assertIn(f'class="cta-button" href="{DEFAULT_CTA_URL}"', page)
+        page = render_page({"scores": self.SCORES, "cta_url": 'https://e.example/"onmouseover="x'})
+        self.assertNotIn('"onmouseover="x', page)
+
+    def test_embedded_card_json_cannot_close_the_script(self):
+        hostile = "</script><img src=x onerror=alert(1)>&amp;"
+        page = render_page({"scores": self.SCORES, "title": hostile, "handle": hostile})
+        self.assertNotIn("</script><img", page)
+        self.assertNotIn("<img src=x", page)
+        self.assertIn("\\u003c/script\\u003e", page)
+        self.assertIn("\\u0026amp;", page)
+
+    def test_report_text_and_diffs_are_escaped(self):
+        hostile = "<script>alert(1)</script>"
+        page = render_page({
+            "scores": self.SCORES,
+            "top_findings": [hostile],
+            "suggestions": [{
+                "skill": "<b>x</b>", "change": hostile, "evidence": hostile,
+                "proposed_path": "../../<i>.md", "diff": "+</pre>" + hostile,
+            }],
+        })
+        self.assertNotIn(hostile, page)
+        self.assertNotIn("<b>x</b>", page)
+        self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", page)
 
     def test_code_diffs_follow_os_theme(self):
         bundle = embedded_diffs_script()

@@ -1437,6 +1437,21 @@ def parse_zcode_session(path: Path, skill_names, include_subagents: bool):
     return meta, stats, entries, sorted(skills_used & set(skill_names))
 
 
+def transcript_filename(harness, session_id) -> str:
+    """File name for one sampled transcript, safe for any session id.
+
+    Session ids come from the session files themselves (sessionId, payload ids,
+    database ids), so they are untrusted. Anything outside [A-Za-z0-9._-] becomes
+    "_", the length is capped, and a changed id gets a short digest so two odd ids
+    cannot land on the same file. The result never contains a path separator.
+    """
+    raw = str(session_id)
+    safe = re.sub(r"[^A-Za-z0-9._-]", "_", raw)[:120]
+    if safe != raw:
+        safe = f"{safe}-{hashlib.sha1(raw.encode('utf-8', 'surrogatepass')).hexdigest()[:8]}"
+    return f"{harness}-{safe}.md"
+
+
 def render_transcript(meta, stats, skills_used, entries) -> str:
     lines = [
         f"# Session {meta.get('id')}",
@@ -1877,7 +1892,7 @@ def main():
         sid = s["meta"]["id"]
         s["sampled"] = s["_key"] in sampled_keys
         if s["sampled"]:
-            tpath = transcripts_dir / f"{s['harness']}-{sid}.md"
+            tpath = transcripts_dir / transcript_filename(s["harness"], sid)
             tpath.write_text(render_transcript(s["meta"], s["stats"], s["skills_used"], s["_entries"]))
             s["transcript_path"] = str(tpath)
         del s["_entries"]
