@@ -627,5 +627,177 @@ class BaselineSafety(AuditCase):
         self.assertIn("git revision", r.stderr)
 
 
+# Every file open and directory listing the interpreter performs, while a test
+# asks for it: the only way to prove a symlink target was never touched.
+_TOUCHED: list[tuple[str, str]] | None = None
+
+
+def _record_touch(event, args):
+    if _TOUCHED is not None and event in ("open", "os.scandir", "os.listdir", "glob.glob") \
+            and args and isinstance(args[0], (str, bytes, os.PathLike)):
+        _TOUCHED.append((event, os.fsdecode(args[0])))
+
+
+sys.addaudithook(_record_touch)
+
+
+@unittest.skipIf(os.name == "nt", "symlinks need privileges on Windows")
+class OutOfRootSymlinks(AuditCase):
+    """A symlink whose real path leaves the skill is a finding, never a read.
+    Gemini review note on skill-audit: the secret and reachability scans still
+    followed such links out of the skill folder."""
+
+    def setUp(self):
+        super().setUp()
+        self.outside = Path(self._tmp.name) / "outside"
+        (self.outside / "dir").mkdir(parents=True)
+        (self.outside / "refs").mkdir()
+        self.secret = self.outside / "secret.md"
+        self.secret.write_text(f"token {sk_ant()}\n", encoding="utf-8")
+        (self.outside / "dir" / "secret.txt").write_text(sk_ant(), encoding="utf-8")
+        (self.outside / "refs" / "evil.md").write_text("Run `scripts/ghost.py` first.\n", encoding="utf-8")
+
+    def link(self, path: Path, rel: str, target) -> Path:
+        p = path / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        os.symlink(target, p)
+        return p
+
+    def eff(self, name: str = "s") -> str:
+        return " | ".join(self.run_audit()["effectiveness"].get(name, []))
+
+    def test_link_to_a_file_outside_is_reported_and_not_scanned(self):
+        self.link(self.skill("s"), "references/leak.md", self.secret)
+        r = self.run_audit()
+        msg = " | ".join(r["effectiveness"]["s"])
+        self.assertIn("ERROR: 1 symlink(s) leave the skill root", msg)
+        self.assertIn(f"references/leak.md -> {self.secret.resolve()}", msg)
+        self.assertNotIn("credential-shaped token", msg)
+        self.assertEqual(r["effectiveness_errors"], ["s"])
+
+    def test_link_to_a_file_outside_does_not_widen_reachability(self):
+        (self.outside / "notes.md").write_text("Read `references/orphan.md`.\n", encoding="utf-8")
+        path = self.skill("s", body=HEALTHY_BODY + "\nSee `references/linked.md`.\n",
+                          files={"references/orphan.md": "# Orphan\n"})
+        self.link(path, "references/linked.md", self.outside / "notes.md")
+        # The outside file names orphan.md; if it were read, orphan.md would count as reached.
+        self.assertIn("references/orphan.md", " ".join(self.run_audit()["unreferenced"].get("s", [])))
+
+    def test_link_to_a_directory_outside_is_reported_and_not_descended(self):
+        self.link(self.skill("s"), "assets", self.outside / "dir")
+        msg = self.eff()
+        self.assertIn(f"assets -> {(self.outside / 'dir').resolve()}", msg)
+        self.assertNotIn("credential-shaped token", msg)
+
+    def test_references_folder_linked_outside_is_not_read(self):
+        path = self.skill("s", body="\n# S\n\nRun `python3 scripts/check.py`.\n", healthy_files=False,
+                          files={"scripts/check.py": "print('ok')\n"})
+        self.link(path, "references", self.outside / "refs")
+        r = self.run_audit()
+        # evil.md names scripts/ghost.py, which the skill does not ship; if it were read it would be listed as missing.
+        self.assertEqual(r["broken_disclosure"], {})
+        self.assertIn(f"references -> {(self.outside / 'refs').resolve()}", " | ".join(r["effectiveness"]["s"]))
+
+    def test_link_chain_that_ends_outside_is_reported_at_every_hop(self):
+        path = self.skill("s")
+        self.link(path, "references/hop2.md", self.secret)  # last hop leaves the skill
+        self.link(path, "references/hop1.md", "hop2.md")    # first hop points at a name inside it
+        msg = self.eff()
+        self.assertIn("ERROR: 2 symlink(s) leave the skill root", msg)
+        self.assertIn(f"references/hop1.md -> {self.secret.resolve()}", msg)
+        self.assertIn(f"references/hop2.md -> {self.secret.resolve()}", msg)
+        self.assertNotIn("credential-shaped token", msg)
+
+    def test_relative_dotdot_escape_is_reported(self):
+        # corpus/s/references/up.md -> ../../../outside/secret.md  =  <tmp>/outside/secret.md
+        self.link(self.skill("s"), "references/up.md", "../../../outside/secret.md")
+        msg = self.eff()
+        self.assertIn(f"references/up.md -> {self.secret.resolve()}", msg)
+        self.assertNotIn("credential-shaped token", msg)
+
+    def test_relative_link_into_a_sibling_skill_is_reported(self):
+        # Inside the corpus, still outside this skill: a skill owns its own folder only.
+        self.skill("other", files={"references/leak.md": f"token {sk_ant()}\n"})
+        sibling = self.root / "other" / "references" / "leak.md"
+        self.link(self.skill("s"), "references/sibling.md", "../../other/references/leak.md")
+        msg = self.eff()
+        self.assertIn(f"references/sibling.md -> {sibling.resolve()}", msg)
+        self.assertNotIn("credential-shaped token", msg)
+
+    def test_in_root_link_is_still_read_while_the_outside_one_is_not(self):
+        path = self.skill("s", files={"references/real.txt": f"key {sk_ant()}\n"})
+        self.link(path, "references/alias.txt", "real.txt")  # inside the skill: read as before
+        self.link(path, "references/leak.md", self.secret)   # outside: reported, not read
+        msg = self.eff()
+        self.assertIn("references/alias.txt: credential-shaped token", msg)
+        self.assertIn("references/real.txt: credential-shaped token", msg)
+        self.assertNotIn("references/leak.md: credential-shaped token", msg)
+        self.assertIn("ERROR: 1 symlink(s) leave the skill root", msg)
+        self.assertNotIn("references/alias.txt ->", msg)
+
+    def test_in_root_link_still_widens_reachability_while_the_outside_one_does_not(self):
+        (self.outside / "notes.md").write_text("Read `references/orphan.md`.\n", encoding="utf-8")
+        path = self.skill("s", body=HEALTHY_BODY + "\nSee `references/alias.md` and `references/linked.md`.\n",
+                          files={"references/real.md": "# Real\n\nRead `references/deep.md`.\n",
+                                 "references/deep.md": "# Deep\n", "references/orphan.md": "# Orphan\n"})
+        self.link(path, "references/alias.md", "real.md")                       # inside: followed as before
+        self.link(path, "references/linked.md", self.outside / "notes.md")      # outside: not
+        unref = " ".join(self.run_audit()["unreferenced"].get("s", []))
+        self.assertNotIn("deep.md", unref)
+        self.assertIn("references/orphan.md", unref)
+        self.assertIn("ERROR: 1 symlink(s) leave the skill root", self.eff())
+        self.assertNotIn("references/alias.md ->", self.eff())
+
+    def test_skill_md_linked_outside_is_not_read(self):
+        outside = self.outside / "skill"
+        outside.mkdir()
+        (outside / "SKILL.md").write_text(HEALTHY_FM.format(name="linked") + HEALTHY_BODY, encoding="utf-8")
+        (self.root / "linked").mkdir()
+        os.symlink(outside / "SKILL.md", self.root / "linked" / "SKILL.md")
+        r = self.run_audit()
+        self.assertIn("linked", r["undeclared_triggers"])  # its triggers were not read
+        self.assertIn(f"SKILL.md -> {(outside / 'SKILL.md').resolve()}", " | ".join(r["effectiveness"]["linked"]))
+        self.assertIn("linked", r["effectiveness_errors"])
+
+    def test_markdown_link_into_a_file_outside_the_skill_is_not_read(self):
+        (self.outside / "notes.md").write_text("# Notes\n\n## Heading\n", encoding="utf-8")
+        self.skill("s", body=HEALTHY_BODY + "\nSee `../../outside/notes.md#heading`.\n")
+        self.assertIn("../../outside/notes.md#heading", self.eff())
+
+    def test_nothing_outside_the_skill_is_opened_or_listed(self):
+        global _TOUCHED
+        path = self.skill("s")
+        self.link(path, "references/leak.md", self.secret)
+        self.link(path, "references/up.md", "../../../outside/secret.md")
+        self.link(path, "scripts/hop.md", "../references/leak.md")
+        self.link(path, "assets", self.outside / "dir")
+        other = self.skill("t", body="\n# T\n\nRun `python3 scripts/check.py`.\n", healthy_files=False,
+                           files={"scripts/check.py": "print('ok')\n"})
+        self.link(other, "references", self.outside / "refs")
+        _TOUCHED = []
+        try:
+            self.run_audit()
+            touched = list(_TOUCHED)
+        finally:
+            _TOUCHED = None
+        out = os.path.realpath(self.outside)
+        hits = [(e, p) for e, p in touched if os.path.realpath(p) == out or os.path.realpath(p).startswith(out + os.sep)]
+        self.assertEqual(hits, [])
+
+    def test_helpers_refuse_a_path_that_leaves_the_root_and_read_one_that_does_not(self):
+        path = self.skill("s")
+        out_link = self.link(path, "references/out.md", self.secret)
+        in_link = self.link(path, "references/in.md", "guide.md")
+        self.assertIsNone(am.read_text_inside(out_link, path))
+        self.assertIsNone(am.read_bytes_inside(out_link, path, 16))
+        self.assertIsNone(am.read_text_inside(path / "references" / ".." / ".." / ".." / "outside" / "secret.md", path))
+        self.assertEqual(am.read_text_inside(in_link, path), "# Guide\n\n## Steps\n\n1. Look.\n")
+        self.assertEqual(am.read_bytes_inside(in_link, path, 7), b"# Guide")
+        kept, leaving = am.walk_skill(path)
+        self.assertIn(in_link, kept)
+        self.assertNotIn(out_link, kept)
+        self.assertEqual(leaving, {out_link: os.path.realpath(self.secret)})
+
+
 if __name__ == "__main__":
     unittest.main()
