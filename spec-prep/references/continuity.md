@@ -134,7 +134,7 @@ Read this reference only when the user requests Living Documents, an existing do
 
 Once present, read the installed Living Documents skill and current system contract rather than copying an old version into spec-prep. Resolve the exact source project, run `ld ensure` for that project, and read the returned start-here, project and what-to-do pages. Verify that the returned source-root actually matches; an ancestor match is not enough. Do not query or resume unrelated project ledger work.
 
-For an authorized missing dossier, use the installed `ld create-project` syntax with the project ID, title and real source root. Reuse existing pages and stable IDs. Use `ld add-page` for additional pages, then edit the registered page. Preserve existing narrative and operator annotations. Read the CLI help for installed syntax; no hardcoded user paths or stale release numbers belong in this portable reference.
+For an authorized missing dossier, use `ld ensure --project <real source root> --id <record id>`, which creates the record when none exists (add `--dry-run` first to see what it would write). Reuse existing pages and stable IDs. For an additional page, write `<record>/<page>.md`, then run `ld index-repair --project <record id>`; edit the registered page afterwards. Preserve existing narrative and operator annotations. Read the CLI help for installed syntax; no hardcoded user paths or stale release numbers belong in this portable reference.
 
 ### Declare authority once
 
