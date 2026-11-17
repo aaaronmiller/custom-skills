@@ -135,6 +135,16 @@ def line(text) -> str:
     return " ".join(inert(text).split())
 
 
+def code(text) -> str:
+    """One inert line that is safe inside an inline-code span: for paths and ids.
+
+    A session's folder, source path, id and harness come out of the session
+    record, not out of this pipeline, so a newline or a backtick in one would
+    otherwise start a new Markdown line or end the code span.
+    """
+    return line(text).replace("`", "'")
+
+
 def quote(text: str) -> str:
     """Blockquote, so headings and lists inside recorded text stay inert."""
     return "\n".join("> " + ln if ln.strip() else ">" for ln in inert(text).splitlines())
@@ -237,7 +247,7 @@ def touch_updated(page: str) -> str:
 
 
 def head(s: dict, n: int) -> str:
-    return (f"### {s['first_ts'][:10]} · {s['harness']} · session {s['session_id'][:13]}"
+    return (f"### {code(s['first_ts'][:10])} · {code(s['harness'])} · session {code(s['session_id'][:13])}"
             f" ({n} prompt{'s' if n != 1 else ''})")
 
 
@@ -256,7 +266,7 @@ def render_dossier(d: str, ps: list[dict], sessions: dict, intents: list, run: s
     for sid in order:
         s = sessions[sid]
         verb.append(head(s, len(by_sess[sid])) + "\n")
-        verb.append(f"Source: `{s['source_path']}`" + (f" · folder `{s['cwd']}`" if s.get("cwd") else "") + "\n")
+        verb.append(f"Source: `{code(s['source_path'])}`" + (f" · folder `{code(s['cwd'])}`" if s.get("cwd") else "") + "\n")
         for p in by_sess[sid]:
             t = p["text"]
             note = ""
@@ -312,7 +322,7 @@ def render_dossier(d: str, ps: list[dict], sessions: dict, intents: list, run: s
             s = sessions[sid]
             n = sum(1 for p in filtered if p["session"] == sid)
             summ = f": {line(s['summary'])}" if s.get("summary") else ""
-            flt.append(f"- {s['first_ts'][:10]} · {s['harness']} · `{s['session_id'][:13]}` ·"
+            flt.append(f"- {code(s['first_ts'][:10])} · {code(s['harness'])} · `{code(s['session_id'][:13])}` ·"
                        f" {n} message{'s' if n != 1 else ''}{summ}")
 
     out = {"intent-verbatim": {"Sessions": "\n".join(verb)},

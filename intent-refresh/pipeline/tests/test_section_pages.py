@@ -132,6 +132,37 @@ class SectionPages(unittest.TestCase):
             body = self.page("fresh", kind).split("\n---", 1)[1]
             self.assertNotIn("<!-- x", body)  # recorded text stays inert
 
+    def test_session_record_fields_cannot_add_page_structure(self):
+        """Folder, source path, session id and harness come from the session record.
+
+        A newline or backtick in one must not start a Markdown line or end a code
+        span on any page (2026-11-05 review: recorded text is rendered inert).
+        """
+        run = self.home / "corpus" / RUN
+        evil = {"id": "claude_code:evil", "harness": "h\n## INJECTED-H", "session_id": "x\n## INJECTED-S",
+                "source_path": "/s`\n## INJECTED-P\n`", "cwd": "/c`\n## INJECTED-C\n`", "origin": "interactive",
+                "project": "fresh", "rung": "cwd-in-dossier-root", "first_ts": "2026-01-03T10:00:00Z"}
+        prompt = {"id": "op_evil_0", "session": evil["id"], "origin": "interactive",
+                  "ts": "2026-01-03T10:00:00Z", "repeats": 0, "text": "plain text"}
+        with open(run / "sessions.jsonl", "a") as fh:
+            fh.write(json.dumps(evil) + "\n")
+        with open(run / "prompts.jsonl", "a") as fh:
+            fh.write(json.dumps(prompt) + "\n")
+        db = sqlite3.connect(self.home / "archaeology.db")
+        db.execute("INSERT INTO event (id,session_id,project_id,seq,ts,role,is_human,text,pipeline_version)"
+                   " VALUES (?,?,?,?,?,?,?,?,?)", ("evt_op_evil_0", "s", "p", 1, prompt["ts"], "user", 1, "plain text", "t"))
+        db.commit()
+        db.close()
+        self.render()
+        for kind in ("intent-verbatim", "intent-archaeology", "prompt-corpus"):
+            body = self.page("fresh", kind).split("\n---", 1)[1]
+            self.assertIn("INJECTED", body, kind)  # the text is kept, as data on one line
+            for ln in body.splitlines():
+                self.assertFalse(ln.lstrip().startswith(("## INJECTED", "INJECTED", "`")),
+                                 f"{kind}: injected line {ln!r}")
+        verbatim = self.page("fresh", "intent-verbatim")
+        self.assertEqual(verbatim.count("\n## INJECTED"), 0)
+
     def test_hand_made_page_is_never_touched(self):
         out = self.render()
         self.assertEqual(self.page("hand", "prompt-corpus"), HAND_CORPUS)
