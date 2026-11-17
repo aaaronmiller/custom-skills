@@ -18,8 +18,10 @@ The hook never blocks or fails the session: it detaches, and every error goes to
 ~/LIVING_DOCUMENTS/replies/.state/errors.log with exit status 0.
 """
 import argparse
+import base64
 import datetime as dt
 import fcntl
+import hashlib
 import html
 import json
 import os
@@ -38,6 +40,18 @@ SUMMARY_PREFIX = "This session is being continued from a previous conversation"
 SKIP_USER = ("<command-", "<local-command", "Caveat:", "<bash-", "[Request interrupted")
 REMINDER = re.compile(r"<system-reminder>.*?</system-reminder>", re.S)
 STATUS_LINE = re.compile(r"^\s*\**DONE:?\**:?\s*(.+)$", re.M)
+SESSION_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+
+
+def safe_session(session):
+    """A session id names files under OUT and STATE, so it must be one plain name.
+
+    It arrives from the hook payload or --session. Anything with a path separator,
+    a leading dot, a NUL or an odd length is refused before any path is built.
+    """
+    if not isinstance(session, str) or not SESSION_RE.match(session):
+        raise ValueError(f"unsafe session id: {session!r}")
+    return session
 
 
 # ---------- capture ----------
@@ -83,6 +97,7 @@ def records_from(lines):
 
 def capture(transcript: Path, session: str, cwd: str = ""):
     """Append the records added since the last run; return how many were added."""
+    safe_session(session)
     STATE.mkdir(parents=True, exist_ok=True)
     state_file = STATE / f"{session}.json"
     state = json.loads(state_file.read_text()) if state_file.exists() else {"offset": 0}
@@ -173,7 +188,25 @@ def short(text, n):
     return t if len(t) <= n else t[: n - 1] + "…"
 
 
+def csp(script_sha256_b64=None):
+    """A Content-Security-Policy for pages built from recorded replies.
+
+    Reply text is model output and can carry anything, including a markdown image
+    whose URL is a tracking or exfiltration request. No remote content may load;
+    the only script allowed is the page's own, by hash.
+    """
+    script = f"'sha256-{script_sha256_b64}'" if script_sha256_b64 else "'none'"
+    policy = (f"default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src {script}; "
+              "base-uri 'none'; form-action 'none'")
+    return f'<meta http-equiv="Content-Security-Policy" content="{policy}">'
+
+
+def js_hash():
+    return base64.b64encode(hashlib.sha256(JS.encode("utf-8")).digest()).decode("ascii")
+
+
 def render_session(session: str):
+    safe_session(session)
     src = OUT / f"{session}.jsonl"
     if not src.exists():
         return None
@@ -222,10 +255,12 @@ def render_session(session: str):
     first = next((r for r in records if r["role"] == "user"), None)
     title = short(first["text"], 90) if first else session
     first_w, last_w = when(records[0]["ts"]) if records else None, when(records[-1]["ts"]) if records else None
-    meta = (f'Session {session} &middot; {html.escape(state.get("cwd", ""))} &middot; {n} turns &middot; '
-            f'{first_w:%Y-%m-%d %H:%M} to {last_w:%Y-%m-%d %H:%M} PT' if first_w and last_w else f"Session {session}")
-    page = (f'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-            f'<title>Replies {session[:8]}</title><style>{CSS}</style></head><body>'
+    esc_session = html.escape(session)
+    meta = (f'Session {esc_session} &middot; {html.escape(state.get("cwd", ""))} &middot; {n} turns &middot; '
+            f'{first_w:%Y-%m-%d %H:%M} to {last_w:%Y-%m-%d %H:%M} PT' if first_w and last_w else f"Session {esc_session}")
+    page = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">{csp(js_hash())}'
+            f'<meta name="viewport" content="width=device-width,initial-scale=1">'
+            f'<title>Replies {html.escape(session[:8])}</title><style>{CSS}</style></head><body>'
             f'<header><h1>{html.escape(title)}</h1><div class="meta">{meta} &middot; <a href="index.html">all sessions</a></div></header>'
             f'<div class="wrap"><nav><input id="q" placeholder="Filter turns" aria-label="Filter turns">{"".join(nav)}</nav>'
             f'<main>{"".join(body)}</main></div><script>{JS}</script></body></html>')
@@ -240,6 +275,8 @@ def render_index():
     rows = []
     for f in OUT.glob("*.jsonl"):
         s = f.stem
+        if not SESSION_RE.match(s):  # not a ledger file; never put its name in a link
+            continue
         lines = [json.loads(l) for l in f.read_text().splitlines() if l.strip()]
         if not lines:
             continue
@@ -249,9 +286,10 @@ def render_index():
         turns = sum(1 for r in lines if r["role"] == "user")
         rows.append((lines[-1].get("ts") or "", s, short(first["text"], 120), turns, state.get("cwd", "")))
     rows.sort(reverse=True)
-    trs = "".join(f'<tr><td>{(when(ts) or dt.datetime.min):%Y-%m-%d %H:%M}</td><td><a href="{s}.html">{html.escape(t)}</a></td>'
+    trs = "".join(f'<tr><td>{(when(ts) or dt.datetime.min):%Y-%m-%d %H:%M}</td><td><a href="{html.escape(s)}.html">{html.escape(t)}</a></td>'
                   f'<td>{n}</td><td>{html.escape(c)}</td></tr>' for ts, s, t, n, c in rows)
-    page = (f'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+    page = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">{csp()}'
+            f'<meta name="viewport" content="width=device-width,initial-scale=1">'
             f'<title>Session replies</title><style>{CSS} main{{max-width:1100px}}</style></head><body>'
             f'<header><h1>Session replies</h1><div class="meta">Every reply the operator saw, captured by the reply-ledger Stop hook. '
             f'Newest first.</div></header><main><table><tr><th>Last reply (PT)</th><th>First prompt</th><th>Turns</th><th>Folder</th></tr>'
@@ -262,6 +300,7 @@ def render_index():
 # ---------- entry points ----------
 
 def run(transcript: Path, session: str, cwd: str):
+    safe_session(session)
     STATE.mkdir(parents=True, exist_ok=True)
     with open(STATE / f"{session}.lock", "w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)  # serialize per session; a waiting run picks up the newest bytes
@@ -298,7 +337,8 @@ def main():
             return 0
         if a.render_all:
             for f in OUT.glob("*.jsonl"):
-                render_session(f.stem)
+                if SESSION_RE.match(f.stem):
+                    render_session(f.stem)
             render_index()
             return 0
         if a.transcript:

