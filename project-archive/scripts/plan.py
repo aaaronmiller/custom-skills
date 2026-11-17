@@ -28,6 +28,7 @@ dry-run mover (move_dryrun.py) only prints commands for a human.
 """
 import argparse
 import os
+import shlex
 import shutil
 import sys
 import time
@@ -225,10 +226,12 @@ def working_copy_repair(folder, dest, facts, cons):
         if os.path.isfile(m):
             plan["backups"].append({"file": m, "sha256": L.sha256_file(m)})
     if plan["is_linked_worktree"] or len(plan["worktrees"]) > 1 or any(c["kind"] in ("git-worktree-link", "linked-worktree") for c in cons["consumers"]):
-        plan["commands"].append("git -C %s worktree repair" % dest)
+        # These lines are printed for a human to paste into a shell. dest comes from the
+        # command line and c["path"] from a scan of the disk, so both are quoted.
+        plan["commands"].append("git -C %s worktree repair" % shlex.quote(dest))
         for c in cons["consumers"]:
             if c["kind"] == "linked-worktree":
-                plan["commands"].append("git -C %s worktree repair %s" % (c["path"], dest))
+                plan["commands"].append("git -C %s worktree repair %s" % (shlex.quote(c["path"]), shlex.quote(dest)))
     for r in cons["internal_absolute_refs"]:
         plan["punch_items"].append({"path": r["path"], "line": r.get("line"), "why": "embedded absolute path to the old location (for example a virtual environment); keeps working only through the old-path link"})
     plan["needed"] = bool(plan["commands"] or plan["punch_items"])
@@ -302,7 +305,7 @@ def main():
     method, junction = link_method(src)
     links = {"schema": "project-archive/old-path-links/1",
              "links": [{"at": src, "points_to": dest, "method": method,
-                        "command": junction or "ln -s -- %s %s" % (dest, src)}],
+                        "command": junction or "ln -s -- %s %s" % (shlex.quote(dest), shlex.quote(src))}],
              "checks": {"old_parent_exists": os.path.isdir(os.path.dirname(src)),
                         "old_parent_writable": os.access(os.path.dirname(src), os.W_OK),
                         "dest_exists_now": os.path.lexists(dest)},

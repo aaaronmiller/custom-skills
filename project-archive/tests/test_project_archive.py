@@ -9,6 +9,7 @@ when given) and removes only that directory afterwards. No other path is written
 import ast
 import json
 import os
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -203,6 +204,92 @@ class ArchiveOrder(Base):
         self.assertIn("no exclude entry", so)
         rc, so, _ = py("discovery.py", "check", "--config", os.path.join(self.top, "discovery.json"), "--archive-root", os.path.join(self.top, "archive-root"))
         self.assertEqual(rc, 0, so)
+
+
+HOSTILE = "odd name;touch pwned$(id)`id`'q\"x"
+
+
+class PrintedCommandsAreQuoted(Base):
+    """Commands the scripts print or record are pasted into a shell by a person.
+
+    Paths reach them from the command line and from a scan of the disk, so each
+    one must survive a shell round trip as exactly one argument.
+    """
+
+    def test_repair_commands_round_trip(self):
+        import plan as P  # scripts folder is on sys.path
+        dest = os.path.join(self.top, "dest " + HOSTILE)
+        wt = os.path.join(self.top, "linked " + HOSTILE)
+        facts = {"is_linked_worktree": True, "worktrees": []}
+        cons = {"consumers": [{"kind": "linked-worktree", "path": wt}], "internal_absolute_refs": []}
+        cmds = P.working_copy_repair(self.pa, dest, facts, cons)["commands"]
+        self.assertEqual([shlex.split(c) for c in cmds],
+                         [["git", "-C", dest, "worktree", "repair"],
+                          ["git", "-C", wt, "worktree", "repair", dest]])
+
+    def test_old_path_link_command_round_trips(self):
+        st = os.path.join(self.box, "st")
+        dest = os.path.join(self.top, "archive-root", "demo", "proj " + HOSTILE)
+        self.plan(st, dest=dest)
+        links = L.read_json(os.path.join(st, "old-path-links.json"))["links"][0]
+        self.assertEqual(shlex.split(links["command"]), ["ln", "-s", "--", dest, self.pa])
+
+    def test_recovery_steps_in_the_archive_record_round_trip(self):
+        folder = os.path.join(self.root, "proj " + HOSTILE)
+        os.makedirs(folder)
+        with open(os.path.join(folder, "README.md"), "w") as fh:
+            fh.write("# odd\n")
+        gate = os.path.join(self.box, "gate.json")
+        with open(gate, "w") as fh:
+            json.dump({"schema": "lineage-gate/1", "folder": folder, "allowed": True,
+                       "unique_without_destination": 0, "counts": {}, "clauses": []}, fh)
+        w = os.path.join(self.box, "w")
+        ar = os.path.join(self.top, "archive-root")
+        rc, _, se = py("archive.py", "mine", "--work", w, "--folder", folder, "--archive-root", ar,
+                       "--project", "demo", "--lineage-gate", gate)
+        self.assertEqual(rc, 0, se)
+        rc, _, se = py("archive.py", "index", "--work", w)
+        self.assertEqual(rc, 0, se)
+        steps = L.read_json(os.path.join(w, "archive-record.json"))["recovery"]["human_steps"]
+        dest = os.path.join(ar, "demo", os.path.basename(folder))
+        head = steps.split(" ; then run")[0]  # "unlink A ; mv B C"
+        unlink, mv = head.split(" ; ")
+        self.assertEqual(shlex.split(unlink), ["unlink", folder])
+        self.assertEqual(shlex.split(mv), ["mv", dest, folder])
+
+
+class Redaction(unittest.TestCase):
+    def test_url_userinfo_is_masked(self):
+        for raw in ("https://alice:hunter2@example.com/r.git", "https://ghp_abcdefghijkl1234@github.com/o/r.git",
+                    "ssh://user@host.example/r.git"):
+            out = L.redact(raw)
+            self.assertNotIn("hunter2", out)
+            self.assertNotIn("ghp_abcdefghijkl1234", out)
+            self.assertNotIn("alice", out)
+            self.assertIn("[redacted]@", out)
+        self.assertEqual(L.redact("https://example.com/r.git"), "https://example.com/r.git")
+
+    def test_git_facts_redact_remotes_and_stash_messages(self):
+        with tempfile.TemporaryDirectory(dir=TMP) as td:
+            def git(*a):
+                r = subprocess.run(["git", "-C", td, "-c", "user.name=t", "-c", "user.email=t@example.com",
+                                    "-c", "commit.gpgsign=false"] + list(a), capture_output=True, text=True)
+                self.assertEqual(r.returncode, 0, r.stderr)
+            git("init", "-q")
+            with open(os.path.join(td, "f.txt"), "w") as fh:
+                fh.write("one\n")
+            git("add", "f.txt")
+            git("commit", "-q", "-m", "init")
+            git("remote", "add", "origin", "https://alice:hunter2@example.com/r.git")
+            with open(os.path.join(td, "f.txt"), "w") as fh:
+                fh.write("two\n")
+            git("stash", "push", "-q", "-m", "wip password=hunter2 token=abcd1234")
+            facts = L.git_facts(td)
+            blob = json.dumps(facts)
+            self.assertNotIn("hunter2", blob)
+            self.assertNotIn("abcd1234", blob)
+            self.assertEqual(facts["stash_count"], 1)
+            self.assertEqual(facts["remotes"], ["https://[redacted]@example.com/r.git"])
 
 
 class Contract(unittest.TestCase):

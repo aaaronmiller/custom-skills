@@ -25,6 +25,7 @@ list, worktrees) and structured recovery instructions.
 import argparse
 import os
 import re
+import shlex
 import shutil
 import sys
 
@@ -172,7 +173,7 @@ def cmd_index(a):
                 {"op": "move", "from": c["dest"], "to": folder},
                 {"op": "verify", "tree_digest": digest, "git_state": L.git_state(facts) if facts.get("is_repo_root") else None},
             ],
-            "human_steps": "unlink %s ; mv %s %s ; then run verify_move.py or recovery_test.py checks; if the folder had linked worktrees run git worktree repair" % (folder, c["dest"], folder),
+            "human_steps": "unlink %s ; mv %s %s ; then run verify_move.py or recovery_test.py checks; if the folder had linked worktrees run git worktree repair" % (shlex.quote(folder), shlex.quote(c["dest"]), shlex.quote(folder)),
             "tested": False,
         },
     }
