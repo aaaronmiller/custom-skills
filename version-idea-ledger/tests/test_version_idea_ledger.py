@@ -81,6 +81,19 @@ class Family(unittest.TestCase):
             run_rec = json.load(fh)
         self.assertTrue(any("node_modules" in s for s in run_rec["skipped"]))
 
+    def test_prefer_makes_canonical_the_original_and_copy_rules_match_copies(self):
+        with open(self.rules, "w") as fh:
+            json.dump({"rules": [
+                {"id": "C1", "glob": "*", "copy": True, "disposition": "removal-candidate", "reason": "byte copy", "ideas": "none"},
+                {"id": "C2", "glob": "*", "disposition": "keep", "reason": "original"}]}, fh)
+        run("inventory.py", "--ledger", self.files, "--root", f"old={self.old}", "--root", f"current={self.cur}",
+            "--rules", self.rules, "--no-known", "--prefer", self.cur)
+        rows = {r["path"]: r for r in jl(self.files)}
+        canon, copy = os.path.join(self.cur, "pkg", "rank.py"), os.path.join(self.old, "copy.py")
+        self.assertEqual(rows[copy]["same_as"], canon)
+        self.assertEqual(rows[copy]["rule"], "C1")
+        self.assertEqual(rows[canon]["rule"], "C2")
+
     def test_rerun_keeps_unchanged_and_resets_changed(self):
         self.inv()
         spec = os.path.join(self.old, "docs", "spec.md")
@@ -161,6 +174,31 @@ class Family(unittest.TestCase):
         for needle in ("B-001: quote not found", "B-002: rejected without reason", "B-003: where path does not exist",
                        "B-004: duplicate_of", "B-005: category"):
             self.assertIn(needle, r.stdout)
+
+    def test_quote_checked_inside_zip_member_and_html(self):
+        import zipfile
+        spec = self.ledger_ok()
+        zpath = os.path.join(self.old, "docs", "snap.zip")
+        with zipfile.ZipFile(zpath, "w") as z:
+            z.writestr("v4/notes.md", "# Notes\n\nRetry a failed probe twice.\n")
+        hpath = os.path.join(self.old, "docs", "page.html")
+        with open(hpath, "w") as fh:
+            fh.write("<p>Show the <b>cost</b> per task &amp; per token.</p>")
+        self.inv()
+        wjl(os.path.join(self.t, "ideas-z.jsonl"), [
+            {"id": "Z-001", "version": "old", "source": zpath, "member": "v4/notes.md", "loc": "L3",
+             "quote": "Retry a failed probe twice.", "idea": "Retry probes.", "category": "rejected", "reason": "noise"},
+            {"id": "Z-002", "version": "old", "source": hpath, "loc": "L1", "quote": "cost per task & per token",
+             "idea": "Show both costs.", "category": "rejected", "reason": "noise"},
+            {"id": "Z-003", "version": "old", "source": zpath, "member": "v4/notes.md", "loc": "L3",
+             "quote": "Retry three times.", "idea": "x", "category": "rejected", "reason": "noise"}])
+        run("ideas_tool.py", "merge", "--ledger", self.ideas, os.path.join(self.t, "ideas-z.jsonl"))
+        r = run("check_ledgers.py", "--files", self.files, "--ideas", self.ideas, "--canonical-root", self.cur,
+                "--allow-pending", ok=False)
+        self.assertNotIn("Z-001: quote", r.stdout)
+        self.assertNotIn("Z-002: quote", r.stdout)
+        self.assertIn("Z-003: quote not found", r.stdout)
+        self.assertTrue(spec)
 
     def test_archived_file_cannot_hold_unknown(self):
         spec = self.ledger_ok()

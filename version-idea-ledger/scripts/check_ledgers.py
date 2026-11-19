@@ -18,7 +18,9 @@ Idea rows (one atomic idea each) must have id, version, source, loc, idea and ca
   unknown         question: the evidence that would decide it.
 The quote, when present, must occur in the source file (whitespace and Markdown emphasis
 ignored), within three lines of loc when loc is "L<n>" or "L<n>-L<m>". A row without a
-quote needs quote_exempt (for example "binary" or "generated HTML").
+quote needs quote_exempt (for example "binary" or "generated HTML"). For an idea inside a zip
+archive, source is the .zip and member names the file inside it; loc counts lines in the member.
+HTML is compared with its tags removed.
 
 File rows must have a final disposition (keep, archive, removal-candidate). A removal
 candidate needs a reason. An archived file may not be the source of an unknown idea, since
@@ -26,10 +28,12 @@ archiving says every idea in it has a home. A file whose ideas_status is pending
 been mined, unless its bytes equal a file that was (same_as).
 """
 import argparse
+import html
 import json
 import os
 import re
 import sys
+import zipfile
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -44,21 +48,34 @@ def simplify(s):
     return norm_ws(s).lower()
 
 
-def lines_of(path):
-    if path not in _cache:
+def text_of(path, member=None):
+    """File text; a zip member's text when member is set; HTML with tags removed."""
+    if member:
+        with zipfile.ZipFile(path) as z:
+            text = z.read(member).decode("utf-8", "replace")
+    else:
+        if os.path.getsize(path) > MAX_QUOTE_FILE:
+            return None
+        with open(path, encoding="utf-8", errors="replace") as fh:
+            text = fh.read()
+    if (member or path).lower().endswith((".html", ".htm")):
+        text = html.unescape(re.sub(r"<[^>]+>", " ", text))
+    return text
+
+
+def lines_of(path, member=None):
+    key = (path, member)
+    if key not in _cache:
         try:
-            if os.path.getsize(path) > MAX_QUOTE_FILE:
-                _cache[path] = None
-            else:
-                with open(path, encoding="utf-8", errors="replace") as fh:
-                    _cache[path] = fh.read().splitlines()
-        except OSError:
-            _cache[path] = None
-    return _cache[path]
+            text = text_of(path, member)
+            _cache[key] = None if text is None else text.splitlines()
+        except (OSError, KeyError, zipfile.BadZipFile):
+            _cache[key] = None
+    return _cache[key]
 
 
-def quote_found(path, loc, quote):
-    lines = lines_of(path)
+def quote_found(path, loc, quote, member=None):
+    lines = lines_of(path, member)
     if lines is None:
         return None
     q = simplify(quote)
@@ -118,7 +135,7 @@ def main():
             unknown_sources.add(src)
         if i.get("quote"):
             if not a.no_quote_check and os.path.exists(src):
-                ok = quote_found(src, i.get("loc"), i["quote"])
+                ok = quote_found(src, i.get("loc"), i["quote"], i.get("member"))
                 if ok is False:
                     errors.append(f"idea {iid}: quote not found in {src} near {i.get('loc')}: {i['quote'][:80]!r}")
                 elif ok is None:

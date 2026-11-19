@@ -3,12 +3,12 @@ name: version-idea-ledger
 description: "Catalogs every idea and file across several versions of one project (repos, folders, dossiers, specs, archives) against the current implementation, so nothing useful is lost and reruns skip audited files. Use before consolidating duplicate or superseded projects."
 license: MIT
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   tags: "consolidation, versions, idea-ledger, file-ledger, lineage, archive, dedupe, living-documents"
   composes: "portfolio-lineage (clause extraction, lexical pre-marks, archive gate), project-archive (moves), intent-find (prior decisions)"
 ---
 
-# version-idea-ledger 1.0.0
+# version-idea-ledger 1.1.0
 
 A project that was rebuilt several times leaves its ideas scattered over old repos, greenfield
 roots, dossiers and archives. This skill picks the current implementation, records every file
@@ -93,9 +93,12 @@ reader output) in a work folder `W` outside every version; the ledgers go to the
 3. **Inventory.** `inventory.py --ledger <dossier>/ledgers/file-ledger.jsonl --root LABEL=PATH
    ... --rules <dossier>/ledgers/rules.json --run-out <dossier>/ledgers/runs/<date>.json`.
    It hashes every file (skipping `.git`, `node_modules`, virtualenvs and caches, which it lists
-   in the run record), notes git status, and finds byte-identical copies (`same_as`).
+   in the run record), notes git status, and finds byte-identical copies (`same_as`). Pass
+   `--prefer LABEL` (the canonical root) so its files are the originals and older versions are
+   the copies. The ledger's own folder is never inventoried.
 4. **Write the disposition rules.** `rules.json` holds ordered `{"id", "glob", "disposition",
-   "reason", "ideas"}` rules; first match wins, `*` crosses `/`. `"ideas": "none"` marks files
+   "reason", "ideas"}` rules; first match wins, `*` crosses `/`. Add `"copy": true` to match only
+   files that are byte copies of another (or `false` for only originals). `"ideas": "none"` marks files
    that need no mining (raw data, generated HTML, caches, binaries). Put exact-path rules before
    folder rules. Rerun step 3 until the summary shows no `pending`. The rules file is the
    durable record of each judgement; it is re-applied on every run.

@@ -5,12 +5,15 @@ Usage:
   python3 -I -B inventory.py --ledger DOSSIER/ledgers/file-ledger.jsonl \
       --root LABEL=PATH [--root LABEL=PATH ...] [--file LABEL=PATH ...] \
       [--rules DOSSIER/ledgers/rules.json] [--known GLOB ...] [--no-known] \
-      [--date YYYY-MM-DD] [--run-out DOSSIER/ledgers/runs/<date>.json]
+      [--prefer CANONICAL_ROOT] [--date YYYY-MM-DD] [--run-out DOSSIER/ledgers/runs/<date>.json]
 
 Each row: path, version (the LABEL), sha256, bytes, mtime (date), git (tracked, untracked,
 ignored or none), audited (date this hash was first recorded), disposition, reason, rule,
-ideas_status (pending, mined, no-ideas, covered-by), same_as (first path with identical bytes),
+ideas_status (pending, mined, no-ideas), same_as (the original of a byte copy: a path under a
+--prefer root first, else the first path in sort order),
 previous_sha256 when the file changed, missing when it left the disk. Rows are never dropped.
+
+The ledger's own folder is never inventoried, so a dossier that holds its ledgers can be a root.
 
 Rerun behaviour, which is the point of the ledger:
   * same path and same sha256: the row is kept as it is; mining is not repeated;
@@ -19,7 +22,9 @@ Rerun behaviour, which is the point of the ledger:
     that disposition and ideas_status and names the ledger in ledger_ref.
 Rules (JSON: {"rules": [{"id", "glob", "disposition", "reason", "ideas": "mine"|"none"}]}) are
 matched first-match-wins against the absolute path with fnmatch, where * also crosses "/".
-They are re-applied on every run, so the rules file is the durable record of each judgement.
+A rule with "copy": true matches only byte copies (rows with same_as), "copy": false only
+originals. They are re-applied on every run, so the rules file is the durable record of each
+judgement.
 A file no rule matches stays disposition "pending"; check_ledgers.py refuses pending rows.
 """
 import argparse
@@ -66,12 +71,12 @@ def git_status_map(root):
     return out
 
 
-def walk(root, skipped):
+def walk(root, skipped, own=None):
     for dirpath, dirnames, filenames in os.walk(root):
         keep = []
         for d in dirnames:
             full = os.path.join(dirpath, d)
-            if d in SKIP_DIRS:
+            if d in SKIP_DIRS or full == own:
                 skipped.append(full)
             elif os.path.islink(full):
                 skipped.append(full + " (symlink)")
@@ -107,8 +112,10 @@ def load_rules(path):
     return rules
 
 
-def match_rule(rules, path):
+def match_rule(rules, path, row):
     for r in rules:
+        if "copy" in r and bool(r["copy"]) != bool(row.get("same_as")):
+            continue
         if fnmatch.fnmatchcase(path, r["glob"]):
             return r
     return None
@@ -135,6 +142,8 @@ def main():
     ap.add_argument("--known", action="append",
                     default=["~/LIVING_DOCUMENTS/projects/*/ledgers/file-ledger.jsonl"])
     ap.add_argument("--no-known", action="store_true")
+    ap.add_argument("--prefer", action="append", default=[],
+                    help="root whose files count as the original when bytes repeat (the canonical root)")
     ap.add_argument("--date", default=dt.date.today().isoformat())
     ap.add_argument("--run-out")
     a = ap.parse_args()
@@ -156,7 +165,7 @@ def main():
     gitmaps = {}
     counts = {"new": 0, "unchanged": 0, "changed": 0, "missing": 0, "from_known": 0}
     for label, root in targets:
-        files = [root] if os.path.isfile(root) else list(walk(root, skipped))
+        files = [root] if os.path.isfile(root) else list(walk(root, skipped, os.path.dirname(os.path.abspath(a.ledger))))
         gmap = gitmaps.setdefault(root, git_status_map(root if os.path.isdir(root) else os.path.dirname(root)))
         for path in files:
             if path in seen:
@@ -179,21 +188,6 @@ def main():
             row.update({"version": label, "sha256": digest, "bytes": st.st_size,
                         "mtime": dt.date.fromtimestamp(st.st_mtime).isoformat(),
                         "git": (gmap or {}).get(path, "none") if gmap is not None else "none"})
-            rule = match_rule(rules, path)
-            ref = known.get((path, digest))
-            if rule:
-                row.update({"disposition": rule["disposition"], "reason": rule["reason"], "rule": rule["id"]})
-                if rule.get("ideas") == "none" and row.get("ideas_status") == "pending":
-                    row["ideas_status"] = "no-ideas"
-            elif ref:
-                counts["from_known"] += 1
-                row.update({"disposition": ref[1]["disposition"], "reason": ref[1].get("reason", ""),
-                            "rule": "known", "ledger_ref": ref[0],
-                            "ideas_status": ref[1].get("ideas_status", "pending")})
-            else:
-                row.setdefault("disposition", "pending")
-                if row.get("rule") not in (None, "manual"):
-                    row.update({"disposition": "pending", "reason": "", "rule": None})
             seen[path] = row
 
     for path, row in old.items():
@@ -203,14 +197,40 @@ def main():
                 counts["missing"] += 1
             seen[path] = row
 
+    prefer = [os.path.abspath(os.path.expanduser(p)).rstrip("/") + "/" for p in a.prefer]
+
+    def original_first(path):
+        return (not any(path.startswith(p) for p in prefer), path)
+
     by_sha = {}
-    for path in sorted(seen):
+    for path in sorted(seen, key=original_first):
         row = seen[path]
         first = by_sha.setdefault(row["sha256"], path)
         if first != path:
             row["same_as"] = first
         else:
             row.pop("same_as", None)
+
+    for path in sorted(seen):
+        row = seen[path]
+        if row.get("missing"):
+            continue
+        digest = row["sha256"]
+        rule = match_rule(rules, path, row)
+        ref = known.get((path, digest))
+        if rule:
+            row.update({"disposition": rule["disposition"], "reason": rule["reason"], "rule": rule["id"]})
+            if rule.get("ideas") == "none" and row.get("ideas_status") == "pending":
+                row["ideas_status"] = "no-ideas"
+        elif ref:
+            counts["from_known"] += 1
+            row.update({"disposition": ref[1]["disposition"], "reason": ref[1].get("reason", ""),
+                        "rule": "known", "ledger_ref": ref[0],
+                        "ideas_status": ref[1].get("ideas_status", "pending")})
+        else:
+            row.setdefault("disposition", "pending")
+            if row.get("rule") not in (None, "manual"):
+                row.update({"disposition": "pending", "reason": "", "rule": None})
 
     rows = [seen[p] for p in sorted(seen)]
     write_jsonl(a.ledger, rows)

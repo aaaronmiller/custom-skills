@@ -45,6 +45,8 @@ trusting it") are ideas when they change how the tool should behave.
 ```
 
 - `loc` is `L<n>` or `L<n>-L<m>` (line numbers in the file) or `§<heading>` for a whole section.
+- For a file inside a zip archive, `source` is the `.zip`, `member` is the path inside it, and
+  `loc` counts lines in the member. HTML quotes are checked with the tags removed.
 - `quote` is copied, never paraphrased or recalled; the checker looks for it near `loc` and
   refuses the row if it is missing. For a file with no usable text (an image, a binary), omit
   `quote` and set `quote_exempt` to the reason.
