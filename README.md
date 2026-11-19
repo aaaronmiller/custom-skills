@@ -1,6 +1,6 @@
 # custom-skills
 
-Aaron's agent skills: 45 skills, deployed to every harness by skillshare.
+Aaron's agent skills: 46 skills, deployed to every harness by skillshare.
 
 Cleaned on 2026-11-14: duplicates and one-off "skills" removed, every description cut to one to three sentences. What went and why: `docs/2026-11-14-skill-cull.md`.
 
@@ -63,5 +63,6 @@ skillshare update <skill> && skillshare sync
 | `spec-prep` | Prepares project intent, requirements, design and Spec Kit specs, plans and tasks, stopping before implementation. Use for project intake, spec updates or intent recovery. |
 | `system-checkup` | Runs the periodic full checkup of this Windows 11 and WSL2 workstation (updates, memory, crashes, storage, outdated software) and produces a cleanup plan with an approval page. |
 | `ui-ux-doctor` | Audits an existing interface for usability, accessibility and visual problems, then fixes them. Use to review, improve or redesign a UI. |
+| `version-idea-ledger` | Catalogs every idea and file across several versions of one project against the current implementation, so nothing useful is lost and reruns skip audited files. Use before consolidating duplicate or superseded projects. |
 | `weekly-report-suite` | Writes the weekly progress report for Aaron's dad or mentor, plus a fuller personal report and HTML dashboard, from the week's project history. |
 | `yt-transcript-artifact` | Turns a YouTube video or transcript into a structured Obsidian note with forensic extraction and analysis. |

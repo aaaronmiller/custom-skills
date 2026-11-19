@@ -1,5 +1,10 @@
 # Changelog
 
+## [version-idea-ledger 1.0.0] — 2026-11-19
+
+### Added
+- `version-idea-ledger`: idea ledger (six categories, quote-checked), file ledger (sha256, dates, keep/archive/removal-candidate, rerun skipping), canonical-version record and incorporation list for a family of project versions. Composes portfolio-lineage (clause extraction, pre-marks, archive gate) and project-archive (moves) instead of repeating them; deletion stays a separate judged step. Prior-art check in `version-idea-ledger/references/prior-art.md`. 10 tests.
+
 ## [spec-prep 2.4.0 + spec-audit 1.0.0] — 2026-10-16
 
 ### Changed
