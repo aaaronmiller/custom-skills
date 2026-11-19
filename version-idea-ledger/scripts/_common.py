@@ -9,6 +9,13 @@ sys.dont_write_bytecode = True
 CATEGORIES = ("implemented", "to-incorporate", "duplicate", "rejected", "stretch-goal", "unknown")
 DISPOSITIONS = ("keep", "archive", "removal-candidate", "pending")
 FINAL_DISPOSITIONS = ("keep", "archive", "removal-candidate")
+# Fields written by screen_removals.py; inventory.py clears them on every run.
+SCREEN_FIELDS = ("survivor", "held", "screened", "screened_sha256", "rule_disposition")
+
+
+def screen_stamp_ok(row):
+    """A removal candidate may reach the judge only with a survivor stamp for its current bytes."""
+    return bool(row.get("survivor")) and row.get("screened_sha256") == row.get("sha256")
 
 # Directories never walked. They are recorded as skipped in the run record, not as files.
 SKIP_DIRS = {".git", "node_modules", ".venv", "venv", "__pycache__", ".pytest_cache", ".ruff_cache",

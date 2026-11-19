@@ -23,7 +23,8 @@ archive, source is the .zip and member names the file inside it; loc counts line
 HTML is compared with its tags removed.
 
 File rows must have a final disposition (keep, archive, removal-candidate). A removal
-candidate needs a reason. An archived file may not be the source of an unknown idea, since
+candidate needs a reason, a current survivor stamp from screen_removals.py, and must not be
+the source of any idea row. An archived file may not be the source of an unknown idea, since
 archiving says every idea in it has a home. A file whose ideas_status is pending has not
 been mined, unless its bytes equal a file that was (same_as).
 """
@@ -37,7 +38,7 @@ import zipfile
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _common import CATEGORIES, FINAL_DISPOSITIONS, ID_RE, LOC_LINE_RE, norm_ws, read_jsonl  # noqa: E402
+from _common import CATEGORIES, FINAL_DISPOSITIONS, ID_RE, LOC_LINE_RE, norm_ws, read_jsonl, screen_stamp_ok  # noqa: E402
 
 MAX_QUOTE_FILE = 25 * 1024 * 1024
 _cache = {}
@@ -120,6 +121,7 @@ def main():
         ids[iid] = i
 
     unknown_sources = set()
+    cited_sources = {os.path.abspath(os.path.expanduser(i.get("source", ""))) for i in ideas}
     for i in ideas:
         iid, cat = i.get("id"), i.get("category")
         for key in ("version", "source", "loc", "idea", "category"):
@@ -173,6 +175,10 @@ def main():
                 errors.append(f"file {path}: disposition {disp!r}")
         if disp == "removal-candidate" and not r.get("reason"):
             errors.append(f"file {path}: removal candidate without reason")
+        if disp == "removal-candidate" and not screen_stamp_ok(r):
+            errors.append(f"file {path}: removal candidate without a current screen stamp (run screen_removals.py)")
+        if disp == "removal-candidate" and path in cited_sources:
+            errors.append(f"file {path}: removal candidate but the source of idea rows; re-point or keep it")
         if disp == "archive" and path in unknown_sources:
             errors.append(f"file {path}: archived but the source of an unknown idea")
         if r.get("ideas_status") not in ("mined", "no-ideas") and r.get("same_as") not in mined:

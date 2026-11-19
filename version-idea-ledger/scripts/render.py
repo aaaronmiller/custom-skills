@@ -19,7 +19,7 @@ import sys
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _common import CATEGORIES, FINAL_DISPOSITIONS, read_jsonl, write_jsonl  # noqa: E402
+from _common import CATEGORIES, FINAL_DISPOSITIONS, read_jsonl, screen_stamp_ok, write_jsonl  # noqa: E402
 
 
 def cell(s, n=220):
@@ -45,14 +45,20 @@ def main():
     if os.path.exists(os.path.join(L, "rules.json")):
         rules = {r["id"]: r for r in json.load(open(os.path.join(L, "rules.json"), encoding="utf-8"))["rules"]}
 
+    unscreened = [r["path"] for r in files if r.get("disposition") == "removal-candidate"
+                  and not r.get("missing") and not screen_stamp_ok(r)]
+    if unscreened:
+        raise SystemExit(f"{len(unscreened)} removal candidates have no current screen stamp (first: "
+                         f"{unscreened[0]}). Run screen_removals.py after inventory.py, then render again.")
     removal = [{"path": r["path"], "version": r.get("version"), "sha256": r["sha256"], "bytes": r.get("bytes"),
                 "reason": r.get("reason"), "rule": r.get("rule"), "same_as": r.get("same_as"),
-                "verdict": None, "judge_reason": None}
+                "survivor": r.get("survivor"), "verdict": None, "judge_reason": None}
                for r in files if r.get("disposition") == "removal-candidate" and not r.get("missing")]
+    held = [r for r in files if r.get("held") and not r.get("missing")]
     old = {r["path"]: r for r in read_jsonl(os.path.join(L, "removal-candidates.jsonl"))}
-    for r in removal:  # keep a judge's verdict when the bytes have not changed
+    for r in removal:  # keep a judge's verdict while the bytes and the survivor are unchanged
         prev = old.get(r["path"])
-        if prev and prev.get("sha256") == r["sha256"]:
+        if prev and prev.get("sha256") == r["sha256"] and prev.get("survivor", r["survivor"]) == r["survivor"]:
             r["verdict"], r["judge_reason"] = prev.get("verdict"), prev.get("judge_reason")
     write_jsonl(os.path.join(L, "removal-candidates.jsonl"), removal)
 
@@ -148,13 +154,29 @@ def main():
     w("")
     w(f"## Removal candidates ({len(removal)})")
     w("")
-    w("Classified only. Nothing here has been deleted. Input for the judge: `ledgers/removal-candidates.jsonl`.")
+    w("Classified only. Nothing here has been deleted. Each passed the removal screen and names the")
+    w("surviving copy of its bytes. Input for the judge: `ledgers/removal-candidates.jsonl`.")
     w("")
     if removal:
-        w("| Path | Bytes | Reason | Verdict |")
-        w("|---|---|---|---|")
+        w("| Path | Bytes | Survivor | Reason | Verdict |")
+        w("|---|---|---|---|---|")
         for r in removal:
-            w(f"| `{cell(r['path'], 160)}` | {r.get('bytes')} | {cell(r.get('reason'), 160)} | {r.get('verdict') or 'awaiting judge'} |")
+            s = r.get("survivor") or {}
+            where = f"{len(s['members'])} archive members" if s.get("kind") == "members" else \
+                f"{s.get('kind')}: `{cell(s.get('tree_path') or s.get('path'), 120)}`"
+            w(f"| `{cell(r['path'], 160)}` | {r.get('bytes')} | {where} | {cell(r.get('reason'), 140)} | "
+              f"{r.get('verdict') or 'awaiting judge'} |")
+    w("")
+    w(f"## Held by the removal screen ({len(held)})")
+    w("")
+    w("A rule proposed these for removal; the screen kept them as `archive`. Codes: H1 stale, H2 cited")
+    w("by an idea, H3 protected class, H4 bytes survive nowhere else, H5 archive with exclusive members.")
+    w("")
+    if held:
+        w("| Path | Rule | Held because |")
+        w("|---|---|---|")
+        for r in held:
+            w(f"| `{cell(r['path'], 160)}` | {r.get('rule')} | {cell('; '.join(r['held']), 300)} |")
     w("")
     os.makedirs(os.path.dirname(os.path.abspath(a.page)), exist_ok=True)
     with open(a.page, "w", encoding="utf-8") as fh:

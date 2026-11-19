@@ -26,6 +26,9 @@ A rule with "copy": true matches only byte copies (rows with same_as), "copy": f
 originals. They are re-applied on every run, so the rules file is the durable record of each
 judgement.
 A file no rule matches stays disposition "pending"; check_ledgers.py refuses pending rows.
+A rule's "removal-candidate" is only a proposal: every run clears the removal screen's fields
+(survivor, held, screened, screened_sha256, rule_disposition), so screen_removals.py must run
+again before render.py will list any candidate.
 """
 import argparse
 import datetime as dt
@@ -39,7 +42,7 @@ import sys
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _common import DISPOSITIONS, SKIP_DIRS, read_jsonl, write_jsonl  # noqa: E402
+from _common import DISPOSITIONS, SCREEN_FIELDS, SKIP_DIRS, read_jsonl, write_jsonl  # noqa: E402
 
 
 def sha256(path):
@@ -215,6 +218,8 @@ def main():
         row = seen[path]
         if row.get("missing"):
             continue
+        for k in SCREEN_FIELDS:  # a screen result is only valid for the run that made it
+            row.pop(k, None)
         digest = row["sha256"]
         rule = match_rule(rules, path, row)
         ref = known.get((path, digest))
