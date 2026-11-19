@@ -9,7 +9,7 @@ Sources (read only, nothing is spent):
                  also lists opencode-go, nvidia, chutes and other providers the
                  CLI knows, with their per-token cost
 Quality: ARDF priors scores (max over effort levels) from
-  /home/cheta/code/ardf/ardf/data/current-comparison.csv
+  /home/cheta/code/model-scan/frontier/data/current-comparison.csv
 
 A model is
   capable      scored at or above the floor (the lowest max score among the
@@ -34,9 +34,10 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import urllib.request
 
-ARDF_CSV = "/home/cheta/code/ardf/ardf/data/current-comparison.csv"
+ARDF_CSV = "/home/cheta/code/model-scan/frontier/data/current-comparison.csv"
 APPROVED = ["deepseek-v4.1-flash", "glm-5.3-flash"]  # crouton-alpha is approved but unscored
 UA = {"User-Agent": "capacity-watch/1.0"}
 SHARING = re.compile(r"contributor|stealth|alpha|cloaked|big-pickle|iceman|glyph", re.I)
@@ -61,8 +62,11 @@ def ardf_scores(path=ARDF_CSV):
                     continue
                 if s == s and s > best.get(ident, (-1, ""))[0]:
                     best[ident] = (s, r["name"])
-    except OSError:
-        pass
+    except OSError as e:
+        # ARDF moved into model-scan/frontier on 2026-11-19; a missing file used to
+        # leave every model unscored without a word. Rebuild with frontier/current_frontier.py.
+        print(f"free-catalog: no frontier scores ({e}); run "
+              "python3 /home/cheta/code/model-scan/frontier/current_frontier.py", file=sys.stderr)
     return best
 
 
